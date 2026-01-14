@@ -2,13 +2,15 @@
 // Shows mistakes, hints, time, and difficulty
 // Uses animated rolling numbers for stats
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
   Text,
   Modal,
   Pressable,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
@@ -28,21 +30,52 @@ const capitalize = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
+const SCREEN_HEIGHT = Dimensions.get('window').height;
+
 export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
   const difficulty = useGameStore((s) => s.difficulty);
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
 
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  useEffect(() => {
+    if (visible) {
+      // Slide up when modal becomes visible
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 11,
+      }).start();
+    } else {
+      // Reset position when modal closes
+      slideAnim.setValue(SCREEN_HEIGHT);
+    }
+  }, [visible, slideAnim]);
+
+  const handleResume = () => {
+    // Slide down before closing
+    Animated.timing(slideAnim, {
+      toValue: SCREEN_HEIGHT,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      onResume();
+    });
+  };
+
   return (
     <Modal
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onResume}
+      onRequestClose={handleResume}
     >
       <View style={styles.overlay}>
-        <View style={styles.container}>
+        <Pressable style={styles.dismissArea} onPress={handleResume} />
+        <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
           <Ionicons
             name="pause-circle"
             size={48}
@@ -112,11 +145,11 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
             </View>
           </View>
 
-          <Pressable style={styles.resumeButton} onPress={onResume}>
+          <Pressable style={styles.resumeButton} onPress={handleResume}>
             <Ionicons name="play" size={20} color="#FFFFFF" />
             <Text style={styles.resumeText}>Resume</Text>
           </Pressable>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
   );
@@ -126,16 +159,18 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: colors.overlayBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  dismissArea: {
+    flex: 1,
   },
   container: {
     backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.xl,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
     padding: spacing.xl,
-    marginHorizontal: spacing.xl,
+    paddingBottom: spacing.xl + 20,
     alignItems: 'center',
-    minWidth: 280,
     ...shadows.large,
   },
   icon: {

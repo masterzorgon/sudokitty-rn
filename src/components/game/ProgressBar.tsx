@@ -56,8 +56,8 @@ export const ProgressBar = ({ onBack }: ProgressBarProps) => {
         <Text style={styles.percentSign}>%</Text>
       </View>
 
-      <Pressable style={styles.pauseButton} onPress={handlePause}>
-        <Ionicons name="pause" size={24} color={colors.textSecondary} />
+      <Pressable style={styles.pauseButton} onPress={isPauseModalVisible ? handleResume : handlePause}>
+        <Ionicons name={isPauseModalVisible ? "play" : "pause"} size={24} color={colors.textSecondary} />
       </Pressable>
 
       <PauseModal visible={isPauseModalVisible} onResume={handleResume} />
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textLight,
     fontSize: 20,
-    marginLeft: -10,
+    marginLeft: -12,
   },
   pauseButton: {
     padding: spacing.xs,
