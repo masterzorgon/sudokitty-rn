@@ -1,5 +1,6 @@
 // Pause modal - displays game summary when paused
 // Shows mistakes, hints, time, and difficulty
+// Uses animated rolling numbers for stats
 
 import React from 'react';
 import {
@@ -15,18 +16,12 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius, shadows } from '../../theme';
 import { MAX_MISTAKES } from '../../engine/types';
+import { RollingNumber, RollingTime } from '../ui';
 
 interface PauseModalProps {
   visible: boolean;
   onResume: () => void;
 }
-
-// Format time as MM:SS
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
 
 // Capitalize first letter
 const capitalize = (str: string): string => {
@@ -54,41 +49,61 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
             color={colors.softOrange}
             style={styles.icon}
           />
-          
+
           <Text style={styles.title}>Game Paused</Text>
-          
+
           <View style={styles.statsContainer}>
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.statLabel}>Time</Text>
-                <Text style={styles.statValue}>{formatTime(timeElapsed)}</Text>
+                <RollingTime
+                  seconds={timeElapsed}
+                  fontSize={18}
+                  color={colors.textPrimary}
+                  textStyle={typography.headline}
+                />
               </View>
-              
+
               <View style={styles.statItem}>
                 <Ionicons name="speedometer-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.statLabel}>Difficulty</Text>
                 <Text style={styles.statValue}>{capitalize(difficulty)}</Text>
               </View>
             </View>
-            
+
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <Ionicons name="close-circle-outline" size={20} color={mistakeCount > 0 ? colors.errorText : colors.textSecondary} />
                 <Text style={styles.statLabel}>Mistakes</Text>
-                <Text style={[styles.statValue, mistakeCount > 0 && styles.errorValue]}>
-                  {mistakeCount}/{MAX_MISTAKES}
-                </Text>
+                <View style={styles.counterRow}>
+                  <RollingNumber
+                    value={mistakeCount}
+                    fontSize={18}
+                    color={mistakeCount > 0 ? colors.errorText : colors.textPrimary}
+                    textStyle={typography.headline}
+                    maxDigits={1}
+                  />
+                  <Text style={[styles.statValue, mistakeCount > 0 && styles.errorValue]}>
+                    /{MAX_MISTAKES}
+                  </Text>
+                </View>
               </View>
-              
+
               <View style={styles.statItem}>
                 <Ionicons name="bulb-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.statLabel}>Hints</Text>
-                <Text style={styles.statValue}>{hintsUsed}</Text>
+                <RollingNumber
+                  value={hintsUsed}
+                  fontSize={18}
+                  color={colors.textPrimary}
+                  textStyle={typography.headline}
+                  maxDigits={1}
+                />
               </View>
             </View>
           </View>
-          
+
           <Pressable style={styles.resumeButton} onPress={onResume}>
             <Ionicons name="play" size={20} color="#FFFFFF" />
             <Text style={styles.resumeText}>Resume</Text>
@@ -149,6 +164,11 @@ const styles = StyleSheet.create({
   statValue: {
     ...typography.headline,
     color: colors.textPrimary,
+    marginTop: spacing.xs,
+  },
+  counterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: spacing.xs,
   },
   errorValue: {

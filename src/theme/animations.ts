@@ -39,6 +39,13 @@ export const springConfigs = {
     stiffness: 100,
     mass: 1,
   } as WithSpringConfig,
+
+  // Rolling number spring - playful odometer effect
+  rolling: {
+    mass: 0.5,
+    damping: 12,
+    stiffness: 120,
+  } as WithSpringConfig,
 };
 
 // Timing animation configs

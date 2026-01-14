@@ -585,6 +585,26 @@ export const useCanUseHint = () => useGameStore((s) => s.hintsUsed < MAX_HINTS);
 export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);
 
+// Progress selector - subscribes to board changes and computes progress
+export const useProgress = () => useGameStore((s) => {
+  let filled = 0;
+  let total = 0;
+
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    for (let col = 0; col < BOARD_SIZE; col++) {
+      const cell = s.board[row][col];
+      if (!cell.isGiven) {
+        total++;
+        if (cell.value === cell.correctValue) {
+          filled++;
+        }
+      }
+    }
+  }
+
+  return total === 0 ? 0 : filled / total;
+});
+
 // Check if there's a resumable game (paused or playing with progress)
 export const useHasResumableGame = () => {
   const gameStatus = useGameStore((s) => s.gameStatus);

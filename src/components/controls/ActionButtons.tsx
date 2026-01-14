@@ -122,7 +122,7 @@ export const ActionButtons = memo(() => {
         icon="bulb-outline"
         label="hint"
         onPress={useHint}
-        disabled={!isPlaying}
+        disabled={!isPlaying || !canUseHint}
       />
     </View>
   );

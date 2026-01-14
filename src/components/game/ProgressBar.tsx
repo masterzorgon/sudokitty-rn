@@ -1,14 +1,16 @@
 // Progress bar component - displays game completion progress
 // Shows a capsule-shaped bar with fill based on cells completed
+// Uses animated rolling numbers for percentage display
 
 import React, { useState } from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useGameStore } from '../../stores/gameStore';
+import { useGameStore, useProgress } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { PauseModal } from './PauseModal';
+import { RollingNumber } from '../ui';
 
 interface ProgressBarProps {
   onBack: () => void;
@@ -16,10 +18,9 @@ interface ProgressBarProps {
 
 export const ProgressBar = ({ onBack }: ProgressBarProps) => {
   const [isPauseModalVisible, setIsPauseModalVisible] = useState(false);
-  const getProgress = useGameStore((s) => s.getProgress);
+  const progress = useProgress();
   const pauseGame = useGameStore((s) => s.pauseGame);
   const resumeGame = useGameStore((s) => s.resumeGame);
-  const progress = getProgress();
   const percentage = Math.round(progress * 100);
 
   const handlePause = () => {
@@ -44,7 +45,16 @@ export const ProgressBar = ({ onBack }: ProgressBarProps) => {
         </View>
       </View>
 
-      <Text style={styles.percentage}>{percentage}%</Text>
+      <View style={styles.percentageContainer}>
+        <RollingNumber
+          value={percentage}
+          fontSize={20}
+          color={colors.textLight}
+          textStyle={typography.caption}
+          maxDigits={3}
+        />
+        <Text style={styles.percentSign}>%</Text>
+      </View>
 
       <Pressable style={styles.pauseButton} onPress={handlePause}>
         <Ionicons name="pause" size={24} color={colors.textSecondary} />
@@ -81,12 +91,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.softOrange,
     borderRadius: borderRadius.full,
   },
-  percentage: {
+  percentageContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 48,
+    justifyContent: 'flex-end',
+  },
+  percentSign: {
     ...typography.caption,
     color: colors.textLight,
-    minWidth: 36,
-    textAlign: 'right',
     fontSize: 20,
+    marginLeft: 1,
   },
   pauseButton: {
     padding: spacing.xs,
