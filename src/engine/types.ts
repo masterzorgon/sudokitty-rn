@@ -223,3 +223,82 @@ export const getRelatedPositions = (pos: Position): Position[] => {
 
 // Helper to check if position is in completed row/col/box
 export const positionKey = (pos: Position): string => `${pos.row}-${pos.col}`;
+
+// ============================================
+// Daily Challenge Types
+// ============================================
+
+// Daily challenge configuration
+export interface DailyChallenge {
+  date: string; // YYYY-MM-DD format
+  difficulty: Difficulty;
+  seed: number; // Deterministic seed for puzzle generation
+  mochiPoints: number; // Reward for completion
+}
+
+// User's daily challenge state (persisted)
+export interface DailyChallengeState {
+  currentStreak: number;
+  longestStreak: number;
+  lastCompletedDate: string | null; // YYYY-MM-DD
+  completedDates: string[]; // Array of completed date strings
+  totalMochiPoints: number;
+}
+
+// Activity calendar day for display
+export interface ActivityDay {
+  date: string; // YYYY-MM-DD
+  completed: boolean;
+}
+
+// Mochi points awarded by difficulty
+export const DAILY_MOCHI_POINTS: Record<Difficulty, number> = {
+  easy: 10,
+  medium: 20,
+  hard: 30,
+  expert: 50,
+};
+
+// Daily difficulty schedule (0 = Sunday, 6 = Saturday)
+export const DAILY_DIFFICULTY_SCHEDULE: Record<number, Difficulty> = {
+  0: 'easy',    // Sunday
+  1: 'medium',  // Monday
+  2: 'hard',    // Tuesday
+  3: 'expert',  // Wednesday
+  4: 'hard',    // Thursday
+  5: 'medium',  // Friday
+  6: 'easy',    // Saturday
+};
+
+// Helper to get today's date as YYYY-MM-DD
+export const getTodayDateString = (): string => {
+  const now = new Date();
+  return now.toISOString().split('T')[0];
+};
+
+// Helper to get yesterday's date as YYYY-MM-DD
+export const getYesterdayDateString = (): string => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toISOString().split('T')[0];
+};
+
+// Helper to generate deterministic seed from date string
+export const getDateSeed = (dateString: string): number => {
+  let hash = 0;
+  for (let i = 0; i < dateString.length; i++) {
+    const char = dateString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+};
+
+// Helper to create empty daily challenge state
+export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
+  currentStreak: 0,
+  longestStreak: 0,
+  lastCompletedDate: null,
+  completedDates: [],
+  totalMochiPoints: 0,
+});

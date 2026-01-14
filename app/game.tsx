@@ -10,19 +10,24 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { AnimatedGameView, GameHeader, ProgressBar } from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
+import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { colors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius, shadows } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
-import { Difficulty } from '../src/engine/types';
+import { Difficulty, DAILY_MOCHI_POINTS } from '../src/engine/types';
 
 // Game status overlay
 const GameStatusOverlay = ({
   onPlayAgain,
   onGoHome,
+  isDaily,
+  mochiPointsEarned,
 }: {
   onPlayAgain: (difficulty: Difficulty) => void;
   onGoHome: () => void;
+  isDaily: boolean;
+  mochiPointsEarned: number;
 }) => {
   const gameStatus = useGameStore((s) => s.gameStatus);
   const difficulty = useGameStore((s) => s.difficulty);
@@ -41,22 +46,38 @@ const GameStatusOverlay = ({
         </Text>
         <Text style={styles.overlayMessage}>
           {isWon
-            ? 'you solved the puzzle!'
-            : 'too many mistakes... try again?'}
+            ? isDaily
+              ? `you earned ${mochiPointsEarned} mochi points!`
+              : 'you solved the puzzle!'
+            : isDaily
+              ? 'keep trying - you can do it!'
+              : 'too many mistakes... try again?'}
         </Text>
         <View style={styles.overlayButtons}>
-          <Pressable
-            style={styles.overlayButton}
-            onPress={() => onPlayAgain(difficulty)}
-          >
-            <Text style={styles.overlayButtonText}>play again</Text>
-          </Pressable>
-          <Pressable
-            style={styles.overlayButtonSecondary}
-            onPress={onGoHome}
-          >
-            <Text style={styles.overlayButtonTextSecondary}>home</Text>
-          </Pressable>
+          {isDaily && isWon ? (
+            <Pressable style={styles.overlayButton} onPress={onGoHome}>
+              <Text style={styles.overlayButtonText}>back to daily</Text>
+            </Pressable>
+          ) : (
+            <>
+              <Pressable
+                style={styles.overlayButton}
+                onPress={() => onPlayAgain(difficulty)}
+              >
+                <Text style={styles.overlayButtonText}>
+                  {isDaily ? 'try again' : 'play again'}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.overlayButtonSecondary}
+                onPress={onGoHome}
+              >
+                <Text style={styles.overlayButtonTextSecondary}>
+                  {isDaily ? 'back to daily' : 'home'}
+                </Text>
+              </Pressable>
+            </>
+          )}
         </View>
       </View>
     </View>
@@ -65,8 +86,16 @@ const GameStatusOverlay = ({
 
 export default function GameScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ difficulty: Difficulty }>();
-  
+  const params = useLocalSearchParams<{
+    difficulty: Difficulty;
+    isDaily?: string;
+    seed?: string;
+  }>();
+
+  const isDaily = params.isDaily === 'true';
+  const difficulty = params.difficulty;
+  const mochiPointsEarned = isDaily ? DAILY_MOCHI_POINTS[difficulty] : 0;
+
   const tick = useGameStore((s) => s.tick);
   const isTimerRunning = useGameStore((s) => s.isTimerRunning);
   const gameStatus = useGameStore((s) => s.gameStatus);
@@ -76,15 +105,28 @@ export default function GameScreen() {
   const resetGame = useGameStore((s) => s.resetGame);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Daily challenge store
+  const completeChallenge = useDailyChallengeStore((s) => s.completeChallenge);
+  const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
+  const dailyCompletedRef = useRef(false);
+
   // Initialize game on mount
   useEffect(() => {
-    if (params.difficulty) {
-      newGame(params.difficulty);
+    if (difficulty) {
+      newGame(difficulty);
       setTimeout(() => {
         startTimer();
       }, startGameAnimations.controlsDelay);
     }
   }, []);
+
+  // Handle daily challenge completion
+  useEffect(() => {
+    if (isDaily && gameStatus === 'won' && !dailyCompletedRef.current && !isTodayCompleted()) {
+      dailyCompletedRef.current = true;
+      completeChallenge();
+    }
+  }, [gameStatus, isDaily, completeChallenge, isTodayCompleted]);
 
   // Timer effect
   useEffect(() => {
@@ -165,7 +207,12 @@ export default function GameScreen() {
       </View>
 
       {/* Game status overlay */}
-      <GameStatusOverlay onPlayAgain={handlePlayAgain} onGoHome={handleGoHome} />
+      <GameStatusOverlay
+        onPlayAgain={handlePlayAgain}
+        onGoHome={handleGoHome}
+        isDaily={isDaily}
+        mochiPointsEarned={mochiPointsEarned}
+      />
     </SafeAreaView>
   );
 }

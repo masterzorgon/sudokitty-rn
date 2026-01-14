@@ -38,7 +38,7 @@ export const colors = {
   boxBorder: '#E0D4D0',
 
   // Note text
-  noteText: '#C0B0A8',
+  noteText: '#8A7A72',
 
   // Error text
   errorText: '#E85A5A',
