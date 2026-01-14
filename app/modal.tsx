@@ -1,15 +1,56 @@
-import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet } from 'react-native';
+// Difficulty selection modal
+// Matches iOS DifficultyPickerSheet.swift
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { StatusBar } from 'expo-status-bar';
+import { Platform, StyleSheet, View, Text, Pressable } from 'react-native';
+import { router } from 'expo-router';
+
+import { useGameStore } from '../src/stores/gameStore';
+import { colors } from '../src/theme/colors';
+import { typography } from '../src/theme/typography';
+import { spacing, borderRadius, shadows } from '../src/theme';
+import { Difficulty, DIFFICULTY_CONFIG } from '../src/engine/types';
+
+interface DifficultyButtonProps {
+  difficulty: Difficulty;
+  onPress: (difficulty: Difficulty) => void;
+}
+
+const DifficultyButton = ({ difficulty, onPress }: DifficultyButtonProps) => {
+  const config = DIFFICULTY_CONFIG[difficulty];
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.difficultyButton,
+        pressed && styles.difficultyButtonPressed,
+      ]}
+      onPress={() => onPress(difficulty)}
+    >
+      <Text style={styles.difficultyName}>{config.name}</Text>
+      <Text style={styles.difficultyComment}>{config.mochiComment}</Text>
+    </Pressable>
+  );
+};
 
 export default function ModalScreen() {
+  const newGame = useGameStore((s) => s.newGame);
+
+  const handleSelectDifficulty = (difficulty: Difficulty) => {
+    newGame(difficulty);
+    router.back();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/modal.tsx" />
+      <Text style={styles.title}>choose your challenge</Text>
+
+      <View style={styles.buttonContainer}>
+        <DifficultyButton difficulty="easy" onPress={handleSelectDifficulty} />
+        <DifficultyButton difficulty="medium" onPress={handleSelectDifficulty} />
+        <DifficultyButton difficulty="hard" onPress={handleSelectDifficulty} />
+        <DifficultyButton difficulty="expert" onPress={handleSelectDifficulty} />
+      </View>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
       <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
@@ -20,16 +61,36 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.cream,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...typography.headline,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  buttonContainer: {
+    gap: spacing.md,
+  },
+  difficultyButton: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.small,
+  },
+  difficultyButtonPressed: {
+    backgroundColor: colors.cellSelected,
+    transform: [{ scale: 0.98 }],
+  },
+  difficultyName: {
+    ...typography.headline,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  difficultyComment: {
+    ...typography.body,
+    color: colors.textSecondary,
   },
 });
