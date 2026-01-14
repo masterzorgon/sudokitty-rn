@@ -218,6 +218,7 @@ interface GameActions {
 
   // Timer
   tick: () => void;
+  startTimer: () => void;
   pauseGame: () => void;
   resumeGame: () => void;
 
@@ -263,7 +264,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.mistakeCount = 0;
           state.hintsUsed = 0;
           state.timeElapsed = 0;
-          state.isTimerRunning = true;
+          state.isTimerRunning = false; // Timer starts after animations complete
           state.gameStatus = 'playing';
           state.history = [];
           state.historyIndex = -1;
@@ -515,6 +516,15 @@ export const useGameStore = create<GameState & GameActions>()(
         set((state) => {
           if (state.isTimerRunning) {
             state.timeElapsed++;
+          }
+        });
+      },
+
+      // Start timer (called after entrance animations complete)
+      startTimer: () => {
+        set((state) => {
+          if (state.gameStatus === 'playing' && !state.isTimerRunning) {
+            state.isTimerRunning = true;
           }
         });
       },

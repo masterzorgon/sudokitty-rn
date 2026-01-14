@@ -109,6 +109,47 @@ export const delays = {
   confettiMax: 500,
 };
 
+// Start Game Animation Flow Timings (matching reference animation-demos)
+export const startGameAnimations = {
+  // Button exit animation
+  buttonFadeOut: {
+    duration: 200,
+  },
+
+  // Difficulty selector
+  difficultyFadeIn: {
+    duration: 400,
+  },
+  difficultyFadeOut: {
+    duration: 200,
+  },
+  difficultyButtonStagger: 75, // ms delay between each button
+
+  // Board container
+  boardContainerFadeIn: {
+    duration: 800,
+  },
+
+  // Cell cascade - each cell fades in based on position
+  cellCascade: {
+    delayPerCell: 75, // (rowIndex + colIndex) * 75ms
+    duration: 350, // Each cell's fade duration
+  },
+
+  // Controls appearance delay (after board starts animating)
+  controlsDelay: 2200, // ~2.2 seconds after board animation starts
+  controlsFadeIn: {
+    duration: 400,
+  },
+
+  // Spring config for button press animations
+  buttonSpring: {
+    mass: 0.3,
+    damping: 10,
+    stiffness: 100,
+  } as WithSpringConfig,
+};
+
 // Scale values for animations
 export const scales = {
   pressed: 0.95,

@@ -1,75 +1,39 @@
-// Home screen - main game view
+// Home screen - main game view with animated transitions
 // Matches iOS HomeView.swift + GameView.swift
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   StyleSheet,
   Text,
   ScrollView,
-  SafeAreaView,
   Pressable,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeOut, LinearTransition } from 'react-native-reanimated';
 
-import { SudokuBoard } from '../../src/components/board';
-import { NumberPad, ActionButtons } from '../../src/components/controls';
+import {
+  AnimatedStartButton,
+  InlineDifficultySelector,
+  AnimatedGameView,
+} from '../../src/components/game';
 import { useGameStore } from '../../src/stores/gameStore';
 import { colors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius, shadows } from '../../src/theme';
-import { MAX_MISTAKES } from '../../src/engine/types';
+import { startGameAnimations } from '../../src/theme/animations';
+import { Difficulty } from '../../src/engine/types';
 
-// Format time as MM:SS
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-};
-
-// Game header with stats
-const GameHeader = () => {
-  const difficulty = useGameStore((s) => s.difficulty);
-  const timeElapsed = useGameStore((s) => s.timeElapsed);
-  const mistakeCount = useGameStore((s) => s.mistakeCount);
-  const hintsUsed = useGameStore((s) => s.hintsUsed);
-
-  return (
-    <View style={styles.header}>
-      <Text style={styles.difficulty}>{difficulty}</Text>
-      <View style={styles.stats}>
-        <View style={styles.stat}>
-          <Text style={styles.statLabel}>time</Text>
-          <Text style={styles.statValue}>{formatTime(timeElapsed)}</Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={styles.statLabel}>mistakes</Text>
-          <Text style={[styles.statValue, mistakeCount > 0 && styles.statError]}>
-            {mistakeCount}/{MAX_MISTAKES}
-          </Text>
-        </View>
-        <View style={styles.stat}>
-          <Text style={styles.statLabel}>hints</Text>
-          <Text style={styles.statValue}>{hintsUsed}</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// New game button
-const NewGameButton = () => (
-  <Link href="/modal" asChild>
-    <Pressable style={styles.newGameButton}>
-      <Text style={styles.newGameButtonText}>play</Text>
-    </Pressable>
-  </Link>
-);
+// Animation phases for start game flow
+type AnimationPhase = 'idle' | 'selecting' | 'transitioning' | 'playing';
 
 // Game status overlay
-const GameStatusOverlay = () => {
+const GameStatusOverlay = ({
+  onPlayAgain,
+}: {
+  onPlayAgain: (difficulty: Difficulty) => void;
+}) => {
   const gameStatus = useGameStore((s) => s.gameStatus);
-  const newGame = useGameStore((s) => s.newGame);
   const difficulty = useGameStore((s) => s.difficulty);
 
   if (gameStatus !== 'won' && gameStatus !== 'lost') {
@@ -91,7 +55,7 @@ const GameStatusOverlay = () => {
         </Text>
         <Pressable
           style={styles.overlayButton}
-          onPress={() => newGame(difficulty)}
+          onPress={() => onPlayAgain(difficulty)}
         >
           <Text style={styles.overlayButtonText}>play again</Text>
         </Pressable>
@@ -104,7 +68,13 @@ export default function HomeScreen() {
   const gameStatus = useGameStore((s) => s.gameStatus);
   const tick = useGameStore((s) => s.tick);
   const isTimerRunning = useGameStore((s) => s.isTimerRunning);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const newGame = useGameStore((s) => s.newGame);
+  const startTimer = useGameStore((s) => s.startTimer);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Animation phase state
+  const [phase, setPhase] = useState<AnimationPhase>('idle');
+  const [controlsReady, setControlsReady] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -126,7 +96,66 @@ export default function HomeScreen() {
     };
   }, [isTimerRunning, tick]);
 
+  // Sync phase with game status
+  useEffect(() => {
+    if (gameStatus === 'idle' && phase !== 'idle' && phase !== 'selecting') {
+      setPhase('idle');
+      setControlsReady(false);
+    }
+  }, [gameStatus, phase]);
+
+  // Handle start game button press
+  const handleStartGame = useCallback(() => {
+    setPhase('selecting');
+  }, []);
+
+  // Handle back from difficulty selection
+  const handleBack = useCallback(() => {
+    setPhase('idle');
+  }, []);
+
+  // Handle difficulty selection
+  const handleSelectDifficulty = useCallback(
+    (difficulty: Difficulty) => {
+      // Generate new game
+      newGame(difficulty);
+
+      // Transition to playing phase
+      setPhase('transitioning');
+
+      // Schedule controls to appear after board animation
+      setTimeout(() => {
+        setControlsReady(true);
+        // Start timer after all animations complete
+        startTimer();
+        setPhase('playing');
+      }, startGameAnimations.controlsDelay);
+    },
+    [newGame, startTimer]
+  );
+
+  // Handle play again from overlay
+  const handlePlayAgain = useCallback(
+    (difficulty: Difficulty) => {
+      // Reset animation state
+      setControlsReady(false);
+      setPhase('transitioning');
+
+      // Generate new game
+      newGame(difficulty);
+
+      // Schedule controls to appear after board animation
+      setTimeout(() => {
+        setControlsReady(true);
+        startTimer();
+        setPhase('playing');
+      }, startGameAnimations.controlsDelay);
+    },
+    [newGame, startTimer]
+  );
+
   const isPlaying = gameStatus === 'playing' || gameStatus === 'paused';
+  const showGame = phase === 'transitioning' || phase === 'playing' || isPlaying;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -137,43 +166,42 @@ export default function HomeScreen() {
         {/* Title */}
         <Text style={styles.title}>sudokitty</Text>
 
-        {isPlaying ? (
-          <>
-            {/* Game header */}
-            <GameHeader />
+        <Animated.View layout={LinearTransition}>
+          {/* Phase: Idle - Show welcome + start button */}
+          {phase === 'idle' && !isPlaying && (
+            <>
+              {/* Welcome message */}
+              <View style={styles.welcomeContainer}>
+                <Text style={styles.welcomeText}>
+                  welcome back!{'\n'}ready to play?
+                </Text>
+              </View>
 
-            {/* Sudoku board */}
-            <View style={styles.boardContainer}>
-              <SudokuBoard />
-            </View>
+              {/* Animated start button */}
+              <AnimatedStartButton
+                onPress={handleStartGame}
+                exiting={FadeOut.duration(startGameAnimations.buttonFadeOut.duration)}
+              />
+            </>
+          )}
 
-            {/* Action buttons */}
-            <View style={styles.controlsContainer}>
-              <ActionButtons />
-            </View>
+          {/* Phase: Selecting - Show difficulty options */}
+          {phase === 'selecting' && (
+            <InlineDifficultySelector
+              onSelect={handleSelectDifficulty}
+              onBack={handleBack}
+            />
+          )}
 
-            {/* Number pad */}
-            <View style={styles.numberPadContainer}>
-              <NumberPad />
-            </View>
-          </>
-        ) : (
-          <>
-            {/* Welcome message */}
-            <View style={styles.welcomeContainer}>
-              <Text style={styles.welcomeText}>
-                welcome back!{'\n'}ready to play?
-              </Text>
-            </View>
-
-            {/* New game button */}
-            <NewGameButton />
-          </>
-        )}
+          {/* Phase: Playing - Show game UI with animations */}
+          {showGame && phase !== 'idle' && phase !== 'selecting' && (
+            <AnimatedGameView controlsReady={controlsReady} />
+          )}
+        </Animated.View>
       </ScrollView>
 
       {/* Game status overlay */}
-      <GameStatusOverlay />
+      <GameStatusOverlay onPlayAgain={handlePlayAgain} />
     </SafeAreaView>
   );
 }
@@ -194,47 +222,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
-  header: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  difficulty: {
-    ...typography.caption,
-    color: colors.softOrange,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-  stats: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.xl,
-  },
-  stat: {
-    alignItems: 'center',
-  },
-  statLabel: {
-    ...typography.captionLight,
-    color: colors.textLight,
-    marginBottom: spacing.xs,
-  },
-  statValue: {
-    ...typography.headline,
-    color: colors.textPrimary,
-  },
-  statError: {
-    color: colors.errorText,
-  },
-  boardContainer: {
-    marginBottom: spacing.xl,
-  },
-  controlsContainer: {
-    marginBottom: spacing.lg,
-  },
-  numberPadContainer: {
-    marginTop: spacing.md,
-  },
   welcomeContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -246,17 +233,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 36,
-  },
-  newGameButton: {
-    marginHorizontal: spacing.xl,
-    backgroundColor: colors.softOrange,
-    paddingVertical: spacing.lg,
-    borderRadius: borderRadius.lg,
-    ...shadows.medium,
-  },
-  newGameButtonText: {
-    ...typography.button,
-    color: colors.cardBackground,
   },
   // Overlay styles
   overlay: {

@@ -3,17 +3,23 @@
 
 import React, { useCallback, memo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { SudokuCell, CELL_SIZE } from './SudokuCell';
 import { useGameStore, useRelatedCells } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { shadows, borderRadius } from '../../theme';
+import { startGameAnimations } from '../../theme/animations';
 import { BOARD_SIZE } from '../../engine/types';
 import { positionKey } from '../../engine/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BOARD_PADDING = 16;
 
-export const SudokuBoard = memo(() => {
+interface SudokuBoardProps {
+  animateEntrance?: boolean;
+}
+
+export const SudokuBoard = memo(({ animateEntrance = false }: SudokuBoardProps) => {
   const board = useGameStore((s) => s.board);
   const selectedCell = useGameStore((s) => s.selectedCell);
   const highlightedNumber = useGameStore((s) => s.highlightedNumber);
@@ -28,7 +34,14 @@ export const SudokuBoard = memo(() => {
   );
 
   return (
-    <View style={styles.container}>
+    <Animated.View
+      entering={
+        animateEntrance
+          ? FadeIn.duration(startGameAnimations.boardContainerFadeIn.duration)
+          : undefined
+      }
+      style={styles.container}
+    >
       <View style={styles.board}>
         {Array.from({ length: BOARD_SIZE }, (_, row) => (
           <View key={row} style={styles.row}>
@@ -40,7 +53,11 @@ export const SudokuBoard = memo(() => {
               const isHighlighted =
                 highlightedNumber !== null && cell.value === highlightedNumber;
 
-              return (
+              // Calculate staggered delay for cascade effect
+              const cellDelay =
+                (row + col) * startGameAnimations.cellCascade.delayPerCell;
+
+              const cellContent = (
                 <SudokuCell
                   key={`${row}-${col}`}
                   cell={cell}
@@ -50,11 +67,27 @@ export const SudokuBoard = memo(() => {
                   onPress={handleCellPress}
                 />
               );
+
+              // Wrap in Animated.View for cascade effect when animating
+              if (animateEntrance) {
+                return (
+                  <Animated.View
+                    key={`${row}-${col}`}
+                    entering={FadeIn.delay(cellDelay).duration(
+                      startGameAnimations.cellCascade.duration
+                    )}
+                  >
+                    {cellContent}
+                  </Animated.View>
+                );
+              }
+
+              return cellContent;
             })}
           </View>
         ))}
       </View>
-    </View>
+    </Animated.View>
   );
 });
 
