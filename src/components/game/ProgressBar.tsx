@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   barContainer: {
     flex: 1,
-    paddingHorizontal: spacing.sm,
+    paddingHorizontal: spacing.xs,
   },
   barBackground: {
     height: 12,
@@ -93,15 +93,15 @@ const styles = StyleSheet.create({
   },
   percentageContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    minWidth: 48,
+    alignItems: 'baseline',
+    minWidth: 36,
     justifyContent: 'flex-end',
   },
   percentSign: {
     ...typography.caption,
     color: colors.textLight,
     fontSize: 20,
-    marginLeft: 1,
+    marginLeft: -10,
   },
   pauseButton: {
     padding: spacing.xs,
