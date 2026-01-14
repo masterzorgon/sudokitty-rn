@@ -83,18 +83,14 @@ export const NumberPad = memo(() => {
   );
 });
 
-const BUTTON_SIZE = 38;
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
+    gap: spacing.xs,
   },
   button: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
+    flex: 1,
+    height: 50,
     backgroundColor: colors.cardBackground,
     borderRadius: borderRadius.md,
     justifyContent: 'center',
@@ -105,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.softOrange,
   },
   buttonText: {
-    ...typography.headline,
+    ...typography.title,
     color: colors.textPrimary,
   },
   buttonTextHighlighted: {

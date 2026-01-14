@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
 import { colors } from '../../src/theme/colors';
+import { spacing } from '@/src/theme';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>['name'];
@@ -20,6 +21,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.tabBarBackground,
           borderTopColor: colors.gridLine,
+          paddingTop: spacing.sm,
         },
         headerShown: false,
       }}

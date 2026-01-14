@@ -20,7 +20,7 @@ export const fontSizes = {
   headline: 18,
   title: 24,
   largeTitle: 32,
-  cell: 22,
+  cell: 24, // Slightly larger for better presence
   notes: 9,
 };
 
@@ -71,16 +71,20 @@ export const typography: Record<string, TextStyle> = {
     fontWeight: fontWeights.regular,
   },
 
-  // Cell text
+  // Cell text - warm, friendly geometry
   cellValue: {
     fontSize: fontSizes.cell,
     fontWeight: fontWeights.medium,
     textAlign: 'center',
+    // Using system font with rounded appearance
+    fontFamily: 'System',
+    letterSpacing: 0.5,
   },
   cellNotes: {
     fontSize: fontSizes.notes,
     fontWeight: fontWeights.regular,
     textAlign: 'center',
+    fontFamily: 'System',
   },
 
   // Button text

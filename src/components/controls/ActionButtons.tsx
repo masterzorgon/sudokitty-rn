@@ -9,7 +9,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useGameStore } from '../../stores/gameStore';
+import { useGameStore, useCanUseHint } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { springConfigs } from '../../theme/animations';
@@ -93,6 +93,7 @@ export const ActionButtons = memo(() => {
   const isNotesMode = useGameStore((s) => s.isNotesMode);
   const useHint = useGameStore((s) => s.useHint);
   const gameStatus = useGameStore((s) => s.gameStatus);
+  const canUseHint = useCanUseHint();
 
   const isPlaying = gameStatus === 'playing';
 
@@ -130,18 +131,15 @@ export const ActionButtons = memo(() => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
     gap: spacing.lg,
   },
   button: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
     backgroundColor: colors.cardBackground,
     borderRadius: borderRadius.lg,
-    minWidth: 64,
     ...shadows.small,
   },
   buttonActive: {

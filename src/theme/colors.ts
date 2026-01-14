@@ -21,28 +21,33 @@ export const colors = {
 
   // Cell colors
   cellBackground: '#FFFFFF',
+  cellBackgroundAlt: '#FFFBF7', // Subtle cream tint for checkerboard boxes
   cellSelected: '#FFE4D6',
-  cellRelated: '#FFF5EE',
-  cellHighlighted: '#FFF0E8',
-  cellError: '#FFE0E0',
-  cellGiven: '#FFF5EE',
+  cellSelectedGlow: 'rgba(255, 176, 133, 0.25)', // Soft glow for selection
+  cellRelated: '#FFF8F2',
+  cellHighlighted: '#FFF5EE',
+  cellError: '#FFF0F0',
+  cellGiven: '#FFFBF8',
 
   // Glow effect
-  glowColor: 'rgba(255, 176, 133, 0.5)',
+  glowColor: 'rgba(255, 176, 133, 0.4)',
 
-  // Grid colors
-  gridLine: '#E8D8D8',
-  gridLineBold: '#D0C0C0',
-  boxBorder: '#C0B0B0',
+  // Grid colors - softer, warmer
+  gridLine: '#F0E8E4', // Hairline warm gray
+  gridLineBold: '#E8DCD8', // Box borders - slightly heavier but still soft
+  boxBorder: '#E0D4D0',
 
   // Note text
-  noteText: '#B0A0A0',
+  noteText: '#C0B0A8',
 
   // Error text
-  errorText: '#FF6B6B',
+  errorText: '#E85A5A',
 
-  // Given number text
-  givenText: '#5D4E4E',
+  // Given number text - darker, more "printed"
+  givenText: '#4A3C3C',
+
+  // User entry text - softer, warmer
+  userEntryText: '#6B5858',
 
   // Tab bar
   tabBarBackground: '#FFFFFF',
@@ -55,6 +60,10 @@ export const colors = {
   // Card
   cardBackground: '#FFFFFF',
   cardBorder: '#F0E8E8',
+
+  // Board card - lifted from cream background
+  boardBackground: '#FEFEFE',
+  boardShadow: '#8B7070', // Warm brown for shadow
 
   // Button
   buttonPrimary: '#FFB085',

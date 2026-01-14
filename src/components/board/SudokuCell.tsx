@@ -1,5 +1,5 @@
 // Individual Sudoku cell component with animations
-// Matches iOS CellView.swift
+// Redesigned: soft checkerboard tinting, improved selection states, warm typography
 
 import React, { useEffect, memo } from 'react';
 import { Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
@@ -19,13 +19,14 @@ import { springConfigs, timingConfigs } from '../../theme/animations';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BOARD_PADDING = 16;
 const BOARD_SIZE = SCREEN_WIDTH - BOARD_PADDING * 2;
-export const CELL_SIZE = Math.floor((BOARD_SIZE - 8) / 9); // Account for grid spacing
+export const CELL_SIZE = Math.floor((BOARD_SIZE - 4) / 9); // Minimal grid spacing
 
 interface SudokuCellProps {
   cell: Cell;
   isSelected: boolean;
   isRelated: boolean;
   isHighlighted: boolean;
+  isInAltBox: boolean;
   onPress: (row: number, col: number) => void;
 }
 
@@ -50,6 +51,7 @@ export const SudokuCell = memo(({
   isSelected,
   isRelated,
   isHighlighted,
+  isInAltBox,
   onPress,
 }: SudokuCellProps) => {
   const { row, col, value, isGiven, isValid, notes } = cell;
@@ -60,13 +62,16 @@ export const SudokuCell = memo(({
   const backgroundProgress = useSharedValue(0);
   const errorShake = useSharedValue(0);
 
-  // Determine border styling for 3x3 box separation
+  // Determine border styling for 3x3 box separation - softer "quilted" feel
   const isRightBoxBorder = (col + 1) % 3 === 0 && col < 8;
   const isBottomBoxBorder = (row + 1) % 3 === 0 && row < 8;
 
+  // Base background color depends on checkerboard box
+  const baseBackground = isInAltBox ? colors.cellBackgroundAlt : colors.cellBackground;
+
   // Update background animation when selection state changes
   useEffect(() => {
-    const targetValue = isSelected ? 1 : isRelated ? 0.5 : isHighlighted ? 0.3 : 0;
+    const targetValue = isSelected ? 1 : isRelated ? 0.4 : isHighlighted ? 0.25 : 0;
     backgroundProgress.value = withSpring(targetValue, springConfigs.default);
   }, [isSelected, isRelated, isHighlighted]);
 
@@ -80,7 +85,7 @@ export const SudokuCell = memo(({
       );
       // Trigger scale bounce
       scale.value = withSequence(
-        withSpring(1.1, springConfigs.bouncy),
+        withSpring(1.08, springConfigs.bouncy),
         withSpring(1, springConfigs.default)
       );
     }
@@ -90,11 +95,11 @@ export const SudokuCell = memo(({
   useEffect(() => {
     if (value && !isGiven && !isValid) {
       errorShake.value = withSequence(
-        withTiming(-3, { duration: 50 }),
-        withTiming(3, { duration: 50 }),
-        withTiming(-3, { duration: 50 }),
-        withTiming(3, { duration: 50 }),
-        withTiming(0, { duration: 50 })
+        withTiming(-2, { duration: 40 }),
+        withTiming(2, { duration: 40 }),
+        withTiming(-2, { duration: 40 }),
+        withTiming(2, { duration: 40 }),
+        withTiming(0, { duration: 40 })
       );
     }
   }, [isValid]);
@@ -109,9 +114,9 @@ export const SudokuCell = memo(({
   const animatedBackgroundStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       backgroundProgress.value,
-      [0, 0.3, 0.5, 1],
+      [0, 0.25, 0.4, 1],
       [
-        colors.cellBackground,
+        baseBackground,
         colors.cellHighlighted,
         colors.cellRelated,
         colors.cellSelected,
@@ -139,10 +144,13 @@ export const SudokuCell = memo(({
       {/* Background layer */}
       <Animated.View style={[styles.background, animatedBackgroundStyle]} />
 
-      {/* Glow effect layer */}
+      {/* Selection glow effect - soft peach glow */}
+      {isSelected && <View style={styles.selectionGlow} />}
+
+      {/* Glow effect layer for correct answers */}
       <Animated.View style={[styles.glow, animatedGlowStyle]} />
 
-      {/* Error background */}
+      {/* Error background - softer */}
       {!isValid && value && (
         <View style={styles.errorBackground} />
       )}
@@ -152,7 +160,7 @@ export const SudokuCell = memo(({
         <Text
           style={[
             styles.value,
-            isGiven && styles.givenValue,
+            isGiven ? styles.givenValue : styles.userValue,
             !isValid && styles.errorValue,
           ]}
         >
@@ -171,20 +179,26 @@ const styles = StyleSheet.create({
     height: CELL_SIZE,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0.5,
+    // Hairline borders in warm gray
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.gridLine,
     overflow: 'hidden',
   },
   rightBoxBorder: {
-    borderRightWidth: 2,
-    borderRightColor: colors.boxBorder,
+    // Softer box border - "quilted" not "caged"
+    borderRightWidth: 1.5,
+    borderRightColor: colors.gridLineBold,
   },
   bottomBoxBorder: {
-    borderBottomWidth: 2,
-    borderBottomColor: colors.boxBorder,
+    borderBottomWidth: 1.5,
+    borderBottomColor: colors.gridLineBold,
   },
   background: {
     ...StyleSheet.absoluteFillObject,
+  },
+  selectionGlow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.cellSelectedGlow,
   },
   glow: {
     ...StyleSheet.absoluteFillObject,
@@ -196,11 +210,16 @@ const styles = StyleSheet.create({
   },
   value: {
     ...typography.cellValue,
-    color: colors.textPrimary,
   },
   givenValue: {
+    // Darker, more "printed" feel - confident and sturdy
     color: colors.givenText,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  userValue: {
+    // Softer, warmer - feels "hand-placed"
+    color: colors.userEntryText,
+    fontWeight: '500',
   },
   errorValue: {
     color: colors.errorText,

@@ -1,72 +1,29 @@
-// Animated "play" button with spring physics
+// Animated "play" button - wraps GameButton for home screen use
 // Matches reference animation-demos button behavior
 
-import React, { useCallback } from 'react';
-import { StyleSheet, Text, Pressable } from 'react-native';
-import Animated, {
-  FadeOut,
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  AnimatedProps,
-} from 'react-native-reanimated';
+import React from 'react';
+import { FadeOut, AnimatedProps } from 'react-native-reanimated';
 import { ViewProps } from 'react-native';
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { spacing, borderRadius, shadows } from '../../theme';
+import { GameButton } from '../ui';
 import { startGameAnimations } from '../../theme/animations';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface AnimatedStartButtonProps {
   onPress: () => void;
+  label?: string;
   exiting?: AnimatedProps<ViewProps>['exiting'];
 }
 
 export const AnimatedStartButton = ({
   onPress,
+  label = 'play',
   exiting,
 }: AnimatedStartButtonProps) => {
-  const scale = useSharedValue(1);
-
-  const handlePressIn = useCallback(() => {
-    scale.value = withSpring(0.95, startGameAnimations.buttonSpring);
-  }, [scale]);
-
-  const handlePressOut = useCallback(() => {
-    scale.value = withSpring(1, startGameAnimations.buttonSpring);
-  }, [scale]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
   return (
-    <Animated.View
+    <GameButton
+      onPress={onPress}
+      label={label}
+      variant="primary"
       exiting={exiting || FadeOut.duration(startGameAnimations.buttonFadeOut.duration)}
-    >
-      <AnimatedPressable
-        style={[styles.button, animatedStyle]}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <Text style={styles.buttonText}>play</Text>
-      </AnimatedPressable>
-    </Animated.View>
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    marginHorizontal: spacing.xl,
-    backgroundColor: colors.softOrange,
-    paddingVertical: spacing.lg,
-    borderRadius: borderRadius.lg,
-    ...shadows.medium,
-  },
-  buttonText: {
-    ...typography.button,
-    color: colors.cardBackground,
-  },
-});

@@ -19,6 +19,7 @@ import {
   BOARD_SIZE,
   BOX_SIZE,
   MAX_MISTAKES,
+  MAX_HINTS,
   getBoxIndex,
   getRelatedPositions,
   positionKey,
@@ -442,6 +443,7 @@ export const useGameStore = create<GameState & GameActions>()(
       useHint: () => {
         const state = get();
         if (state.gameStatus !== 'playing') return null;
+        if (state.hintsUsed >= MAX_HINTS) return null;
 
         // Find random empty cell
         const emptyCells: Position[] = [];
@@ -578,8 +580,36 @@ export const useSelectedCell = () => useGameStore((s) => s.selectedCell);
 export const useIsNotesMode = () => useGameStore((s) => s.isNotesMode);
 export const useGameStatus = () => useGameStore((s) => s.gameStatus);
 export const useMistakeCount = () => useGameStore((s) => s.mistakeCount);
+export const useHintsUsed = () => useGameStore((s) => s.hintsUsed);
+export const useCanUseHint = () => useGameStore((s) => s.hintsUsed < MAX_HINTS);
 export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);
+
+// Check if there's a resumable game (paused or playing with progress)
+export const useHasResumableGame = () => {
+  const gameStatus = useGameStore((s) => s.gameStatus);
+  const timeElapsed = useGameStore((s) => s.timeElapsed);
+  // Game is resumable if it's paused, or if it's playing and has some progress
+  return gameStatus === 'paused' || (gameStatus === 'playing' && timeElapsed > 0);
+};
+
+// Get resumable game info for display
+export const useResumableGameInfo = () => {
+  const difficulty = useGameStore((s) => s.difficulty);
+  const timeElapsed = useGameStore((s) => s.timeElapsed);
+  const gameStatus = useGameStore((s) => s.gameStatus);
+  const getProgress = useGameStore((s) => s.getProgress);
+
+  const hasResumable = gameStatus === 'paused' || (gameStatus === 'playing' && timeElapsed > 0);
+
+  if (!hasResumable) return null;
+
+  return {
+    difficulty,
+    timeElapsed,
+    progress: getProgress(),
+  };
+};
 
 // Selector for cells related to current selection
 export const useRelatedCells = (): Set<string> => {
