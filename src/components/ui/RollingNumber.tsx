@@ -32,6 +32,7 @@ interface AnimatedDigitProps {
   fontSize: number;
   textStyle: StyleProp<TextStyle>;
   maxDigits: number;
+  padWithZeros?: boolean;
 }
 
 const AnimatedDigit = memo(({
@@ -42,6 +43,7 @@ const AnimatedDigit = memo(({
   fontSize,
   textStyle,
   maxDigits,
+  padWithZeros = false,
 }: AnimatedDigitProps) => {
   const animatedValue = useSharedValue(value);
 
@@ -61,12 +63,13 @@ const AnimatedDigit = memo(({
     return maxDigits - len;
   }, [maxDigits]);
 
-  // Determine if this digit should be visible (hide leading zeros)
+  // Determine if this digit should be visible (hide leading zeros unless padWithZeros)
   const isVisible = useDerivedValue(() => {
+    if (padWithZeros) return true;
     const digitValue = getDigitByIndex(animatedValue.value, index, maxDigits);
     if (digitValue !== 0) return true;
     return index < maxDigits - invisibleDigitsAmount.value;
-  }, [index, maxDigits]);
+  }, [index, maxDigits, padWithZeros]);
 
   // Rolling animation - translate Y to show the correct digit
   const rDigitsStyle = useAnimatedStyle(() => {
@@ -80,12 +83,15 @@ const AnimatedDigit = memo(({
   }, [height]);
 
   // Opacity and position adjustment for leading zeros
+  // When padWithZeros is true, keep fixed position (no translateX shift)
   const rContainerStyle = useAnimatedStyle(() => {
     return {
       opacity: withTiming(isVisible.value ? 1 : 0, { duration: 150 }),
       transform: [
         {
-          translateX: withSpring((-width * invisibleDigitsAmount.value) / 2, ROLLING_SPRING_CONFIG),
+          translateX: padWithZeros
+            ? 0
+            : withSpring((-width * invisibleDigitsAmount.value) / 2, ROLLING_SPRING_CONFIG),
         },
       ],
     };
@@ -124,7 +130,7 @@ const AnimatedDigit = memo(({
                 flattenedTextStyle,
                 {
                   fontSize,
-                  lineHeight: fontSize,
+                  lineHeight: height,
                   textAlign: 'center',
                   includeFontPadding: false,
                   // On Android, explicitly remove padding
@@ -165,8 +171,8 @@ export const RollingNumber = memo(({
   padWithZeros = false,
 }: RollingNumberProps) => {
   // Calculate dimensions based on font size if not provided
-  // Height should match typical line-height for baseline alignment
-  const height = digitHeight ?? Math.ceil(fontSize * 1.2);
+  // Height uses 1.4x multiplier to match typical text line-height for baseline alignment
+  const height = digitHeight ?? Math.ceil(fontSize * 1.4);
   const width = digitWidth ?? Math.ceil(fontSize * 0.65);
 
   // Determine max digits needed
@@ -192,6 +198,7 @@ export const RollingNumber = memo(({
             fontSize={fontSize}
             textStyle={combinedTextStyle}
             maxDigits={maxDigits}
+            padWithZeros={padWithZeros}
           />
         ))}
       </Animated.View>
@@ -221,8 +228,8 @@ export const RollingTime = memo(({
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  // Use consistent height calculation
-  const height = Math.ceil(fontSize * 1.2);
+  // Use consistent height calculation (1.4x to match RollingNumber)
+  const height = Math.ceil(fontSize * 1.4);
   const width = Math.ceil(fontSize * 0.65);
 
   // Build text style (without fontSize - passed separately)
@@ -240,6 +247,7 @@ export const RollingTime = memo(({
     height,
     width: width * 0.5,
     textAlign: 'center',
+    marginTop: -1, // Slight upward adjustment for optical alignment
   }), [combinedTextStyle, fontSize, height, width]);
 
   return (

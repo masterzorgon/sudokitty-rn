@@ -36,9 +36,8 @@ export const GameHeader = () => {
           textStyle={typography.caption}
           maxDigits={1}
         />
-        <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>
-          /{MAX_MISTAKES} mistakes
-        </Text>
+        <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>/</Text>
+        <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>{MAX_MISTAKES} mistakes</Text>
       </View>
       <View style={styles.separator} />
       <View style={styles.statRow}>
@@ -49,7 +48,8 @@ export const GameHeader = () => {
           textStyle={typography.caption}
           maxDigits={1}
         />
-        <Text style={styles.stat}>/{MAX_HINTS} hints</Text>
+        <Text style={styles.stat}>/</Text>
+        <Text style={styles.stat}>{MAX_HINTS} hints</Text>
       </View>
     </View>
   );
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   stat: {
     ...typography.caption,
     color: colors.textSecondary,
+    lineHeight: Math.ceil(14 * 1.4), // Match RollingNumber height for baseline alignment
   },
   statError: {
     color: colors.errorText,
@@ -85,5 +86,7 @@ const styles = StyleSheet.create({
   statRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: Math.ceil(14 * 1.4), // Fixed height to prevent layout shift during animation
+    gap: 1,
   },
 });
