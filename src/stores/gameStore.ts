@@ -25,6 +25,7 @@ import {
   positionKey,
 } from '../engine/types';
 import { generatePuzzle } from '../engine/generator';
+import { SudokuSolver, Hint } from '../engine/solver';
 
 // Create empty cell
 const createCell = (
@@ -191,6 +192,10 @@ interface GameState {
   // Completion tracking (for wave animations)
   lastCompletedUnit: CompletedUnit | null;
   lastCorrectCell: Position | null;
+
+  // Hint tracking (for technique-based hints)
+  lastHint: Hint | null;
+  hintHighlightCells: Position[];
 }
 
 // Game actions interface
@@ -212,6 +217,9 @@ interface GameActions {
 
   // Hints
   useHint: () => { row: number; col: number; value: number } | null;
+  getStrategicHint: () => Hint | null;
+  applyHint: (hint: Hint) => void;
+  clearHintHighlight: () => void;
 
   // Undo
   undo: () => boolean;
@@ -243,6 +251,8 @@ const initialState: GameState = {
   historyIndex: -1,
   lastCompletedUnit: null,
   lastCorrectCell: null,
+  lastHint: null,
+  hintHighlightCells: [],
 };
 
 // Create the store
@@ -492,6 +502,101 @@ export const useGameStore = create<GameState & GameActions>()(
         return { row: randomCell.row, col: randomCell.col, value: correctValue };
       },
 
+      // Get a strategic hint using the solver (technique-based)
+      getStrategicHint: () => {
+        const state = get();
+        if (state.gameStatus !== 'playing') return null;
+        if (state.hintsUsed >= MAX_HINTS) return null;
+
+        // Convert current board state to puzzle format (0 = empty)
+        const puzzle: number[][] = state.board.map((row) =>
+          row.map((cell) => cell.value ?? 0)
+        );
+
+        // Create solver with full technique arsenal
+        const solver = new SudokuSolver({
+          maxTechniqueLevel: 4,
+          trackSteps: true,
+        });
+
+        const hint = solver.getHint(puzzle);
+
+        if (!hint) {
+          // No logical next step found - fall back to random hint
+          return null;
+        }
+
+        // Store the hint for display
+        set((draft) => {
+          draft.lastHint = hint;
+          draft.hintHighlightCells = hint.highlightCells;
+        });
+
+        return hint;
+      },
+
+      // Apply a strategic hint (place the value and update state)
+      applyHint: (hint: Hint) => {
+        const state = get();
+        if (state.gameStatus !== 'playing') return;
+        if (state.hintsUsed >= MAX_HINTS) return;
+
+        // For placement hints, apply the value
+        if (hint.targetValue) {
+          set((draft) => {
+            draft.hintsUsed++;
+            draft.selectedCell = hint.targetCell;
+
+            // Save snapshot for undo
+            const snapshot = createSnapshot(draft.board);
+            draft.history = draft.history.slice(0, draft.historyIndex + 1);
+            draft.history.push(snapshot);
+            draft.historyIndex++;
+
+            // Place the value
+            const cell = draft.board[hint.targetCell.row][hint.targetCell.col];
+            cell.value = hint.targetValue!;
+            cell.notes.clear();
+            cell.isValid = true;
+            draft.highlightedNumber = hint.targetValue!;
+            draft.lastCorrectCell = hint.targetCell;
+
+            // Clear related notes
+            clearRelatedNotes(
+              draft.board,
+              hint.targetCell.row,
+              hint.targetCell.col,
+              hint.targetValue!
+            );
+
+            // Clear hint state
+            draft.lastHint = null;
+            draft.hintHighlightCells = [];
+
+            // Check for win
+            if (isBoardComplete(draft.board)) {
+              draft.gameStatus = 'won';
+              draft.isTimerRunning = false;
+            }
+          });
+        } else {
+          // Elimination-only hint - just highlight and explain
+          set((draft) => {
+            draft.hintsUsed++;
+            draft.lastHint = null;
+            draft.hintHighlightCells = [];
+          });
+        }
+      },
+
+      // Clear hint highlight cells
+      clearHintHighlight: () => {
+        set((draft) => {
+          draft.lastHint = null;
+          draft.hintHighlightCells = [];
+        });
+      },
+
       // Undo last move
       undo: () => {
         const state = get();
@@ -638,4 +743,14 @@ export const useRelatedCells = (): Set<string> => {
 
   const related = getRelatedPositions(selectedCell);
   return new Set(related.map(positionKey));
+};
+
+// Hint selectors
+export const useLastHint = () => useGameStore((s) => s.lastHint);
+export const useHintHighlightCells = () => useGameStore((s) => s.hintHighlightCells);
+
+// Set of hint highlight cell keys for efficient lookup
+export const useHintHighlightSet = (): Set<string> => {
+  const hintCells = useGameStore((s) => s.hintHighlightCells);
+  return new Set(hintCells.map(positionKey));
 };

@@ -1,5 +1,5 @@
 // Sudoku puzzle generator using backtracking algorithm
-// Matches iOS SudokuBoard generation logic
+// Enhanced with technique-based difficulty validation
 
 import {
   BOARD_SIZE,
@@ -8,6 +8,7 @@ import {
   DIFFICULTY_CONFIG,
   GeneratedPuzzle,
 } from './types';
+import { SudokuSolver, TechniqueLevel } from './solver';
 
 // Fisher-Yates shuffle
 const shuffleArray = <T>(array: T[]): T[] => {
@@ -112,8 +113,8 @@ const copyBoard = (board: number[][]): number[][] => {
   return board.map((row) => [...row]);
 };
 
-// Remove numbers to create puzzle while ensuring unique solution
-const removeNumbers = (
+// Remove numbers to create puzzle while ensuring unique solution (legacy - no technique validation)
+const removeNumbersSimple = (
   solution: number[][],
   difficulty: Difficulty
 ): number[][] => {
@@ -156,18 +157,115 @@ const removeNumbers = (
   return puzzle;
 };
 
+// Remove numbers with technique-based difficulty validation
+const removeNumbersWithValidation = (
+  solution: number[][],
+  difficulty: Difficulty
+): number[][] | null => {
+  const config = DIFFICULTY_CONFIG[difficulty];
+  const [minClues, maxClues] = config.clueRange;
+  const maxTechniqueLevel = config.maxTechniqueLevel as TechniqueLevel;
+
+  // Create solver for this difficulty level
+  const solver = new SudokuSolver({
+    maxTechniqueLevel,
+    trackSteps: false,
+  });
+
+  const puzzle = copyBoard(solution);
+
+  // Create list of all positions and shuffle
+  const positions: [number, number][] = [];
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    for (let col = 0; col < BOARD_SIZE; col++) {
+      positions.push([row, col]);
+    }
+  }
+  const shuffledPositions = shuffleArray(positions);
+
+  let currentClues = BOARD_SIZE * BOARD_SIZE;
+
+  for (const [row, col] of shuffledPositions) {
+    // Don't go below minimum clues
+    if (currentClues <= minClues) break;
+
+    const backup = puzzle[row][col];
+    puzzle[row][col] = 0;
+
+    // Check 1: Unique solution (fast check)
+    const testBoard = copyBoard(puzzle);
+    const solutions = countSolutions(testBoard, 2);
+
+    if (solutions !== 1) {
+      // Restore - would create multiple solutions
+      puzzle[row][col] = backup;
+      continue;
+    }
+
+    // Check 2: Solvable with allowed techniques
+    const solveResult = solver.solve(puzzle);
+
+    if (!solveResult.solved) {
+      // Restore - requires guessing or advanced techniques
+      puzzle[row][col] = backup;
+      continue;
+    }
+
+    // Check 3: Technique level doesn't exceed max
+    if (solveResult.maxLevelRequired > maxTechniqueLevel) {
+      // Restore - too hard for this difficulty
+      puzzle[row][col] = backup;
+      continue;
+    }
+
+    currentClues--;
+  }
+
+  // Validate final clue count is within range
+  if (currentClues > maxClues) {
+    // Puzzle ended up too easy - signal to regenerate
+    return null;
+  }
+
+  return puzzle;
+};
+
 // Generate a new puzzle with solution
 export const generatePuzzle = (difficulty: Difficulty): GeneratedPuzzle => {
-  // Create empty board
+  const maxAttempts = 50;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    // Create empty board
+    const solution: number[][] = Array(BOARD_SIZE)
+      .fill(null)
+      .map(() => Array(BOARD_SIZE).fill(0));
+
+    // Fill with complete solution
+    fillBoard(solution);
+
+    // Remove numbers with technique validation
+    const puzzle = removeNumbersWithValidation(solution, difficulty);
+
+    if (puzzle !== null) {
+      return { puzzle, solution };
+    }
+  }
+
+  // Fallback to simple generation if technique validation keeps failing
+  console.warn(
+    `Falling back to simple generation for ${difficulty} after ${maxAttempts} attempts`
+  );
+  return generatePuzzleSimple(difficulty);
+};
+
+// Simple puzzle generation without technique validation (fallback)
+export const generatePuzzleSimple = (difficulty: Difficulty): GeneratedPuzzle => {
   const solution: number[][] = Array(BOARD_SIZE)
     .fill(null)
     .map(() => Array(BOARD_SIZE).fill(0));
 
-  // Fill with complete solution
   fillBoard(solution);
-
-  // Remove numbers based on difficulty
-  const puzzle = removeNumbers(solution, difficulty);
+  const puzzle = removeNumbersSimple(solution, difficulty);
 
   return { puzzle, solution };
 };
@@ -223,7 +321,10 @@ export const validateBoard = (board: number[][]): boolean => {
 };
 
 // Generate daily puzzle with seeded random (same puzzle for everyone on same day)
-export const generateDailyPuzzle = (dateString: string): GeneratedPuzzle => {
+export const generateDailyPuzzle = (
+  dateString: string,
+  difficulty: Difficulty = 'medium'
+): GeneratedPuzzle => {
   // Simple seeded random based on date
   const seed = dateString.split('').reduce((acc, char) => {
     return acc + char.charCodeAt(0);
@@ -239,8 +340,8 @@ export const generateDailyPuzzle = (dateString: string): GeneratedPuzzle => {
     return state / 0x100000000;
   };
 
-  // Generate puzzle with seeded random
-  const puzzle = generatePuzzle('medium');
+  // Generate puzzle with seeded random and technique validation
+  const puzzle = generatePuzzle(difficulty);
 
   // Restore original Math.random
   Math.random = originalRandom;
