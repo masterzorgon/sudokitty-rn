@@ -1,5 +1,5 @@
-// Individual difficulty row for the unfurl menu
-// Shows difficulty label with Mochi face icon
+// Individual menu row for the secondary menu
+// Shows label with icon
 
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
@@ -12,22 +12,19 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 
 import { colors } from '@/src/theme/colors';
-import { DIFFICULTY_CONFIG, Difficulty } from '@/src/engine/types';
-import { DifficultyRowProps, DIFFICULTY_ICONS, LAYOUT } from './types';
+import { MenuRowProps, LAYOUT } from './types';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const PRESS_DURATION = 120;
 
-export function DifficultyRow({
-  difficulty,
+export function MenuRow({
+  item,
   index,
   onPress,
   isVisible,
   isLast,
-}: DifficultyRowProps) {
-  const config = DIFFICULTY_CONFIG[difficulty];
-  const iconName = DIFFICULTY_ICONS[difficulty];
+}: MenuRowProps) {
   const isPressed = useSharedValue(0);
 
   const handlePressIn = useCallback(() => {
@@ -57,17 +54,17 @@ export function DifficultyRow({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      {/* difficulty icon */}
+      {/* menu item icon */}
       <View style={styles.iconContainer}>
         <Feather
-          name={iconName as keyof typeof Feather.glyphMap}
+          name={item.icon as keyof typeof Feather.glyphMap}
           size={24}
           color={colors.softOrange}
         />
       </View>
-      {/* difficulty name label */}
+      {/* menu item label */}
       <View style={styles.labelContainer}>
-        <Text style={styles.difficultyName}>{config.name}</Text>
+        <Text style={styles.label}>{item.label}</Text>
       </View>
     </AnimatedPressable>
   );
@@ -88,16 +85,11 @@ const styles = StyleSheet.create({
   labelContainer: {
     flex: 1,
   },
-  difficultyName: {
+  label: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.textPrimary,
-    textTransform: 'capitalize',
     marginBottom: 2,
-  },
-  mochiComment: {
-    fontSize: 13,
-    color: colors.textLight,
   },
   iconContainer: {
     marginLeft: 12,

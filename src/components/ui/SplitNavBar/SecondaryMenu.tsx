@@ -1,4 +1,4 @@
-// Difficulty selection unfurl menu
+// Secondary menu that unfurls from primary action pill
 // Expands upward from primary action pill
 
 import React from 'react';
@@ -11,20 +11,20 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import { Difficulty } from '@/src/engine/types';
-import { DifficultyUnfurlProps, LAYOUT } from './types';
-import { DifficultyRow } from './DifficultyRow';
+import { SecondaryMenuProps, MENU_CONFIGS, LAYOUT, MenuItem } from './types';
+import { MenuRow } from './MenuRow';
 
-const DIFFICULTIES: Difficulty[] = ['expert', 'hard', 'medium', 'easy'];
-
-export function DifficultyUnfurl({
+export function SecondaryMenu({
   isOpen,
+  menuType,
   onSelect,
   onDismiss,
-}: DifficultyUnfurlProps) {
+}: SecondaryMenuProps) {
   const insets = useSafeAreaInsets();
   const menuScale = useSharedValue(0);
   const menuOpacity = useSharedValue(0);
+
+  const menuItems = MENU_CONFIGS[menuType];
 
   React.useEffect(() => {
     if (isOpen) {
@@ -49,8 +49,8 @@ export function DifficultyUnfurl({
     transform: [{ scale: menuScale.value }],
   }));
 
-  const handleDifficultySelect = (difficulty: Difficulty) => {
-    onSelect(difficulty);
+  const handleItemSelect = (item: MenuItem) => {
+    onSelect(item);
   };
 
   return (
@@ -75,15 +75,15 @@ export function DifficultyUnfurl({
       >
         {/* Animated menu - scales from bottom-right due to flex alignment */}
         <Animated.View style={[styles.menuWrapper, animatedMenuStyle]}>
-          <View style={styles.menu}>
-            {DIFFICULTIES.map((difficulty, index) => (
-              <DifficultyRow
-                key={difficulty}
-                difficulty={difficulty}
+          <View style={[styles.menu, menuType === 'resume' && styles.menuWide]}>
+            {menuItems.map((item, index) => (
+              <MenuRow
+                key={item.id}
+                item={item}
                 index={index}
                 isVisible={isOpen}
-                isLast={index === DIFFICULTIES.length - 1}
-                onPress={() => handleDifficultySelect(difficulty)}
+                isLast={index === menuItems.length - 1}
+                onPress={() => handleItemSelect(item)}
               />
             ))}
           </View>
@@ -112,5 +112,8 @@ const styles = StyleSheet.create({
     padding: LAYOUT.unfurlPadding,
     gap: LAYOUT.rowGap,
     minWidth: 260,
+  },
+  menuWide: {
+    minWidth: 320,
   },
 });

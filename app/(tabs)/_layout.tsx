@@ -10,6 +10,7 @@ export default function TabLayout() {
   const router = useRouter();
   const resumeGame = useGameStore((s) => s.resumeGame);
   const startTimer = useGameStore((s) => s.startTimer);
+  const resetGame = useGameStore((s) => s.resetGame);
 
   // Handle new game - navigate to game screen with difficulty
   const handleNewGame = (difficulty: Difficulty) => {
@@ -27,6 +28,11 @@ export default function TabLayout() {
     setTimeout(() => {
       startTimer();
     }, startGameAnimations.controlsDelay);
+  };
+
+  // Handle quit game - clear game state without navigating
+  const handleQuitGame = () => {
+    resetGame();
   };
 
   return (
@@ -59,6 +65,7 @@ export default function TabLayout() {
             }}
             onNewGame={handleNewGame}
             onResume={handleResume}
+            onQuitGame={handleQuitGame}
           />
         );
       }}

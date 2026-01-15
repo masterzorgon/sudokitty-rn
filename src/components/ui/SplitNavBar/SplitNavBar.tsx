@@ -7,62 +7,68 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHasResumableGame } from '@/src/stores/gameStore';
-import { Difficulty } from '@/src/engine/types';
-import { SplitNavBarProps, PrimaryActionState, LAYOUT } from './types';
+import { SplitNavBarProps, PrimaryActionState, LAYOUT, MenuItem } from './types';
 import { LeftCluster } from './LeftCluster';
 import { PrimaryActionPill } from './PrimaryActionPill';
-import { DifficultyUnfurl } from './DifficultyUnfurl';
+import { SecondaryMenu } from './SecondaryMenu';
 
 export function SplitNavBar({
   activeTab,
   onTabPress,
   onNewGame,
   onResume,
+  onQuitGame,
 }: SplitNavBarProps) {
   const insets = useSafeAreaInsets();
   const hasResumableGame = useHasResumableGame();
-  const [isUnfurlOpen, setIsUnfurlOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Determine primary action state based on game store
   const primaryState: PrimaryActionState = hasResumableGame ? 'resume' : 'new_game';
 
-  // Handle primary pill press
+  // Handle primary pill press - always opens menu for both states
   const handlePrimaryPress = useCallback(() => {
-    if (primaryState === 'resume') {
-      // Resume navigates directly to game
-      onResume();
-    } else {
-      // New Game opens the difficulty unfurl
-      setIsUnfurlOpen(true);
-    }
-  }, [primaryState, onResume]);
-
-  // Handle difficulty selection from unfurl
-  const handleDifficultySelect = useCallback(
-    (difficulty: Difficulty) => {
-      setIsUnfurlOpen(false);
-      // Small delay to allow menu close animation
-      setTimeout(() => {
-        onNewGame(difficulty);
-      }, 100);
-    },
-    [onNewGame]
-  );
-
-  // Handle unfurl dismiss
-  const handleUnfurlDismiss = useCallback(() => {
-    setIsUnfurlOpen(false);
+    setIsMenuOpen(true);
   }, []);
 
-  // Close unfurl when navigating away
+  // Handle menu item selection
+  const handleMenuSelect = useCallback(
+    (item: MenuItem) => {
+      setIsMenuOpen(false);
+      // Small delay to allow menu close animation
+      setTimeout(() => {
+        switch (item.action) {
+          case 'select_difficulty':
+            if (item.difficulty) {
+              onNewGame(item.difficulty);
+            }
+            break;
+          case 'continue_game':
+            onResume();
+            break;
+          case 'quit_game':
+            onQuitGame();
+            break;
+        }
+      }, 100);
+    },
+    [onNewGame, onResume, onQuitGame]
+  );
+
+  // Handle menu dismiss
+  const handleMenuDismiss = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  // Close menu when navigating away
   const handleTabPress = useCallback(
     (tab: typeof activeTab) => {
-      if (isUnfurlOpen) {
-        setIsUnfurlOpen(false);
+      if (isMenuOpen) {
+        setIsMenuOpen(false);
       }
       onTabPress(tab);
     },
-    [isUnfurlOpen, onTabPress]
+    [isMenuOpen, onTabPress]
   );
 
   return (
@@ -73,11 +79,12 @@ export function SplitNavBar({
       ]}
       pointerEvents="box-none"
     >
-      {/* Difficulty unfurl menu (rendered first for z-index) */}
-      <DifficultyUnfurl
-        isOpen={isUnfurlOpen}
-        onSelect={handleDifficultySelect}
-        onDismiss={handleUnfurlDismiss}
+      {/* Secondary menu (rendered first for z-index) */}
+      <SecondaryMenu
+        isOpen={isMenuOpen}
+        menuType={primaryState}
+        onSelect={handleMenuSelect}
+        onDismiss={handleMenuDismiss}
       />
 
       {/* Navigation pills container */}
@@ -89,7 +96,7 @@ export function SplitNavBar({
         <PrimaryActionPill
           state={primaryState}
           onPress={handlePrimaryPress}
-          isHidden={isUnfurlOpen}
+          isHidden={isMenuOpen}
         />
       </View>
     </View>
