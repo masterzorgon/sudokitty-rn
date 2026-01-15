@@ -30,19 +30,19 @@ export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryA
   // Animate scale when hidden state changes
   useEffect(() => {
     if (isHidden) {
-      // Scale down to 0 (150ms ease-in)
+      // Scale out: 100ms with cubic ease-out
       visibilityScale.value = withTiming(0, {
-        duration: 150,
-        easing: Easing.in(Easing.ease),
+        duration: 100,
+        easing: Easing.out(Easing.cubic),
       });
-      visibilityOpacity.value = withTiming(0, { duration: 150 });
+      visibilityOpacity.value = withTiming(0, { duration: 100 });
     } else {
-      // Scale back up to 1 (150ms ease-out)
+      // Scale in: 100ms with cubic ease-out
       visibilityScale.value = withTiming(1, {
-        duration: 150,
-        easing: Easing.out(Easing.ease),
+        duration: 100,
+        easing: Easing.out(Easing.cubic),
       });
-      visibilityOpacity.value = withTiming(1, { duration: 150 });
+      visibilityOpacity.value = withTiming(1, { duration: 100 });
     }
   }, [isHidden, visibilityScale, visibilityOpacity]);
 

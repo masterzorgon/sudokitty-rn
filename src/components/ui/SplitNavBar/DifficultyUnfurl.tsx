@@ -28,19 +28,19 @@ export function DifficultyUnfurl({
 
   React.useEffect(() => {
     if (isOpen) {
-      // Scale up from 0 → 1 (200ms ease-out)
+      // Scale up from 0 → 1 with subtle overshoot
       menuScale.value = withTiming(1, {
-        duration: 200,
-        easing: Easing.out(Easing.ease),
+        duration: 120,
+        easing: Easing.out(Easing.back(1.1)),
       });
-      menuOpacity.value = withTiming(1, { duration: 200 });
+      menuOpacity.value = withTiming(1, { duration: 120 });
     } else {
-      // Scale down 1 → 0 (150ms ease-in)
+      // Fast collapse
       menuScale.value = withTiming(0, {
-        duration: 150,
-        easing: Easing.in(Easing.ease),
+        duration: 80,
+        easing: Easing.in(Easing.cubic),
       });
-      menuOpacity.value = withTiming(0, { duration: 150 });
+      menuOpacity.value = withTiming(0, { duration: 80 });
     }
   }, [isOpen, menuScale, menuOpacity]);
 
@@ -66,27 +66,29 @@ export function DifficultyUnfurl({
         <Pressable style={styles.overlayPressable} onPress={onDismiss} />
       </BlurView>
 
-      {/* Menu container */}
-      <Animated.View
+      {/* Anchor container - positioned at bottom-right, same as button */}
+      <View
         style={[
-          styles.menuContainer,
-          animatedMenuStyle,
-          { bottom: insets.bottom + LAYOUT.bottomOffset + 70 },
+          styles.anchorContainer,
+          { bottom: insets.bottom + LAYOUT.bottomOffset },
         ]}
       >
-        <View style={styles.menu}>
-          {DIFFICULTIES.map((difficulty, index) => (
-            <DifficultyRow
-              key={difficulty}
-              difficulty={difficulty}
-              index={index}
-              isVisible={isOpen}
-              isLast={index === DIFFICULTIES.length - 1}
-              onPress={() => handleDifficultySelect(difficulty)}
-            />
-          ))}
-        </View>
-      </Animated.View>
+        {/* Animated menu - scales from bottom-right due to flex alignment */}
+        <Animated.View style={[styles.menuWrapper, animatedMenuStyle]}>
+          <View style={styles.menu}>
+            {DIFFICULTIES.map((difficulty, index) => (
+              <DifficultyRow
+                key={difficulty}
+                difficulty={difficulty}
+                index={index}
+                isVisible={isOpen}
+                isLast={index === DIFFICULTIES.length - 1}
+                onPress={() => handleDifficultySelect(difficulty)}
+              />
+            ))}
+          </View>
+        </Animated.View>
+      </View>
     </Modal>
   );
 }
@@ -95,9 +97,16 @@ const styles = StyleSheet.create({
   overlayPressable: {
     flex: 1,
   },
-  menuContainer: {
+  anchorContainer: {
     position: 'absolute',
     right: LAYOUT.horizontalPadding,
+    // Flex alignment makes content anchor to bottom-right
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+  },
+  menuWrapper: {
+    // Transform origin simulation: content naturally anchors bottom-right
+    // due to parent's flex alignment
   },
   menu: {
     padding: LAYOUT.unfurlPadding,
