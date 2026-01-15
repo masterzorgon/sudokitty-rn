@@ -15,7 +15,7 @@ import { Difficulty } from '@/src/engine/types';
 import { DifficultyUnfurlProps, LAYOUT } from './types';
 import { DifficultyRow } from './DifficultyRow';
 
-const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
+const DIFFICULTIES: Difficulty[] = ['expert', 'hard', 'medium', 'easy'];
 
 export function DifficultyUnfurl({
   isOpen,
