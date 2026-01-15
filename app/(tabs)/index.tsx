@@ -74,7 +74,7 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <Animated.View entering={FadeIn.duration(400)}>
-          <Text style={styles.title}>Home</Text>
+          <Text style={styles.title}>sudokitty</Text>
         </Animated.View>
 
         {/* Hero Mochi Stat */}
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.largeTitle,
     color: colors.textPrimary,
-    textAlign: 'left',
+    textAlign: 'center',
   },
   chartSection: {
     marginTop: spacing.lg,
