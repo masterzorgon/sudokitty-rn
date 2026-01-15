@@ -1,66 +1,70 @@
-// Home screen - welcome view with difficulty selection
-// Navigates to game screen when starting a game
+// Home screen - welcome view with Daily Challenge card
+// Game actions are handled via the split nav bar
 
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeOut, LinearTransition } from 'react-native-reanimated';
+import { Feather } from '@expo/vector-icons';
+import Animated, {
+  FadeIn,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
-import {
-  AnimatedStartButton,
-  InlineDifficultySelector,
-  ContinueGameButton,
-} from '../../src/components/game';
-import { useGameStore, useHasResumableGame } from '../../src/stores/gameStore';
 import { colors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
-import { spacing } from '../../src/theme';
-import { startGameAnimations } from '../../src/theme/animations';
-import { Difficulty } from '../../src/engine/types';
+import { spacing, borderRadius, shadows } from '../../src/theme';
+import { springConfigs } from '../../src/theme/animations';
+import {
+  useDailyChallengeStore,
+  useCurrentStreak,
+} from '../../src/stores/dailyChallengeStore';
+import { DIFFICULTY_CONFIG } from '../../src/engine/types';
 
-// Animation phases for start game flow
-type AnimationPhase = 'idle' | 'selecting';
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [phase, setPhase] = useState<AnimationPhase>('idle');
-  const hasResumableGame = useHasResumableGame();
-  const resumeGame = useGameStore((s) => s.resumeGame);
-  const startTimer = useGameStore((s) => s.startTimer);
-
-  // Handle continue game - resume existing game
-  const handleContinueGame = useCallback(() => {
-    resumeGame();
-    router.push('/game');
-    // Start timer after navigation
-    setTimeout(() => {
-      startTimer();
-    }, startGameAnimations.controlsDelay);
-  }, [resumeGame, router, startTimer]);
-
-  // Handle start game button press
-  const handleStartGame = useCallback(() => {
-    setPhase('selecting');
-  }, []);
-
-  // Handle back from difficulty selection
-  const handleBack = useCallback(() => {
-    setPhase('idle');
-  }, []);
-
-  // Handle difficulty selection - navigate to game screen
-  const handleSelectDifficulty = useCallback(
-    (difficulty: Difficulty) => {
-      router.push({
-        pathname: '/game',
-        params: { difficulty },
-      });
-      // Reset phase after navigation
-      setTimeout(() => setPhase('idle'), 300);
-    },
-    [router]
+  const loadState = useDailyChallengeStore((s) => s.loadState);
+  const getTodayChallenge = useDailyChallengeStore((s) => s.getTodayChallenge);
+  const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
+  const getSimulatedParticipants = useDailyChallengeStore(
+    (s) => s.getSimulatedParticipants
   );
+  const currentStreak = useCurrentStreak();
+
+  // Load daily challenge state on mount
+  useEffect(() => {
+    loadState();
+  }, [loadState]);
+
+  const challenge = getTodayChallenge();
+  const isCompleted = isTodayCompleted();
+  const participants = getSimulatedParticipants();
+  const difficultyConfig = DIFFICULTY_CONFIG[challenge.difficulty];
+
+  // Card press animation
+  const cardScale = useSharedValue(1);
+
+  const handleCardPressIn = () => {
+    cardScale.value = withSpring(0.98, springConfigs.quick);
+  };
+
+  const handleCardPressOut = () => {
+    cardScale.value = withSpring(1, springConfigs.quick);
+  };
+
+  const handleDailyPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/daily');
+  };
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: cardScale.value }],
+  }));
 
   return (
     <SafeAreaView style={styles.container}>
@@ -71,42 +75,65 @@ export default function HomeScreen() {
 
       {/* MIDDLE ZONE - Content area */}
       <View style={styles.middleZone}>
-        <Animated.View style={styles.middleContent} layout={LinearTransition}>
-          {/* Phase: Idle - Show welcome + buttons */}
-          {phase === 'idle' && (
-            <>
-              <View style={styles.welcomeContainer}>
-                <Text style={styles.welcomeText}>
-                  {hasResumableGame
-                    ? 'welcome back!\npick up where you left off?'
-                    : 'welcome back!\nready to play?'}
+        {/* Welcome message */}
+        <View style={styles.welcomeContainer}>
+          <Text style={styles.welcomeText}>
+            welcome back!{'\n'}ready to play?
+          </Text>
+        </View>
+
+        {/* Daily Challenge Card */}
+        <Animated.View entering={FadeIn.delay(200).duration(400)}>
+          <AnimatedPressable
+            style={[styles.dailyCard, cardAnimatedStyle]}
+            onPress={handleDailyPress}
+            onPressIn={handleCardPressIn}
+            onPressOut={handleCardPressOut}
+          >
+            <View style={styles.dailyCardHeader}>
+              <View style={styles.dailyBadge}>
+                <Feather name="calendar" size={14} color={colors.softOrange} />
+                <Text style={styles.dailyBadgeText}>Daily Challenge</Text>
+              </View>
+              {isCompleted && (
+                <View style={styles.completedBadge}>
+                  <Feather name="check" size={12} color={colors.mint} />
+                  <Text style={styles.completedText}>Done!</Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.dailyContent}>
+              <View style={styles.difficultyInfo}>
+                <Text style={styles.difficultyLabel}>
+                  {difficultyConfig.name}
                 </Text>
               </View>
 
-              {/* Continue game button - only shows if there's a paused game */}
-              {hasResumableGame && (
-                <ContinueGameButton onPress={handleContinueGame} />
-              )}
+              <View style={styles.statsRow}>
+                {currentStreak > 0 && (
+                  <View style={styles.statItem}>
+                    <Feather name="zap" size={14} color={colors.softOrange} />
+                    <Text style={styles.statText}>{currentStreak} day streak</Text>
+                  </View>
+                )}
+                <View style={styles.statItem}>
+                  <Feather name="users" size={14} color={colors.textLight} />
+                  <Text style={styles.statText}>
+                    {participants.toLocaleString()} playing today
+                  </Text>
+                </View>
+              </View>
+            </View>
 
-              <AnimatedStartButton
-                onPress={handleStartGame}
-                label={hasResumableGame ? 'new game' : 'start game'}
-                exiting={FadeOut.duration(startGameAnimations.buttonFadeOut.duration)}
-              />
-            </>
-          )}
-
-          {/* Phase: Selecting - Show difficulty options */}
-          {phase === 'selecting' && (
-            <InlineDifficultySelector
-              onSelect={handleSelectDifficulty}
-              onBack={handleBack}
-            />
-          )}
+            <View style={styles.arrowContainer}>
+              <Feather name="chevron-right" size={20} color={colors.textLight} />
+            </View>
+          </AnimatedPressable>
         </Animated.View>
       </View>
 
-      {/* BOTTOM ZONE - Empty placeholder for layout consistency */}
+      {/* BOTTOM ZONE - Spacer for nav bar */}
       <View style={styles.bottomZone} />
     </SafeAreaView>
   );
@@ -130,11 +157,7 @@ const styles = StyleSheet.create({
   },
   middleZone: {
     flex: 1,
-  },
-  middleContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    paddingTop: 80,
+    paddingHorizontal: spacing.lg,
   },
   welcomeContainer: {
     flex: 1,
@@ -147,9 +170,82 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 36,
   },
+  dailyCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    ...shadows.medium,
+  },
+  dailyCardHeader: {
+    position: 'absolute',
+    top: spacing.md,
+    left: spacing.lg,
+    right: spacing.lg,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  dailyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dailyBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.softOrange,
+  },
+  completedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: 'rgba(184, 230, 208, 0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  completedText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.mint,
+  },
+  dailyContent: {
+    flex: 1,
+    paddingTop: 28,
+  },
+  difficultyInfo: {
+    marginBottom: spacing.sm,
+  },
+  difficultyLabel: {
+    ...typography.headline,
+    color: colors.textPrimary,
+    textTransform: 'capitalize',
+    marginBottom: 2,
+  },
+  mochiComment: {
+    fontSize: 13,
+    color: colors.textLight,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  arrowContainer: {
+    marginLeft: spacing.sm,
+  },
   bottomZone: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.lg,
+    height: 100,
   },
 });

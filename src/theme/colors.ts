@@ -54,6 +54,9 @@ export const colors = {
   tabBarActive: '#FFB085',
   tabBarInactive: '#B0A0A0',
 
+  // Floating nav bar
+  navInactive: '#9CA3AF',
+
   // Overlay
   overlayBackground: 'rgba(0, 0, 0, 0.5)',
 
@@ -69,6 +72,27 @@ export const colors = {
   buttonPrimary: '#FFB085',
   buttonSecondary: '#FFFFFF',
   buttonDisabled: '#E0D8D8',
+
+  // 3D CTA Button colors
+  ctaPrimaryFace: '#FFB085',
+  ctaPrimaryEdge: '#E8956A',
+  ctaPrimaryHighlight: '#FFC4A0',
+  ctaSecondaryFace: '#FFF8F0',
+  ctaSecondaryEdge: '#E8DFD4',
+  ctaSecondaryHighlight: '#FFFCF8',
+  ctaSuccessFace: '#B8E6D0',
+  ctaSuccessEdge: '#8FCDB5',
+  ctaSuccessHighlight: '#D0F0E0',
+  ctaDisabledFace: '#E8E0E0',
+  ctaDisabledEdge: '#D0C8C8',
+  ctaTextDark: '#4A3728',
+
+  // NumberPad concave button colors
+  numberPadBase: '#FFF8F0',
+  numberPadPressed: '#F5EDE5',
+  numberPadText: '#4A3728',
+  numberPadActiveGlow: 'rgba(255, 176, 133, 0.3)',
+  numberPadError: '#FFE5E5',
 
   // Gradients (as arrays for LinearGradient)
   backgroundGradient: ['#FFF8F0', '#FFF0E8', '#FFE8E0'] as const,

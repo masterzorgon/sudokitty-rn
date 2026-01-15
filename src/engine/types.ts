@@ -29,7 +29,6 @@ export interface DifficultyConfig {
   name: Difficulty;
   clueRange: [number, number]; // [min, max] clues
   maxTechniqueLevel: number; // 1-4
-  mochiComment: string;
 }
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
@@ -37,25 +36,21 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
     name: 'easy',
     clueRange: [36, 50],
     maxTechniqueLevel: 1,
-    mochiComment: "purrfect for warming up~",
   },
   medium: {
     name: 'medium',
     clueRange: [30, 40],
     maxTechniqueLevel: 2,
-    mochiComment: "let's get cozy with this one!",
   },
   hard: {
     name: 'hard',
     clueRange: [25, 32],
     maxTechniqueLevel: 3,
-    mochiComment: "ooh, feeling brave today?",
   },
   expert: {
     name: 'expert',
     clueRange: [22, 28],
     maxTechniqueLevel: 4,
-    mochiComment: "you've got this... i believe in you!",
   },
 };
 
