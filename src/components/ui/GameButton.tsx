@@ -96,6 +96,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     alignItems: 'center',
     ...shadows.medium,
+    borderWidth: 3,
+    borderColor: 'red',
+    width: '100%',
   },
   buttonPrimary: {
     backgroundColor: colors.softOrange,

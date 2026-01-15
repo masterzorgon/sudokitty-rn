@@ -1,8 +1,8 @@
 // Secondary menu that unfurls from primary action pill
 // Expands upward from primary action pill
 
-import React from 'react';
-import { StyleSheet, View, Pressable, Modal } from 'react-native';
+import React, { useRef, useMemo } from 'react';
+import { StyleSheet, View, Pressable, Modal, PanResponder } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
@@ -14,6 +14,9 @@ import Animated, {
 import { SecondaryMenuProps, MENU_CONFIGS, LAYOUT, MenuItem } from './types';
 import { MenuRow } from './MenuRow';
 
+const SWIPE_THRESHOLD = 50; // Minimum distance to trigger dismiss
+const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity to trigger dismiss
+
 export function SecondaryMenu({
   isOpen,
   menuType,
@@ -23,8 +26,40 @@ export function SecondaryMenu({
   const insets = useSafeAreaInsets();
   const menuScale = useSharedValue(0);
   const menuOpacity = useSharedValue(0);
+  const isDismissing = useRef(false);
 
   const menuItems = MENU_CONFIGS[menuType];
+
+  // PanResponder for swipe-down to dismiss
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) => {
+          // Only respond to downward swipes
+          return gestureState.dy > 10 && Math.abs(gestureState.dx) < Math.abs(gestureState.dy);
+        },
+        onPanResponderRelease: (_, gestureState) => {
+          const { dy, vy } = gestureState;
+          // Dismiss if swiped down far enough or with enough velocity
+          if (
+            !isDismissing.current &&
+            (dy > SWIPE_THRESHOLD || (dy > 20 && vy > SWIPE_VELOCITY_THRESHOLD))
+          ) {
+            isDismissing.current = true;
+            onDismiss();
+            // Reset after animation completes
+            setTimeout(() => {
+              isDismissing.current = false;
+            }, 100);
+          }
+        },
+        onPanResponderTerminate: () => {
+          isDismissing.current = false;
+        },
+      }),
+    [onDismiss]
+  );
 
   React.useEffect(() => {
     if (isOpen) {
@@ -61,20 +96,23 @@ export function SecondaryMenu({
       statusBarTranslucent
       onRequestClose={onDismiss}
     >
-      {/* Full-screen blur overlay */}
+      {/* Full-screen blur overlay with tap and swipe to dismiss */}
       <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
-        <Pressable style={styles.overlayPressable} onPress={onDismiss} />
+        <View style={styles.overlayTouchable} {...panResponder.panHandlers}>
+          <Pressable style={styles.overlayPressable} onPress={onDismiss} />
+        </View>
       </BlurView>
 
-      {/* Anchor container - positioned at bottom-right, same as button */}
+      {/* Full-screen positioning container - passes all touches through */}
       <View
         style={[
-          styles.anchorContainer,
-          { bottom: insets.bottom + LAYOUT.bottomOffset },
+          styles.positioningContainer,
+          { paddingBottom: insets.bottom + LAYOUT.bottomOffset },
         ]}
+        pointerEvents="box-none"
       >
-        {/* Animated menu - scales from bottom-right due to flex alignment */}
-        <Animated.View style={[styles.menuWrapper, animatedMenuStyle]}>
+        {/* Animated menu - only as large as its content */}
+        <Animated.View style={[styles.menuWrapper, animatedMenuStyle]} pointerEvents="box-none">
           <View style={[styles.menu, menuType === 'resume' && styles.menuWide]}>
             {menuItems.map((item, index) => (
               <MenuRow
@@ -94,19 +132,22 @@ export function SecondaryMenu({
 }
 
 const styles = StyleSheet.create({
+  overlayTouchable: {
+    flex: 1,
+  },
   overlayPressable: {
     flex: 1,
   },
-  anchorContainer: {
-    position: 'absolute',
-    right: LAYOUT.horizontalPadding,
-    // Flex alignment makes content anchor to bottom-right
-    alignItems: 'flex-end',
+  positioningContainer: {
+    ...StyleSheet.absoluteFillObject,
+    // Flexbox positions content at bottom-right without expanding
+    flexDirection: 'column',
     justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    paddingRight: LAYOUT.horizontalPadding,
   },
   menuWrapper: {
-    // Transform origin simulation: content naturally anchors bottom-right
-    // due to parent's flex alignment
+    // Transform origin: scales from bottom-right corner
   },
   menu: {
     padding: LAYOUT.unfurlPadding,

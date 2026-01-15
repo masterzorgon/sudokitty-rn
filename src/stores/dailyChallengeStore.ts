@@ -10,8 +10,11 @@ import {
   DailyChallenge,
   DailyChallengeState,
   ActivityDay,
+  MochiHistoryEntry,
+  ChartTimePeriod,
   DAILY_MOCHI_POINTS,
   DAILY_DIFFICULTY_SCHEDULE,
+  PERIOD_MS,
   getTodayDateString,
   getYesterdayDateString,
   getDateSeed,
@@ -23,6 +26,9 @@ interface DailyChallengeStore extends DailyChallengeState {
   // Loading state
   isLoaded: boolean;
 
+  // Mochi history for chart
+  mochiHistory: MochiHistoryEntry[];
+
   // Actions
   loadState: () => Promise<void>;
   saveState: () => Promise<void>;
@@ -31,6 +37,11 @@ interface DailyChallengeStore extends DailyChallengeState {
   getActivityData: (weeks?: number) => ActivityDay[];
   isTodayCompleted: () => boolean;
   getSimulatedParticipants: () => number;
+
+  // Mochi history methods
+  getMochiHistory: (period: ChartTimePeriod) => MochiHistoryEntry[];
+  getMochiEarnedToday: () => number;
+  addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus') => void;
 
   // For testing/debugging
   resetState: () => void;
@@ -42,11 +53,15 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
       // Initial state
       ...createEmptyDailyChallengeState(),
       isLoaded: false,
+      mochiHistory: [],
 
       // Load state from AsyncStorage
       loadState: async () => {
         const stored = await storage.get<DailyChallengeState>(
           STORAGE_KEYS.DAILY_CHALLENGE_STATE
+        );
+        const storedHistory = await storage.get<MochiHistoryEntry[]>(
+          STORAGE_KEYS.MOCHI_HISTORY
         );
 
         if (stored) {
@@ -56,6 +71,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
             state.lastCompletedDate = stored.lastCompletedDate;
             state.completedDates = stored.completedDates;
             state.totalMochiPoints = stored.totalMochiPoints;
+            state.mochiHistory = storedHistory || [];
             state.isLoaded = true;
           });
 
@@ -85,7 +101,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
 
       // Save state to AsyncStorage
       saveState: async () => {
-        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints } =
+        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, mochiHistory } =
           get();
         await storage.set<DailyChallengeState>(STORAGE_KEYS.DAILY_CHALLENGE_STATE, {
           currentStreak,
@@ -94,13 +110,14 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           completedDates,
           totalMochiPoints,
         });
+        await storage.set<MochiHistoryEntry[]>(STORAGE_KEYS.MOCHI_HISTORY, mochiHistory);
       },
 
       // Complete today's challenge
       completeChallenge: () => {
         const today = getTodayDateString();
         const yesterday = getYesterdayDateString();
-        const { lastCompletedDate, currentStreak, longestStreak, completedDates } = get();
+        const { lastCompletedDate, currentStreak, longestStreak, completedDates, totalMochiPoints, mochiHistory } = get();
 
         // Already completed today
         if (lastCompletedDate === today) {
@@ -118,12 +135,22 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           newStreak = 1;
         }
 
+        // Create mochi history entry
+        const historyEntry: MochiHistoryEntry = {
+          date: today,
+          timestamp: Date.now(),
+          amount: challenge.mochiPoints,
+          cumulativeTotal: totalMochiPoints + challenge.mochiPoints,
+          source: 'daily',
+        };
+
         set((state) => {
           state.currentStreak = newStreak;
           state.longestStreak = Math.max(longestStreak, newStreak);
           state.lastCompletedDate = today;
           state.completedDates = [...completedDates, today];
           state.totalMochiPoints += challenge.mochiPoints;
+          state.mochiHistory = [...mochiHistory, historyEntry];
         });
 
         get().saveState();
@@ -196,6 +223,44 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         return Math.floor(baseCount + hoursElapsed * growthRate + noise);
       },
 
+      // Get mochi history filtered by time period
+      getMochiHistory: (period: ChartTimePeriod): MochiHistoryEntry[] => {
+        const { mochiHistory } = get();
+        const now = Date.now();
+        const cutoff = now - PERIOD_MS[period];
+        return mochiHistory.filter((entry) => entry.timestamp >= cutoff);
+      },
+
+      // Get mochis earned today
+      getMochiEarnedToday: (): number => {
+        const { mochiHistory } = get();
+        const today = getTodayDateString();
+        return mochiHistory
+          .filter((entry) => entry.date === today)
+          .reduce((sum, entry) => sum + entry.amount, 0);
+      },
+
+      // Add a mochi history entry (for regular games or bonuses)
+      addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus') => {
+        const today = getTodayDateString();
+        const { totalMochiPoints, mochiHistory } = get();
+
+        const entry: MochiHistoryEntry = {
+          date: today,
+          timestamp: Date.now(),
+          amount,
+          cumulativeTotal: totalMochiPoints + amount,
+          source,
+        };
+
+        set((state) => {
+          state.mochiHistory = [...mochiHistory, entry];
+          state.totalMochiPoints += amount;
+        });
+
+        get().saveState();
+      },
+
       // Reset state (for testing)
       resetState: () => {
         set((state) => {
@@ -204,6 +269,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           state.lastCompletedDate = null;
           state.completedDates = [];
           state.totalMochiPoints = 0;
+          state.mochiHistory = [];
         });
         get().saveState();
       },

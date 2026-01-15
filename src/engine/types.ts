@@ -297,3 +297,36 @@ export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
   completedDates: [],
   totalMochiPoints: 0,
 });
+
+// ============================================
+// Mochi History Types (for Home Screen Chart)
+// ============================================
+
+// Mochi history entry for tracking earnings over time
+export interface MochiHistoryEntry {
+  date: string;              // YYYY-MM-DD format
+  timestamp: number;         // Unix timestamp for precise ordering
+  amount: number;            // Mochis earned in this entry
+  cumulativeTotal: number;   // Running total at this point
+  source: 'daily' | 'game' | 'bonus';  // Where mochis came from
+}
+
+// Time period options for chart filtering
+export type ChartTimePeriod = '1D' | '1W' | '1M' | '6M' | '1Y';
+
+// Period durations in milliseconds
+export const PERIOD_MS: Record<ChartTimePeriod, number> = {
+  '1D': 24 * 60 * 60 * 1000,         // 86,400,000
+  '1W': 7 * 24 * 60 * 60 * 1000,     // 604,800,000
+  '1M': 30 * 24 * 60 * 60 * 1000,    // 2,592,000,000
+  '6M': 180 * 24 * 60 * 60 * 1000,   // 15,552,000,000
+  '1Y': 365 * 24 * 60 * 60 * 1000,   // 31,536,000,000
+};
+
+// Chart data point for Skia rendering
+export interface ChartDataPoint {
+  x: number;     // Normalized 0-1
+  y: number;     // Normalized 0-1
+  value: number; // Actual mochi value
+  label: string; // Display label
+}

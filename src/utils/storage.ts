@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   DAILY_CHALLENGE_STATE: '@sudokitty/daily_challenge_state',
   USER_STATS: '@sudokitty/user_stats',
   GAME_STATE: '@sudokitty/game_state',
+  MOCHI_HISTORY: '@sudokitty/mochi_history',
 } as const;
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];

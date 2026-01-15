@@ -1,0 +1,59 @@
+// Reusable stat card component for displaying rank and streak
+// Lifted card aesthetic with icon, value, and label
+
+import React, { memo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+import { colors } from '../../theme/colors';
+import { typography } from '../../theme/typography';
+import { spacing, borderRadius, shadows } from '../../theme';
+
+interface StatCardProps {
+  icon: string;
+  label: string;
+  value: string | number;
+  valueColor?: string;
+}
+
+export const StatCard = memo(({
+  icon,
+  label,
+  value,
+  valueColor,
+}: StatCardProps) => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.icon}>{icon}</Text>
+      <Text style={[styles.value, valueColor && { color: valueColor }]}>
+        {value}
+      </Text>
+      <Text style={styles.label}>{label}</Text>
+    </View>
+  );
+});
+
+StatCard.displayName = 'StatCard';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.cardBackground,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    alignItems: 'center',
+    ...shadows.medium,
+  },
+  icon: {
+    fontSize: 24,
+    marginBottom: spacing.xs,
+  },
+  value: {
+    ...typography.title,
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  label: {
+    ...typography.caption,
+    color: colors.textSecondary,
+  },
+});
