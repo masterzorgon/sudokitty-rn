@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
@@ -28,8 +28,14 @@ import {
 // Static placeholder for global rank (until backend integration)
 const STATIC_GLOBAL_RANK = 4521;
 
+// Nav bar height estimate: paddingV (14) * 2 + content (~24) = ~52px
+// Nav bar bottomOffset: 16px
+// Gap above nav bar: 20px
+const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
+
 export default function HomeScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [selectedPeriod, setSelectedPeriod] = useState<ChartTimePeriod>('1W');
 
   // Store hooks
@@ -72,12 +78,12 @@ export default function HomeScreen() {
         </Animated.View>
 
         {/* Hero Mochi Stat */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        {/* <Animated.View entering={FadeInDown.delay(100).duration(400)}>
           <MochiHeroStat totalMochis={totalMochis} earnedToday={earnedToday} />
-        </Animated.View>
+        </Animated.View> */}
 
         {/* Chart Section */}
-        <Animated.View
+        {/* <Animated.View
           entering={FadeInDown.delay(200).duration(400)}
           style={styles.chartSection}
         >
@@ -88,32 +94,32 @@ export default function HomeScreen() {
           <View style={styles.chartContainer}>
             <MochiChart data={chartData} period={selectedPeriod} height={140} />
           </View>
-        </Animated.View>
+        </Animated.View> */}
 
         {/* Stats Card Grid */}
-        <Animated.View
+        {/* <Animated.View
           entering={FadeInDown.delay(300).duration(400)}
           style={styles.statsSection}
         >
           <StatsCardGrid streak={currentStreak} globalRank={STATIC_GLOBAL_RANK} />
-        </Animated.View>
-
-        {/* Daily Challenge CTA */}
-        <Animated.View
-          entering={FadeInDown.delay(400).duration(400)}
-          style={styles.ctaSection}
-        >
-          <DailyChallengeCTA
-            challenge={challenge}
-            isCompleted={isCompleted}
-            participantCount={participants}
-            onPress={handleDailyPress}
-          />
-        </Animated.View>
+        </Animated.View> */}
       </ScrollView>
 
-      {/* Bottom spacer for floating nav bar */}
-      <View style={styles.bottomSpacer} />
+      {/* Daily Challenge CTA - fixed 20px above nav bar */}
+      <Animated.View
+        entering={FadeInDown.delay(400).duration(400)}
+        style={[
+          styles.ctaSection,
+          { bottom: insets.bottom + CTA_BOTTOM_OFFSET },
+        ]}
+      >
+        <DailyChallengeCTA
+          challenge={challenge}
+          isCompleted={isCompleted}
+          participantCount={participants}
+          onPress={handleDailyPress}
+        />
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -150,9 +156,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   ctaSection: {
-    marginTop: spacing.md,
-  },
-  bottomSpacer: {
-    height: 100,
+    position: 'absolute',
+    left: spacing.lg,
+    right: spacing.lg,
   },
 });

@@ -93,9 +93,6 @@ export const DailyChallengeCTA = memo(({
 
   return (
     <Animated.View style={[styles.container, animatedShadowStyle]}>
-      {/* Bottom edge */}
-      <Animated.View style={[styles.edge, animatedEdgeStyle]} />
-
       {/* Card face */}
       <Pressable
         onPress={handlePress}
@@ -149,16 +146,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
-  },
-  edge: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: EDGE_HEIGHT,
-    backgroundColor: colors.ctaSecondaryEdge,
-    borderBottomLeftRadius: borderRadius.lg,
-    borderBottomRightRadius: borderRadius.lg,
   },
   face: {
     flexDirection: 'row',
