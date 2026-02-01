@@ -21,7 +21,7 @@ export const SKEU_DIMENSIONS = {
 
 // MARK: - Types
 
-export type SkeuVariant = 'primary' | 'secondary';
+export type SkeuVariant = 'primary' | 'secondary' | 'success' | 'disabled' | 'neutral';
 
 export interface SkeuVariantColors {
   gradient: readonly [string, string, string];
@@ -54,6 +54,27 @@ export const SKEU_VARIANTS: Record<SkeuVariant, SkeuVariantColors> = {
     edge: '#E8DFD4',
     borderLight: 'rgba(255, 255, 255, 0.5)',
     borderDark: 'rgba(200, 190, 180, 0.3)',
+    textColor: '#5D4E4E',
+  },
+  success: {
+    gradient: ['#D0F0E0', '#B8E6D0', '#D0F0E0'],
+    edge: '#8FCDB5',
+    borderLight: 'rgba(255, 255, 255, 0.4)',
+    borderDark: 'rgba(143, 205, 181, 0.3)',
+    textColor: '#4A3728',
+  },
+  disabled: {
+    gradient: ['#E8E0E0', '#E8E0E0', '#E8E0E0'],
+    edge: '#D0C8C8',
+    borderLight: 'rgba(255, 255, 255, 0.2)',
+    borderDark: 'rgba(208, 200, 200, 0.2)',
+    textColor: '#B0A0A0',
+  },
+  neutral: {
+    gradient: ['#FFFFFF', '#FEFEFE', '#FFFFFF'],
+    edge: '#E8E8E8',
+    borderLight: 'rgba(255, 255, 255, 0.5)',
+    borderDark: 'rgba(0, 0, 0, 0.1)',
     textColor: '#5D4E4E',
   },
 } as const;

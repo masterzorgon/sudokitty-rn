@@ -1,5 +1,6 @@
 // Hook for skeuomorphic press animation
 // Provides scale + translateY animation with haptic feedback
+// Respects reduced motion accessibility preference
 
 import { useCallback } from 'react';
 import {
@@ -10,6 +11,7 @@ import {
 import * as Haptics from 'expo-haptics';
 
 import { SKEU_TIMINGS, SKEU_DIMENSIONS } from '../theme/skeuomorphic';
+import { useReducedMotion } from './useReducedMotion';
 
 interface UseSkeuomorphicPressOptions {
   /** Scale factor when pressed (default: 0.96) */
@@ -24,6 +26,8 @@ interface UseSkeuomorphicPressOptions {
   hapticStyle?: Haptics.ImpactFeedbackStyle;
   /** Callback when pressed */
   onPress?: () => void;
+  /** Whether the button is disabled */
+  disabled?: boolean;
 }
 
 
@@ -35,24 +39,33 @@ export function useSkeuomorphicPress(options: UseSkeuomorphicPressOptions = {}) 
     haptic = true,
     hapticStyle = Haptics.ImpactFeedbackStyle.Light,
     onPress,
+    disabled = false,
   } = options;
 
+  const reducedMotion = useReducedMotion();
   const pressProgress = useSharedValue(0);
 
+  // Use 0 duration when reduced motion is enabled for instant state changes
+  const effectiveDuration = reducedMotion ? 0 : duration;
+
   const handlePressIn = useCallback(() => {
-    pressProgress.value = withTiming(1, { duration });
-  }, [pressProgress, duration]);
+    if (disabled) return;
+    pressProgress.value = withTiming(1, { duration: effectiveDuration });
+  }, [pressProgress, effectiveDuration, disabled]);
 
   const handlePressOut = useCallback(() => {
-    pressProgress.value = withTiming(0, { duration });
-  }, [pressProgress, duration]);
+    if (disabled) return;
+    pressProgress.value = withTiming(0, { duration: effectiveDuration });
+  }, [pressProgress, effectiveDuration, disabled]);
 
   const handlePress = useCallback(() => {
+    if (disabled) return;
+    // Haptics are preserved even with reduced motion (they're not visual)
     if (haptic) {
       Haptics.impactAsync(hapticStyle);
     }
     onPress?.();
-  }, [haptic, hapticStyle, onPress]);
+  }, [haptic, hapticStyle, onPress, disabled]);
 
   const animatedStyle = useAnimatedStyle(() => {
     const currentScale = 1 - (1 - scale) * pressProgress.value;

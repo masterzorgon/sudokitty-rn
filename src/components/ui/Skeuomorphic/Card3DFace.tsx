@@ -1,5 +1,5 @@
-// 3D Face with gradient, highlight, and border treatment
-// The main visible surface of a skeuomorphic button
+// 3D Face for rectangular cards
+// Similar to Pill3DFace but optimized for larger surfaces and individual corner radii
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
@@ -12,13 +12,18 @@ import {
   SKEU_DIMENSIONS,
 } from '../../../theme/skeuomorphic';
 
-interface Pill3DFaceProps {
+interface Card3DFaceProps {
   /** Color variant preset */
   variant?: SkeuVariant;
   /** Custom colors (overrides variant) */
   customColors?: CustomSkeuColors;
-  /** Border radius for the pill shape */
-  borderRadius: number;
+  /** Border radius (applies to all corners) */
+  borderRadius?: number;
+  /** Individual corner radii */
+  borderTopLeftRadius?: number;
+  borderTopRightRadius?: number;
+  borderBottomLeftRadius?: number;
+  borderBottomRightRadius?: number;
   /** Whether to show the gradient background (default: true) */
   showGradient?: boolean;
   /** Whether to show the top highlight (default: true) */
@@ -29,21 +34,33 @@ interface Pill3DFaceProps {
   children: React.ReactNode;
 }
 
-export function Pill3DFace({
+export function Card3DFace({
   variant = 'primary',
   customColors,
   borderRadius,
+  borderTopLeftRadius,
+  borderTopRightRadius,
+  borderBottomLeftRadius,
+  borderBottomRightRadius,
   showGradient = true,
   showHighlight = true,
   style,
   children,
-}: Pill3DFaceProps) {
+}: Card3DFaceProps) {
   const colors = getVariantColors(variant, customColors);
+
+  // Use individual corner radii if provided, otherwise use borderRadius
+  const cornerRadii = {
+    borderTopLeftRadius: borderTopLeftRadius ?? borderRadius,
+    borderTopRightRadius: borderTopRightRadius ?? borderRadius,
+    borderBottomLeftRadius: borderBottomLeftRadius ?? borderRadius,
+    borderBottomRightRadius: borderBottomRightRadius ?? borderRadius,
+  };
 
   const faceStyle = [
     styles.face,
     {
-      borderRadius,
+      ...cornerRadii,
       borderTopColor: colors.borderLight,
       borderLeftColor: colors.borderLight,
       borderRightColor: colors.borderDark,
@@ -54,13 +71,15 @@ export function Pill3DFace({
 
   const content = (
     <>
-      {/* Top highlight for glossy effect */}
+      {/* Top highlight for glossy effect - wider for cards */}
       {showHighlight && (
         <View
           style={[
             styles.highlight,
             {
               height: SKEU_DIMENSIONS.highlightHeight,
+              borderTopLeftRadius: cornerRadii.borderTopLeftRadius,
+              borderTopRightRadius: cornerRadii.borderTopRightRadius,
             },
           ]}
         />
@@ -93,10 +112,10 @@ const styles = StyleSheet.create({
   highlight: {
     position: 'absolute',
     top: 0,
-    left: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderBottomLeftRadius: 100,
-    borderBottomRightRadius: 100,
+    left: 12,
+    right: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
 });

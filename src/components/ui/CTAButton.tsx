@@ -1,19 +1,15 @@
-import React, { useCallback } from 'react';
-import { StyleSheet, Text, Pressable, View, ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-} from 'react-native-reanimated';
+import React from 'react';
+import { StyleSheet, Text, Pressable, ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-import { colors } from '@/src/theme/colors';
 import { typography } from '@/src/theme/typography';
-import { spacing, borderRadius } from '@/src/theme';
-
-const EDGE_HEIGHT = 4;
-const PRESS_DEPTH = 3;
+import { borderRadius } from '@/src/theme';
+import { Pill3DContainer, Pill3DFace } from './Skeuomorphic';
+import { useSkeuomorphicPress } from '@/src/hooks/useSkeuomorphicPress';
+import { useFeatureFlags } from '@/src/stores/featureFlagStore';
+import { SKEU_VARIANTS, SkeuVariant } from '@/src/theme/skeuomorphic';
+import { ACCESSIBILITY_ROLES, getAccessibilityState } from '@/src/theme/accessibility';
 
 type CTAVariant = 'primary' | 'secondary' | 'success' | 'disabled';
 
@@ -25,50 +21,12 @@ interface CTAButtonProps {
   disabled?: boolean;
 }
 
-interface VariantColors {
-  face: string;
-  edge: string;
-  highlight: string;
-  text: string;
-}
-
-const getVariantColors = (variant: CTAVariant): VariantColors => {
-  switch (variant) {
-    case 'primary':
-      return {
-        face: colors.ctaPrimaryFace,
-        edge: colors.ctaPrimaryEdge,
-        highlight: colors.ctaPrimaryHighlight,
-        text: colors.cardBackground,
-      };
-    case 'secondary':
-      return {
-        face: colors.ctaSecondaryFace,
-        edge: colors.ctaSecondaryEdge,
-        highlight: colors.ctaSecondaryHighlight,
-        text: colors.softOrange,
-      };
-    case 'success':
-      return {
-        face: colors.ctaSuccessFace,
-        edge: colors.ctaSuccessEdge,
-        highlight: colors.ctaSuccessHighlight,
-        text: colors.ctaTextDark,
-      };
-    case 'disabled':
-      return {
-        face: colors.ctaDisabledFace,
-        edge: colors.ctaDisabledEdge,
-        highlight: colors.ctaDisabledFace,
-        text: colors.textLight,
-      };
-  }
-};
-
-const springConfig = {
-  damping: 18,
-  stiffness: 400,
-  mass: 0.6,
+// Map CTAVariant to SkeuVariant
+const variantMap: Record<CTAVariant, SkeuVariant> = {
+  primary: 'primary',
+  secondary: 'secondary',
+  success: 'success',
+  disabled: 'disabled',
 };
 
 export function CTAButton({
@@ -78,6 +36,107 @@ export function CTAButton({
   style,
   disabled = false,
 }: CTAButtonProps) {
+  const { skeuomorphicCTAButton } = useFeatureFlags();
+
+  // Use legacy implementation if feature flag is disabled
+  if (!skeuomorphicCTAButton) {
+    return <CTAButtonLegacy onPress={onPress} label={label} variant={variant} style={style} disabled={disabled} />;
+  }
+
+  const effectiveVariant = disabled ? 'disabled' : variant;
+  const skeuVariant = variantMap[effectiveVariant];
+  const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
+    onPress,
+    disabled,
+    hapticStyle: Haptics.ImpactFeedbackStyle.Medium,
+  });
+
+  return (
+    <Pressable
+      {...pressHandlers}
+      disabled={disabled}
+      accessibilityRole={ACCESSIBILITY_ROLES.button}
+      accessibilityLabel={label}
+      accessibilityState={getAccessibilityState({ disabled })}
+      testID={`cta-button-${variant}`}
+      style={style}
+    >
+      <Animated.View style={animatedStyle}>
+        <Pill3DContainer variant={skeuVariant} borderRadius={borderRadius.lg}>
+          <Pill3DFace variant={skeuVariant} borderRadius={borderRadius.lg} style={styles.face}>
+            <Text style={[styles.label, { color: SKEU_VARIANTS[skeuVariant].textColor }]}>
+              {label}
+            </Text>
+          </Pill3DFace>
+        </Pill3DContainer>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+// Legacy implementation (will be removed after rollout)
+function CTAButtonLegacy({
+  onPress,
+  label,
+  variant = 'primary',
+  style,
+  disabled = false,
+}: CTAButtonProps) {
+  const { colors } = require('@/src/theme/colors');
+  const React = require('react');
+  const { useCallback } = React;
+  const { useSharedValue, useAnimatedStyle, withSpring, interpolate } = require('react-native-reanimated');
+  const { View } = require('react-native');
+
+  const EDGE_HEIGHT = 4;
+  const PRESS_DEPTH = 3;
+
+  interface VariantColors {
+    face: string;
+    edge: string;
+    highlight: string;
+    text: string;
+  }
+
+  const getVariantColors = (variant: CTAVariant): VariantColors => {
+    switch (variant) {
+      case 'primary':
+        return {
+          face: colors.ctaPrimaryFace,
+          edge: colors.ctaPrimaryEdge,
+          highlight: colors.ctaPrimaryHighlight,
+          text: colors.cardBackground,
+        };
+      case 'secondary':
+        return {
+          face: colors.ctaSecondaryFace,
+          edge: colors.ctaSecondaryEdge,
+          highlight: colors.ctaSecondaryHighlight,
+          text: colors.softOrange,
+        };
+      case 'success':
+        return {
+          face: colors.ctaSuccessFace,
+          edge: colors.ctaSuccessEdge,
+          highlight: colors.ctaSuccessHighlight,
+          text: colors.ctaTextDark,
+        };
+      case 'disabled':
+        return {
+          face: colors.ctaDisabledFace,
+          edge: colors.ctaDisabledEdge,
+          highlight: colors.ctaDisabledFace,
+          text: colors.textLight,
+        };
+    }
+  };
+
+  const springConfig = {
+    damping: 18,
+    stiffness: 400,
+    mass: 0.6,
+  };
+
   const pressProgress = useSharedValue(0);
   const effectiveVariant = disabled ? 'disabled' : variant;
   const variantColors = getVariantColors(effectiveVariant);
@@ -126,19 +185,17 @@ export function CTAButton({
   });
 
   return (
-    <Animated.View style={[styles.container, animatedShadowStyle, style]}>
-      {/* Bottom edge (the darker "base") - hidden for disabled */}
+    <Animated.View style={[legacyStyles.container, animatedShadowStyle, style]}>
       {effectiveVariant !== 'disabled' && (
         <Animated.View
           style={[
-            styles.edge,
+            legacyStyles.edge,
             { backgroundColor: variantColors.edge },
             animatedEdgeStyle,
           ]}
         />
       )}
 
-      {/* Button face (the pressable surface) */}
       <Pressable
         onPress={handlePress}
         onPressIn={handlePressIn}
@@ -147,22 +204,21 @@ export function CTAButton({
       >
         <Animated.View
           style={[
-            styles.face,
+            legacyStyles.face,
             { backgroundColor: variantColors.face },
             animatedFaceStyle,
           ]}
         >
-          {/* Top highlight for plastic sheen */}
           {effectiveVariant !== 'disabled' && (
             <View
               style={[
-                styles.highlight,
+                legacyStyles.highlight,
                 { backgroundColor: variantColors.highlight },
               ]}
             />
           )}
 
-          <Text style={[styles.label, { color: variantColors.text }]}>
+          <Text style={[legacyStyles.label, { color: variantColors.text }]}>
             {label}
           </Text>
         </Animated.View>
@@ -172,6 +228,21 @@ export function CTAButton({
 }
 
 const styles = StyleSheet.create({
+  face: {
+    paddingVertical: 15,
+    paddingHorizontal: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    ...typography.button,
+    fontWeight: '600',
+    fontSize: 17,
+  },
+});
+
+// Legacy styles (will be removed after rollout)
+const legacyStyles = StyleSheet.create({
   container: {
     position: 'relative',
     shadowColor: '#000',
@@ -185,7 +256,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: EDGE_HEIGHT,
+    height: 4,
     borderBottomLeftRadius: borderRadius.lg,
     borderBottomRightRadius: borderRadius.lg,
   },

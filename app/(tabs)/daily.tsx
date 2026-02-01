@@ -61,6 +61,9 @@ export default function DailyScreen() {
   const isCompleted = isTodayCompleted();
 
   const handleStartChallenge = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/94ae2156-4726-49ff-ada6-508e5ac3a39a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'daily.tsx:65',message:'handleStartChallenge called',data:{isCompleted},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{});
+    // #endregion
     router.push({
       pathname: '/game',
       params: {
@@ -110,6 +113,9 @@ export default function DailyScreen() {
 
         {/* Action Button */}
         <View style={styles.buttonContainer}>
+          {/* #region agent log */}
+          {(() => { fetch('http://127.0.0.1:7242/ingest/94ae2156-4726-49ff-ada6-508e5ac3a39a',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'daily.tsx:115',message:'Rendering button section',data:{isCompleted,willRenderGameButton:!isCompleted},timestamp:Date.now(),sessionId:'debug-session',runId:'initial',hypothesisId:'E'})}).catch(()=>{}); return null; })()}
+          {/* #endregion */}
           {isCompleted ? (
             <View style={styles.completedMessage}>
               <Text style={styles.completedEmoji}>✨</Text>
