@@ -92,7 +92,7 @@ export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryA
     };
   });
 
-  const label = state === 'resume' ? 'Resume Game' : 'New Game';
+  const label = state === 'resume' ? 'resume game' : 'new game';
 
   return (
     <Animated.View style={[styles.container, animatedContainerStyle]}>

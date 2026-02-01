@@ -22,7 +22,7 @@ export const MochiHeroStat = memo(({
   return (
     <View style={styles.container}>
       {/* Label */}
-      <Text style={styles.label}>YOUR MOCHIS</Text>
+      <Text style={styles.label}>your mochis</Text>
 
       {/* Main value row with emoji and rolling number */}
       <View style={styles.valueRow}>
@@ -59,7 +59,6 @@ const styles = StyleSheet.create({
   label: {
     ...typography.caption,
     color: colors.textSecondary,
-    textTransform: 'uppercase',
     letterSpacing: 1.5,
     marginBottom: spacing.xs,
   },

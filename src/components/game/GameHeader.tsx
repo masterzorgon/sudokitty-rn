@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
   difficulty: {
     ...typography.caption,
     color: colors.softOrange,
-    textTransform: 'uppercase',
     letterSpacing: 1.5,
   },
   separator: {

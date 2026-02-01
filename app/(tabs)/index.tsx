@@ -1,49 +1,40 @@
-// Home screen - hero stat, chart, stats grid, and daily challenge CTA
-// Scrollable layout with staggered entrance animations
+// Home screen - Landing page with mochi cat mascot and animated greeting
+// Features split-flap animation for Japanese to English text transition
 
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
 import { colors } from '../../src/theme/colors';
-import { typography } from '../../src/theme/typography';
-import { spacing, borderRadius, shadows } from '../../src/theme';
+import { typography, fontFamilies } from '../../src/theme/typography';
+import { spacing } from '../../src/theme';
 import {
   useDailyChallengeStore,
-  useCurrentStreak,
-  useTotalMochiPoints,
 } from '../../src/stores/dailyChallengeStore';
-import { ChartTimePeriod } from '../../src/engine/types';
 import {
-  MochiHeroStat,
-  MochiChart,
-  TimePeriodTabs,
-  StatsCardGrid,
+  MochiCat,
+  ChatBubble,
   DailyChallengeCTA,
 } from '../../src/components/home';
 
-// Static placeholder for global rank (until backend integration)
-const STATIC_GLOBAL_RANK = 4521;
+// MARK: - Constants
 
 // Nav bar height estimate: paddingV (14) * 2 + content (~24) = ~52px
 // Nav bar bottomOffset: 16px
 // Gap above nav bar: 20px
 const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
 
+// MARK: - Component
+
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [selectedPeriod, setSelectedPeriod] = useState<ChartTimePeriod>('1W');
 
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
-  const totalMochis = useTotalMochiPoints();
-  const currentStreak = useCurrentStreak();
-  const getMochiEarnedToday = useDailyChallengeStore((s) => s.getMochiEarnedToday);
-  const getMochiHistory = useDailyChallengeStore((s) => s.getMochiHistory);
   const getTodayChallenge = useDailyChallengeStore((s) => s.getTodayChallenge);
   const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
   const getSimulatedParticipants = useDailyChallengeStore((s) => s.getSimulatedParticipants);
@@ -54,8 +45,6 @@ export default function HomeScreen() {
   }, [loadState]);
 
   // Derived values
-  const earnedToday = getMochiEarnedToday();
-  const chartData = getMochiHistory(selectedPeriod);
   const challenge = getTodayChallenge();
   const isCompleted = isTodayCompleted();
   const participants = getSimulatedParticipants();
@@ -65,49 +54,42 @@ export default function HomeScreen() {
     router.push('/daily');
   };
 
+  // MARK: - Render
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header */}
+      <View style={styles.content}>
+        {/* App Title */}
         <Animated.View entering={FadeIn.duration(400)}>
           <Text style={styles.title}>sudokitty</Text>
         </Animated.View>
 
-        {/* Hero Mochi Stat */}
-        {/* <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-          <MochiHeroStat totalMochis={totalMochis} earnedToday={earnedToday} />
-        </Animated.View> */}
+        {/* Mochi Cat Hero Section */}
+        <View style={styles.heroSection}>
+          {/* Mochi Cat Character */}
+          <Animated.View
+            entering={FadeInDown.delay(200).duration(500).springify()}
+            style={styles.catContainer}
+          >
+            <MochiCat size={180} animate={true} />
+          </Animated.View>
 
-        {/* Chart Section */}
-        {/* <Animated.View
-          entering={FadeInDown.delay(200).duration(400)}
-          style={styles.chartSection}
+          {/* Chat Bubble with Japanese greeting */}
+          <ChatBubble text="こんにちは！" appearDelay={400} />
+        </View>
+
+        {/* Tagline */}
+        <Animated.View
+          entering={FadeInUp.delay(800).duration(400)}
+          style={styles.taglineContainer}
         >
-          <TimePeriodTabs
-            selectedPeriod={selectedPeriod}
-            onSelectPeriod={setSelectedPeriod}
-          />
-          <View style={styles.chartContainer}>
-            <MochiChart data={chartData} period={selectedPeriod} height={140} />
-          </View>
-        </Animated.View> */}
+          <Text style={styles.tagline}>sudoku. but cuter.</Text>
+        </Animated.View>
+      </View>
 
-        {/* Stats Card Grid */}
-        {/* <Animated.View
-          entering={FadeInDown.delay(300).duration(400)}
-          style={styles.statsSection}
-        >
-          <StatsCardGrid streak={currentStreak} globalRank={STATIC_GLOBAL_RANK} />
-        </Animated.View> */}
-      </ScrollView>
-
-      {/* Daily Challenge CTA - fixed 20px above nav bar */}
+      {/* Daily Challenge CTA - fixed above nav bar */}
       <Animated.View
-        entering={FadeInDown.delay(400).duration(400)}
+        entering={FadeInDown.delay(1000).duration(400)}
         style={[
           styles.ctaSection,
           { bottom: insets.bottom + CTA_BOTTOM_OFFSET },
@@ -124,36 +106,43 @@ export default function HomeScreen() {
   );
 }
 
+// MARK: - Styles
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.cream,
   },
-  scrollView: {
+  content: {
     flex: 1,
-  },
-  scrollContent: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl,
   },
   title: {
     ...typography.largeTitle,
     color: colors.textPrimary,
     textAlign: 'center',
   },
-  chartSection: {
-    marginTop: spacing.lg,
-    gap: spacing.md,
-  },
-  chartContainer: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    ...shadows.medium,
-  },
-  statsSection: {
+  heroSection: {
+    alignItems: 'center',
     marginTop: spacing.xl,
+  },
+  catContainer: {
+    // Shadow for the cat to make it pop
+    shadowColor: colors.boardShadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  taglineContainer: {
+    marginTop: spacing.xl,
+    alignItems: 'center',
+  },
+  tagline: {
+    fontFamily: fontFamilies.semibold,
+    fontSize: 28,
+    color: colors.textSecondary,
+    letterSpacing: 0.5,
   },
   ctaSection: {
     position: 'absolute',

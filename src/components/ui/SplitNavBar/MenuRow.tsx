@@ -1,9 +1,10 @@
 // Individual menu row for the secondary menu
-// Shows label with icon
+// Shows label with icon (mochi SVG for difficulty items, Feather icon for others)
 
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { SvgProps } from 'react-native-svg';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,7 +13,22 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 
 import { colors } from '@/src/theme/colors';
+import { Difficulty } from '@/src/engine/types';
 import { MenuRowProps, LAYOUT } from './types';
+
+// Import mochi SVG characters for difficulty levels
+import MochiEasy from '../../../../assets/images/mochi/mochi-easy.svg';
+import MochiMedium from '../../../../assets/images/mochi/mochi-medium.svg';
+import MochiHard from '../../../../assets/images/mochi/mochi-hard.svg';
+import MochiExpert from '../../../../assets/images/mochi/mochi-expert.svg';
+
+// Mapping from difficulty to mochi SVG component
+const MOCHI_ICONS: Record<Difficulty, React.FC<SvgProps>> = {
+  easy: MochiEasy,
+  medium: MochiMedium,
+  hard: MochiHard,
+  expert: MochiExpert,
+};
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -54,13 +70,22 @@ export function MenuRow({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      {/* menu item icon */}
+      {/* menu item icon - mochi SVG for difficulty items, Feather icon for others */}
       <View style={styles.iconContainer}>
-        <Feather
-          name={item.icon as keyof typeof Feather.glyphMap}
-          size={24}
-          color={colors.softOrange}
-        />
+        {item.difficulty ? (
+          // Render mochi SVG for difficulty items
+          (() => {
+            const MochiIcon = MOCHI_ICONS[item.difficulty];
+            return <MochiIcon width={42} height={42} />;
+          })()
+        ) : (
+          // Render Feather icon for non-difficulty items (continue playing, quit game)
+          <Feather
+            name={item.icon as keyof typeof Feather.glyphMap}
+            size={42}
+            color={colors.softOrange}
+          />
+        )}
       </View>
       {/* menu item label */}
       <View style={styles.labelContainer}>
@@ -75,7 +100,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginLeft: 100,
+    marginLeft: 0,
     paddingVertical: 12,
     paddingHorizontal: 1,
     borderRadius: 12,
@@ -86,8 +111,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 29,
+    fontWeight: '500',
     color: colors.textPrimary,
     marginBottom: 2,
   },

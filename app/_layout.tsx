@@ -23,6 +23,12 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
+    // Open Runde - rounded variant of Inter for soft, friendly aesthetic
+    'OpenRunde-Regular': require('../assets/fonts/OpenRunde-Regular.otf'),
+    'OpenRunde-Medium': require('../assets/fonts/OpenRunde-Medium.otf'),
+    'OpenRunde-Semibold': require('../assets/fonts/OpenRunde-Semibold.otf'),
+    'OpenRunde-Bold': require('../assets/fonts/OpenRunde-Bold.otf'),
+    // Legacy font (can be removed if unused)
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });

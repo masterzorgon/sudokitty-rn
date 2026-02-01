@@ -25,10 +25,6 @@ interface PauseModalProps {
   onResume: () => void;
 }
 
-// Capitalize first letter
-const capitalize = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-};
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -83,13 +79,13 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
             style={styles.icon}
           />
 
-          <Text style={styles.title}>Game Paused</Text>
+          <Text style={styles.title}>game paused</Text>
 
           <View style={styles.statsContainer}>
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
-                <Text style={styles.statLabel}>Time</Text>
+                <Text style={styles.statLabel}>time</Text>
                 <View style={styles.statValueContainer}>
                   <RollingTime
                     seconds={timeElapsed}
@@ -102,9 +98,9 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
 
               <View style={styles.statItem}>
                 <Ionicons name="speedometer-outline" size={20} color={colors.textSecondary} />
-                <Text style={styles.statLabel}>Difficulty</Text>
+                <Text style={styles.statLabel}>difficulty</Text>
                 <View style={styles.statValueContainer}>
-                  <Text style={styles.statValue}>{capitalize(difficulty)}</Text>
+                  <Text style={styles.statValue}>{difficulty}</Text>
                 </View>
               </View>
             </View>
@@ -112,7 +108,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
             <View style={styles.statRow}>
               <View style={styles.statItem}>
                 <Ionicons name="close-circle-outline" size={20} color={mistakeCount > 0 ? colors.errorText : colors.textSecondary} />
-                <Text style={styles.statLabel}>Mistakes</Text>
+                <Text style={styles.statLabel}>mistakes</Text>
                 <View style={styles.statValueContainer}>
                   <View style={styles.counterRow}>
                     <RollingNumber
@@ -131,7 +127,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
 
               <View style={styles.statItem}>
                 <Ionicons name="bulb-outline" size={20} color={colors.textSecondary} />
-                <Text style={styles.statLabel}>Hints</Text>
+                <Text style={styles.statLabel}>hints</Text>
                 <View style={styles.statValueContainer}>
                   <RollingNumber
                     value={hintsUsed}
@@ -147,7 +143,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
 
           <Pressable style={styles.resumeButton} onPress={handleResume}>
             <Ionicons name="play" size={20} color="#FFFFFF" />
-            <Text style={styles.resumeText}>Resume</Text>
+            <Text style={styles.resumeText}>resume</Text>
           </Pressable>
         </Animated.View>
       </View>

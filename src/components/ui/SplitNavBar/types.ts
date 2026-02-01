@@ -43,9 +43,9 @@ export type MenuAction = 'select_difficulty' | 'continue_game' | 'quit_game';
 export interface MenuItem {
   id: string;
   label: string;
-  icon: string; // Feather icon name
+  icon: string; // Feather icon name (used when difficulty is not present)
   action: MenuAction;
-  difficulty?: Difficulty; // Only for difficulty items
+  difficulty?: Difficulty; // Only for difficulty items - when present, mochi SVG is used instead of icon
 }
 
 // Props for SecondaryMenu (replaces DifficultyUnfurl)
@@ -96,13 +96,13 @@ export const DIFFICULTY_ICONS: Record<Difficulty, string> = {
 // Menu configurations for each primary action state
 export const MENU_CONFIGS: Record<PrimaryActionState, MenuItem[]> = {
   new_game: [
-    { id: 'expert', label: 'Expert', icon: 'zap', action: 'select_difficulty', difficulty: 'expert' },
-    { id: 'hard', label: 'Hard', icon: 'frown', action: 'select_difficulty', difficulty: 'hard' },
-    { id: 'medium', label: 'Medium', icon: 'meh', action: 'select_difficulty', difficulty: 'medium' },
-    { id: 'easy', label: 'Easy', icon: 'smile', action: 'select_difficulty', difficulty: 'easy' },
+    { id: 'expert', label: 'expert', icon: 'zap', action: 'select_difficulty', difficulty: 'expert' },
+    { id: 'hard', label: 'hard', icon: 'frown', action: 'select_difficulty', difficulty: 'hard' },
+    { id: 'medium', label: 'medium', icon: 'meh', action: 'select_difficulty', difficulty: 'medium' },
+    { id: 'easy', label: 'easy', icon: 'smile', action: 'select_difficulty', difficulty: 'easy' },
   ],
   resume: [
-    { id: 'continue', label: 'Continue Playing', icon: 'play', action: 'continue_game' },
-    { id: 'quit', label: 'Quit Game', icon: 'x-circle', action: 'quit_game' },
+    { id: 'continue', label: 'continue playing', icon: 'play', action: 'continue_game' },
+    { id: 'quit', label: 'quit game', icon: 'x-circle', action: 'quit_game' },
   ],
 };

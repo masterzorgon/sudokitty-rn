@@ -150,11 +150,12 @@ const styles = StyleSheet.create({
     // Transform origin: scales from bottom-right corner
   },
   menu: {
-    padding: LAYOUT.unfurlPadding,
+    // padding: LAYOUT.unfurlPadding,
     gap: LAYOUT.rowGap,
-    minWidth: 260,
+    minWidth: 180,
   },
   menuWide: {
-    minWidth: 320,
+    minWidth: 416,
+    borderWidth: 1,
   },
 });

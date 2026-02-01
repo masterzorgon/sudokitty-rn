@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
     marginBottom: spacing.sm,
-    textTransform: 'uppercase',
     letterSpacing: 1,
   },
   buttonContainer: {

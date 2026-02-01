@@ -104,7 +104,7 @@ export const DailyChallengeCTA = memo(
                 <Feather name="calendar" size={20} color={colors.softOrange} />
               </View>
               <View style={styles.titleContainer}>
-                <Text style={styles.title}>Daily Challenge</Text>
+                <Text style={styles.title}>daily challenge</Text>
                 <View style={styles.metaRow}>
                   <View
                     style={[
@@ -133,7 +133,7 @@ export const DailyChallengeCTA = memo(
               {isCompleted && (
                 <View style={styles.completedBadge}>
                   <Feather name="check" size={12} color={colors.mint} />
-                  <Text style={styles.completedText}>Done!</Text>
+                  <Text style={styles.completedText}>done!</Text>
                 </View>
               )}
               <Feather
@@ -206,7 +206,6 @@ const styles = StyleSheet.create({
   difficultyText: {
     fontSize: 12,
     fontWeight: "600",
-    textTransform: "capitalize",
   },
   participants: {
     fontSize: 12,

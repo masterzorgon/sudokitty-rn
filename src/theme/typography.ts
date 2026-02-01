@@ -1,9 +1,19 @@
 // Typography system for Sudokitty
-// Rounded, casual style matching iOS Theme.swift
+// Uses Open Runde - a soft, rounded variant of Inter
+// Perfect for the cute, friendly aesthetic of the app
 
 import { TextStyle } from 'react-native';
 
-// Font weights mapping (system font)
+// Font family names - Open Runde with different weights
+// Each weight requires its own font file (OTF doesn't support weight variants)
+export const fontFamilies = {
+  regular: 'OpenRunde-Regular',
+  medium: 'OpenRunde-Medium',
+  semibold: 'OpenRunde-Semibold',
+  bold: 'OpenRunde-Bold',
+};
+
+// Font weights mapping (for reference, actual weight is determined by fontFamily)
 export const fontWeights = {
   regular: '400' as const,
   medium: '500' as const,
@@ -24,78 +34,75 @@ export const fontSizes = {
   notes: 9,
 };
 
-// Pre-defined text styles
+// Pre-defined text styles using Open Runde font family
 export const typography: Record<string, TextStyle> = {
   // Titles
   largeTitle: {
+    fontFamily: fontFamilies.bold,
     fontSize: fontSizes.largeTitle,
-    fontWeight: fontWeights.bold,
     letterSpacing: -0.5,
   },
   title: {
+    fontFamily: fontFamilies.bold,
     fontSize: fontSizes.title,
-    fontWeight: fontWeights.bold,
     letterSpacing: -0.3,
   },
 
   // Headings
   headline: {
+    fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.headline,
-    fontWeight: fontWeights.semibold,
   },
 
   // Body text
   body: {
+    fontFamily: fontFamilies.regular,
     fontSize: fontSizes.body,
-    fontWeight: fontWeights.regular,
     lineHeight: 22,
   },
   bodyMedium: {
+    fontFamily: fontFamilies.medium,
     fontSize: fontSizes.body,
-    fontWeight: fontWeights.medium,
   },
 
   // Captions
   caption: {
+    fontFamily: fontFamilies.medium,
     fontSize: fontSizes.caption,
-    fontWeight: fontWeights.medium,
   },
   captionLight: {
+    fontFamily: fontFamilies.regular,
     fontSize: fontSizes.caption,
-    fontWeight: fontWeights.regular,
   },
 
   // Small text
   small: {
+    fontFamily: fontFamilies.regular,
     fontSize: fontSizes.sm,
-    fontWeight: fontWeights.regular,
   },
 
-  // Cell text - warm, friendly geometry
+  // Cell text - using Open Runde for consistent aesthetic
   cellValue: {
+    fontFamily: fontFamilies.medium,
     fontSize: fontSizes.cell,
-    fontWeight: fontWeights.medium,
     textAlign: 'center',
-    // Using system font with rounded appearance
-    fontFamily: 'System',
     letterSpacing: 0.5,
   },
   cellNotes: {
+    fontFamily: fontFamilies.regular,
     fontSize: fontSizes.notes,
-    fontWeight: fontWeights.regular,
     textAlign: 'center',
-    fontFamily: 'System',
   },
 
   // Button text
   button: {
+    fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.body,
-    fontWeight: fontWeights.semibold,
     textAlign: 'center',
   },
   buttonSmall: {
+    fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.caption,
-    fontWeight: fontWeights.semibold,
     textAlign: 'center',
   },
 };
