@@ -9,7 +9,7 @@ import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated'
 import * as Haptics from 'expo-haptics';
 
 import { colors } from '../../src/theme/colors';
-import { typography, fontFamilies } from '../../src/theme/typography';
+import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
   useDailyChallengeStore,
@@ -18,7 +18,9 @@ import {
   MochiCat,
   ChatBubble,
   DailyChallengeCTA,
+  StreakPill,
 } from '../../src/components/home';
+import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
 
 // MARK: - Constants
 
@@ -38,6 +40,7 @@ export default function HomeScreen() {
   const getTodayChallenge = useDailyChallengeStore((s) => s.getTodayChallenge);
   const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
   const getSimulatedParticipants = useDailyChallengeStore((s) => s.getSimulatedParticipants);
+  const currentStreak = useCurrentStreak();
 
   // Load state on mount
   useEffect(() => {
@@ -78,12 +81,12 @@ export default function HomeScreen() {
           <ChatBubble text="こんにちは！" appearDelay={400} />
         </View>
 
-        {/* Tagline */}
+        {/* Streak Pill */}
         <Animated.View
           entering={FadeInUp.delay(800).duration(400)}
-          style={styles.taglineContainer}
+          style={styles.streakContainer}
         >
-          <Text style={styles.tagline}>sudoku. but cuter.</Text>
+          <StreakPill streakCount={currentStreak} />
         </Animated.View>
       </View>
 
@@ -134,15 +137,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
-  taglineContainer: {
+  streakContainer: {
     marginTop: spacing.xl,
     alignItems: 'center',
-  },
-  tagline: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 28,
-    color: colors.textSecondary,
-    letterSpacing: 0.5,
   },
   ctaSection: {
     position: 'absolute',

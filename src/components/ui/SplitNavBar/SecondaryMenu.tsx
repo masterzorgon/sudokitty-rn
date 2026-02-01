@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   menu: {
     // padding: LAYOUT.unfurlPadding,
     gap: LAYOUT.rowGap,
-    minWidth: 180,
+    minWidth: 190,
   },
   menuWide: {
     minWidth: 416,

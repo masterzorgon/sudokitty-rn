@@ -5,14 +5,14 @@ export const colors = {
   // Primary colors
   cream: '#FFF8F0',
   softOrange: '#FFB085',
-  peach: '#FFCAB0',
+  peach: '#FFA070',
   pink: '#FFD1DC',
   lavender: '#E8D5E8',
 
   // Accent colors
-  coral: '#FF8A80',
-  mint: '#B8E6D0',
-  butter: '#FFF3B0',
+  coral: '#FF5C50',
+  mint: '#7CC9A8',
+  butter: '#FFD84D',
 
   // Text colors
   textPrimary: '#5D4E4E',
