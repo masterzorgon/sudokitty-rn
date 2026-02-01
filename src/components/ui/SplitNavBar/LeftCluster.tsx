@@ -14,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { colors } from '@/src/theme/colors';
 import { springConfigs } from '@/src/theme/animations';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
+import { Pill3DContainer, Pill3DFace } from '../Skeuomorphic';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -65,17 +66,36 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
 }
 
 export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
+  const whiteColors = {
+    gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+    edge: '#E0E0E0',
+    borderLight: 'rgba(255, 255, 255, 0.5)',
+    borderDark: 'rgba(0, 0, 0, 0.1)',
+  };
+
   return (
-    <View style={styles.container}>
-      {tabs.map((tab) => (
-        <NavIcon
-          key={tab.name}
-          tab={tab}
-          isActive={activeTab === tab.name}
-          onPress={() => onTabPress(tab.name)}
-        />
-      ))}
-    </View>
+    <Pill3DContainer 
+      variant="secondary" 
+      customColors={whiteColors}
+      borderRadius={LAYOUT.rightPillRadius}
+    >
+      <Pill3DFace 
+        variant="secondary"
+        customColors={whiteColors}
+        borderRadius={LAYOUT.rightPillRadius}
+        showHighlight={false}
+        style={styles.container}
+      >
+        {tabs.map((tab) => (
+          <NavIcon
+            key={tab.name}
+            tab={tab}
+            isActive={activeTab === tab.name}
+            onPress={() => onTabPress(tab.name)}
+          />
+        ))}
+      </Pill3DFace>
+    </Pill3DContainer>
   );
 }
 
@@ -84,15 +104,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: LAYOUT.iconGap,
-    backgroundColor: colors.cream,
-    borderRadius: LAYOUT.leftClusterRadius,
     paddingHorizontal: LAYOUT.leftClusterPaddingH,
-    paddingVertical: LAYOUT.leftClusterPaddingV,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 8,
+    paddingVertical: LAYOUT.rightPillPaddingV,
   },
   iconContainer: {
     alignItems: 'center',

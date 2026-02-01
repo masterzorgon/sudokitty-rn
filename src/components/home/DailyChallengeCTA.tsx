@@ -1,23 +1,17 @@
 // Daily Challenge CTA card with 3D press effect
 // Full-width card showing calendar icon, difficulty, participant count
 
-import React, { memo, useCallback } from "react";
+import React, { memo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-} from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
+import Animated from "react-native-reanimated";
 
 import { DailyChallenge, DIFFICULTY_CONFIG } from "../../engine/types";
 import { colors } from "../../theme/colors";
 import { typography } from "../../theme/typography";
-import { spacing, borderRadius, shadows } from "../../theme";
-
-const PRESS_DEPTH = 3;
+import { spacing, borderRadius } from "../../theme";
+import { Card3DContainer, Card3DFace } from "../ui/Skeuomorphic";
+import { useSkeuomorphicPress } from "../../hooks/useSkeuomorphicPress";
 
 interface DailyChallengeCTAProps {
   challenge: DailyChallenge;
@@ -25,12 +19,6 @@ interface DailyChallengeCTAProps {
   participantCount: number;
   onPress: () => void;
 }
-
-const springConfig = {
-  damping: 18,
-  stiffness: 400,
-  mass: 0.6,
-};
 
 // Difficulty badge colors
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -47,57 +35,36 @@ export const DailyChallengeCTA = memo(
     participantCount,
     onPress,
   }: DailyChallengeCTAProps) => {
-    const pressProgress = useSharedValue(0);
     const difficultyConfig = DIFFICULTY_CONFIG[challenge.difficulty];
     const difficultyColor =
       DIFFICULTY_COLORS[challenge.difficulty] || colors.softOrange;
 
-    const handlePressIn = useCallback(() => {
-      pressProgress.value = withSpring(1, springConfig);
-    }, [pressProgress]);
-
-    const handlePressOut = useCallback(() => {
-      pressProgress.value = withSpring(0, springConfig);
-    }, [pressProgress]);
-
-    const handlePress = useCallback(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      onPress();
-    }, [onPress]);
-
-    const animatedFaceStyle = useAnimatedStyle(() => {
-      const translateY = interpolate(
-        pressProgress.value,
-        [0, 1],
-        [0, PRESS_DEPTH]
-      );
-      return {
-        transform: [{ translateY }],
-      };
+    const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
+      onPress,
     });
 
-    const animatedShadowStyle = useAnimatedStyle(() => {
-      const shadowOpacity = interpolate(
-        pressProgress.value,
-        [0, 1],
-        [0.1, 0.05]
-      );
-      const shadowRadius = interpolate(pressProgress.value, [0, 1], [8, 4]);
-      return {
-        shadowOpacity,
-        shadowRadius,
-      };
-    });
+    const whiteColors = {
+      gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+      edge: '#E0E0E0',
+      borderLight: 'rgba(255, 255, 255, 0.5)',
+      borderDark: 'rgba(0, 0, 0, 0.1)',
+    };
 
     return (
-      <Animated.View style={[styles.container, animatedShadowStyle]}>
-        {/* Card face */}
-        <Pressable
-          onPress={handlePress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-        >
-          <Animated.View style={[styles.face, animatedFaceStyle]}>
+      <Pressable {...pressHandlers}>
+        <Animated.View style={[styles.container, animatedStyle]}>
+          <Card3DContainer 
+            variant="secondary"
+            customColors={whiteColors}
+            borderRadius={borderRadius.lg}
+          >
+            <Card3DFace 
+              variant="secondary"
+              customColors={whiteColors}
+              borderRadius={borderRadius.lg}
+              showHighlight={false}
+              style={styles.face}
+            >
             {/* Left section - Icon and title */}
             <View style={styles.leftContent}>
               <View style={styles.iconContainer}>
@@ -142,9 +109,10 @@ export const DailyChallengeCTA = memo(
                 color={colors.textLight}
               />
             </View>
-          </Animated.View>
-        </Pressable>
-      </Animated.View>
+            </Card3DFace>
+          </Card3DContainer>
+        </Animated.View>
+      </Pressable>
     );
   }
 );
@@ -154,22 +122,13 @@ DailyChallengeCTA.displayName = "DailyChallengeCTA";
 const styles = StyleSheet.create({
   container: {
     position: "relative",
-    overflow: "visible",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
   },
   face: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
-    overflow: "hidden",
   },
   leftContent: {
     flexDirection: "row",
@@ -241,7 +200,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    ...shadows.small,
     zIndex: 10,
   },
   streakIcon: {
