@@ -1,8 +1,8 @@
 // Unified game button component
 // Composable button with primary/secondary variants and optional subtext
 
-import React, { useCallback, ReactNode } from 'react';
-import { StyleSheet, Text, Pressable, View, ViewStyle } from 'react-native';
+import React, { useCallback } from 'react';
+import { StyleSheet, Text, Pressable, ViewStyle } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,

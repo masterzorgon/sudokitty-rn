@@ -4,7 +4,7 @@
 export const colors = {
   // Primary colors
   cream: '#FFF8F0',
-  softOrange: '#FFB085',
+  softOrange: '#FF9D6B',
   peach: '#FFA070',
   pink: '#FFD1DC',
   lavender: '#E8D5E8',
@@ -23,14 +23,14 @@ export const colors = {
   cellBackground: '#FFFFFF',
   cellBackgroundAlt: '#FFFBF7', // Subtle cream tint for checkerboard boxes
   cellSelected: '#FFE4D6',
-  cellSelectedGlow: 'rgba(255, 176, 133, 0.25)', // Soft glow for selection
+  cellSelectedGlow: 'rgba(255, 157, 107, 0.25)', // Soft glow for selection
   cellRelated: '#FFF8F2',
   cellHighlighted: '#FFF5EE',
   cellError: '#FFF0F0',
   cellGiven: '#FFFBF8',
 
   // Glow effect
-  glowColor: 'rgba(255, 176, 133, 0.4)',
+  glowColor: 'rgba(255, 157, 107, 0.4)',
 
   // Grid colors - softer, warmer
   gridLine: '#F0E8E4', // Hairline warm gray
@@ -51,7 +51,7 @@ export const colors = {
 
   // Tab bar
   tabBarBackground: '#FFFFFF',
-  tabBarActive: '#FFB085',
+  tabBarActive: '#FF9D6B',
   tabBarInactive: '#B0A0A0',
 
   // Floating nav bar
@@ -69,14 +69,14 @@ export const colors = {
   boardShadow: '#8B7070', // Warm brown for shadow
 
   // Button
-  buttonPrimary: '#FFB085',
+  buttonPrimary: '#FF9D6B',
   buttonSecondary: '#FFFFFF',
   buttonDisabled: '#E0D8D8',
 
   // 3D CTA Button colors
-  ctaPrimaryFace: '#FFB085',
-  ctaPrimaryEdge: '#E8956A',
-  ctaPrimaryHighlight: '#FFC4A0',
+  ctaPrimaryFace: '#FF9D6B',
+  ctaPrimaryEdge: '#E8875A',
+  ctaPrimaryHighlight: '#FFB890',
   ctaSecondaryFace: '#FFF8F0',
   ctaSecondaryEdge: '#E8DFD4',
   ctaSecondaryHighlight: '#FFFCF8',
@@ -91,13 +91,13 @@ export const colors = {
   numberPadBase: '#FFF8F0',
   numberPadPressed: '#F5EDE5',
   numberPadText: '#4A3728',
-  numberPadActiveGlow: 'rgba(255, 176, 133, 0.3)',
+  numberPadActiveGlow: 'rgba(255, 157, 107, 0.3)',
   numberPadError: '#FFE5E5',
 
   // Gradients (as arrays for LinearGradient)
   backgroundGradient: ['#FFF8F0', '#FFF0E8', '#FFE8E0'] as const,
-  buttonGradient: ['#FFB085', '#FFCAB0'] as const,
-  mochiGradient: ['#FFD4B8', '#FFB085'] as const,
+  buttonGradient: ['#FF9D6B', '#FFB890'] as const,
+  mochiGradient: ['#FFC4A0', '#FF9D6B'] as const,
 } as const;
 
 export type ColorName = keyof typeof colors;

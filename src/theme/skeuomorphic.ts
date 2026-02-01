@@ -43,10 +43,10 @@ export interface CustomSkeuColors {
 
 export const SKEU_VARIANTS: Record<SkeuVariant, SkeuVariantColors> = {
   primary: {
-    gradient: ['#FFB085', '#FF9B6A', '#FFA570'],
-    edge: '#E8956A',
+    gradient: ['#FF9D6B', '#FF8B55', '#FF9360'],
+    edge: '#E8875A',
     borderLight: 'rgba(255, 255, 255, 0.3)',
-    borderDark: 'rgba(232, 149, 106, 0.3)',
+    borderDark: 'rgba(232, 135, 90, 0.3)',
     textColor: '#FFFFFF',
   },
   secondary: {

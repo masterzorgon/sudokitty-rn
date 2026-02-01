@@ -13,7 +13,7 @@ import * as Haptics from 'expo-haptics';
 
 import { colors } from '@/src/theme/colors';
 import { springConfigs } from '@/src/theme/animations';
-import { LeftClusterProps, SecondaryTab, TabConfig, LAYOUT } from './types';
+import { LeftClusterProps, TabConfig, LAYOUT } from './types';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 

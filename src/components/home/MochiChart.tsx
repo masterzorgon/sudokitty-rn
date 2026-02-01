@@ -194,7 +194,7 @@ export const MochiChart = memo(({
             <LinearGradient
               start={vec(0, CHART_PADDING.top)}
               end={vec(0, height - CHART_PADDING.bottom)}
-              colors={['rgba(255, 176, 133, 0.4)', 'rgba(255, 176, 133, 0)']}
+              colors={['rgba(255, 157, 107, 0.4)', 'rgba(255, 157, 107, 0)']}
             />
           </Path>
         )}
