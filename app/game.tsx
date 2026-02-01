@@ -184,26 +184,28 @@ export default function GameScreen() {
       <View style={styles.middleZone}>
         <View style={styles.flexSpacer} />
 
-        {/* Game content block: stats row + grid */}
+        {/* Game content block: grid + stats row */}
         <View style={styles.gameContent}>
-          <GameHeader />
           <View style={styles.gridContainer}>
             <AnimatedGameView />
           </View>
+          <GameHeader />
         </View>
 
-        <View style={styles.flexSpacer} />
+        <View style={styles.minimalSpacer} />
       </View>
 
       {/* BOTTOM ZONE - Controls */}
       <View style={styles.bottomZone}>
-        <Animated.View entering={FadeIn.duration(startGameAnimations.controlsFadeIn.duration)}>
-          <ActionButtons />
-        </Animated.View>
+        <View style={styles.controlsContainer}>
+          <Animated.View entering={FadeIn.duration(startGameAnimations.controlsFadeIn.duration)}>
+            <ActionButtons />
+          </Animated.View>
 
-        <Animated.View entering={FadeIn.delay(100).duration(startGameAnimations.controlsFadeIn.duration)}>
-          <NumberPad />
-        </Animated.View>
+          <Animated.View entering={FadeIn.delay(100).duration(startGameAnimations.controlsFadeIn.duration)}>
+            <NumberPad />
+          </Animated.View>
+        </View>
       </View>
 
       {/* Game status overlay */}
@@ -231,17 +233,24 @@ const styles = StyleSheet.create({
   flexSpacer: {
     flex: 1,
   },
+  minimalSpacer: {
+    height: spacing.lg,
+  },
   gameContent: {
     alignItems: 'center',
   },
   gridContainer: {
-    marginTop: spacing.md,
+    marginBottom: spacing.md,
   },
   bottomZone: {
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
+    paddingBottom: spacing.md,
+    alignItems: 'center',
+  },
+  controlsContainer: {
+    width: '100%',
+    maxWidth: 360, // Matches approximate board width on most devices
+    gap: spacing.xs,
+    paddingHorizontal: 16, // Match BOARD_PADDING from SudokuCell
   },
   // Overlay styles
   overlay: {

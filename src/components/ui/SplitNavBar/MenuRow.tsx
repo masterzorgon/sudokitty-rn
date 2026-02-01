@@ -76,13 +76,13 @@ export function MenuRow({
           // Render mochi SVG for difficulty items
           (() => {
             const MochiIcon = MOCHI_ICONS[item.difficulty];
-            return <MochiIcon width={50} height={50} />;
+            return <MochiIcon width={55} height={55} />;
           })()
         ) : (
           // Render Feather icon for non-difficulty items (continue playing, quit game)
           <Feather
             name={item.icon as keyof typeof Feather.glyphMap}
-            size={50}
+            size={55}
             color={colors.softOrange}
           />
         )}

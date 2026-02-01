@@ -1,21 +1,31 @@
 // Action buttons: Undo, Erase, Notes, Hint
-// Matches iOS UtilityButtonsView.swift
+// Skeuomorphic 3D styling
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { View, StyleSheet, Pressable, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore, useCanUseHint } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { springConfigs } from '../../theme/animations';
-import { borderRadius, shadows, spacing } from '../../theme';
+import { spacing } from '../../theme';
+import { Pill3DContainer, Pill3DFace } from '../ui/Skeuomorphic';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const BUTTON_HEIGHT = 56;
+const BUTTON_RADIUS = 12;
+const PRESS_DEPTH = 2;
+
+const timingConfig = {
+  duration: 100,
+  easing: Easing.out(Easing.ease),
+};
 
 interface ActionButtonProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -32,56 +42,75 @@ const ActionButton = memo(({
   isActive = false,
   disabled = false,
 }: ActionButtonProps) => {
-  const scale = useSharedValue(1);
+  const pressProgress = useSharedValue(0);
 
-  const handlePressIn = () => {
-    if (!disabled) {
-      scale.value = withSpring(0.92, springConfigs.quick);
-    }
-  };
+  const handlePressIn = useCallback(() => {
+    if (disabled) return;
+    pressProgress.value = withTiming(1, timingConfig);
+  }, [disabled, pressProgress]);
 
-  const handlePressOut = () => {
-    scale.value = withSpring(1, springConfigs.default);
-  };
+  const handlePressOut = useCallback(() => {
+    if (disabled) return;
+    pressProgress.value = withTiming(0, timingConfig);
+  }, [disabled, pressProgress]);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: pressProgress.value * PRESS_DEPTH }],
+    opacity: disabled ? 0.5 : 1,
   }));
 
+  // Use active colors (orange) or white background
+  const customColors = isActive
+    ? undefined // Use primary variant
+    : {
+        gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+        edge: '#E0E0E0',
+        borderLight: 'rgba(255, 255, 255, 0.5)',
+        borderDark: 'rgba(0, 0, 0, 0.1)',
+        textColor: colors.textSecondary,
+      };
+
+  const iconColor = disabled
+    ? colors.textLight
+    : isActive
+    ? '#FFFFFF'
+    : colors.textSecondary;
+
   return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      disabled={disabled}
-      style={[
-        styles.button,
-        isActive && styles.buttonActive,
-        disabled && styles.buttonDisabled,
-        animatedStyle,
-      ]}
-    >
-      <Ionicons
-        name={icon}
-        size={24}
-        color={
-          disabled
-            ? colors.textLight
-            : isActive
-            ? colors.softOrange
-            : colors.textSecondary
-        }
-      />
-      <Text
-        style={[
-          styles.label,
-          isActive && styles.labelActive,
-          disabled && styles.labelDisabled,
-        ]}
+    <Animated.View style={[styles.buttonWrapper, animatedContainerStyle]}>
+      <Pill3DContainer
+        variant={isActive ? 'primary' : 'secondary'}
+        customColors={customColors}
+        borderRadius={BUTTON_RADIUS}
+        edgeHeight={4}
       >
-        {label}
-      </Text>
-    </AnimatedPressable>
+        <AnimatedPressable
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          disabled={disabled}
+          style={styles.buttonPressable}
+        >
+          <Pill3DFace
+            variant={isActive ? 'primary' : 'secondary'}
+            customColors={customColors}
+            borderRadius={BUTTON_RADIUS}
+            showHighlight={false}
+            style={styles.buttonFace}
+          >
+            <Ionicons name={icon} size={24} color={iconColor} />
+            <Text
+              style={[
+                styles.label,
+                isActive && styles.labelActive,
+              ]}
+            >
+              {label}
+            </Text>
+          </Pill3DFace>
+        </AnimatedPressable>
+      </Pill3DContainer>
+    </Animated.View>
   );
 });
 
@@ -131,32 +160,28 @@ export const ActionButtons = memo(() => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
   },
-  button: {
+  buttonWrapper: {
     flex: 1,
+  },
+  buttonPressable: {
+    height: BUTTON_HEIGHT,
+  },
+  buttonFace: {
+    height: BUTTON_HEIGHT,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
-    ...shadows.small,
-  },
-  buttonActive: {
-    backgroundColor: colors.cellSelected,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
+    gap: 2,
   },
   label: {
-    ...typography.captionLight,
+    fontSize: 11,
+    fontWeight: '600',
     color: colors.textSecondary,
-    marginTop: spacing.xs,
+    marginTop: 2,
   },
   labelActive: {
-    color: colors.softOrange,
-  },
-  labelDisabled: {
-    color: colors.textLight,
+    color: '#FFFFFF',
   },
 });

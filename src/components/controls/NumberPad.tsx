@@ -1,5 +1,5 @@
 // Number pad for inputting numbers 1-9
-// OP-1 style concave well buttons in 3x3 grid
+// Single row layout with skeuomorphic 3D styling
 
 import React, { memo, useCallback } from 'react';
 import { View, StyleSheet, Pressable, Text } from 'react-native';
@@ -7,24 +7,23 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  interpolateColor,
   Easing,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { useGameStore } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
-import { borderRadius, shadows } from '../../theme';
+import { borderRadius } from '../../theme';
+import { Pill3DContainer, Pill3DFace } from '../ui/Skeuomorphic';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-const BUTTON_SIZE = 60;
-const GRID_GAP = 10;
-const GRID_WIDTH = BUTTON_SIZE * 3 + GRID_GAP * 2;
+const BUTTON_HEIGHT = 56;
+const BUTTON_GAP = 8;
+const BUTTON_RADIUS = 12;
+const PRESS_DEPTH = 2;
 
 const timingConfig = {
-  duration: 120,
+  duration: 100,
   easing: Easing.out(Easing.ease),
 };
 
@@ -54,61 +53,56 @@ const NumberButton = memo(({ number, onPress, isHighlighted, disabled = false }:
     onPress(number);
   }, [disabled, number, onPress]);
 
-  const animatedButtonStyle = useAnimatedStyle(() => {
-    const scale = 1 - pressProgress.value * 0.04; // 1 -> 0.96
-    const backgroundColor = isHighlighted
-      ? colors.softOrange
-      : interpolateColor(
-          pressProgress.value,
-          [0, 1],
-          [colors.numberPadBase, colors.numberPadPressed]
-        );
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: pressProgress.value * PRESS_DEPTH }],
+    opacity: disabled ? 0.5 : 1,
+  }));
 
-    return {
-      transform: [{ scale }],
-      backgroundColor,
-    };
-  });
-
-  const animatedGradientStyle = useAnimatedStyle(() => {
-    // Deepen the concave shadow on press (0.08 -> 0.15 opacity)
-    // When highlighted, we don't show the concave gradient
-    const opacity = isHighlighted ? 0 : 0.08 + pressProgress.value * 0.07;
-    return { opacity };
-  });
+  // Use highlighted colors (orange) or white background
+  const customColors = isHighlighted
+    ? undefined // Use primary variant
+    : {
+        gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+        edge: '#E0E0E0',
+        borderLight: 'rgba(255, 255, 255, 0.5)',
+        borderDark: 'rgba(0, 0, 0, 0.1)',
+        textColor: colors.textPrimary,
+      };
 
   return (
-    <AnimatedPressable
-      onPress={handlePress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      disabled={disabled}
-      style={[
-        styles.button,
-        animatedButtonStyle,
-        disabled && styles.buttonDisabled,
-        isHighlighted && styles.buttonHighlighted,
-      ]}
-    >
-      {/* Concave inner shadow gradient */}
-      <AnimatedLinearGradient
-        colors={['rgba(0,0,0,0.12)', 'transparent']}
-        locations={[0, 0.35]}
-        style={[styles.concaveOverlay, animatedGradientStyle]}
-        pointerEvents="none"
-      />
-
-      {/* Number text */}
-      <Text
-        style={[
-          styles.buttonText,
-          isHighlighted && styles.buttonTextHighlighted,
-          disabled && styles.buttonTextDisabled,
-        ]}
+    <Animated.View style={[styles.buttonWrapper, animatedContainerStyle]}>
+      <Pill3DContainer
+        variant={isHighlighted ? 'primary' : 'secondary'}
+        customColors={customColors}
+        borderRadius={BUTTON_RADIUS}
+        edgeHeight={4}
       >
-        {number}
-      </Text>
-    </AnimatedPressable>
+        <AnimatedPressable
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          disabled={disabled}
+          style={styles.buttonPressable}
+        >
+          <Pill3DFace
+            variant={isHighlighted ? 'primary' : 'secondary'}
+            customColors={customColors}
+            borderRadius={BUTTON_RADIUS}
+            showHighlight={false}
+            style={styles.buttonFace}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                isHighlighted && styles.buttonTextHighlighted,
+              ]}
+            >
+              {number}
+            </Text>
+          </Pill3DFace>
+        </AnimatedPressable>
+      </Pill3DContainer>
+    </Animated.View>
   );
 });
 
@@ -145,46 +139,25 @@ export const NumberPad = memo(() => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: GRID_GAP,
-    width: GRID_WIDTH,
-    alignSelf: 'center',
+    gap: BUTTON_GAP,
   },
-  button: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: borderRadius.md + 1, // 13px
-    backgroundColor: colors.numberPadBase,
+  buttonWrapper: {
+    flex: 1,
+  },
+  buttonPressable: {
+    height: BUTTON_HEIGHT,
+  },
+  buttonFace: {
+    height: BUTTON_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
-    ...shadows.small,
-  },
-  buttonHighlighted: {
-    ...shadows.medium,
-    shadowColor: colors.softOrange,
-    shadowOpacity: 0.3,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  concaveOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: borderRadius.md + 1,
   },
   buttonText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
-    color: colors.numberPadText,
+    color: colors.textPrimary,
   },
   buttonTextHighlighted: {
-    color: colors.cardBackground,
-  },
-  buttonTextDisabled: {
-    color: colors.textLight,
+    color: '#FFFFFF',
   },
 });
