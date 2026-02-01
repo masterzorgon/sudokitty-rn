@@ -1,9 +1,8 @@
 // Individual menu row for the secondary menu
-// Shows label with icon (mochi SVG for difficulty items, Feather icon for others)
+// Shows label with mochi SVG icons for all menu items
 
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 import { SvgProps } from 'react-native-svg';
 import Animated, {
   useSharedValue,
@@ -22,12 +21,22 @@ import MochiMedium from '../../../../assets/images/mochi/mochi-medium.svg';
 import MochiHard from '../../../../assets/images/mochi/mochi-hard.svg';
 import MochiExpert from '../../../../assets/images/mochi/mochi-expert.svg';
 
+// Import mochi SVG characters for action items
+import MochiResume from '../../../../assets/images/mochi/mochi-resume.svg';
+import MochiQuit from '../../../../assets/images/mochi/mochi-quit.svg';
+
 // Mapping from difficulty to mochi SVG component
-const MOCHI_ICONS: Record<Difficulty, React.FC<SvgProps>> = {
+const MOCHI_DIFFICULTY_ICONS: Record<Difficulty, React.FC<SvgProps>> = {
   easy: MochiEasy,
   medium: MochiMedium,
   hard: MochiHard,
   expert: MochiExpert,
+};
+
+// Mapping from action to mochi SVG component
+const MOCHI_ACTION_ICONS: Record<'continue_game' | 'quit_game', React.FC<SvgProps>> = {
+  continue_game: MochiResume,
+  quit_game: MochiQuit,
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -70,22 +79,25 @@ export function MenuRow({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      {/* menu item icon - mochi SVG for difficulty items, Feather icon for others */}
+      {/* menu item icon - mochi SVG for all items */}
       <View style={styles.iconContainer}>
-        {item.difficulty ? (
-          // Render mochi SVG for difficulty items
-          (() => {
-            const MochiIcon = MOCHI_ICONS[item.difficulty];
-            return <MochiIcon width={55} height={55} />;
-          })()
-        ) : (
-          // Render Feather icon for non-difficulty items (continue playing, quit game)
-          <Feather
-            name={item.icon as keyof typeof Feather.glyphMap}
-            size={55}
-            color={colors.softOrange}
-          />
-        )}
+        {(() => {
+          // Determine which mochi icon to use
+          let MochiIcon: React.FC<SvgProps>;
+          
+          if (item.difficulty) {
+            // Difficulty items use difficulty icons
+            MochiIcon = MOCHI_DIFFICULTY_ICONS[item.difficulty];
+          } else if (item.action === 'continue_game' || item.action === 'quit_game') {
+            // Action items use action icons
+            MochiIcon = MOCHI_ACTION_ICONS[item.action];
+          } else {
+            // Fallback (should not happen)
+            return null;
+          }
+          
+          return <MochiIcon width={55} height={55} />;
+        })()}
       </View>
       {/* menu item label */}
       <View style={styles.labelContainer}>

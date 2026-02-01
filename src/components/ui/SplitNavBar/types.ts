@@ -102,7 +102,7 @@ export const MENU_CONFIGS: Record<PrimaryActionState, MenuItem[]> = {
     { id: 'easy', label: 'easy', icon: 'smile', action: 'select_difficulty', difficulty: 'easy' },
   ],
   resume: [
-    { id: 'continue', label: 'continue playing', icon: 'play', action: 'continue_game' },
     { id: 'quit', label: 'quit game', icon: 'x-circle', action: 'quit_game' },
+    { id: 'continue', label: 'continue playing', icon: 'play', action: 'continue_game' },
   ],
 };

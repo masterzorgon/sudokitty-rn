@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
   },
   menuWrapper: {
     // Transform origin: scales from bottom-right corner
+    // borderWidth: 1,
   },
   menu: {
     // padding: LAYOUT.unfurlPadding,
@@ -155,7 +156,6 @@ const styles = StyleSheet.create({
     minWidth: 190,
   },
   menuWide: {
-    minWidth: 416,
-    borderWidth: 1,
+    minWidth: 310,
   },
 });
