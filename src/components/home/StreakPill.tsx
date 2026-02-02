@@ -1,14 +1,12 @@
 // StreakPill - 3D pill button showing current day streak
-// Uses the skeuomorphic composable system for consistent styling
+// Uses SkeuButton for consistent skeuomorphic styling with built-in animation
 
 import React from 'react';
-import { StyleSheet, View, Text, Pressable } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { StyleSheet, View, Text } from 'react-native';
 
 import { fontFamilies } from '../../theme/typography';
 import { spacing } from '../../theme';
-import { useSkeuomorphicPress } from '../../hooks';
-import { Pill3DContainer, Pill3DFace, SheenOverlay } from '../ui/Skeuomorphic';
+import { SkeuButton } from '../ui/Skeuomorphic';
 import FlameIcon from '../../../assets/images/icons/flame.svg';
 
 // MARK: - Types
@@ -27,39 +25,28 @@ const ICON_SIZE = 32;
 // MARK: - Component
 
 export function StreakPill({ streakCount, onPress }: StreakPillProps) {
-  // Use the skeuomorphic press hook
-  const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
-    onPress,
-  });
-
-  // MARK: - Render
-
   return (
-    <Pressable {...pressHandlers}>
-      <Animated.View style={[styles.container, animatedStyle]}>
-        <Pill3DContainer variant="primary" borderRadius={PILL_RADIUS}>
-          <Pill3DFace
-            variant="primary"
-            borderRadius={PILL_RADIUS}
-            style={styles.face}
-          >
-            <SheenOverlay />
+    <SkeuButton
+      onPress={onPress ?? (() => {})}
+      variant="primary"
+      borderRadius={PILL_RADIUS}
+      sheen
+      style={styles.container}
+      contentStyle={styles.face}
+      accessibilityLabel={`${streakCount} day streak`}
+    >
+      {/* Flame icon */}
+      <View style={styles.iconContainer}>
+        <View style={styles.iconGlow} />
+        <FlameIcon width={ICON_SIZE} height={ICON_SIZE} fill="#FFFFFF" />
+      </View>
 
-            {/* Flame icon */}
-            <View style={styles.iconContainer}>
-              <View style={styles.iconGlow} />
-              <FlameIcon width={ICON_SIZE} height={ICON_SIZE} fill="#FFFFFF" />
-            </View>
-
-            {/* Streak count and label - horizontal layout */}
-            <View style={styles.textContainer}>
-              <Text style={styles.countText}>{streakCount}</Text>
-              <Text style={styles.labelText}>day streak</Text>
-            </View>
-          </Pill3DFace>
-        </Pill3DContainer>
-      </Animated.View>
-    </Pressable>
+      {/* Streak count and label - horizontal layout */}
+      <View style={styles.textContainer}>
+        <Text style={styles.countText}>{streakCount}</Text>
+        <Text style={styles.labelText}>day streak</Text>
+      </View>
+    </SkeuButton>
   );
 }
 

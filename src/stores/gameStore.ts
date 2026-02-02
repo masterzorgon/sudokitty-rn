@@ -26,6 +26,7 @@ import {
 } from '../engine/types';
 import { generatePuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
+import { useSettingsStore } from './settingsStore';
 
 // Create empty cell
 const createCell = (
@@ -357,7 +358,9 @@ export const useGameStore = create<GameState & GameActions>()(
             if (!isCorrect) {
               // Wrong answer
               draft.mistakeCount++;
-              if (draft.mistakeCount >= MAX_MISTAKES) {
+              // Only end game if mistake limit is enabled in settings
+              const { mistakeLimitEnabled } = useSettingsStore.getState();
+              if (mistakeLimitEnabled && draft.mistakeCount >= MAX_MISTAKES) {
                 draft.gameStatus = 'lost';
                 draft.isTimerRunning = false;
                 result.isGameLost = true;

@@ -8,9 +8,8 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-
 import { ChartTimePeriod } from '../../engine/types';
+import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
@@ -77,7 +76,7 @@ export const TimePeriodTabs = memo(({
 }: TimePeriodTabsProps) => {
   const handlePress = (period: ChartTimePeriod) => {
     if (period !== selectedPeriod) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      triggerHaptic(ImpactFeedbackStyle.Light);
       onSelectPeriod(period);
     }
   };

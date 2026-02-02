@@ -1,30 +1,25 @@
 // Action buttons: Undo, Erase, Notes, Hint
-// Skeuomorphic 3D styling
+// Skeuomorphic 3D styling using SkeuButton
 
-import React, { memo, useCallback } from 'react';
-import { View, StyleSheet, Pressable, Text } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+import React, { memo } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
 import { useGameStore, useCanUseHint } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
-import { Pill3DContainer, Pill3DFace } from '../ui/Skeuomorphic';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { SkeuButton } from '../ui/Skeuomorphic';
 
 const BUTTON_HEIGHT = 56;
 const BUTTON_RADIUS = 12;
-const PRESS_DEPTH = 2;
 
-const timingConfig = {
-  duration: 100,
-  easing: Easing.out(Easing.ease),
+// White custom colors for inactive buttons
+const whiteColors = {
+  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+  edge: '#E0E0E0',
+  borderLight: 'rgba(255, 255, 255, 0.5)',
+  borderDark: 'rgba(0, 0, 0, 0.1)',
+  textColor: colors.textSecondary,
 };
 
 interface ActionButtonProps {
@@ -42,34 +37,6 @@ const ActionButton = memo(({
   isActive = false,
   disabled = false,
 }: ActionButtonProps) => {
-  const pressProgress = useSharedValue(0);
-
-  const handlePressIn = useCallback(() => {
-    if (disabled) return;
-    pressProgress.value = withTiming(1, timingConfig);
-  }, [disabled, pressProgress]);
-
-  const handlePressOut = useCallback(() => {
-    if (disabled) return;
-    pressProgress.value = withTiming(0, timingConfig);
-  }, [disabled, pressProgress]);
-
-  const animatedContainerStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: pressProgress.value * PRESS_DEPTH }],
-    opacity: disabled ? 0.5 : 1,
-  }));
-
-  // Use active colors (orange) or white background
-  const customColors = isActive
-    ? undefined // Use primary variant
-    : {
-        gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-        edge: '#E0E0E0',
-        borderLight: 'rgba(255, 255, 255, 0.5)',
-        borderDark: 'rgba(0, 0, 0, 0.1)',
-        textColor: colors.textSecondary,
-      };
-
   const iconColor = disabled
     ? colors.textLight
     : isActive
@@ -77,40 +44,23 @@ const ActionButton = memo(({
     : colors.textSecondary;
 
   return (
-    <Animated.View style={[styles.buttonWrapper, animatedContainerStyle]}>
-      <Pill3DContainer
+    <View style={styles.buttonWrapper}>
+      <SkeuButton
+        onPress={onPress}
         variant={isActive ? 'primary' : 'secondary'}
-        customColors={customColors}
+        customColors={isActive ? undefined : whiteColors}
         borderRadius={BUTTON_RADIUS}
-        edgeHeight={4}
+        showHighlight={false}
+        disabled={disabled}
+        contentStyle={styles.buttonFace}
+        accessibilityLabel={`${label} button`}
       >
-        <AnimatedPressable
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          disabled={disabled}
-          style={styles.buttonPressable}
-        >
-          <Pill3DFace
-            variant={isActive ? 'primary' : 'secondary'}
-            customColors={customColors}
-            borderRadius={BUTTON_RADIUS}
-            showHighlight={false}
-            style={styles.buttonFace}
-          >
-            <Ionicons name={icon} size={24} color={iconColor} />
-            <Text
-              style={[
-                styles.label,
-                isActive && styles.labelActive,
-              ]}
-            >
-              {label}
-            </Text>
-          </Pill3DFace>
-        </AnimatedPressable>
-      </Pill3DContainer>
-    </Animated.View>
+        <Ionicons name={icon} size={24} color={iconColor} />
+        <Text style={[styles.label, isActive && styles.labelActive]}>
+          {label}
+        </Text>
+      </SkeuButton>
+    </View>
   );
 });
 
@@ -165,9 +115,6 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     flex: 1,
-  },
-  buttonPressable: {
-    height: BUTTON_HEIGHT,
   },
   buttonFace: {
     height: BUTTON_HEIGHT,

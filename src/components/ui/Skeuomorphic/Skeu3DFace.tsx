@@ -1,5 +1,6 @@
-// 3D Face for rectangular cards
-// Similar to Pill3DFace but optimized for larger surfaces and individual corner radii
+// Unified 3D face component
+// The visible gradient surface with borders and highlight
+// Replaces both Pill3DFace and Card3DFace
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
@@ -11,56 +12,50 @@ import {
   getVariantColors,
   SKEU_DIMENSIONS,
 } from '../../../theme/skeuomorphic';
+import { CornerRadii, resolveCornerRadii } from './SkeuContext';
 
-interface Card3DFaceProps {
+export interface Skeu3DFaceProps {
   /** Color variant preset */
   variant?: SkeuVariant;
   /** Custom colors (overrides variant) */
   customColors?: CustomSkeuColors;
-  /** Border radius (applies to all corners) */
+  /** Uniform border radius for all corners */
   borderRadius?: number;
-  /** Individual corner radii */
-  borderTopLeftRadius?: number;
-  borderTopRightRadius?: number;
-  borderBottomLeftRadius?: number;
-  borderBottomRightRadius?: number;
+  /** Individual corner radii (overrides borderRadius) */
+  cornerRadii?: CornerRadii;
   /** Whether to show the gradient background (default: true) */
   showGradient?: boolean;
   /** Whether to show the top highlight (default: true) */
   showHighlight?: boolean;
+  /** Horizontal inset for the highlight (default: 8, use 12 for cards) */
+  highlightInset?: number;
   /** Additional face styles */
   style?: ViewStyle;
   /** Content to render */
   children: React.ReactNode;
 }
 
-export function Card3DFace({
+export function Skeu3DFace({
   variant = 'primary',
   customColors,
   borderRadius,
-  borderTopLeftRadius,
-  borderTopRightRadius,
-  borderBottomLeftRadius,
-  borderBottomRightRadius,
+  cornerRadii,
   showGradient = true,
   showHighlight = true,
+  highlightInset = 8,
   style,
   children,
-}: Card3DFaceProps) {
+}: Skeu3DFaceProps) {
   const colors = getVariantColors(variant, customColors);
+  const radii = resolveCornerRadii(borderRadius, cornerRadii);
 
-  // Use individual corner radii if provided, otherwise use borderRadius
-  const cornerRadii = {
-    borderTopLeftRadius: borderTopLeftRadius ?? borderRadius,
-    borderTopRightRadius: borderTopRightRadius ?? borderRadius,
-    borderBottomLeftRadius: borderBottomLeftRadius ?? borderRadius,
-    borderBottomRightRadius: borderBottomRightRadius ?? borderRadius,
-  };
-
-  const faceStyle = [
+  const faceStyle: ViewStyle[] = [
     styles.face,
     {
-      ...cornerRadii,
+      borderTopLeftRadius: radii.topLeft,
+      borderTopRightRadius: radii.topRight,
+      borderBottomLeftRadius: radii.bottomLeft,
+      borderBottomRightRadius: radii.bottomRight,
       borderTopColor: colors.borderLight,
       borderLeftColor: colors.borderLight,
       borderRightColor: colors.borderDark,
@@ -71,15 +66,18 @@ export function Card3DFace({
 
   const content = (
     <>
-      {/* Top highlight for glossy effect - wider for cards */}
+      {/* Top highlight for glossy effect */}
       {showHighlight && (
         <View
           style={[
             styles.highlight,
             {
               height: SKEU_DIMENSIONS.highlightHeight,
-              borderTopLeftRadius: cornerRadii.borderTopLeftRadius,
-              borderTopRightRadius: cornerRadii.borderTopRightRadius,
+              left: highlightInset,
+              right: highlightInset,
+              // Match top corners for cards with different corner radii
+              borderTopLeftRadius: radii.topLeft > 0 ? Math.min(radii.topLeft, 100) : 0,
+              borderTopRightRadius: radii.topRight > 0 ? Math.min(radii.topRight, 100) : 0,
             },
           ]}
         />
@@ -112,10 +110,8 @@ const styles = StyleSheet.create({
   highlight: {
     position: 'absolute',
     top: 0,
-    left: 12,
-    right: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderBottomLeftRadius: 100,
+    borderBottomRightRadius: 100,
   },
 });

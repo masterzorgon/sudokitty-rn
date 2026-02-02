@@ -12,6 +12,7 @@ import * as Haptics from 'expo-haptics';
 
 import { SKEU_TIMINGS, SKEU_DIMENSIONS } from '../theme/skeuomorphic';
 import { useReducedMotion } from './useReducedMotion';
+import { triggerHaptic } from '../utils/haptics';
 
 interface UseSkeuomorphicPressOptions {
   /** Scale factor when pressed (default: 0.96) */
@@ -61,8 +62,9 @@ export function useSkeuomorphicPress(options: UseSkeuomorphicPressOptions = {}) 
   const handlePress = useCallback(() => {
     if (disabled) return;
     // Haptics are preserved even with reduced motion (they're not visual)
+    // Uses centralized haptics utility which respects user settings
     if (haptic) {
-      Haptics.impactAsync(hapticStyle);
+      triggerHaptic(hapticStyle);
     }
     onPress?.();
   }, [haptic, hapticStyle, onPress, disabled]);

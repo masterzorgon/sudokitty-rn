@@ -1,8 +1,8 @@
 // Primary action 3D pill button (New Game / Resume)
-// Uses skeuomorphic design system with visibility animations
+// Uses SkeuButton with visibility animations
 
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, Pressable } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -12,78 +12,44 @@ import Animated, {
 import * as Haptics from 'expo-haptics';
 
 import { PrimaryActionPillProps, LAYOUT } from './types';
-import { Pill3DContainer, Pill3DFace } from '../Skeuomorphic';
-import { useSkeuomorphicPress } from '@/src/hooks/useSkeuomorphicPress';
-import { SKEU_VARIANTS } from '@/src/theme/skeuomorphic';
-import { ACCESSIBILITY_ROLES } from '@/src/theme/accessibility';
+import { SkeuButton, SKEU_VARIANTS } from '../Skeuomorphic';
 
 export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryActionPillProps) {
-
   const visibilityScale = useSharedValue(1);
   const visibilityOpacity = useSharedValue(1);
 
-  // Animate scale when hidden state changes (preserve existing animation)
+  // Animate scale when hidden state changes
   useEffect(() => {
-    if (isHidden) {
-      // Scale out: 100ms with cubic ease-out
-      visibilityScale.value = withTiming(0, {
-        duration: 100,
-        easing: Easing.out(Easing.cubic),
-      });
-      visibilityOpacity.value = withTiming(0, { duration: 100 });
-    } else {
-      // Scale in: 100ms with cubic ease-out
-      visibilityScale.value = withTiming(1, {
-        duration: 100,
-        easing: Easing.out(Easing.cubic),
-      });
-      visibilityOpacity.value = withTiming(1, { duration: 100 });
-    }
+    const config = { duration: 100, easing: Easing.out(Easing.cubic) };
+    visibilityScale.value = withTiming(isHidden ? 0 : 1, config);
+    visibilityOpacity.value = withTiming(isHidden ? 0 : 1, { duration: 100 });
   }, [isHidden, visibilityScale, visibilityOpacity]);
 
-  const { animatedStyle: pressAnimatedStyle, pressHandlers } = useSkeuomorphicPress({
-    onPress,
-    hapticStyle: Haptics.ImpactFeedbackStyle.Medium,
-  });
-
-  // Combine press animation with visibility animation
-  const combinedAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { scale: visibilityScale.value },
-      ],
-      opacity: visibilityOpacity.value,
-    };
-  });
+  const visibilityAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: visibilityScale.value }],
+    opacity: visibilityOpacity.value,
+  }));
 
   const label = state === 'resume' ? 'resume game' : 'new game';
   const accessibilityLabel = state === 'resume' ? 'Resume Game' : 'Start New Game';
 
   return (
-    <Pressable
-      {...pressHandlers}
-      accessibilityRole={ACCESSIBILITY_ROLES.button}
-      accessibilityLabel={accessibilityLabel}
-      accessibilityHint={state === 'resume' ? 'Continue your previous game' : 'Start a new game'}
-      testID={`primary-action-pill-${state}`}
-    >
-      <Animated.View style={combinedAnimatedStyle}>
-        <Animated.View style={pressAnimatedStyle}>
-          <Pill3DContainer variant="primary" borderRadius={LAYOUT.rightPillRadius}>
-            <Pill3DFace
-              variant="primary"
-              borderRadius={LAYOUT.rightPillRadius}
-              style={styles.face}
-              showHighlight={false}
-            >
-              <Text style={[styles.label, { color: SKEU_VARIANTS.primary.textColor }]}>
-                {label}
-              </Text>
-            </Pill3DFace>
-          </Pill3DContainer>
-        </Animated.View>
-      </Animated.View>
-    </Pressable>
+    <Animated.View style={visibilityAnimatedStyle}>
+      <SkeuButton
+        onPress={onPress}
+        variant="primary"
+        borderRadius={LAYOUT.rightPillRadius}
+        showHighlight={false}
+        hapticStyle={Haptics.ImpactFeedbackStyle.Medium}
+        contentStyle={styles.face}
+        accessibilityLabel={accessibilityLabel}
+        testID={`primary-action-pill-${state}`}
+      >
+        <Text style={[styles.label, { color: SKEU_VARIANTS.primary.textColor }]}>
+          {label}
+        </Text>
+      </SkeuButton>
+    </Animated.View>
   );
 }
 

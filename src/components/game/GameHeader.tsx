@@ -5,6 +5,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { useGameStore } from '../../stores/gameStore';
+import { useTimerEnabled, useMistakeLimitEnabled } from '../../stores/settingsStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
@@ -17,28 +18,46 @@ export const GameHeader = () => {
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
 
+  // Settings
+  const timerEnabled = useTimerEnabled();
+  const mistakeLimitEnabled = useMistakeLimitEnabled();
+
   return (
     <View style={styles.container}>
       <Text style={styles.difficulty}>{difficulty}</Text>
-      <View style={styles.separator} />
-      <RollingTime
-        seconds={timeElapsed}
-        fontSize={14}
-        color={colors.textSecondary}
-        textStyle={typography.caption}
-      />
-      <View style={styles.separator} />
-      <View style={styles.statRow}>
-        <RollingNumber
-          value={mistakeCount}
-          fontSize={14}
-          color={mistakeCount > 0 ? colors.errorText : colors.textSecondary}
-          textStyle={typography.caption}
-          maxDigits={1}
-        />
-        <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>/</Text>
-        <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>{MAX_MISTAKES} mistakes</Text>
-      </View>
+
+      {/* Timer - conditionally shown based on settings */}
+      {timerEnabled && (
+        <>
+          <View style={styles.separator} />
+          <RollingTime
+            seconds={timeElapsed}
+            fontSize={14}
+            color={colors.textSecondary}
+            textStyle={typography.caption}
+          />
+        </>
+      )}
+
+      {/* Mistakes - conditionally shown based on settings */}
+      {mistakeLimitEnabled && (
+        <>
+          <View style={styles.separator} />
+          <View style={styles.statRow}>
+            <RollingNumber
+              value={mistakeCount}
+              fontSize={14}
+              color={mistakeCount > 0 ? colors.errorText : colors.textSecondary}
+              textStyle={typography.caption}
+              maxDigits={1}
+            />
+            <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>/</Text>
+            <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>{MAX_MISTAKES} mistakes</Text>
+          </View>
+        </>
+      )}
+
+      {/* Hints - always shown */}
       <View style={styles.separator} />
       <View style={styles.statRow}>
         <RollingNumber

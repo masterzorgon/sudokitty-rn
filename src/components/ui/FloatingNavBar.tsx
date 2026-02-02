@@ -7,9 +7,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-
 import { colors } from '@/src/theme/colors';
+import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
 import { springConfigs } from '@/src/theme/animations';
 
 export type TabName = 'index' | 'daily' | 'profile' | 'settings';
@@ -55,7 +54,7 @@ function NavItem({ tab, isActive, onPress }: NavItemProps) {
   }));
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic(ImpactFeedbackStyle.Light);
     onPress();
   };
 

@@ -1,5 +1,6 @@
-// 3D Container with edge layer
-// Wraps content and provides the 3D depth effect via a darker edge beneath
+// Unified 3D edge component
+// The darker shadow layer beneath the face that creates the 3D depth effect
+// Replaces both Pill3DContainer and Card3DContainer
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
@@ -10,31 +11,36 @@ import {
   getVariantColors,
   SKEU_DIMENSIONS,
 } from '../../../theme/skeuomorphic';
+import { CornerRadii, resolveCornerRadii } from './SkeuContext';
 
-interface Pill3DContainerProps {
+export interface Skeu3DEdgeProps {
   /** Color variant preset */
   variant?: SkeuVariant;
   /** Custom colors (overrides variant) */
   customColors?: CustomSkeuColors;
-  /** Border radius for the pill shape */
-  borderRadius: number;
+  /** Uniform border radius for all corners */
+  borderRadius?: number;
+  /** Individual corner radii (overrides borderRadius) */
+  cornerRadii?: CornerRadii;
   /** Height of the 3D edge (default: 4) */
   edgeHeight?: number;
   /** Additional container styles */
   style?: ViewStyle;
-  /** Content to render */
+  /** Content to render (typically Skeu3DFace) */
   children: React.ReactNode;
 }
 
-export function Pill3DContainer({
+export function Skeu3DEdge({
   variant = 'primary',
   customColors,
   borderRadius,
+  cornerRadii,
   edgeHeight = SKEU_DIMENSIONS.edgeHeight,
   style,
   children,
-}: Pill3DContainerProps) {
+}: Skeu3DEdgeProps) {
   const colors = getVariantColors(variant, customColors);
+  const radii = resolveCornerRadii(borderRadius, cornerRadii);
 
   return (
     <View style={[styles.container, style]}>
@@ -44,7 +50,10 @@ export function Pill3DContainer({
           styles.edge,
           {
             backgroundColor: colors.edge,
-            borderRadius,
+            borderTopLeftRadius: radii.topLeft,
+            borderTopRightRadius: radii.topRight,
+            borderBottomLeftRadius: radii.bottomLeft,
+            borderBottomRightRadius: radii.bottomRight,
             height: '100%',
             bottom: -edgeHeight,
           },

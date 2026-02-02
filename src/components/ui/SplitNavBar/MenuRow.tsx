@@ -10,9 +10,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
-
 import { colors } from '@/src/theme/colors';
+import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
 import { Difficulty } from '@/src/engine/types';
 import { MenuRowProps, LAYOUT } from './types';
 
@@ -52,7 +51,7 @@ export function MenuRow({
   }, [isPressed]);
 
   const handlePress = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerHaptic(ImpactFeedbackStyle.Medium);
     onPress();
   }, [onPress]);
 

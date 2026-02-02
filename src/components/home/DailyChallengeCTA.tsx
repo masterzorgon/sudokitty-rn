@@ -2,16 +2,14 @@
 // Full-width card showing calendar icon, difficulty, participant count
 
 import React, { memo } from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import Animated from "react-native-reanimated";
 
 import { DailyChallenge, DIFFICULTY_CONFIG } from "../../engine/types";
 import { colors } from "../../theme/colors";
 import { typography } from "../../theme/typography";
 import { spacing, borderRadius } from "../../theme";
-import { Card3DContainer, Card3DFace } from "../ui/Skeuomorphic";
-import { useSkeuomorphicPress } from "../../hooks/useSkeuomorphicPress";
+import { SkeuCard } from "../ui/Skeuomorphic";
 
 interface DailyChallengeCTAProps {
   challenge: DailyChallenge;
@@ -28,6 +26,14 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   expert: colors.coral,
 };
 
+// White custom colors for the card
+const whiteColors = {
+  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+  edge: '#E0E0E0',
+  borderLight: 'rgba(255, 255, 255, 0.5)',
+  borderDark: 'rgba(0, 0, 0, 0.1)',
+};
+
 export const DailyChallengeCTA = memo(
   ({
     challenge,
@@ -39,80 +45,62 @@ export const DailyChallengeCTA = memo(
     const difficultyColor =
       DIFFICULTY_COLORS[challenge.difficulty] || colors.softOrange;
 
-    const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
-      onPress,
-    });
-
-    const whiteColors = {
-      gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-      edge: '#E0E0E0',
-      borderLight: 'rgba(255, 255, 255, 0.5)',
-      borderDark: 'rgba(0, 0, 0, 0.1)',
-    };
-
     return (
-      <Pressable {...pressHandlers}>
-        <Animated.View style={[styles.container, animatedStyle]}>
-          <Card3DContainer 
-            variant="secondary"
-            customColors={whiteColors}
-            borderRadius={borderRadius.lg}
-          >
-            <Card3DFace 
-              variant="secondary"
-              customColors={whiteColors}
-              borderRadius={borderRadius.lg}
-              showHighlight={false}
-              style={styles.face}
-            >
-            {/* Left section - Icon and title */}
-            <View style={styles.leftContent}>
-              <View style={styles.iconContainer}>
-                <Feather name="calendar" size={20} color={colors.softOrange} />
+      <SkeuCard
+        onPress={onPress}
+        variant="secondary"
+        customColors={whiteColors}
+        borderRadius={borderRadius.lg}
+        showHighlight={false}
+        style={styles.container}
+        contentStyle={styles.face}
+        accessibilityLabel={`Daily challenge, ${difficultyConfig.name} difficulty`}
+      >
+        {/* Left section - Icon and title */}
+        <View style={styles.leftContent}>
+          <View style={styles.iconContainer}>
+            <Feather name="calendar" size={20} color={colors.softOrange} />
+          </View>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>daily challenge</Text>
+            <View style={styles.metaRow}>
+              <View
+                style={[
+                  styles.difficultyBadge,
+                  { backgroundColor: `${difficultyColor}40` },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.difficultyText,
+                    { color: difficultyColor },
+                  ]}
+                >
+                  {difficultyConfig.name}
+                </Text>
               </View>
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>daily challenge</Text>
-                <View style={styles.metaRow}>
-                  <View
-                    style={[
-                      styles.difficultyBadge,
-                      { backgroundColor: `${difficultyColor}40` },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.difficultyText,
-                        { color: difficultyColor },
-                      ]}
-                    >
-                      {difficultyConfig.name}
-                    </Text>
-                  </View>
-                  <Text style={styles.participants}>
-                    {participantCount.toLocaleString()} playing today
-                  </Text>
-                </View>
-              </View>
+              <Text style={styles.participants}>
+                {participantCount.toLocaleString()} playing today
+              </Text>
             </View>
+          </View>
+        </View>
 
-            {/* Right section - Status and chevron */}
-            <View style={styles.rightContent}>
-              {isCompleted && (
-                <View style={styles.completedBadge}>
-                  <Feather name="check" size={12} color={colors.mint} />
-                  <Text style={styles.completedText}>done!</Text>
-                </View>
-              )}
-              <Feather
-                name="chevron-right"
-                size={24}
-                color={colors.textLight}
-              />
+        {/* Right section - Status and chevron */}
+        <View style={styles.rightContent}>
+          {isCompleted && (
+            <View style={styles.completedBadge}>
+              <Feather name="check" size={12} color={colors.mint} />
+              <Text style={styles.completedText}>done!</Text>
             </View>
-            </Card3DFace>
-          </Card3DContainer>
-        </Animated.View>
-      </Pressable>
+          )}
+          <Feather
+            name="chevron-right"
+            size={24}
+            color={colors.textLight}
+          />
+        </View>
+      </SkeuCard>
     );
   }
 );

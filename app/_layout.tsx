@@ -79,6 +79,13 @@ function RootLayoutNav() {
             headerTintColor: colors.textPrimary,
           }}
         />
+        <Stack.Screen
+          name="feedback"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
       </Stack>
     </View>
   );

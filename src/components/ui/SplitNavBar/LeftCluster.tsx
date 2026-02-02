@@ -2,19 +2,19 @@
 // Contains Home, Profile, and Settings icons
 
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 
 import { colors } from '@/src/theme/colors';
+import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
 import { springConfigs } from '@/src/theme/animations';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
-import { Pill3DContainer, Pill3DFace } from '../Skeuomorphic';
+import { Skeu3D } from '../Skeuomorphic';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -24,6 +24,14 @@ const tabs: TabConfig[] = [
   { name: 'profile', icon: 'bar-chart-2', label: 'Stats' },
   { name: 'settings', icon: 'settings', label: 'Settings' },
 ];
+
+// White custom colors for the cluster
+const whiteColors = {
+  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+  edge: '#E0E0E0',
+  borderLight: 'rgba(255, 255, 255, 0.5)',
+  borderDark: 'rgba(0, 0, 0, 0.1)',
+};
 
 interface NavIconProps {
   tab: TabConfig;
@@ -46,7 +54,7 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
   }));
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerHaptic(ImpactFeedbackStyle.Light);
     onPress();
   };
 
@@ -66,36 +74,23 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
 }
 
 export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
-  const whiteColors = {
-    gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-    edge: '#E0E0E0',
-    borderLight: 'rgba(255, 255, 255, 0.5)',
-    borderDark: 'rgba(0, 0, 0, 0.1)',
-  };
-
   return (
-    <Pill3DContainer 
-      variant="secondary" 
+    <Skeu3D
+      variant="secondary"
       customColors={whiteColors}
       borderRadius={LAYOUT.rightPillRadius}
+      showHighlight={false}
+      faceStyle={styles.container}
     >
-      <Pill3DFace 
-        variant="secondary"
-        customColors={whiteColors}
-        borderRadius={LAYOUT.rightPillRadius}
-        showHighlight={false}
-        style={styles.container}
-      >
-        {tabs.map((tab) => (
-          <NavIcon
-            key={tab.name}
-            tab={tab}
-            isActive={activeTab === tab.name}
-            onPress={() => onTabPress(tab.name)}
-          />
-        ))}
-      </Pill3DFace>
-    </Pill3DContainer>
+      {tabs.map((tab) => (
+        <NavIcon
+          key={tab.name}
+          tab={tab}
+          isActive={activeTab === tab.name}
+          onPress={() => onTabPress(tab.name)}
+        />
+      ))}
+    </Skeu3D>
   );
 }
 
