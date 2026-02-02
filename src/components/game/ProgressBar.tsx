@@ -30,7 +30,12 @@ export const ProgressBar = ({ onBack, trailingAction }: ProgressBarProps) => {
 
       <View style={styles.barContainer}>
         <View style={styles.barBackground}>
-          <View style={[styles.barFill, { width: `${percentage}%` }]} />
+          <View style={[styles.barFill, { width: `${percentage}%` }]}>
+            {/* Middle highlight layer - slightly lighter, inset 2px */}
+            <View style={styles.barFillMiddle} />
+            {/* Top gloss layer - lightest, thin strip near top */}
+            <View style={styles.barFillGloss} />
+          </View>
         </View>
       </View>
 
@@ -71,14 +76,33 @@ const styles = StyleSheet.create({
   },
   barBackground: {
     height: GAME_LAYOUT.PROGRESS_BAR_HEIGHT, // Increased from 12 to 20
-    backgroundColor: colors.gridLine,
+    backgroundColor: '#e8e5e9',
     borderRadius: borderRadius.full,
     overflow: 'hidden',
   },
   barFill: {
     height: '100%',
-    backgroundColor: colors.softOrange,
+    backgroundColor: '#FF8C56', // Base layer - darkest
     borderRadius: borderRadius.full,
+    overflow: 'hidden',
+  },
+  barFillMiddle: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
+    right: 2,
+    bottom: 2,
+    backgroundColor: '#FF915E', // Middle highlight - slightly lighter
+    borderRadius: borderRadius.full,
+  },
+  barFillGloss: {
+    position: 'absolute',
+    top: 3,
+    left: 10,
+    right: 10,
+    height: 5,
+    backgroundColor: '#FF9A6B', // Top gloss - lightest
+    borderRadius: 2,
   },
   percentageContainer: {
     flexDirection: 'row',

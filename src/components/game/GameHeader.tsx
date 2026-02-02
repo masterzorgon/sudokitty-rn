@@ -47,12 +47,12 @@ export const GameHeader = () => {
             <RollingNumber
               value={mistakeCount}
               fontSize={14}
-              color={mistakeCount > 0 ? colors.errorText : colors.textSecondary}
+              color={colors.textSecondary}
               textStyle={typography.caption}
               maxDigits={1}
             />
-            <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>/</Text>
-            <Text style={[styles.stat, mistakeCount > 0 && styles.statError]}>{MAX_MISTAKES} mistakes</Text>
+            <Text style={styles.stat}>/</Text>
+            <Text style={styles.stat}>{MAX_MISTAKES} mistakes</Text>
           </View>
         </>
       )}
@@ -97,9 +97,6 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: colors.textSecondary,
     lineHeight: Math.ceil(14 * 1.4), // Match RollingNumber height for baseline alignment
-  },
-  statError: {
-    color: colors.errorText,
   },
   statRow: {
     flexDirection: 'row',

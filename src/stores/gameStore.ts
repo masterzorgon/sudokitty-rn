@@ -452,11 +452,10 @@ export const useGameStore = create<GameState & GameActions>()(
         });
       },
 
-      // Use a hint
+      // Use a hint (unlimited hints enabled)
       useHint: () => {
         const state = get();
         if (state.gameStatus !== 'playing') return null;
-        if (state.hintsUsed >= MAX_HINTS) return null;
 
         // Find random empty cell
         const emptyCells: Position[] = [];
@@ -509,7 +508,6 @@ export const useGameStore = create<GameState & GameActions>()(
       getStrategicHint: () => {
         const state = get();
         if (state.gameStatus !== 'playing') return null;
-        if (state.hintsUsed >= MAX_HINTS) return null;
 
         // Convert current board state to puzzle format (0 = empty)
         const puzzle: number[][] = state.board.map((row) =>
@@ -542,7 +540,6 @@ export const useGameStore = create<GameState & GameActions>()(
       applyHint: (hint: Hint) => {
         const state = get();
         if (state.gameStatus !== 'playing') return;
-        if (state.hintsUsed >= MAX_HINTS) return;
 
         // For placement hints, apply the value
         if (hint.targetValue) {
@@ -689,7 +686,7 @@ export const useIsNotesMode = () => useGameStore((s) => s.isNotesMode);
 export const useGameStatus = () => useGameStore((s) => s.gameStatus);
 export const useMistakeCount = () => useGameStore((s) => s.mistakeCount);
 export const useHintsUsed = () => useGameStore((s) => s.hintsUsed);
-export const useCanUseHint = () => useGameStore((s) => s.hintsUsed < MAX_HINTS);
+export const useCanUseHint = () => true; // Unlimited hints enabled
 export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);
 
