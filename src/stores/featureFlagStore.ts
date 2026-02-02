@@ -7,7 +7,6 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FeatureFlagState {
   // Component migration flags
-  skeuomorphicCTAButton: boolean;
   skeuomorphicPrimaryPill: boolean;
   skeuomorphicGameButton: boolean;
   skeuomorphicCards: boolean;
@@ -22,7 +21,6 @@ interface FeatureFlagState {
 }
 
 const initialState = {
-  skeuomorphicCTAButton: true,  // ✅ Enabled - Using new 3D implementation
   skeuomorphicPrimaryPill: true, // ✅ Enabled - Using new 3D implementation
   skeuomorphicGameButton: true,  // ✅ Enabled - Using new 3D implementation
   skeuomorphicCards: false,      // Not yet implemented (Phase 2)
@@ -59,7 +57,6 @@ export const useFeatureFlags = create<FeatureFlagState>()(
 export const useHasSkeuomorphicFeatures = () => {
   const flags = useFeatureFlags();
   return (
-    flags.skeuomorphicCTAButton ||
     flags.skeuomorphicPrimaryPill ||
     flags.skeuomorphicGameButton ||
     flags.skeuomorphicCards
@@ -73,7 +70,6 @@ export const useHasSkeuomorphicFeatures = () => {
 export const getFeatureFlagDebugInfo = () => {
   const state = useFeatureFlags.getState();
   return {
-    skeuomorphicCTAButton: state.skeuomorphicCTAButton,
     skeuomorphicPrimaryPill: state.skeuomorphicPrimaryPill,
     skeuomorphicGameButton: state.skeuomorphicGameButton,
     skeuomorphicCards: state.skeuomorphicCards,

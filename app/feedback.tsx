@@ -30,7 +30,8 @@ import { Pressable } from 'react-native';
 import { colors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
-import { CTAButton } from '../src/components/ui/CTAButton';
+import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
+import * as Haptics from 'expo-haptics';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
 import { trackFeedbackSubmitted } from '../src/utils/analytics';
 
@@ -366,13 +367,21 @@ export default function FeedbackScreen() {
               <Text style={styles.loadingText}>Sending...</Text>
             </View>
           ) : (
-            <CTAButton
-              label="Send Feedback"
+            <SkeuButton
               onPress={handleSubmit}
               variant={canSubmit ? 'primary' : 'disabled'}
+              borderRadius={borderRadius.lg}
               disabled={!canSubmit}
-              showHighlight={true}
-            />
+              hapticStyle={Haptics.ImpactFeedbackStyle.Medium}
+              contentStyle={styles.ctaButtonContent}
+              accessibilityLabel="Send Feedback"
+              testID="send-feedback-button"
+              showHighlight={false}
+            >
+              <Text style={[styles.ctaButtonLabel, { color: SKEU_VARIANTS[canSubmit ? 'primary' : 'disabled'].textColor }]}>
+                Send Feedback
+              </Text>
+            </SkeuButton>
           )}
         </View>
       </KeyboardAvoidingView>
@@ -555,5 +564,16 @@ const styles = StyleSheet.create({
   loadingText: {
     ...typography.body,
     color: colors.textSecondary,
+  },
+  ctaButtonContent: {
+    paddingVertical: 15,
+    paddingHorizontal: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaButtonLabel: {
+    ...typography.button,
+    fontWeight: '600',
+    fontSize: 17,
   },
 });

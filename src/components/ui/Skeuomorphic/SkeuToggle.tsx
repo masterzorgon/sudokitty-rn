@@ -121,7 +121,7 @@ export function SkeuToggle({
         
         {/* Track face */}
         <LinearGradient
-          colors={trackGradientColors as unknown as string[]}
+          colors={trackGradientColors}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.trackFace}
@@ -138,7 +138,7 @@ export function SkeuToggle({
         
         {/* Thumb face */}
         <LinearGradient
-          colors={COLORS.onThumb as unknown as string[]}
+          colors={COLORS.onThumb}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.thumbFace}
