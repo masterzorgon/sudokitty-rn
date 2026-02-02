@@ -110,8 +110,8 @@ export const ActionButtons = memo(() => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+    gap: 4, // Reduced to make buttons ~5% wider
+    // No marginBottom - spacing controlled by parent container gap
   },
   buttonWrapper: {
     flex: 1,

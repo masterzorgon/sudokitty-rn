@@ -12,9 +12,6 @@ import { startGameAnimations } from '../../theme/animations';
 import { BOARD_SIZE } from '../../engine/types';
 import { positionKey } from '../../engine/types';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const BOARD_PADDING = 16;
-
 // Helper to determine if a box should have alt background (checkerboard pattern)
 // Boxes are numbered 0-8, left to right, top to bottom
 // Pattern: boxes 1, 3, 5, 7 get alt background (center cross + corners alternate)
@@ -115,10 +112,10 @@ const BOARD_WIDTH = CELL_SIZE * 9;
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingHorizontal: BOARD_PADDING,
+    // No padding - grid spans edge-to-edge
   },
   cardOuter: {
-    borderRadius: borderRadius.lg + 2,
+    // No rounded corners - edge-to-edge
     // Warm shadow - subtle y-offset, low blur
     shadowColor: colors.boardShadow,
     shadowOffset: { width: 0, height: 4 },
@@ -128,14 +125,12 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.boardBackground,
-    borderRadius: borderRadius.lg,
     padding: 2,
     // Inner subtle border
     borderWidth: 1,
     borderColor: colors.gridLineBold,
   },
   board: {
-    borderRadius: borderRadius.md,
     overflow: 'hidden',
   },
   row: {

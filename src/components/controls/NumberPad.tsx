@@ -9,7 +9,7 @@ import { colors } from '../../theme/colors';
 import { SkeuButton } from '../ui/Skeuomorphic';
 
 const BUTTON_HEIGHT = 56;
-const BUTTON_GAP = 8;
+const BUTTON_GAP = 4; // Reduced from 8 to make buttons ~5% wider
 const BUTTON_RADIUS = 12;
 
 // White custom colors for non-highlighted buttons

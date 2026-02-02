@@ -17,9 +17,9 @@ import { typography } from '../../theme/typography';
 import { springConfigs, timingConfigs } from '../../theme/animations';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const BOARD_PADDING = 16;
-const BOARD_SIZE = SCREEN_WIDTH - BOARD_PADDING * 2;
-export const CELL_SIZE = Math.floor((BOARD_SIZE - 4) / 9); // Minimal grid spacing
+// Grid spans full screen width (edge-to-edge)
+const BOARD_SIZE_PX = SCREEN_WIDTH;
+export const CELL_SIZE = Math.floor((BOARD_SIZE_PX - 4) / 9); // Minimal grid spacing
 
 interface SudokuCellProps {
   cell: Cell;

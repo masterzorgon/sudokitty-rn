@@ -2,36 +2,25 @@
 // Shows a capsule-shaped bar with fill based on cells completed
 // Uses animated rolling numbers for percentage display
 
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useGameStore, useProgress } from '../../stores/gameStore';
+import { useProgress } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import { PauseModal } from './PauseModal';
+import { borderRadius } from '../../theme';
 import { RollingNumber } from '../ui';
+import { GAME_LAYOUT } from '../../constants/layout';
 
 interface ProgressBarProps {
   onBack: () => void;
+  /** Optional trailing action element (e.g., settings button) */
+  trailingAction?: React.ReactNode;
 }
 
-export const ProgressBar = ({ onBack }: ProgressBarProps) => {
-  const [isPauseModalVisible, setIsPauseModalVisible] = useState(false);
+export const ProgressBar = ({ onBack, trailingAction }: ProgressBarProps) => {
   const progress = useProgress();
-  const pauseGame = useGameStore((s) => s.pauseGame);
-  const resumeGame = useGameStore((s) => s.resumeGame);
   const percentage = Math.round(progress * 100);
-
-  const handlePause = () => {
-    pauseGame();
-    setIsPauseModalVisible(true);
-  };
-
-  const handleResume = () => {
-    setIsPauseModalVisible(false);
-    resumeGame();
-  };
 
   return (
     <View style={styles.container}>
@@ -56,11 +45,11 @@ export const ProgressBar = ({ onBack }: ProgressBarProps) => {
         <Text style={styles.percentSign}>%</Text>
       </View>
 
-      <Pressable style={styles.pauseButton} onPress={isPauseModalVisible ? handleResume : handlePause}>
-        <Ionicons name={isPauseModalVisible ? "play" : "pause"} size={24} color={colors.textSecondary} />
-      </Pressable>
-
-      <PauseModal visible={isPauseModalVisible} onResume={handleResume} />
+      {trailingAction && (
+        <View style={styles.trailingSlot}>
+          {trailingAction}
+        </View>
+      )}
     </View>
   );
 };
@@ -70,18 +59,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 44,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },
   backButton: {
-    padding: spacing.xs,
-    marginRight: spacing.sm,
+    padding: 4,
+    marginRight: 8,
   },
   barContainer: {
     flex: 1,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: 4,
   },
   barBackground: {
-    height: 12,
+    height: GAME_LAYOUT.PROGRESS_BAR_HEIGHT, // Increased from 12 to 20
     backgroundColor: colors.gridLine,
     borderRadius: borderRadius.full,
     overflow: 'hidden',
@@ -103,8 +92,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: -12,
   },
-  pauseButton: {
-    padding: spacing.xs,
-    marginLeft: spacing.sm,
+  trailingSlot: {
+    marginLeft: 8,
   },
 });

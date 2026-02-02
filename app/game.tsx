@@ -1,21 +1,31 @@
 // Game screen - active game view with back navigation
 // Separate from tabs for clean navigation experience
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { Feather } from '@expo/vector-icons';
 
-import { AnimatedGameView, GameHeader, ProgressBar } from '../src/components/game';
+import {
+  AnimatedGameView,
+  GameHeader,
+  ProgressBar,
+  GameMascot,
+  GameSettingsModal,
+} from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
 import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
+import { useGameMascotMessage } from '../src/hooks';
 import { colors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius, shadows } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
+import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty, DAILY_MOCHI_POINTS } from '../src/engine/types';
+import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
 
 // Game status overlay
 const GameStatusOverlay = ({
@@ -102,6 +112,7 @@ export default function GameScreen() {
   const newGame = useGameStore((s) => s.newGame);
   const startTimer = useGameStore((s) => s.startTimer);
   const pauseGame = useGameStore((s) => s.pauseGame);
+  const resumeGame = useGameStore((s) => s.resumeGame);
   const resetGame = useGameStore((s) => s.resetGame);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -109,6 +120,13 @@ export default function GameScreen() {
   const completeChallenge = useDailyChallengeStore((s) => s.completeChallenge);
   const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
   const dailyCompletedRef = useRef(false);
+
+  // Settings modal state
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const wasPausedBeforeModal = useRef(false);
+
+  // Mascot message hook
+  const mascotMessage = useGameMascotMessage();
 
   // Initialize game on mount
   useEffect(() => {
@@ -173,23 +191,57 @@ export default function GameScreen() {
     [newGame, startTimer]
   );
 
+  // Settings modal handlers with pause state preservation
+  const openSettingsModal = useCallback(() => {
+    triggerHaptic(ImpactFeedbackStyle.Light);
+    wasPausedBeforeModal.current = gameStatus === 'paused';
+    if (gameStatus === 'playing') {
+      pauseGame();
+    }
+    setIsSettingsModalVisible(true);
+  }, [gameStatus, pauseGame]);
+
+  const closeSettingsModal = useCallback(() => {
+    setIsSettingsModalVisible(false);
+    // Only resume if game wasn't already paused before opening modal
+    if (!wasPausedBeforeModal.current && gameStatus === 'paused') {
+      resumeGame();
+    }
+  }, [gameStatus, resumeGame]);
+
+  // Settings button for progress bar trailing action
+  const settingsButton = (
+    <Pressable
+      onPress={openSettingsModal}
+      hitSlop={12}
+      style={styles.settingsButton}
+    >
+      <Feather name="settings" size={24} color={colors.textSecondary} />
+    </Pressable>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* TOP ZONE - Progress bar with back button */}
+      {/* TOP ZONE - Progress bar with back button and settings */}
       <View style={styles.topZone}>
-        <ProgressBar onBack={handleGoBack} />
+        <ProgressBar onBack={handleGoBack} trailingAction={settingsButton} />
       </View>
 
-      {/* MIDDLE ZONE - Flex space + game content + flex space */}
+      {/* HEADER ZONE - Game stats */}
+      <View style={styles.headerZone}>
+        <GameHeader />
+      </View>
+
+      {/* MASCOT ZONE - Cat with contextual speech bubble */}
+      <GameMascot message={mascotMessage} />
+
+      {/* MIDDLE ZONE - Grid (edge-to-edge) */}
       <View style={styles.middleZone}>
         <View style={styles.flexSpacer} />
 
-        {/* Game content block: grid + stats row */}
-        <View style={styles.gameContent}>
-          <View style={styles.gridContainer}>
-            <AnimatedGameView />
-          </View>
-          <GameHeader />
+        {/* Grid container - NO horizontal padding for edge-to-edge */}
+        <View style={styles.gridContainer}>
+          <AnimatedGameView />
         </View>
 
         <View style={styles.minimalSpacer} />
@@ -215,6 +267,12 @@ export default function GameScreen() {
         isDaily={isDaily}
         mochiPointsEarned={mochiPointsEarned}
       />
+
+      {/* Settings modal */}
+      <GameSettingsModal
+        visible={isSettingsModalVisible}
+        onClose={closeSettingsModal}
+      />
     </SafeAreaView>
   );
 }
@@ -227,6 +285,9 @@ const styles = StyleSheet.create({
   topZone: {
     paddingTop: spacing.sm,
   },
+  headerZone: {
+    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
+  },
   middleZone: {
     flex: 1,
   },
@@ -234,23 +295,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   minimalSpacer: {
-    height: spacing.lg,
-  },
-  gameContent: {
-    alignItems: 'center',
+    height: spacing.md,
   },
   gridContainer: {
-    marginBottom: spacing.md,
+    // NO horizontal padding - grid spans edge-to-edge
+    alignItems: 'center',
   },
   bottomZone: {
     paddingBottom: spacing.md,
-    alignItems: 'center',
   },
   controlsContainer: {
     width: '100%',
-    maxWidth: 360, // Matches approximate board width on most devices
-    gap: spacing.xs,
-    paddingHorizontal: 16, // Match BOARD_PADDING from SudokuCell
+    gap: spacing.md,
+    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
+  },
+  settingsButton: {
+    padding: 4,
   },
   // Overlay styles
   overlay: {
