@@ -244,7 +244,7 @@ export default function GameScreen() {
           <AnimatedGameView />
         </View>
 
-        <View style={styles.minimalSpacer} />
+        <View style={styles.flexSpacer} />
       </View>
 
       {/* BOTTOM ZONE - Controls */}
@@ -293,9 +293,6 @@ const styles = StyleSheet.create({
   },
   flexSpacer: {
     flex: 1,
-  },
-  minimalSpacer: {
-    height: spacing.md,
   },
   gridContainer: {
     // NO horizontal padding - grid spans edge-to-edge
