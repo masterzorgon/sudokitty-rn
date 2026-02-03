@@ -14,7 +14,7 @@ import Animated, {
 import { Cell } from '../../engine/types';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { springConfigs, timingConfigs } from '../../theme/animations';
+import { springConfigs, timingConfigs, scales } from '../../theme/animations';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Grid spans full screen width (edge-to-edge)
@@ -83,10 +83,11 @@ export const SudokuCell = memo(({
         withTiming(1, timingConfigs.glowIn),
         withTiming(0, timingConfigs.glowOut)
       );
-      // Trigger scale bounce
+      // Trigger pop-in animation: shrink → overshoot → settle
       scale.value = withSequence(
-        withSpring(1.08, springConfigs.bouncy),
-        withSpring(1, springConfigs.default)
+        withSpring(scales.popShrink, springConfigs.popShrink),    // Quick shrink (0.8)
+        withSpring(scales.popOvershoot, springConfigs.bouncy),    // Overshoot (1.1)
+        withSpring(1, springConfigs.gentle)                        // Settle to normal
       );
     }
   }, [value, isValid]);

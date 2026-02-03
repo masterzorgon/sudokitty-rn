@@ -46,6 +46,20 @@ export const springConfigs = {
     damping: 12,
     stiffness: 120,
   } as WithSpringConfig,
+
+  // Pop-in animation for number placement - quick shrink stage
+  popShrink: {
+    damping: 20,
+    stiffness: 600,
+    mass: 0.3,
+  } as WithSpringConfig,
+
+  // Pop-in animation for number placement - overshoot stage
+  popIn: {
+    damping: 10,
+    stiffness: 250,
+    mass: 0.4,
+  } as WithSpringConfig,
 };
 
 // Timing animation configs
@@ -163,4 +177,7 @@ export const scales = {
   selected: 1.05,
   bounce: 1.1,
   celebration: 1.2,
+  // Pop-in animation stages
+  popShrink: 0.8,
+  popOvershoot: 1.1,
 };
