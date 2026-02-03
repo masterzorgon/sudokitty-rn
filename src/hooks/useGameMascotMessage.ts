@@ -1,151 +1,195 @@
 // Hook for contextual mascot messages during gameplay
-// Uses priority-based message selection with debouncing
+// Event-driven: messages appear only in response to events, then auto-dismiss
+// Uses probability-based triggering for frequent events (mistakes, correct answers)
 
 import { useState, useEffect, useRef } from 'react';
-import { useGameStore, useProgress } from '../stores/gameStore';
+import { useGameStore } from '../stores/gameStore';
 
 // MARK: - Types
 
 interface GameStateSnapshot {
   gameStatus: string;
-  isNotesMode: boolean;
   mistakeCount: number;
   hintsUsed: number;
-  progress: number;
+  lastCorrectCell: { row: number; col: number } | null;
 }
 
-interface MessageTrigger {
-  condition: (state: GameStateSnapshot, prevState: GameStateSnapshot | null) => boolean;
-  message: string;
-  priority: number;
+interface EventConfig {
+  messages: readonly string[];
+  probability: number; // 0-1, where 1 = always respond
+  persist?: boolean;
+  duration?: number; // ms, defaults to MESSAGE_DURATION_MS
 }
 
-// MARK: - Message Configuration
+// MARK: - Event Configuration
 
-// Priority-ordered message triggers
-// Higher priority = shown first when multiple conditions match
-const MESSAGE_TRIGGERS: MessageTrigger[] = [
-  // Highest priority: Terminal/event states
-  {
-    condition: (s) => s.gameStatus === 'won',
-    message: "Purrfect! You did it!",
-    priority: 100,
-  },
-  {
-    condition: (s) => s.gameStatus === 'lost',
-    message: "Don't give up!",
-    priority: 95,
-  },
-  {
-    condition: (s, prev) => prev !== null && s.mistakeCount > prev.mistakeCount,
-    message: "No worries, keep trying!",
-    priority: 90,
-  },
-  {
-    condition: (s, prev) => prev !== null && s.hintsUsed > prev.hintsUsed,
-    message: "Smart move!",
-    priority: 80,
-  },
+// Default message duration (ms)
+const MESSAGE_DURATION_MS = 3000;
 
-  // Medium priority: Mode states
-  {
-    condition: (s) => s.isNotesMode,
-    message: "Good strategy!",
-    priority: 50,
+// Configurable event responses
+const EVENT_CONFIG = {
+  gameStart: {
+    messages: ["Good luck!", "Let's do this!", "You've got this!"],
+    probability: 1.0,
+    duration: 3000,
   },
+  hint: {
+    messages: ["Smart move!", "Good thinking!", "Nice strategy!"],
+    probability: 1.0,
+    duration: 3000,
+  },
+  win: {
+    messages: ["Purrfect! You did it!", "Amazing work!", "You're a star!"],
+    probability: 1.0,
+    persist: true,
+  },
+  lose: {
+    messages: ["Don't give up!", "Try again!", "You'll get it next time!"],
+    probability: 1.0,
+    persist: true,
+  },
+  mistake: {
+    messages: ["No worries!", "Keep trying!", "You've got this!"],
+    probability: 0.3,
+    duration: 2500,
+  },
+  correct: {
+    messages: ["Nice!", "Great!", "Perfect!", "Awesome!"],
+    probability: 0.25,
+    duration: 2500,
+  },
+} as const satisfies Record<string, EventConfig>;
 
-  // Lowest priority: Progress-based (fallback messages)
-  {
-    condition: (s) => s.progress >= 0.9,
-    message: "Just a few more cells!",
-    priority: 10,
-  },
-  {
-    condition: (s) => s.progress >= 0.6,
-    message: "Almost there!",
-    priority: 9,
-  },
-  {
-    condition: (s) => s.progress >= 0.3,
-    message: "Keep going, you're doing great!",
-    priority: 8,
-  },
-  {
-    condition: (s) => s.progress >= 0.05,
-    message: "You're off to a great start!",
-    priority: 7,
-  },
-  {
-    condition: () => true, // Default fallback
-    message: "Let's solve this puzzle!",
-    priority: 1,
-  },
-];
+type EventKey = keyof typeof EVENT_CONFIG;
 
-// MARK: - Pure Functions (for testing)
+// MARK: - Helpers
 
-/**
- * Derives the appropriate message based on game state
- * Pure function for easy unit testing
- */
-export const deriveMessage = (
-  state: GameStateSnapshot,
-  prevState: GameStateSnapshot | null
-): string => {
-  const match = MESSAGE_TRIGGERS
-    .filter((t) => t.condition(state, prevState))
-    .sort((a, b) => b.priority - a.priority)[0];
+// Pick random message from pool
+const pickRandom = (messages: readonly string[]): string => {
+  return messages[Math.floor(Math.random() * messages.length)];
+};
 
-  return match?.message ?? "Let's go!";
+// Probability check for whether to show a message
+const shouldRespond = (probability: number): boolean => {
+  return Math.random() < probability;
 };
 
 // MARK: - Hook
 
-const DEBOUNCE_MS = 300;
-
 /**
- * Hook that returns contextual mascot message based on game state
- * Includes debouncing to prevent message flicker
+ * Hook that returns contextual mascot message based on game events
+ * Returns null when no message should be displayed
+ * Messages auto-dismiss after MESSAGE_DURATION_MS
  */
-export function useGameMascotMessage(): string {
+export function useGameMascotMessage(): string | null {
   // Subscribe to relevant game state
   const gameStatus = useGameStore((s) => s.gameStatus);
-  const isNotesMode = useGameStore((s) => s.isNotesMode);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
-  const progress = useProgress();
+  const lastCorrectCell = useGameStore((s) => s.lastCorrectCell);
 
   // Track previous state for detecting changes
   const prevStateRef = useRef<GameStateSnapshot | null>(null);
+  
+  // Current displayed message (null = no bubble)
+  const [message, setMessage] = useState<string | null>(null);
+  
+  // Timer ref for auto-dismiss
+  const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to show a message with auto-dismiss
+  const showMessage = (msg: string, persist = false, duration = MESSAGE_DURATION_MS) => {
+    // Clear any existing timer
+    if (dismissTimerRef.current) {
+      clearTimeout(dismissTimerRef.current);
+    }
+    
+    setMessage(msg);
+    
+    // Auto-dismiss unless persist is true (for win/lose states)
+    if (!persist) {
+      dismissTimerRef.current = setTimeout(() => {
+        setMessage(null);
+      }, duration);
+    }
+  };
+
+  // Unified message trigger with probability check
+  const tryShowMessage = (eventKey: EventKey) => {
+    const config = EVENT_CONFIG[eventKey];
+    if (shouldRespond(config.probability)) {
+      showMessage(
+        pickRandom(config.messages),
+        config.persist ?? false,
+        config.duration ?? MESSAGE_DURATION_MS
+      );
+    }
+  };
 
   // Create current state snapshot
   const currentState: GameStateSnapshot = {
     gameStatus,
-    isNotesMode,
     mistakeCount,
     hintsUsed,
-    progress,
+    lastCorrectCell,
   };
 
-  // Derive message from current state
-  const derivedMessage = deriveMessage(currentState, prevStateRef.current);
-
-  // Debounced displayed message
-  const [displayedMessage, setDisplayedMessage] = useState(derivedMessage);
-
-  // Update previous state ref after deriving message
+  // Detect events and trigger messages
   useEffect(() => {
+    const prevState = prevStateRef.current;
+    
+    // Game just started (first render with playing status)
+    if (prevState === null && gameStatus === 'playing') {
+      tryShowMessage('gameStart');
+    }
+    
+    // Game won
+    if (prevState?.gameStatus !== 'won' && gameStatus === 'won') {
+      tryShowMessage('win');
+    }
+    
+    // Game lost
+    if (prevState?.gameStatus !== 'lost' && gameStatus === 'lost') {
+      tryShowMessage('lose');
+    }
+    
+    // Mistake made (probability-based)
+    if (prevState !== null && mistakeCount > prevState.mistakeCount) {
+      tryShowMessage('mistake');
+    }
+    
+    // Hint used (always respond)
+    if (prevState !== null && hintsUsed > prevState.hintsUsed) {
+      tryShowMessage('hint');
+    }
+    
+    // Correct answer (probability-based, exclude hint-triggered fills)
+    if (
+      prevState !== null &&
+      lastCorrectCell !== null &&
+      (prevState.lastCorrectCell === null ||
+        lastCorrectCell.row !== prevState.lastCorrectCell.row ||
+        lastCorrectCell.col !== prevState.lastCorrectCell.col) &&
+      hintsUsed === prevState.hintsUsed // Not from a hint
+    ) {
+      tryShowMessage('correct');
+    }
+    
+    // Update previous state ref
     prevStateRef.current = currentState;
-  });
+  }, [gameStatus, mistakeCount, hintsUsed, lastCorrectCell]);
 
-  // Debounce message updates to prevent flicker
+  // Cleanup timer on unmount
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDisplayedMessage(derivedMessage);
-    }, DEBOUNCE_MS);
+    return () => {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+      }
+    };
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [derivedMessage]);
-
-  return displayedMessage;
+  return message;
 }
+
+// Legacy export for testing (can be removed)
+export const deriveMessage = () => null;

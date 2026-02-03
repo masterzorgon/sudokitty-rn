@@ -9,6 +9,7 @@ import Animated, {
   withRepeat,
   withTiming,
   withSequence,
+  cancelAnimation,
   Easing,
 } from 'react-native-reanimated';
 import { durations } from '../../theme/animations';
@@ -54,6 +55,10 @@ export function MochiCat({
         -1, // Repeat forever
         false // Don't reverse, we handle both directions in sequence
       );
+    } else {
+      // Cancel any running animation and reset to default scale
+      cancelAnimation(breatheScale);
+      breatheScale.value = 1;
     }
   }, [animate, breatheScale]);
 
