@@ -6,7 +6,6 @@ import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Feather } from '@expo/vector-icons';
 
 import {
   AnimatedGameView,
@@ -209,42 +208,27 @@ export default function GameScreen() {
     }
   }, [gameStatus, resumeGame]);
 
-  // Settings button for progress bar trailing action
-  const settingsButton = (
-    <Pressable
-      onPress={openSettingsModal}
-      hitSlop={12}
-      style={styles.settingsButton}
-    >
-      <Feather name="settings" size={24} color={colors.textSecondary} />
-    </Pressable>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       {/* TOP ZONE - Progress bar with back button and settings */}
       <View style={styles.topZone}>
-        <ProgressBar onBack={handleGoBack} trailingAction={settingsButton} />
+        <ProgressBar onBack={handleGoBack} onSettingsPress={openSettingsModal} />
       </View>
 
-      {/* HEADER ZONE - Game stats */}
-      <View style={styles.headerZone}>
-        <GameHeader />
+      {/* Flex spacer to push mascot+grid down toward controls */}
+      <View style={styles.flexSpacer} />
+
+      {/* MASCOT ZONE - Cat with contextual speech bubble (directly above stats bar) */}
+      <View style={styles.mascotZone}>
+        <GameMascot message={mascotMessage} />
       </View>
 
-      {/* MASCOT ZONE - Cat with contextual speech bubble */}
-      <GameMascot message={mascotMessage} />
+      {/* STATS BAR - Time | Mistakes | Hints (directly below mascot, above grid) */}
+      <GameHeader />
 
-      {/* MIDDLE ZONE - Grid (edge-to-edge) */}
-      <View style={styles.middleZone}>
-        <View style={styles.flexSpacer} />
-
-        {/* Grid container - NO horizontal padding for edge-to-edge */}
-        <View style={styles.gridContainer}>
-          <AnimatedGameView />
-        </View>
-
-        <View style={styles.flexSpacer} />
+      {/* GRID ZONE - Game board (edge-to-edge) */}
+      <View style={styles.gridContainer}>
+        <AnimatedGameView />
       </View>
 
       {/* BOTTOM ZONE - Controls */}
@@ -285,29 +269,26 @@ const styles = StyleSheet.create({
   topZone: {
     paddingTop: spacing.sm,
   },
-  headerZone: {
-    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
-  },
-  middleZone: {
-    flex: 1,
-  },
   flexSpacer: {
     flex: 1,
+  },
+  mascotZone: {
+    width: '100%',
+    maxWidth: '80%',
+    alignSelf: 'center',
   },
   gridContainer: {
     // NO horizontal padding - grid spans edge-to-edge
     alignItems: 'center',
   },
   bottomZone: {
+    paddingTop: spacing.md,
     paddingBottom: spacing.md,
   },
   controlsContainer: {
     width: '100%',
     gap: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
-  },
-  settingsButton: {
-    padding: 4,
   },
   // Overlay styles
   overlay: {

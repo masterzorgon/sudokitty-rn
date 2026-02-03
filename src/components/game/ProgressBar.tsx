@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useProgress } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
@@ -14,11 +14,11 @@ import { GAME_LAYOUT } from '../../constants/layout';
 
 interface ProgressBarProps {
   onBack: () => void;
-  /** Optional trailing action element (e.g., settings button) */
-  trailingAction?: React.ReactNode;
+  /** Callback when settings button is pressed */
+  onSettingsPress?: () => void;
 }
 
-export const ProgressBar = ({ onBack, trailingAction }: ProgressBarProps) => {
+export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
   const progress = useProgress();
   const percentage = Math.round(progress * 100);
 
@@ -50,10 +50,14 @@ export const ProgressBar = ({ onBack, trailingAction }: ProgressBarProps) => {
         <Text style={styles.percentSign}>%</Text>
       </View>
 
-      {trailingAction && (
-        <View style={styles.trailingSlot}>
-          {trailingAction}
-        </View>
+      {onSettingsPress && (
+        <Pressable
+          onPress={onSettingsPress}
+          hitSlop={12}
+          style={styles.settingsButton}
+        >
+          <Feather name="settings" size={24} color={colors.textSecondary} />
+        </Pressable>
       )}
     </View>
   );
@@ -116,7 +120,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: -12,
   },
-  trailingSlot: {
+  settingsButton: {
+    padding: 4,
     marginLeft: 8,
   },
 });
