@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   mascotWrapper: {
     // Slight negative margin to overlap the mascot slightly
     marginLeft: -10,
-    marginRight: -15,
+    marginRight: 15,
   },
   bubbleContainer: {
     flex: 1,

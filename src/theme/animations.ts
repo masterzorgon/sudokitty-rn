@@ -177,7 +177,7 @@ export const scales = {
   selected: 1.05,
   bounce: 1.1,
   celebration: 1.2,
-  // Pop-in animation stages (subtle)
-  popShrink: 0.92,
-  popOvershoot: 1.04,
+  // Pop-in animation stages (very subtle)
+  popShrink: 0.96,
+  popOvershoot: 1.02,
 };
