@@ -1,20 +1,63 @@
 // Game stats bar - displays time, mistakes, and hints
 // Thin bar positioned between mascot and game grid
-// Uses animated rolling numbers for visual feedback
+// Uses visual dot indicators for mistakes/hints
 
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
 import { useTimerEnabled, useMistakeLimitEnabled } from '../../stores/settingsStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
-import { RollingNumber, RollingTime } from '../ui';
+import { RollingTime } from '../ui';
 import { CELL_SIZE } from '../board/SudokuCell';
 
 // Width of a 3x3 box (matches the sudoku board's box width)
 const BOX_WIDTH = CELL_SIZE * 3;
+
+// Icon indicator props
+interface IconIndicatorProps {
+  used: number;
+  total: number;
+}
+
+// Lives indicator - hearts representing remaining lives
+// Filled hearts = lives remaining, outline hearts = lives lost
+const LivesIndicator = ({ used, total }: IconIndicatorProps) => (
+  <View style={styles.iconRow}>
+    {Array.from({ length: total }, (_, i) => {
+      const isRemaining = i < (total - used);
+      return (
+        <Ionicons
+          key={i}
+          name={isRemaining ? 'heart' : 'heart-outline'}
+          size={16}
+          color={isRemaining ? colors.errorText : colors.gridLine}
+        />
+      );
+    })}
+  </View>
+);
+
+// Hints indicator - lightbulbs representing available hints
+// Filled bulbs = hints available, outline bulbs = hints used
+const HintsIndicator = ({ used, total }: IconIndicatorProps) => (
+  <View style={styles.iconRow}>
+    {Array.from({ length: total }, (_, i) => {
+      const isRemaining = i < (total - used);
+      return (
+        <Ionicons
+          key={i}
+          name={isRemaining ? 'bulb' : 'bulb-outline'}
+          size={16}
+          color={isRemaining ? colors.softOrange : colors.gridLine}
+        />
+      );
+    })}
+  </View>
+);
 
 export const GameHeader = () => {
   const timeElapsed = useGameStore((s) => s.timeElapsed);
@@ -42,20 +85,10 @@ export const GameHeader = () => {
       {/* Separator */}
       <View style={styles.separator} />
 
-      {/* Section 2: Mistakes */}
+      {/* Section 2: Lives (Mistakes) */}
       <View style={styles.section}>
         {mistakeLimitEnabled && (
-          <View style={styles.statRow}>
-            <RollingNumber
-              value={mistakeCount}
-              fontSize={14}
-              color={colors.textSecondary}
-              textStyle={typography.caption}
-              maxDigits={1}
-            />
-            <Text style={styles.stat}>/</Text>
-            <Text style={styles.stat}>{MAX_MISTAKES} mistakes</Text>
-          </View>
+          <LivesIndicator used={mistakeCount} total={MAX_MISTAKES} />
         )}
       </View>
 
@@ -64,17 +97,7 @@ export const GameHeader = () => {
 
       {/* Section 3: Hints */}
       <View style={styles.section}>
-        <View style={styles.statRow}>
-          <RollingNumber
-            value={hintsUsed}
-            fontSize={14}
-            color={colors.textSecondary}
-            textStyle={typography.caption}
-            maxDigits={1}
-          />
-          <Text style={styles.stat}>/</Text>
-          <Text style={styles.stat}>{MAX_HINTS} hints</Text>
-        </View>
+        <HintsIndicator used={hintsUsed} total={MAX_HINTS} />
       </View>
     </View>
   );
@@ -99,15 +122,9 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: colors.gridLine,
   },
-  stat: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    lineHeight: Math.ceil(14 * 1.4), // Match RollingNumber height for baseline alignment
-  },
-  statRow: {
+  iconRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: Math.ceil(14 * 1.4), // Fixed height to prevent layout shift during animation
-    gap: 1,
+    gap: 8,
   },
 });

@@ -71,7 +71,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },
   backButton: {
-    padding: 4,
     marginRight: 8,
   },
   barContainer: {
