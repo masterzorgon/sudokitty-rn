@@ -4,6 +4,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
@@ -32,6 +33,7 @@ const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
@@ -44,7 +46,7 @@ export default function HomeScreen() {
 
   const handleTechniquesPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // TODO: Navigate to techniques screen when implemented
+    router.push('/techniques');
   };
 
   // MARK: - Render

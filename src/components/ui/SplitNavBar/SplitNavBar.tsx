@@ -4,6 +4,9 @@
 
 import React, { useState, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useHasResumableGame } from '@/src/stores/gameStore';
@@ -73,12 +76,28 @@ export function SplitNavBar({
 
   return (
     <View
-      style={[
-        styles.container,
-        { bottom: insets.bottom + LAYOUT.bottomOffset },
-      ]}
+      style={styles.container}
       pointerEvents="box-none"
     >
+      {/* Full-width blur background with soft top edge */}
+      <MaskedView
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+        maskElement={
+          <LinearGradient
+            colors={['transparent', 'black']}
+            locations={[0, 0.45]}
+            style={StyleSheet.absoluteFill}
+          />
+        }
+      >
+        <BlurView
+          intensity={200}
+          tint="light"
+          style={StyleSheet.absoluteFill}
+        />
+      </MaskedView>
+
       {/* Secondary menu (rendered first for z-index) */}
       <SecondaryMenu
         isOpen={isMenuOpen}
@@ -88,7 +107,13 @@ export function SplitNavBar({
       />
 
       {/* Navigation pills container */}
-      <View style={styles.pillsContainer}>
+      <View
+        style={[
+          styles.pillsContainer,
+          { paddingBottom: insets.bottom + LAYOUT.bottomOffset },
+        ]}
+        pointerEvents="box-none"
+      >
         {/* Left cluster - secondary navigation */}
         <LeftCluster activeTab={activeTab} onTabPress={handleTabPress} />
 
@@ -108,6 +133,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
+    bottom: 0,
     zIndex: 100,
   },
   pillsContainer: {
@@ -115,5 +141,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-end',
     paddingHorizontal: LAYOUT.horizontalPadding,
+    paddingTop: 52,
   },
 });

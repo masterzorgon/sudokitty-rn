@@ -1,0 +1,232 @@
+// Technique metadata for display and categorization
+// Maps from engine technique names to user-facing display data
+
+import { TechniqueLevel } from '../engine/solver/types';
+
+// ============================================
+// Types
+// ============================================
+
+export type TechniqueCategory = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+
+export interface TechniqueMetadata {
+  id: string;
+  name: string;
+  level: TechniqueLevel;
+  category: TechniqueCategory;
+  shortDescription: string;
+  longDescription: string;
+  icon: string; // Feather icon name
+  color: string; // Category accent color
+  /** Whether the technique produces a placement (vs elimination) */
+  isPlacement: boolean;
+}
+
+// ============================================
+// Category Mappings
+// ============================================
+
+export const LEVEL_TO_CATEGORY: Record<TechniqueLevel, TechniqueCategory> = {
+  1: 'Beginner',
+  2: 'Intermediate',
+  3: 'Advanced',
+  4: 'Expert',
+};
+
+export const CATEGORY_COLORS: Record<TechniqueCategory, string> = {
+  Beginner: '#4CAF50',     // Green
+  Intermediate: '#FF9800', // Orange
+  Advanced: '#F44336',     // Red
+  Expert: '#9C27B0',       // Purple
+};
+
+export const CATEGORY_ICONS: Record<TechniqueCategory, string> = {
+  Beginner: 'star',
+  Intermediate: 'zap',
+  Advanced: 'target',
+  Expert: 'award',
+};
+
+// ============================================
+// All Technique Metadata
+// ============================================
+
+export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
+  // Level 1 - Beginner
+  {
+    id: 'naked-single',
+    name: 'Naked Single',
+    level: 1,
+    category: 'Beginner',
+    shortDescription: 'A cell with only one possible value',
+    longDescription:
+      'When all other candidates have been eliminated from a cell, only one value remains. ' +
+      'This is the most fundamental Sudoku technique. Look for cells where row, column, and box ' +
+      'constraints leave only a single possibility.',
+    icon: 'star',
+    color: CATEGORY_COLORS.Beginner,
+    isPlacement: true,
+  },
+  {
+    id: 'hidden-single',
+    name: 'Hidden Single',
+    level: 1,
+    category: 'Beginner',
+    shortDescription: 'A value that can only go in one cell of a unit',
+    longDescription:
+      'When a number can only fit in one cell within a row, column, or box, that cell must contain ' +
+      'that number — even if the cell has other candidates. The number is "hidden" among other ' +
+      'possibilities, but it has no other home in that unit.',
+    icon: 'star',
+    color: CATEGORY_COLORS.Beginner,
+    isPlacement: true,
+  },
+
+  // Level 2 - Intermediate
+  {
+    id: 'naked-pair',
+    name: 'Naked Pair',
+    level: 2,
+    category: 'Intermediate',
+    shortDescription: 'Two cells sharing exactly two candidates',
+    longDescription:
+      'When two cells in a unit (row, column, or box) contain exactly the same two candidates, ' +
+      'those two numbers are locked into those two cells. This means you can safely eliminate ' +
+      'those candidates from all other cells in the same unit.',
+    icon: 'zap',
+    color: CATEGORY_COLORS.Intermediate,
+    isPlacement: false,
+  },
+  {
+    id: 'hidden-pair',
+    name: 'Hidden Pair',
+    level: 2,
+    category: 'Intermediate',
+    shortDescription: 'Two values restricted to the same two cells',
+    longDescription:
+      'When two candidates appear only in the same two cells within a unit, those cells must ' +
+      'contain those two values. All other candidates in those two cells can be eliminated. ' +
+      'The pair is "hidden" because the cells may have additional candidates that obscure the pattern.',
+    icon: 'zap',
+    color: CATEGORY_COLORS.Intermediate,
+    isPlacement: false,
+  },
+  {
+    id: 'pointing-pair',
+    name: 'Pointing Pair',
+    level: 2,
+    category: 'Intermediate',
+    shortDescription: 'Box candidates aligned in a row or column',
+    longDescription:
+      'When a candidate within a box is confined to a single row or column, it must be in one of those ' +
+      'positions. This means the same candidate can be eliminated from the rest of that row or column ' +
+      'outside the box. The cells "point" toward where eliminations can happen.',
+    icon: 'zap',
+    color: CATEGORY_COLORS.Intermediate,
+    isPlacement: false,
+  },
+  {
+    id: 'box-line-reduction',
+    name: 'Box/Line Reduction',
+    level: 2,
+    category: 'Intermediate',
+    shortDescription: 'Row/column candidates confined to one box',
+    longDescription:
+      'The inverse of a Pointing Pair. When a candidate in a row or column is confined to a single box, ' +
+      'it can be eliminated from other cells in that box. The row/column tells the box where the ' +
+      'number must go, removing it from unrelated cells.',
+    icon: 'zap',
+    color: CATEGORY_COLORS.Intermediate,
+    isPlacement: false,
+  },
+
+  // Level 3 - Advanced
+  {
+    id: 'naked-triple',
+    name: 'Naked Triple',
+    level: 3,
+    category: 'Advanced',
+    shortDescription: 'Three cells sharing at most three candidates',
+    longDescription:
+      'An extension of the Naked Pair. When three cells in a unit collectively contain at most three ' +
+      'distinct candidates, those three values are locked into those cells. Each cell doesn\'t need ' +
+      'all three candidates — the union of candidates across the three cells must equal exactly three.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+  },
+  {
+    id: 'x-wing',
+    name: 'X-Wing',
+    level: 3,
+    category: 'Advanced',
+    shortDescription: 'A candidate forming a rectangle across two rows',
+    longDescription:
+      'When a candidate appears in exactly two cells in each of two rows, and those cells share the ' +
+      'same two columns, the candidate forms an X-shaped pattern. It must be in one diagonal pair or ' +
+      'the other, so it can be eliminated from all other cells in those two columns.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+  },
+
+  // Level 4 - Expert
+  {
+    id: 'swordfish',
+    name: 'Swordfish',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'X-Wing extended to three rows and columns',
+    longDescription:
+      'A generalization of X-Wing to three dimensions. When a candidate appears in 2-3 cells in each ' +
+      'of three rows, and those cells collectively occupy exactly three columns, the candidate can be ' +
+      'eliminated from other cells in those three columns. The pattern resembles a three-pronged fork.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+  },
+  {
+    id: 'xy-wing',
+    name: 'XY-Wing',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Three bi-value cells forming a chain',
+    longDescription:
+      'Three cells with two candidates each form a special chain. The pivot cell (with candidates XY) ' +
+      'sees two wing cells — one with XZ and one with YZ. No matter which value the pivot takes, Z ' +
+      'is forced into one of the wings. So Z can be eliminated from any cell that sees both wings.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+  },
+];
+
+// ============================================
+// Lookup Helpers
+// ============================================
+
+/** Get metadata by technique ID */
+export function getTechniqueMetadata(id: string): TechniqueMetadata | undefined {
+  return TECHNIQUE_METADATA.find((t) => t.id === id);
+}
+
+/** Get all techniques for a given category */
+export function getTechniquesByCategory(category: TechniqueCategory): TechniqueMetadata[] {
+  return TECHNIQUE_METADATA.filter((t) => t.category === category);
+}
+
+/** Get all techniques grouped by category (in order) */
+export function getTechniquesGroupedByCategory(): Array<{
+  category: TechniqueCategory;
+  color: string;
+  icon: string;
+  techniques: TechniqueMetadata[];
+}> {
+  const categories: TechniqueCategory[] = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
+  return categories.map((category) => ({
+    category,
+    color: CATEGORY_COLORS[category],
+    icon: CATEGORY_ICONS[category],
+    techniques: getTechniquesByCategory(category),
+  }));
+}

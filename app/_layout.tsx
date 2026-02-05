@@ -80,6 +80,20 @@ function RootLayoutNav() {
           }}
         />
         <Stack.Screen
+          name="techniques/index"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="techniques/[id]"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
           name="feedback"
           options={{
             headerShown: false,
