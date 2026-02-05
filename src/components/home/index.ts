@@ -8,5 +8,5 @@ export { MochiChart } from './MochiChart';
 export { TimePeriodTabs } from './TimePeriodTabs';
 export { StatCard } from './StatCard';
 export { StatsCardGrid } from './StatsCardGrid';
-export { DailyChallengeCTA } from './DailyChallengeCTA';
+export { TechniquesCTA } from './TechniquesCTA';
 export { StreakPill } from './StreakPill';

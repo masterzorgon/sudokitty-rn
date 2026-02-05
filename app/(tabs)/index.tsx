@@ -4,7 +4,6 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
@@ -17,7 +16,7 @@ import {
 import {
   MochiCat,
   ChatBubble,
-  DailyChallengeCTA,
+  TechniquesCTA,
   StreakPill,
 } from '../../src/components/home';
 import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
@@ -32,14 +31,10 @@ const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
 // MARK: - Component
 
 export default function HomeScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
 
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
-  const getTodayChallenge = useDailyChallengeStore((s) => s.getTodayChallenge);
-  const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
-  const getSimulatedParticipants = useDailyChallengeStore((s) => s.getSimulatedParticipants);
   const currentStreak = useCurrentStreak();
 
   // Load state on mount
@@ -47,14 +42,9 @@ export default function HomeScreen() {
     loadState();
   }, [loadState]);
 
-  // Derived values
-  const challenge = getTodayChallenge();
-  const isCompleted = isTodayCompleted();
-  const participants = getSimulatedParticipants();
-
-  const handleDailyPress = () => {
+  const handleTechniquesPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push('/daily');
+    // TODO: Navigate to techniques screen when implemented
   };
 
   // MARK: - Render
@@ -90,7 +80,7 @@ export default function HomeScreen() {
         </Animated.View>
       </View>
 
-      {/* Daily Challenge CTA - fixed above nav bar */}
+      {/* Techniques CTA - fixed above nav bar */}
       <Animated.View
         entering={FadeInDown.delay(1000).duration(400)}
         style={[
@@ -98,12 +88,7 @@ export default function HomeScreen() {
           { bottom: insets.bottom + CTA_BOTTOM_OFFSET },
         ]}
       >
-        <DailyChallengeCTA
-          challenge={challenge}
-          isCompleted={isCompleted}
-          participantCount={participants}
-          onPress={handleDailyPress}
-        />
+        <TechniquesCTA onPress={handleTechniquesPress} />
       </Animated.View>
     </SafeAreaView>
   );
