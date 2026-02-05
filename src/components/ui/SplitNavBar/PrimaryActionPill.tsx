@@ -55,6 +55,7 @@ export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryA
 
 const styles = StyleSheet.create({
   face: {
+    width: LAYOUT.pillWidth,
     paddingVertical: LAYOUT.rightPillPaddingV,
     paddingHorizontal: LAYOUT.rightPillPaddingH,
     alignItems: 'center',

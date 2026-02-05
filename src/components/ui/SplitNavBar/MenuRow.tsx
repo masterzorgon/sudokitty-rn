@@ -3,7 +3,6 @@
 
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
 import { SvgProps } from 'react-native-svg';
 import Animated, {
   useSharedValue,
@@ -20,6 +19,9 @@ import MochiEasy from '../../../../assets/images/mochi/mochi-easy.svg';
 import MochiMedium from '../../../../assets/images/mochi/mochi-medium.svg';
 import MochiHard from '../../../../assets/images/mochi/mochi-hard.svg';
 import MochiExpert from '../../../../assets/images/mochi/mochi-expert.svg';
+// Import mochi SVG characters for resume menu actions
+import MochiQuit from '../../../../assets/images/mochi/mochi-quit.svg';
+import MochiResume from '../../../../assets/images/mochi/mochi-resume.svg';
 
 // Mapping from difficulty to mochi SVG component
 const MOCHI_ICONS: Record<Difficulty, React.FC<SvgProps>> = {
@@ -27,6 +29,12 @@ const MOCHI_ICONS: Record<Difficulty, React.FC<SvgProps>> = {
   medium: MochiMedium,
   hard: MochiHard,
   expert: MochiExpert,
+};
+
+// Mapping from menu action to mochi SVG component
+const ACTION_MOCHI_ICONS: Record<string, React.FC<SvgProps>> = {
+  quit_game: MochiQuit,
+  continue_game: MochiResume,
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -69,22 +77,15 @@ export function MenuRow({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      {/* menu item icon - mochi SVG for difficulty items, Feather icon for others */}
+      {/* menu item icon - mochi SVG for all items */}
       <View style={styles.iconContainer}>
-        {item.difficulty ? (
-          // Render mochi SVG for difficulty items
-          (() => {
-            const MochiIcon = MOCHI_ICONS[item.difficulty];
-            return <MochiIcon width={55} height={55} />;
-          })()
-        ) : (
-          // Render Feather icon for non-difficulty items (continue playing, quit game)
-          <Feather
-            name={item.icon as keyof typeof Feather.glyphMap}
-            size={55}
-            color={colors.softOrange}
-          />
-        )}
+        {(() => {
+          // Use difficulty mochi icon if available, otherwise use action mochi icon
+          const MochiIcon = item.difficulty
+            ? MOCHI_ICONS[item.difficulty]
+            : ACTION_MOCHI_ICONS[item.action];
+          return MochiIcon ? <MochiIcon width={55} height={55} /> : null;
+        })()}
       </View>
       {/* menu item label */}
       <View style={styles.labelContainer}>

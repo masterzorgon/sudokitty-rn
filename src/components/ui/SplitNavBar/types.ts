@@ -83,6 +83,8 @@ export const LAYOUT = {
   unfurlPadding: 16,
   rowHeight: 56,
   rowGap: 8,
+  // Shared width for LeftCluster and PrimaryActionPill: 3 icons + 2 gaps + padding
+  pillWidth: 3 * 24 + 2 * 32 + 2 * 20, // 176
 } as const;
 
 // Mochi icon mapping for difficulties (using Feather icons)

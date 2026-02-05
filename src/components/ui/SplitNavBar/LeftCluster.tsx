@@ -96,10 +96,11 @@ export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
 
 const styles = StyleSheet.create({
   container: {
+    width: LAYOUT.pillWidth,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: LAYOUT.iconGap,
-    paddingHorizontal: LAYOUT.leftClusterPaddingH,
     paddingVertical: LAYOUT.rightPillPaddingV,
   },
   iconContainer: {
