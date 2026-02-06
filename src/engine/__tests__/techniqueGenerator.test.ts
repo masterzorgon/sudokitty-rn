@@ -8,6 +8,7 @@
 
 import {
   generatePuzzleForTechnique,
+  generateWithFallback,
   benchmarkTechnique,
   benchmarkAllTechniques,
   findAllTechniqueInstances,
@@ -15,6 +16,8 @@ import {
   TechniqueGenerationResult,
   GenerationConfig,
 } from '../techniqueGenerator';
+import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
+import { TECHNIQUE_METADATA } from '../../data/techniqueMetadata';
 import { SudokuSolver } from '../solver/SudokuSolver';
 import { CandidateGrid } from '../solver/CandidateGrid';
 
@@ -260,4 +263,31 @@ describe('Technique Generator - Benchmark', () => {
       expect(r.successRate).toBeGreaterThan(0);
     }
   });
+});
+
+// ============================================
+// Generation Reliability — Hard Assertions
+// Each solver-backed technique MUST be obtainable via generateWithFallback
+// ============================================
+
+describe('Generation reliability', () => {
+  const solverTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver);
+
+  for (const technique of solverTechniques) {
+    const info = TECHNIQUE_IDS[technique.id];
+    if (!info) continue;
+
+    test(`${technique.name} can be obtained via generateWithFallback`, () => {
+      const result = generateWithFallback(technique.id, CURATED_PUZZLE_BANK, {
+        maxRetries: 50,
+        timeoutMs: 3000,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.puzzle).toBeDefined();
+      expect(result.solution).toBeDefined();
+      expect(result.techniqueResult).toBeDefined();
+      expect(result.techniqueResult!.techniqueName).toBe(info.name);
+    });
+  }
 });

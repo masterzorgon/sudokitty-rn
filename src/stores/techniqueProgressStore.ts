@@ -244,14 +244,14 @@ export const useTechniqueProgressStore = create<
         return Object.values(get().techniques).filter((p) => p.isCompleted).length;
       },
 
-      // Total technique count
+      // Total technique count (only solver-backed techniques)
       getTotalCount: (): number => {
-        return TECHNIQUE_METADATA.length;
+        return TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
       },
 
-      // Overall progress (0-1)
+      // Overall progress (0-1, only solver-backed techniques)
       getOverallProgress: (): number => {
-        const total = TECHNIQUE_METADATA.length;
+        const total = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
         if (total === 0) return 0;
         const completed = Object.values(get().techniques).filter((p) => p.isCompleted).length;
         return completed / total;

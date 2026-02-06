@@ -1,21 +1,9 @@
-// Curated puzzle bank for technique practice
-// Contains pre-generated puzzles where each technique is the next logical step
-//
-// Generation strategy:
-//   Level 1 (Naked/Hidden Single): Always generated on-device (~6-52ms)
-//   Level 2 (Pairs, Pointing): Generated with fallback to these curated puzzles
-//   Level 3-4 (X-Wing, Swordfish, etc.): Use curated puzzles (generation unreliable)
-//
-// Each puzzle is a "snapshot" where simpler techniques are already exhausted
-// and the target technique is the next applicable step.
+// Level 2 - Intermediate curated puzzles
+// Naked Pair, Hidden Pair, Pointing Pair, Box/Line Reduction
 
-import { CuratedPuzzle, CuratedPuzzleBank } from '../engine/techniqueGenerator';
+import { PartialPuzzleBank } from './types';
 
-export const CURATED_PUZZLE_BANK: CuratedPuzzleBank = {
-  // ============================================
-  // Level 2 - Intermediate (Generated, verified)
-  // ============================================
-
+export const level2Puzzles: PartialPuzzleBank = {
   'naked-pair': [
     {
       puzzle: [
@@ -43,15 +31,9 @@ export const CURATED_PUZZLE_BANK: CuratedPuzzleBank = {
       techniqueResult: {
         techniqueName: 'Naked Pair',
         level: 2,
-        explanation:
-          'R7C3 and R9C3 form a naked pair with candidates 1, 8 in box 7',
-        highlightCells: [
-          { row: 6, col: 2 },
-          { row: 8, col: 2 },
-        ],
-        eliminations: [
-          { position: { row: 7, col: 1 }, candidates: [8] },
-        ],
+        explanation: 'R7C3 and R9C3 form a naked pair with candidates 1, 8 in box 7',
+        highlightCells: [{ row: 6, col: 2 }, { row: 8, col: 2 }],
+        eliminations: [{ position: { row: 7, col: 1 }, candidates: [8] }],
         placements: [],
       },
     },
@@ -84,12 +66,8 @@ export const CURATED_PUZZLE_BANK: CuratedPuzzleBank = {
       techniqueResult: {
         techniqueName: 'Hidden Pair',
         level: 2,
-        explanation:
-          '5, 6 form a hidden pair in R9C4 and R9C9 in row 9',
-        highlightCells: [
-          { row: 8, col: 3 },
-          { row: 8, col: 8 },
-        ],
+        explanation: '5, 6 form a hidden pair in R9C4 and R9C9 in row 9',
+        highlightCells: [{ row: 8, col: 3 }, { row: 8, col: 8 }],
         eliminations: [
           { position: { row: 8, col: 3 }, candidates: [3, 8] },
           { position: { row: 8, col: 8 }, candidates: [1, 2, 8] },
@@ -126,12 +104,8 @@ export const CURATED_PUZZLE_BANK: CuratedPuzzleBank = {
       techniqueResult: {
         techniqueName: 'Pointing Pair',
         level: 2,
-        explanation:
-          '8 in box 9 is confined to column 7, eliminating from rest of column',
-        highlightCells: [
-          { row: 6, col: 6 },
-          { row: 7, col: 6 },
-        ],
+        explanation: '8 in box 9 is confined to column 7, eliminating from rest of column',
+        highlightCells: [{ row: 6, col: 6 }, { row: 7, col: 6 }],
         eliminations: [
           { position: { row: 3, col: 6 }, candidates: [8] },
           { position: { row: 5, col: 6 }, candidates: [8] },
@@ -168,12 +142,8 @@ export const CURATED_PUZZLE_BANK: CuratedPuzzleBank = {
       techniqueResult: {
         techniqueName: 'Box/Line Reduction',
         level: 2,
-        explanation:
-          '1 in row 4 is confined to box 5, eliminating from rest of box',
-        highlightCells: [
-          { row: 3, col: 3 },
-          { row: 3, col: 5 },
-        ],
+        explanation: '1 in row 4 is confined to box 5, eliminating from rest of box',
+        highlightCells: [{ row: 3, col: 3 }, { row: 3, col: 5 }],
         eliminations: [
           { position: { row: 4, col: 3 }, candidates: [1] },
           { position: { row: 4, col: 5 }, candidates: [1] },
@@ -182,17 +152,4 @@ export const CURATED_PUZZLE_BANK: CuratedPuzzleBank = {
       },
     },
   ],
-
-  // ============================================
-  // Level 3-4 - Advanced/Expert
-  // These are harder to generate on-device.
-  // Empty for now - generation with fallback will try on-device first,
-  // then show "generation failed" UI if no curated puzzles available.
-  // Will be populated as generation succeeds over time.
-  // ============================================
-
-  'naked-triple': [],
-  'x-wing': [],
-  'swordfish': [],
-  'xy-wing': [],
 };

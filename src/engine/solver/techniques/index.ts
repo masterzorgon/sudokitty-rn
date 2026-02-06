@@ -14,11 +14,21 @@ import { BoxLineReduction } from './level2/BoxLineReduction';
 
 // Level 3 techniques
 import { NakedTriple } from './level3/NakedTriple';
+import { HiddenTriple } from './level3/HiddenTriple';
 import { XWing } from './level3/XWing';
+import { FinnedFish } from './level3/FinnedFish';
 
 // Level 4 techniques
 import { Swordfish } from './level4/Swordfish';
+import { Jellyfish } from './level4/Jellyfish';
 import { XYWing } from './level4/XYWing';
+import { XYZWing } from './level4/XYZWing';
+import { WXYZWing } from './level4/WXYZWing';
+import { UniqueRectangle } from './level4/UniqueRectangle';
+import { AvoidableRectangle } from './level4/AvoidableRectangle';
+import { BUG } from './level4/BUG';
+import { AlmostLockedSets } from './level4/AlmostLockedSets';
+import { AIC } from './level4/AIC';
 
 // Re-export for convenience
 export { NakedSingle } from './level1/NakedSingle';
@@ -28,9 +38,19 @@ export { HiddenPair } from './level2/HiddenPair';
 export { PointingPair } from './level2/PointingPair';
 export { BoxLineReduction } from './level2/BoxLineReduction';
 export { NakedTriple } from './level3/NakedTriple';
+export { HiddenTriple } from './level3/HiddenTriple';
 export { XWing } from './level3/XWing';
+export { FinnedFish } from './level3/FinnedFish';
 export { Swordfish } from './level4/Swordfish';
+export { Jellyfish } from './level4/Jellyfish';
 export { XYWing } from './level4/XYWing';
+export { XYZWing } from './level4/XYZWing';
+export { WXYZWing } from './level4/WXYZWing';
+export { UniqueRectangle } from './level4/UniqueRectangle';
+export { AvoidableRectangle } from './level4/AvoidableRectangle';
+export { BUG } from './level4/BUG';
+export { AlmostLockedSets } from './level4/AlmostLockedSets';
+export { AIC } from './level4/AIC';
 
 /**
  * All techniques ordered by difficulty level.
@@ -47,10 +67,20 @@ export const ALL_TECHNIQUES: Technique[] = [
   new BoxLineReduction(),
   // Level 3 - Hard
   new NakedTriple(),
+  new HiddenTriple(),
   new XWing(),
+  new FinnedFish(),
   // Level 4 - Expert
   new Swordfish(),
+  new Jellyfish(),
   new XYWing(),
+  new XYZWing(),
+  new WXYZWing(),
+  new UniqueRectangle(),
+  new AvoidableRectangle(),
+  new BUG(),
+  new AlmostLockedSets(),
+  new AIC(),
 ];
 
 /**
@@ -73,6 +103,6 @@ export const getTechniquesForLevel = (level: TechniqueLevel): Technique[] => {
 export const TECHNIQUE_NAMES_BY_LEVEL: Record<TechniqueLevel, string[]> = {
   1: ['Naked Single', 'Hidden Single'],
   2: ['Naked Pair', 'Hidden Pair', 'Pointing Pair', 'Box/Line Reduction'],
-  3: ['Naked Triple', 'X-Wing'],
-  4: ['Swordfish', 'XY-Wing'],
+  3: ['Naked Triple', 'Hidden Triple', 'X-Wing', 'Finned Fish'],
+  4: ['Swordfish', 'Jellyfish', 'XY-Wing', 'XYZ-Wing', 'WXYZ-Wing', 'Unique Rectangle', 'Avoidable Rectangle', 'BUG', 'Almost Locked Sets', 'Alternating Inference Chains'],
 };

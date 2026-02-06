@@ -20,6 +20,8 @@ export interface TechniqueMetadata {
   color: string; // Category accent color
   /** Whether the technique produces a placement (vs elimination) */
   isPlacement: boolean;
+  /** Whether this technique has a working solver implementation for interactive practice */
+  hasSolver: boolean;
 }
 
 // ============================================
@@ -66,6 +68,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'star',
     color: CATEGORY_COLORS.Beginner,
     isPlacement: true,
+    hasSolver: true,
   },
   {
     id: 'hidden-single',
@@ -80,6 +83,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'star',
     color: CATEGORY_COLORS.Beginner,
     isPlacement: true,
+    hasSolver: true,
   },
 
   // Level 2 - Intermediate
@@ -96,6 +100,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'zap',
     color: CATEGORY_COLORS.Intermediate,
     isPlacement: false,
+    hasSolver: true,
   },
   {
     id: 'hidden-pair',
@@ -110,6 +115,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'zap',
     color: CATEGORY_COLORS.Intermediate,
     isPlacement: false,
+    hasSolver: true,
   },
   {
     id: 'pointing-pair',
@@ -124,6 +130,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'zap',
     color: CATEGORY_COLORS.Intermediate,
     isPlacement: false,
+    hasSolver: true,
   },
   {
     id: 'box-line-reduction',
@@ -138,6 +145,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'zap',
     color: CATEGORY_COLORS.Intermediate,
     isPlacement: false,
+    hasSolver: true,
   },
 
   // Level 3 - Advanced
@@ -154,6 +162,22 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'target',
     color: CATEGORY_COLORS.Advanced,
     isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'hidden-triple',
+    name: 'Hidden Triple',
+    level: 3,
+    category: 'Advanced',
+    shortDescription: 'Three values restricted to the same three cells',
+    longDescription:
+      'When three candidates appear only in the same three cells within a unit, those cells must ' +
+      'contain those three values. All other candidates in those three cells can be eliminated. ' +
+      'Like Hidden Pair but with three numbers — harder to spot because extra candidates obscure the pattern.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
   },
   {
     id: 'x-wing',
@@ -168,6 +192,22 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'target',
     color: CATEGORY_COLORS.Advanced,
     isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'finned-fish',
+    name: 'Finned Fish',
+    level: 3,
+    category: 'Advanced',
+    shortDescription: 'X-Wing with an extra candidate "fin" cell',
+    longDescription:
+      'A variation of X-Wing where one corner has extra candidate cells (the "fin"). Eliminations ' +
+      'are restricted to cells that see both the fin and the regular X-Wing pattern. Covers Finned ' +
+      'X-Wing, Sashimi Finned Fish, and Finned Grouped X-Cycles.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
   },
 
   // Level 4 - Expert
@@ -184,6 +224,22 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'award',
     color: CATEGORY_COLORS.Expert,
     isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'jellyfish',
+    name: 'Jellyfish',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Fish pattern extended to four rows and columns',
+    longDescription:
+      'The next step beyond Swordfish. When a candidate appears in 2-4 cells in each of four rows, ' +
+      'and those cells collectively occupy exactly four columns, the candidate can be eliminated from ' +
+      'other cells in those four columns. Rare in practice but powerful when it appears.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
   },
   {
     id: 'xy-wing',
@@ -198,6 +254,112 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     icon: 'award',
     color: CATEGORY_COLORS.Expert,
     isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'xyz-wing',
+    name: 'XYZ-Wing',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'XY-Wing with a three-candidate pivot cell',
+    longDescription:
+      'Similar to XY-Wing, but the pivot cell has three candidates (XYZ) instead of two. The pivot ' +
+      'sees two wing cells — one with XZ and one with YZ. The common candidate Z can be eliminated ' +
+      'from any cell that sees the pivot and both wings simultaneously.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'wxyz-wing',
+    name: 'WXYZ-Wing',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Four-cell wing pattern with shared elimination',
+    longDescription:
+      'An extension of XYZ-Wing to four cells. A pivot and three wings collectively hold four ' +
+      'candidates (WXYZ). Through the chain of relationships, one candidate can be eliminated from ' +
+      'cells that see all positions where it could appear. Very rare but satisfying to find.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'unique-rectangle',
+    name: 'Unique Rectangle',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Exploits the uniqueness of a valid puzzle',
+    longDescription:
+      'If four cells forming a rectangle across two boxes share the same two candidates, the puzzle ' +
+      'would have multiple solutions — which is invalid. This lets you eliminate candidates to prevent ' +
+      'the deadly pattern. Covers Standard, Hidden, SSCP, and Expanded Rectangle variants.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'avoidable-rectangle',
+    name: 'Avoidable Rectangle',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Unique Rectangle using solved cells as anchors',
+    longDescription:
+      'A variation of Unique Rectangle where some corner cells are already solved. The placed values ' +
+      'anchor the pattern, and you eliminate candidates from the unsolved corners to avoid a deadly ' +
+      'rectangle. Covers AR with candidate pairs and conjugate pair variants.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'alternating-inference-chains',
+    name: 'Alternating Inference Chains',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Chains of strong and weak links between candidates',
+    longDescription:
+      'A powerful chain-based technique that alternates between strong links (exactly two candidates) ' +
+      'and weak links (shared unit). If the chain starts and ends on the same candidate, eliminations ' +
+      'follow. Covers basic AIC, AIC with Groups, and AIC with Almost Locked Sets.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'almost-locked-sets',
+    name: 'Almost Locked Sets',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'N cells with N+1 candidates linked by shared values',
+    longDescription:
+      'A group of N cells in a unit containing exactly N+1 distinct candidates. When two ALS groups ' +
+      'share a restricted common candidate, eliminations become possible in cells that see both sets. ' +
+      'Covers ALS-XZ, ALS-XY, and ALS-Chains.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'bug',
+    name: 'BUG',
+    level: 4,
+    category: 'Expert',
+    shortDescription: 'Bivalue Universal Grave — prevent an invalid state',
+    longDescription:
+      'BUG (Bivalue Universal Grave) occurs when all unsolved cells have exactly two candidates ' +
+      'except one cell with three. To avoid the deadly BUG state (which implies multiple solutions), ' +
+      'the odd candidate in that cell must be the solution. A quick, elegant deduction.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
   },
 ];
 

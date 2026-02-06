@@ -13,6 +13,7 @@ import { SudokuSolver, TechniqueLevel, TechniqueResult, Hint, getMochiHint } fro
 import { CandidateGrid } from './solver/CandidateGrid';
 import { ALL_TECHNIQUES } from './solver/techniques';
 import { generatePuzzle } from './generator';
+import { transformCuratedPuzzle } from './puzzleTransform';
 
 // ============================================
 // Types
@@ -50,9 +51,19 @@ export const TECHNIQUE_IDS: Record<string, TechniqueInfo> = {
   'pointing-pair': { id: 'pointing-pair', name: 'Pointing Pair', level: 2 },
   'box-line-reduction': { id: 'box-line-reduction', name: 'Box/Line Reduction', level: 2 },
   'naked-triple': { id: 'naked-triple', name: 'Naked Triple', level: 3 },
+  'hidden-triple': { id: 'hidden-triple', name: 'Hidden Triple', level: 3 },
   'x-wing': { id: 'x-wing', name: 'X-Wing', level: 3 },
+  'finned-fish': { id: 'finned-fish', name: 'Finned Fish', level: 3 },
   'swordfish': { id: 'swordfish', name: 'Swordfish', level: 4 },
+  'jellyfish': { id: 'jellyfish', name: 'Jellyfish', level: 4 },
   'xy-wing': { id: 'xy-wing', name: 'XY-Wing', level: 4 },
+  'xyz-wing': { id: 'xyz-wing', name: 'XYZ-Wing', level: 4 },
+  'wxyz-wing': { id: 'wxyz-wing', name: 'WXYZ-Wing', level: 4 },
+  'unique-rectangle': { id: 'unique-rectangle', name: 'Unique Rectangle', level: 4 },
+  'avoidable-rectangle': { id: 'avoidable-rectangle', name: 'Avoidable Rectangle', level: 4 },
+  'bug': { id: 'bug', name: 'BUG', level: 4 },
+  'almost-locked-sets': { id: 'almost-locked-sets', name: 'Almost Locked Sets', level: 4 },
+  'alternating-inference-chains': { id: 'alternating-inference-chains', name: 'Alternating Inference Chains', level: 4 },
 };
 
 // Reverse lookup: technique name -> technique ID
@@ -316,7 +327,11 @@ export interface CuratedPuzzle {
 export type CuratedPuzzleBank = Record<string, CuratedPuzzle[]>;
 
 /**
- * Get a puzzle from the curated bank (round-robin).
+ * Get a puzzle from the curated bank.
+ *
+ * Applies a random isomorphic transformation to the selected puzzle so users
+ * see a visually distinct board each time, even when drawing from a small
+ * curated pool. The transformation preserves the technique that applies.
  */
 export function getCuratedPuzzle(
   bank: CuratedPuzzleBank,
@@ -337,12 +352,15 @@ export function getCuratedPuzzle(
   const idx = index !== undefined ? index % puzzles.length : Math.floor(Math.random() * puzzles.length);
   const curated = puzzles[idx];
 
+  // Apply random isomorphic transformation for variety
+  const transformed = transformCuratedPuzzle(curated);
+
   return {
     success: true,
-    puzzle: curated.puzzle,
-    solution: curated.solution,
-    techniqueResult: curated.techniqueResult as TechniqueResult,
-    hint: techniqueResultToHint(curated.techniqueResult as TechniqueResult),
+    puzzle: transformed.puzzle,
+    solution: transformed.solution,
+    techniqueResult: transformed.techniqueResult as TechniqueResult,
+    hint: techniqueResultToHint(transformed.techniqueResult as TechniqueResult),
     attemptsTaken: 0,
     timeMs: 0,
     source: 'curated',

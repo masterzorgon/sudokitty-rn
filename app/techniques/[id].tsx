@@ -37,7 +37,8 @@ import { TechniqueResult, TechniqueLevel } from '../../src/engine/solver/types';
 // Types
 // ============================================
 
-type PracticeMode = 'loading' | 'intro' | 'demo' | 'find-it' | 'error';
+type PracticeMode = 'loading' | 'intro' | 'demo' | 'find-it' | 'error' | 'coming-soon';
+type FindPhase = 'pattern' | 'elimination';
 
 interface PuzzleState {
   puzzle: number[][];
@@ -74,14 +75,34 @@ export default function TechniquePracticeScreen() {
   const [generationError, setGenerationError] = useState<string | null>(null);
   const demoStartTime = useRef<number>(0);
 
+  // Two-phase selection for elimination techniques
+  const [findPhase, setFindPhase] = useState<FindPhase>('pattern');
+  const [patternCells, setPatternCells] = useState<Set<string>>(new Set());
+  const [eliminationCells, setEliminationCells] = useState<Set<string>>(new Set());
+
+  const isElimination = puzzleState
+    ? !isPlacementTechnique(puzzleState.techniqueResult.techniqueName)
+    : false;
+
   // Store
   const completeDemo = useTechniqueProgressStore((s) => s.completeDemo);
   const recordFindAttempt = useTechniqueProgressStore((s) => s.recordFindAttempt);
 
-  // Generate puzzle on mount
+  // Reset find-it state (shared by multiple handlers)
+  const resetFindState = useCallback(() => {
+    setValidationResult(null);
+    setSelectedCells(new Set());
+    setPatternCells(new Set());
+    setEliminationCells(new Set());
+    setFindPhase('pattern');
+  }, []);
+
+  // Generate puzzle on mount (skip for techniques without solvers)
   useEffect(() => {
-    if (techniqueId) {
+    if (techniqueId && metadata?.hasSolver) {
       generatePuzzle();
+    } else if (techniqueId && metadata && !metadata.hasSolver) {
+      setMode('coming-soon');
     }
   }, [techniqueId]);
 
@@ -156,8 +177,7 @@ export default function TechniquePracticeScreen() {
             steps,
           });
           setMode('find-it');
-          setSelectedCells(new Set());
-          setValidationResult(null);
+          resetFindState();
         } else {
           setMode('error');
           setGenerationError('Could not generate a practice puzzle.');
@@ -177,32 +197,68 @@ export default function TechniquePracticeScreen() {
     if (mode !== 'find-it' || !puzzleState) return;
 
     const key = positionKey({ row, col });
-    setSelectedCells((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
+
+    if (!isElimination) {
+      // Placement: single cell toggle
+      setSelectedCells((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          // Only allow one cell for placement
+          next.clear();
+          next.add(key);
+        }
+        return next;
+      });
+    } else if (findPhase === 'pattern') {
+      // Elimination phase 1: select pattern cells
+      setPatternCells((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
+        return next;
+      });
+    } else {
+      // Elimination phase 2: select elimination targets
+      setEliminationCells((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
+        return next;
+      });
+    }
+    triggerHaptic(ImpactFeedbackStyle.Light);
+  };
+
+  const handleConfirmPattern = () => {
+    // Move from pattern phase to elimination phase
+    setFindPhase('elimination');
+    triggerHaptic(ImpactFeedbackStyle.Light);
+  };
+
+  const handleBackToPattern = () => {
+    setFindPhase('pattern');
+    setEliminationCells(new Set());
     triggerHaptic(ImpactFeedbackStyle.Light);
   };
 
   const handleSubmitSelection = () => {
     if (!puzzleState || mode !== 'find-it') return;
 
-    const selectedPositions = Array.from(selectedCells).map((key) => {
-      const [row, col] = key.split('-').map(Number);
-      return { row, col } as Position;
-    });
+    if (!isElimination) {
+      // Placement technique: user selects one cell
+      const selectedPositions = Array.from(selectedCells).map((key) => {
+        const [row, col] = key.split('-').map(Number);
+        return { row, col } as Position;
+      });
 
-    let selection;
-
-    if (isPlacementTechnique(puzzleState.techniqueResult.techniqueName)) {
-      // For placement techniques, user selects one cell
-      // In a full implementation, we'd also ask for the value via the number pad
-      // For now, validate cell selection only
       if (selectedPositions.length !== 1) {
         setValidationResult({
           correct: false,
@@ -215,49 +271,42 @@ export default function TechniquePracticeScreen() {
       }
 
       const expected = puzzleState.techniqueResult.placements[0];
-      selection = {
-        type: 'placement' as const,
+      const selection: PlacementSelection = {
+        type: 'placement',
         cell: selectedPositions[0],
-        value: expected?.value ?? 0, // Auto-fill value for now
-      };
-    } else {
-      // For elimination techniques, split selection into pattern and elimination cells
-      // The pattern cells are the highlighted cells from the solver
-      // For now, just validate that user selected the pattern cells
-      selection = {
-        type: 'elimination' as const,
-        patternCells: selectedPositions,
-        eliminationCells: [], // User doesn't need to select elimination targets in lenient mode
+        value: expected?.value ?? 0,
       };
 
-      // Actually, let's validate just the pattern cells for the initial implementation
-      // (Phase 2 can add the elimination selection UI)
-      const result = validateSelection(
-        {
-          type: 'elimination',
-          patternCells: selectedPositions,
-          eliminationCells: puzzleState.techniqueResult.eliminations.map((e) => e.position),
-        },
-        puzzleState.techniqueResult,
-        false,
-      );
-
+      const result = validateSelection(selection, puzzleState.techniqueResult, false);
       setValidationResult(result);
-      recordFindAttempt(techniqueId, result.patternCorrect);
-      triggerHaptic(result.patternCorrect ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
-      return;
-    }
+      recordFindAttempt(techniqueId, result.correct);
+      triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+    } else {
+      // Elimination technique: two-phase validation
+      const patternPositions = Array.from(patternCells).map((key) => {
+        const [row, col] = key.split('-').map(Number);
+        return { row, col } as Position;
+      });
+      const eliminationPositions = Array.from(eliminationCells).map((key) => {
+        const [row, col] = key.split('-').map(Number);
+        return { row, col } as Position;
+      });
 
-    const result = validateSelection(selection, puzzleState.techniqueResult, false);
-    setValidationResult(result);
-    recordFindAttempt(techniqueId, result.correct);
-    triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+      const selection: EliminationSelection = {
+        type: 'elimination',
+        patternCells: patternPositions,
+        eliminationCells: eliminationPositions,
+      };
+
+      const result = validateSelection(selection, puzzleState.techniqueResult, false);
+      setValidationResult(result);
+      recordFindAttempt(techniqueId, result.correct);
+      triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+    }
   };
 
   const handleTryAnother = () => {
-    setValidationResult(null);
-    setSelectedCells(new Set());
-    generatePuzzle();
+    resetFindState();
     setMode('loading');
     setTimeout(() => {
       const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, GENERATION_CONFIG);
@@ -297,8 +346,13 @@ export default function TechniquePracticeScreen() {
     }
   }
 
-  // Merge selectedCells into highlight for find-it mode
-  const boardHighlightSet = mode === 'find-it' ? selectedCells : highlightSet;
+  // For find-it mode, compute separate highlight sets for pattern and elimination cells
+  const boardHighlightSet = mode === 'find-it'
+    ? (isElimination ? new Set([...patternCells, ...eliminationCells]) : selectedCells)
+    : highlightSet;
+
+  // Secondary highlight (elimination cells get a different color)
+  const boardSecondarySet = mode === 'find-it' && isElimination ? eliminationCells : new Set<string>();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -335,6 +389,33 @@ export default function TechniquePracticeScreen() {
             <Text style={styles.retryButtonText}>try again</Text>
           </Pressable>
         </View>
+      )}
+
+      {/* Coming soon state (techniques without solvers) */}
+      {mode === 'coming-soon' && metadata && (
+        <Animated.View entering={FadeIn.duration(300)} style={styles.introContent}>
+          <View style={styles.introCard}>
+            <View style={[styles.introIcon, { backgroundColor: `${metadata.color}15` }]}>
+              <Feather name={metadata.icon as any} size={32} color={metadata.color} />
+            </View>
+            <Text style={styles.introTitle}>{metadata.name}</Text>
+            <View style={[styles.categoryBadge, { backgroundColor: `${metadata.color}20`, alignSelf: 'center' }]}>
+              <Text style={[styles.categoryBadgeText, { color: metadata.color }]}>
+                {metadata.category}
+              </Text>
+            </View>
+            <Text style={styles.introDescription}>{metadata.longDescription}</Text>
+            <View style={styles.comingSoonBadge}>
+              <Feather name="clock" size={14} color={colors.textLight} />
+              <Text style={styles.comingSoonBadgeText}>Coming Soon</Text>
+            </View>
+          </View>
+
+          <Pressable onPress={handleBack} style={styles.backToListButton}>
+            <Feather name="arrow-left" size={16} color={colors.textSecondary} />
+            <Text style={styles.backToListText}>back to techniques</Text>
+          </Pressable>
+        </Animated.View>
       )}
 
       {/* Intro state */}
@@ -432,6 +513,7 @@ export default function TechniquePracticeScreen() {
             <MiniBoard
               puzzle={puzzleState.puzzle}
               highlightCells={boardHighlightSet}
+              secondaryHighlightCells={boardSecondarySet}
               onCellPress={handleCellPress}
               interactive
             />
@@ -441,24 +523,81 @@ export default function TechniquePracticeScreen() {
           <View style={styles.findItGuide}>
             {!validationResult ? (
               <>
-                <Text style={styles.findItTitle}>your turn!</Text>
+                {/* Phase indicator for elimination techniques */}
+                {isElimination && (
+                  <View style={styles.phaseIndicator}>
+                    <View style={[styles.phaseDot, findPhase === 'pattern' && styles.phaseDotActive]} />
+                    <Text style={[styles.phaseLabel, findPhase === 'pattern' && styles.phaseLabelActive]}>
+                      pattern
+                    </Text>
+                    <Feather name="chevron-right" size={14} color={colors.textLight} />
+                    <View style={[styles.phaseDot, findPhase === 'elimination' && styles.phaseDotActiveSecondary]} />
+                    <Text style={[styles.phaseLabel, findPhase === 'elimination' && styles.phaseLabelActive]}>
+                      eliminations
+                    </Text>
+                  </View>
+                )}
+
+                <Text style={styles.findItTitle}>
+                  {!isElimination
+                    ? 'your turn!'
+                    : findPhase === 'pattern'
+                      ? 'find the pattern'
+                      : 'select eliminations'}
+                </Text>
                 <Text style={styles.findItText}>
-                  {isPlacementTechnique(puzzleState.techniqueResult.techniqueName)
+                  {!isElimination
                     ? 'Tap the cell where you can apply this technique.'
-                    : 'Tap the cells that form the pattern for this technique.'}
+                    : findPhase === 'pattern'
+                      ? 'Tap the cells that form the pattern (e.g., the pair, triple, or wings).'
+                      : 'Now tap the cells where candidates can be eliminated.'}
                 </Text>
 
                 <View style={styles.findItActions}>
-                  <Pressable
-                    onPress={handleSubmitSelection}
-                    style={[
-                      styles.submitButton,
-                      selectedCells.size === 0 && styles.submitButtonDisabled,
-                    ]}
-                    disabled={selectedCells.size === 0}
-                  >
-                    <Text style={styles.submitButtonText}>check answer</Text>
-                  </Pressable>
+                  {isElimination && findPhase === 'pattern' ? (
+                    // Phase 1: Confirm pattern, move to elimination
+                    <Pressable
+                      onPress={handleConfirmPattern}
+                      style={[
+                        styles.submitButton,
+                        patternCells.size === 0 && styles.submitButtonDisabled,
+                      ]}
+                      disabled={patternCells.size === 0}
+                    >
+                      <Text style={styles.submitButtonText}>confirm pattern</Text>
+                      <Feather name="chevron-right" size={14} color="#FFF" />
+                    </Pressable>
+                  ) : isElimination && findPhase === 'elimination' ? (
+                    // Phase 2: Back to pattern or submit
+                    <>
+                      <Pressable onPress={handleBackToPattern} style={styles.retryInlineButton}>
+                        <Feather name="chevron-left" size={14} color={colors.textSecondary} />
+                        <Text style={styles.retryInlineText}>back</Text>
+                      </Pressable>
+                      <Pressable
+                        onPress={handleSubmitSelection}
+                        style={[
+                          styles.submitButton,
+                          eliminationCells.size === 0 && styles.submitButtonDisabled,
+                        ]}
+                        disabled={eliminationCells.size === 0}
+                      >
+                        <Text style={styles.submitButtonText}>check answer</Text>
+                      </Pressable>
+                    </>
+                  ) : (
+                    // Placement: single submit
+                    <Pressable
+                      onPress={handleSubmitSelection}
+                      style={[
+                        styles.submitButton,
+                        selectedCells.size === 0 && styles.submitButtonDisabled,
+                      ]}
+                      disabled={selectedCells.size === 0}
+                    >
+                      <Text style={styles.submitButtonText}>check answer</Text>
+                    </Pressable>
+                  )}
                 </View>
               </>
             ) : (
@@ -484,10 +623,7 @@ export default function TechniquePracticeScreen() {
                   ) : (
                     <>
                       <Pressable
-                        onPress={() => {
-                          setValidationResult(null);
-                          setSelectedCells(new Set());
-                        }}
+                        onPress={() => { resetFindState(); }}
                         style={styles.retryInlineButton}
                       >
                         <Text style={styles.retryInlineText}>try again</Text>
@@ -514,11 +650,13 @@ export default function TechniquePracticeScreen() {
 function MiniBoard({
   puzzle,
   highlightCells,
+  secondaryHighlightCells,
   onCellPress,
   interactive = false,
 }: {
   puzzle: number[][];
   highlightCells: Set<string>;
+  secondaryHighlightCells?: Set<string>;
   onCellPress?: (row: number, col: number) => void;
   interactive?: boolean;
 }) {
@@ -529,6 +667,7 @@ function MiniBoard({
           {row.map((value, colIndex) => {
             const key = positionKey({ row: rowIndex, col: colIndex });
             const isHighlighted = highlightCells.has(key);
+            const isSecondary = secondaryHighlightCells?.has(key) ?? false;
             const isBoxBorderRight = (colIndex + 1) % 3 === 0 && colIndex < 8;
             const isBoxBorderBottom = (rowIndex + 1) % 3 === 0 && rowIndex < 8;
 
@@ -537,7 +676,8 @@ function MiniBoard({
                 key={`${rowIndex}-${colIndex}`}
                 style={[
                   miniStyles.cell,
-                  isHighlighted && miniStyles.cellHighlighted,
+                  isHighlighted && !isSecondary && miniStyles.cellHighlighted,
+                  isSecondary && miniStyles.cellSecondaryHighlighted,
                   isBoxBorderRight && miniStyles.cellBoxRight,
                   isBoxBorderBottom && miniStyles.cellBoxBottom,
                 ]}
@@ -548,7 +688,8 @@ function MiniBoard({
                   style={[
                     miniStyles.cellText,
                     value === 0 && miniStyles.cellTextEmpty,
-                    isHighlighted && miniStyles.cellTextHighlighted,
+                    isHighlighted && !isSecondary && miniStyles.cellTextHighlighted,
+                    isSecondary && miniStyles.cellTextSecondary,
                   ]}
                 >
                   {value !== 0 ? value : ''}
@@ -663,6 +804,36 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  comingSoonBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: `${colors.textLight}15`,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    marginTop: spacing.sm,
+  },
+  comingSoonBadgeText: {
+    fontSize: 13,
+    fontFamily: 'OpenRunde-Medium',
+    color: colors.textLight,
+  },
+  backToListButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md + 2,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.gridLine,
+  },
+  backToListText: {
+    ...typography.button,
+    color: colors.textSecondary,
+    fontSize: 15,
   },
   startButton: {
     backgroundColor: colors.softOrange,
@@ -818,6 +989,35 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
+  // Phase indicator for elimination techniques
+  phaseIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  phaseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.gridLine,
+  },
+  phaseDotActive: {
+    backgroundColor: colors.softOrange,
+  },
+  phaseDotActiveSecondary: {
+    backgroundColor: colors.coral,
+  },
+  phaseLabel: {
+    fontSize: 12,
+    color: colors.textLight,
+    fontFamily: 'OpenRunde-Medium',
+  },
+  phaseLabelActive: {
+    color: colors.textPrimary,
+  },
+
   // Validation feedback
   feedbackCard: {
     flexDirection: 'row',
@@ -868,6 +1068,9 @@ const miniStyles = StyleSheet.create({
   cellHighlighted: {
     backgroundColor: colors.cellSelected,
   },
+  cellSecondaryHighlighted: {
+    backgroundColor: 'rgba(255, 92, 80, 0.15)', // coral tint for elimination targets
+  },
   cellBoxRight: {
     borderRightWidth: 2,
     borderRightColor: colors.boxBorder,
@@ -886,5 +1089,8 @@ const miniStyles = StyleSheet.create({
   },
   cellTextHighlighted: {
     color: colors.softOrange,
+  },
+  cellTextSecondary: {
+    color: colors.coral,
   },
 });

@@ -167,6 +167,10 @@ export const MOCHI_TECHNIQUE_HINTS: Record<string, string[]> = {
     "three cells are sharing three numbers~",
     "*counts on paws* one, two, three cells... three numbers!",
   ],
+  'Hidden Triple': [
+    "three numbers are hiding together in three cells~",
+    "*counts on paws* three numbers, only three possible homes!",
+  ],
   'X-Wing': [
     "*stretches* time for some advanced fishing~",
     "the numbers form an X pattern!",
@@ -176,9 +180,45 @@ export const MOCHI_TECHNIQUE_HINTS: Record<string, string[]> = {
     "ooh, this one's tricky... three rows, three columns~",
     "*focused stare* the fish swims in three rows!",
   ],
+  'Finned Fish': [
+    "almost an X-Wing, but with a little fin~",
+    "*squints* the fin changes the elimination rules!",
+  ],
+  'Jellyfish': [
+    "four rows, four columns... a rare catch!",
+    "*wide eyes* the jellyfish has four tentacles~",
+  ],
   'XY-Wing': [
     "three cells make a special chain~",
     "*thoughtful meow* pivot, wing, wing... got it!",
+  ],
+  'XYZ-Wing': [
+    "like XY-Wing but the pivot has three candidates~",
+    "*focused stare* X, Y, Z... all three matter!",
+  ],
+  'WXYZ-Wing': [
+    "four cells, four candidates, one elimination~",
+    "*counts on paws* W, X, Y, Z... the biggest wing!",
+  ],
+  'Unique Rectangle': [
+    "four cells want to make a deadly rectangle~",
+    "*alert ears* break the pattern to save the puzzle!",
+  ],
+  'Avoidable Rectangle': [
+    "the solved cells anchor a dangerous rectangle~",
+    "*tilts head* don't let the rectangle complete!",
+  ],
+  'BUG': [
+    "almost every cell is bivalue... except one~",
+    "*wide eyes* squash the BUG!",
+  ],
+  'Almost Locked Sets': [
+    "two groups of cells linked by shared candidates~",
+    "*thoughtful meow* the sets are almost locked...",
+  ],
+  'Alternating Inference Chains': [
+    "follow the chain: strong, weak, strong, weak...~",
+    "*traces paw* the chain reveals what to eliminate!",
   ],
 };
 
