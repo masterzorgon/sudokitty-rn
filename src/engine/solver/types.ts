@@ -220,6 +220,26 @@ export const MOCHI_TECHNIQUE_HINTS: Record<string, string[]> = {
     "follow the chain: strong, weak, strong, weak...~",
     "*traces paw* the chain reveals what to eliminate!",
   ],
+  'Skyscraper': [
+    "*looks up* two towers, one number... see it?",
+    "the skyscraper connects two rows~",
+    "*stretches tall* follow the columns up!",
+  ],
+  '2-String Kite': [
+    "*bats at string* two strings, one box connects them~",
+    "the kite flies between a row and a column!",
+    "*playful swat* tug both strings to find the answer~",
+  ],
+  'Turbot Fish': [
+    "*splashes* this fish swims through strong links~",
+    "follow the chain: strong, weak, strong!",
+    "*alert eyes* the turbot's path reveals the elimination~",
+  ],
+  'Empty Rectangle': [
+    "*draws in the air* the box makes an L-shape~",
+    "the empty rectangle hides a clever trick!",
+    "*tilts head* the ER and the pair work together~",
+  ],
 };
 
 /**

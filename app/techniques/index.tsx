@@ -1,5 +1,5 @@
 // Techniques list screen - Browse and select techniques to learn
-// Grouped by difficulty: Beginner, Intermediate, Advanced, Expert
+// Grouped by technique type: Singles, Intersections, Subsets, Fish, etc.
 
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
@@ -12,9 +12,9 @@ import { colors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius, shadows } from '../../src/theme';
 import {
-  getTechniquesGroupedByCategory,
+  getTechniquesGroupedByType,
   TechniqueMetadata,
-  TechniqueCategory,
+  TechniqueType,
   CATEGORY_COLORS,
   TECHNIQUE_METADATA,
 } from '../../src/data/techniqueMetadata';
@@ -40,6 +40,7 @@ function TechniqueCard({
   onPress: () => void;
 }) {
   const progress = useTechniqueProgress(technique.id);
+  const difficultyColor = CATEGORY_COLORS[technique.category];
 
   // For techniques without a solver, show "Coming Soon" instead of progress
   if (!technique.hasSolver) {
@@ -55,21 +56,14 @@ function TechniqueCard({
           accessibilityRole="button"
         >
           <View style={styles.cardContent}>
-            {/* Left: Icon */}
-            <View style={[styles.cardIcon, { backgroundColor: `${technique.color}15` }]}>
-              <Feather
-                name={technique.icon as any}
-                size={18}
-                color={technique.color}
-              />
-            </View>
-
-            {/* Center: Name and description */}
+            {/* Left: Name and difficulty badge */}
             <View style={styles.cardText}>
               <Text style={styles.cardTitle}>{technique.name}</Text>
-              <Text style={styles.cardDescription} numberOfLines={1}>
-                {technique.shortDescription}
-              </Text>
+              <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
+                <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
+                  {technique.category}
+                </Text>
+              </View>
             </View>
 
             {/* Right: Coming Soon pill and chevron */}
@@ -115,21 +109,14 @@ function TechniqueCard({
         accessibilityRole="button"
       >
         <View style={styles.cardContent}>
-          {/* Left: Icon */}
-          <View style={[styles.cardIcon, { backgroundColor: `${technique.color}15` }]}>
-            <Feather
-              name={technique.icon as any}
-              size={18}
-              color={technique.color}
-            />
-          </View>
-
-          {/* Center: Name and description */}
+          {/* Left: Name and difficulty badge */}
           <View style={styles.cardText}>
             <Text style={styles.cardTitle}>{technique.name}</Text>
-            <Text style={styles.cardDescription} numberOfLines={1}>
-              {technique.shortDescription}
-            </Text>
+            <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
+              <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
+                {technique.category}
+              </Text>
+            </View>
           </View>
 
           {/* Right: Status and chevron */}
@@ -144,45 +131,55 @@ function TechniqueCard({
 }
 
 // ============================================
-// Category Section Component
+// Type Section Component
 // ============================================
 
-function CategorySection({
-  category,
+function TypeSection({
+  type,
   color,
   techniques,
   sectionIndex,
   onSelectTechnique,
 }: {
-  category: TechniqueCategory;
+  type: TechniqueType;
   color: string;
   techniques: TechniqueMetadata[];
   sectionIndex: number;
   onSelectTechnique: (id: string) => void;
 }) {
+  const isEmpty = techniques.length === 0;
+
   return (
     <Animated.View
-      entering={FadeIn.delay(sectionIndex * 100).duration(300)}
+      entering={FadeIn.delay(sectionIndex * 60).duration(300)}
       style={styles.section}
     >
       {/* Section header */}
       <View style={styles.sectionHeader}>
         <View style={[styles.sectionDot, { backgroundColor: color }]} />
-        <Text style={styles.sectionTitle}>{category.toLowerCase()}</Text>
-        <Text style={styles.sectionCount}>{techniques.length} techniques</Text>
+        <Text style={styles.sectionTitle}>{type.toLowerCase()}</Text>
+        {!isEmpty && (
+          <Text style={styles.sectionCount}>{techniques.length}</Text>
+        )}
       </View>
 
-      {/* Technique cards */}
-      <View style={styles.sectionCards}>
-        {techniques.map((technique, index) => (
-          <TechniqueCard
-            key={technique.id}
-            technique={technique}
-            index={sectionIndex * 4 + index}
-            onPress={() => onSelectTechnique(technique.id)}
-          />
-        ))}
-      </View>
+      {/* Technique cards or empty state */}
+      {isEmpty ? (
+        <View style={styles.emptySection}>
+          <Text style={styles.emptySectionText}>coming soon</Text>
+        </View>
+      ) : (
+        <View style={styles.sectionCards}>
+          {techniques.map((technique, index) => (
+            <TechniqueCard
+              key={technique.id}
+              technique={technique}
+              index={sectionIndex * 4 + index}
+              onPress={() => onSelectTechnique(technique.id)}
+            />
+          ))}
+        </View>
+      )}
     </Animated.View>
   );
 }
@@ -195,7 +192,7 @@ export default function TechniquesListScreen() {
   const router = useRouter();
   const loadState = useTechniqueProgressStore((s) => s.loadState);
   const completionCount = useCompletionCount();
-  const groups = getTechniquesGroupedByCategory();
+  const groups = getTechniquesGroupedByType();
   const totalTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
 
   // Load progress on mount
@@ -238,9 +235,9 @@ export default function TechniquesListScreen() {
         showsVerticalScrollIndicator={false}
       >
         {groups.map((group, sectionIndex) => (
-          <CategorySection
-            key={group.category}
-            category={group.category}
+          <TypeSection
+            key={group.type}
+            type={group.type}
             color={group.color}
             techniques={group.techniques}
             sectionIndex={sectionIndex}
@@ -339,25 +336,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     gap: spacing.md,
   },
-  cardIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   cardText: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   cardTitle: {
     ...typography.headline,
     color: colors.textPrimary,
     fontSize: 14,
   },
-  cardDescription: {
-    fontSize: 12,
-    color: colors.textLight,
+  difficultyBadge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.full,
+  },
+  difficultyBadgeText: {
+    fontSize: 10,
+    fontFamily: 'OpenRunde-Medium',
   },
   cardRight: {
     flexDirection: 'row',
@@ -374,5 +370,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'OpenRunde-Medium',
     color: colors.textLight,
+  },
+  emptySection: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  emptySectionText: {
+    fontSize: 12,
+    fontFamily: 'OpenRunde-Medium',
+    color: colors.textLight,
+    fontStyle: 'italic',
   },
 });

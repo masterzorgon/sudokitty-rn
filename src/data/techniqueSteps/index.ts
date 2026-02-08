@@ -9,7 +9,10 @@ import { nakedSingleSteps, hiddenSingleSteps } from './level1';
 // Level 2
 import { nakedPairSteps, hiddenPairSteps, pointingPairSteps, boxLineReductionSteps } from './level2';
 // Level 3
-import { nakedTripleSteps, hiddenTripleSteps, xWingSteps, finnedFishSteps } from './level3';
+import {
+  nakedTripleSteps, hiddenTripleSteps, xWingSteps, finnedFishSteps,
+  skyscraperSteps, twoStringKiteSteps, turbotFishSteps, emptyRectangleSteps,
+} from './level3';
 // Level 4
 import {
   swordfishSteps, jellyfishSteps, xyWingSteps, xyzWingSteps, wxyzWingSteps,
@@ -35,6 +38,10 @@ export const TECHNIQUE_STEP_TEMPLATES: Record<string, StepTemplate[]> = {
   'Hidden Triple': hiddenTripleSteps,
   'X-Wing': xWingSteps,
   'Finned Fish': finnedFishSteps,
+  'Skyscraper': skyscraperSteps,
+  '2-String Kite': twoStringKiteSteps,
+  'Turbot Fish': turbotFishSteps,
+  'Empty Rectangle': emptyRectangleSteps,
   'Swordfish': swordfishSteps,
   'Jellyfish': jellyfishSteps,
   'XY-Wing': xyWingSteps,

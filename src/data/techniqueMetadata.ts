@@ -9,11 +9,29 @@ import { TechniqueLevel } from '../engine/solver/types';
 
 export type TechniqueCategory = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
 
+export type TechniqueType =
+  | 'Singles'
+  | 'Intersections'
+  | 'Hidden Subsets'
+  | 'Naked Subsets'
+  | 'Basic Fish'
+  | 'Finned/Sashimi Fish'
+  | 'Complex Fish'
+  | 'Single Digit Patterns'
+  | 'Uniqueness'
+  | 'Wings'
+  | 'Miscellaneous'
+  | 'Coloring'
+  | 'Chains/Loops'
+  | 'ALS'
+  | 'Last Resort';
+
 export interface TechniqueMetadata {
   id: string;
   name: string;
   level: TechniqueLevel;
   category: TechniqueCategory;
+  techniqueType: TechniqueType;
   shortDescription: string;
   longDescription: string;
   icon: string; // Feather icon name
@@ -50,6 +68,47 @@ export const CATEGORY_ICONS: Record<TechniqueCategory, string> = {
 };
 
 // ============================================
+// Technique Type Mappings
+// ============================================
+
+/** Display order matching HoDoKu reference (top-to-bottom) */
+export const TECHNIQUE_TYPE_ORDER: TechniqueType[] = [
+  'Singles',
+  'Intersections',
+  'Hidden Subsets',
+  'Naked Subsets',
+  'Basic Fish',
+  'Finned/Sashimi Fish',
+  'Complex Fish',
+  'Single Digit Patterns',
+  'Uniqueness',
+  'Wings',
+  'Miscellaneous',
+  'Coloring',
+  'Chains/Loops',
+  'ALS',
+  'Last Resort',
+];
+
+export const TECHNIQUE_TYPE_COLORS: Record<TechniqueType, string> = {
+  'Singles':              '#4CAF50', // Green
+  'Intersections':        '#66BB6A', // Light Green
+  'Hidden Subsets':       '#FF9800', // Orange
+  'Naked Subsets':        '#FFA726', // Light Orange
+  'Basic Fish':           '#2196F3', // Blue
+  'Finned/Sashimi Fish': '#1E88E5', // Dark Blue
+  'Complex Fish':         '#1565C0', // Deeper Blue
+  'Single Digit Patterns':'#AB47BC', // Purple
+  'Uniqueness':           '#F44336', // Red
+  'Wings':                '#EC407A', // Pink
+  'Miscellaneous':        '#78909C', // Blue Grey
+  'Coloring':             '#26A69A', // Teal
+  'Chains/Loops':         '#7E57C2', // Deep Purple
+  'ALS':                  '#5C6BC0', // Indigo
+  'Last Resort':          '#8D6E63', // Brown
+};
+
+// ============================================
 // All Technique Metadata
 // ============================================
 
@@ -60,6 +119,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Naked Single',
     level: 1,
     category: 'Beginner',
+    techniqueType: 'Singles',
     shortDescription: 'A cell with only one possible value',
     longDescription:
       'When all other candidates have been eliminated from a cell, only one value remains. ' +
@@ -75,6 +135,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Hidden Single',
     level: 1,
     category: 'Beginner',
+    techniqueType: 'Singles',
     shortDescription: 'A value that can only go in one cell of a unit',
     longDescription:
       'When a number can only fit in one cell within a row, column, or box, that cell must contain ' +
@@ -92,6 +153,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Naked Pair',
     level: 2,
     category: 'Intermediate',
+    techniqueType: 'Naked Subsets',
     shortDescription: 'Two cells sharing exactly two candidates',
     longDescription:
       'When two cells in a unit (row, column, or box) contain exactly the same two candidates, ' +
@@ -107,6 +169,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Hidden Pair',
     level: 2,
     category: 'Intermediate',
+    techniqueType: 'Hidden Subsets',
     shortDescription: 'Two values restricted to the same two cells',
     longDescription:
       'When two candidates appear only in the same two cells within a unit, those cells must ' +
@@ -122,6 +185,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Pointing Pair',
     level: 2,
     category: 'Intermediate',
+    techniqueType: 'Intersections',
     shortDescription: 'Box candidates aligned in a row or column',
     longDescription:
       'When a candidate within a box is confined to a single row or column, it must be in one of those ' +
@@ -137,6 +201,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Box/Line Reduction',
     level: 2,
     category: 'Intermediate',
+    techniqueType: 'Intersections',
     shortDescription: 'Row/column candidates confined to one box',
     longDescription:
       'The inverse of a Pointing Pair. When a candidate in a row or column is confined to a single box, ' +
@@ -154,6 +219,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Naked Triple',
     level: 3,
     category: 'Advanced',
+    techniqueType: 'Naked Subsets',
     shortDescription: 'Three cells sharing at most three candidates',
     longDescription:
       'An extension of the Naked Pair. When three cells in a unit collectively contain at most three ' +
@@ -169,6 +235,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Hidden Triple',
     level: 3,
     category: 'Advanced',
+    techniqueType: 'Hidden Subsets',
     shortDescription: 'Three values restricted to the same three cells',
     longDescription:
       'When three candidates appear only in the same three cells within a unit, those cells must ' +
@@ -184,6 +251,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'X-Wing',
     level: 3,
     category: 'Advanced',
+    techniqueType: 'Basic Fish',
     shortDescription: 'A candidate forming a rectangle across two rows',
     longDescription:
       'When a candidate appears in exactly two cells in each of two rows, and those cells share the ' +
@@ -199,11 +267,82 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Finned Fish',
     level: 3,
     category: 'Advanced',
+    techniqueType: 'Finned/Sashimi Fish',
     shortDescription: 'X-Wing with an extra candidate "fin" cell',
     longDescription:
       'A variation of X-Wing where one corner has extra candidate cells (the "fin"). Eliminations ' +
       'are restricted to cells that see both the fin and the regular X-Wing pattern. Covers Finned ' +
       'X-Wing, Sashimi Finned Fish, and Finned Grouped X-Cycles.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
+  },
+
+  // Level 3 - Single Digit Patterns
+  {
+    id: 'skyscraper',
+    name: 'Skyscraper',
+    level: 3,
+    category: 'Advanced',
+    techniqueType: 'Single Digit Patterns',
+    shortDescription: 'Two conjugate pairs sharing one end, forming a tower',
+    longDescription:
+      'Find two rows (or columns) that each contain a candidate in exactly two cells. ' +
+      'If two of those cells share the same column (or row), they form the "base" of the skyscraper. ' +
+      'The other two cells are the "endpoints." Since one endpoint must be true, any cell that ' +
+      'sees both endpoints can have the candidate eliminated.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'two-string-kite',
+    name: '2-String Kite',
+    level: 3,
+    category: 'Advanced',
+    techniqueType: 'Single Digit Patterns',
+    shortDescription: 'Row and column pairs linked through a shared box',
+    longDescription:
+      'Find a row and a column that each contain a candidate in exactly two cells (the "strings"). ' +
+      'One cell from the row and one from the column must share the same box. The remaining two cells ' +
+      'are the "kite endpoints." Since one endpoint must be true, any cell that sees both can ' +
+      'have the candidate eliminated.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'turbot-fish',
+    name: 'Turbot Fish',
+    level: 3,
+    category: 'Advanced',
+    techniqueType: 'Single Digit Patterns',
+    shortDescription: 'A chain of two conjugate pairs connected by a weak link',
+    longDescription:
+      'A general single-digit pattern: two conjugate pairs (strong links) for the same candidate ' +
+      'connected by a weak link. The chain has four cells, and the two endpoints must include the true ' +
+      'value. Any cell that sees both endpoints can have the candidate eliminated. Skyscrapers and ' +
+      '2-String Kites are special cases of this pattern.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'empty-rectangle',
+    name: 'Empty Rectangle',
+    level: 3,
+    category: 'Advanced',
+    techniqueType: 'Single Digit Patterns',
+    shortDescription: 'A box pattern combined with a conjugate pair',
+    longDescription:
+      'When a candidate in a box is restricted to one row and one column (forming an L-shape), ' +
+      'it creates an "Empty Rectangle." Combined with a conjugate pair in a crossing row or column, ' +
+      'the candidate can be eliminated at the intersection point. The ER acts as a pivot that ' +
+      'connects the strong link to the elimination target.',
     icon: 'target',
     color: CATEGORY_COLORS.Advanced,
     isPlacement: false,
@@ -216,6 +355,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Swordfish',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Basic Fish',
     shortDescription: 'X-Wing extended to three rows and columns',
     longDescription:
       'A generalization of X-Wing to three dimensions. When a candidate appears in 2-3 cells in each ' +
@@ -231,6 +371,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Jellyfish',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Basic Fish',
     shortDescription: 'Fish pattern extended to four rows and columns',
     longDescription:
       'The next step beyond Swordfish. When a candidate appears in 2-4 cells in each of four rows, ' +
@@ -246,6 +387,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'XY-Wing',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Wings',
     shortDescription: 'Three bi-value cells forming a chain',
     longDescription:
       'Three cells with two candidates each form a special chain. The pivot cell (with candidates XY) ' +
@@ -261,6 +403,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'XYZ-Wing',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Wings',
     shortDescription: 'XY-Wing with a three-candidate pivot cell',
     longDescription:
       'Similar to XY-Wing, but the pivot cell has three candidates (XYZ) instead of two. The pivot ' +
@@ -276,6 +419,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'WXYZ-Wing',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Wings',
     shortDescription: 'Four-cell wing pattern with shared elimination',
     longDescription:
       'An extension of XYZ-Wing to four cells. A pivot and three wings collectively hold four ' +
@@ -291,6 +435,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Unique Rectangle',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Uniqueness',
     shortDescription: 'Exploits the uniqueness of a valid puzzle',
     longDescription:
       'If four cells forming a rectangle across two boxes share the same two candidates, the puzzle ' +
@@ -306,6 +451,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Avoidable Rectangle',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Uniqueness',
     shortDescription: 'Unique Rectangle using solved cells as anchors',
     longDescription:
       'A variation of Unique Rectangle where some corner cells are already solved. The placed values ' +
@@ -321,6 +467,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Alternating Inference Chains',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Chains/Loops',
     shortDescription: 'Chains of strong and weak links between candidates',
     longDescription:
       'A powerful chain-based technique that alternates between strong links (exactly two candidates) ' +
@@ -336,6 +483,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'Almost Locked Sets',
     level: 4,
     category: 'Expert',
+    techniqueType: 'ALS',
     shortDescription: 'N cells with N+1 candidates linked by shared values',
     longDescription:
       'A group of N cells in a unit containing exactly N+1 distinct candidates. When two ALS groups ' +
@@ -351,6 +499,7 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     name: 'BUG',
     level: 4,
     category: 'Expert',
+    techniqueType: 'Uniqueness',
     shortDescription: 'Bivalue Universal Grave — prevent an invalid state',
     longDescription:
       'BUG (Bivalue Universal Grave) occurs when all unsolved cells have exactly two candidates ' +
@@ -390,5 +539,20 @@ export function getTechniquesGroupedByCategory(): Array<{
     color: CATEGORY_COLORS[category],
     icon: CATEGORY_ICONS[category],
     techniques: getTechniquesByCategory(category),
+  }));
+}
+
+/** Get all techniques grouped by technique type (in HoDoKu reference order) */
+export function getTechniquesGroupedByType(): Array<{
+  type: TechniqueType;
+  color: string;
+  techniques: TechniqueMetadata[];
+}> {
+  return TECHNIQUE_TYPE_ORDER.map((type) => ({
+    type,
+    color: TECHNIQUE_TYPE_COLORS[type],
+    techniques: TECHNIQUE_METADATA
+      .filter((t) => t.techniqueType === type)
+      .sort((a, b) => a.level - b.level),
   }));
 }

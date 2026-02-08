@@ -17,6 +17,10 @@ import { NakedTriple } from './level3/NakedTriple';
 import { HiddenTriple } from './level3/HiddenTriple';
 import { XWing } from './level3/XWing';
 import { FinnedFish } from './level3/FinnedFish';
+import { Skyscraper } from './level3/Skyscraper';
+import { TwoStringKite } from './level3/TwoStringKite';
+import { TurbotFish } from './level3/TurbotFish';
+import { EmptyRectangle } from './level3/EmptyRectangle';
 
 // Level 4 techniques
 import { Swordfish } from './level4/Swordfish';
@@ -41,6 +45,10 @@ export { NakedTriple } from './level3/NakedTriple';
 export { HiddenTriple } from './level3/HiddenTriple';
 export { XWing } from './level3/XWing';
 export { FinnedFish } from './level3/FinnedFish';
+export { Skyscraper } from './level3/Skyscraper';
+export { TwoStringKite } from './level3/TwoStringKite';
+export { TurbotFish } from './level3/TurbotFish';
+export { EmptyRectangle } from './level3/EmptyRectangle';
 export { Swordfish } from './level4/Swordfish';
 export { Jellyfish } from './level4/Jellyfish';
 export { XYWing } from './level4/XYWing';
@@ -70,6 +78,10 @@ export const ALL_TECHNIQUES: Technique[] = [
   new HiddenTriple(),
   new XWing(),
   new FinnedFish(),
+  new Skyscraper(),
+  new TwoStringKite(),
+  new TurbotFish(),
+  new EmptyRectangle(),
   // Level 4 - Expert
   new Swordfish(),
   new Jellyfish(),
@@ -103,6 +115,6 @@ export const getTechniquesForLevel = (level: TechniqueLevel): Technique[] => {
 export const TECHNIQUE_NAMES_BY_LEVEL: Record<TechniqueLevel, string[]> = {
   1: ['Naked Single', 'Hidden Single'],
   2: ['Naked Pair', 'Hidden Pair', 'Pointing Pair', 'Box/Line Reduction'],
-  3: ['Naked Triple', 'Hidden Triple', 'X-Wing', 'Finned Fish'],
+  3: ['Naked Triple', 'Hidden Triple', 'X-Wing', 'Finned Fish', 'Skyscraper', '2-String Kite', 'Turbot Fish', 'Empty Rectangle'],
   4: ['Swordfish', 'Jellyfish', 'XY-Wing', 'XYZ-Wing', 'WXYZ-Wing', 'Unique Rectangle', 'Avoidable Rectangle', 'BUG', 'Almost Locked Sets', 'Alternating Inference Chains'],
 };
