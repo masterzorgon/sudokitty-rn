@@ -368,6 +368,25 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     hasSolver: true,
   },
 
+  // Level 3 - Coloring
+  {
+    id: 'simple-colors',
+    name: 'Simple Colors',
+    level: 3,
+    category: 'Advanced',
+    techniqueType: 'Coloring',
+    shortDescription: 'Two-color conjugate pair chains reveal contradictions',
+    longDescription:
+      'Color cells along conjugate pair chains with two alternating colors. If two same-colored cells ' +
+      'see each other (Color Wrap), all cells with that color are false. If an uncolored cell sees ' +
+      'both colors (Color Trap), it cannot contain the candidate. A visual, intuitive approach ' +
+      'to chain-based deductions.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
+  },
+
   // Level 4 - Expert
   {
     id: 'swordfish',
@@ -530,6 +549,24 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     hasSolver: true,
   },
 
+  // Level 4 - Coloring
+  {
+    id: 'multi-colors',
+    name: 'Multi Colors',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Coloring',
+    shortDescription: 'Multiple disconnected color pairs interact to eliminate',
+    longDescription:
+      'Extends Simple Colors by using two or more disconnected conjugate pair chains, each colored ' +
+      'independently. When cells from different color pairs share a house, or when same-colored cells ' +
+      'see opposite colors of another pair, contradictions arise. Has the same power as X-Chains.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+
   // Level 4 - Complex Fish
   {
     id: 'franken-fish',
@@ -576,6 +613,91 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
       'cover set, they can be combined into a Siamese Fish. Each fish contributes different ' +
       'eliminations, making the combined move more powerful than either alone. The simplest ' +
       'Siamese Sashimi X-Wing is better known as a Skyscraper.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+
+  // Level 4 - Last Resort
+  {
+    id: 'templates',
+    name: 'Templates',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Last Resort',
+    shortDescription: 'Enumerate all valid digit placements to find eliminations',
+    longDescription:
+      'For each digit, calculate all valid ways to place 9 instances in the grid. If a cell is not ' +
+      'in any remaining template, the candidate can be eliminated. If a cell is in all remaining ' +
+      'templates, the candidate must be placed there. A computational approach not meant for ' +
+      'human solving, but a powerful indicator of what is possible.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'forcing-chain',
+    name: 'Forcing Chain',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Last Resort',
+    shortDescription: 'Multiple chains from premises converging on one conclusion',
+    longDescription:
+      'Assume each candidate of a cell is true and trace the implications. If all candidates lead ' +
+      'to the same conclusion (verity), that conclusion is forced. If a candidate leads to a ' +
+      'contradiction (impossible state), it must be false. Covers both cell-based and house-based ' +
+      'forcing chains.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'forcing-net',
+    name: 'Forcing Net',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Last Resort',
+    shortDescription: 'Branching implication networks that force conclusions',
+    longDescription:
+      'An extension of Forcing Chains that allows branching. When propagation encounters a cell ' +
+      'with two candidates, both branches can be explored. If they agree on a conclusion, it is ' +
+      'forced. The branching structure makes these extremely powerful but nearly impossible to ' +
+      'find manually.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'kraken-fish',
+    name: 'Kraken Fish',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Last Resort',
+    shortDescription: 'Fish patterns enhanced with chains to prove eliminations',
+    longDescription:
+      'Combines finned fish with chains. When a finned fish has possible eliminations that can\'t ' +
+      'see all fins, chains from each fin can prove the elimination is still valid. If all ' +
+      'fin-chains converge, the Kraken Fish produces the elimination. A powerful hybrid technique.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'brute-force',
+    name: 'Brute Force',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Last Resort',
+    shortDescription: 'Trial and error — the absolute last resort',
+    longDescription:
+      'Not really a technique: place a digit in a cell and check if the puzzle is solvable via ' +
+      'recursive backtracking. If not, try the next candidate. Guarantees any valid sudoku can ' +
+      'be solved, but provides no logical insight into the solution.',
     icon: 'award',
     color: CATEGORY_COLORS.Expert,
     isPlacement: false,

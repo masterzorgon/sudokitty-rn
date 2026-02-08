@@ -245,6 +245,41 @@ export const MOCHI_TECHNIQUE_HINTS: Record<string, string[]> = {
     "the intersection has too many candidates... but look at the helpers!",
     "*counts on paws* the locked sets overlap beautifully~",
   ],
+  'Simple Colors': [
+    "*paints with paws* color the conjugate pairs~",
+    "two colors, one contradiction... see it?",
+    "*tilts head* the colors reveal what can't be true!",
+  ],
+  'Multi Colors': [
+    "*sees many colors* two chains, two color pairs~",
+    "the color pairs interact through a weak link!",
+    "*focused stare* when colors collide, candidates fall~",
+  ],
+  'Templates': [
+    "*calculates on paws* checking all possible placements~",
+    "if no template includes this cell, it can't have the number!",
+    "*methodical stare* the templates reveal the truth~",
+  ],
+  'Forcing Chain': [
+    "*traces multiple paths* all roads lead to the same place~",
+    "every candidate tells the same story!",
+    "*determined look* the chains converge on one answer~",
+  ],
+  'Forcing Net': [
+    "*weaves a web* the branches all agree~",
+    "the net catches the answer from every direction!",
+    "*complex thinking* branching paths, one conclusion~",
+  ],
+  'Kraken Fish': [
+    "*mysterious eyes* the kraken fish rises from the deep~",
+    "the fins can't hide from the chains!",
+    "*dramatic pounce* fish plus chains equals power~",
+  ],
+  'Brute Force': [
+    "*rolls up sleeves* time to try everything~",
+    "if all else fails, brute force always works!",
+    "*determined stare* trial and error, but it gets the job done~",
+  ],
   'Franken Fish': [
     "*peers into the box* this fish swims through boxes~",
     "the franken fish mixes boxes into the pattern!",

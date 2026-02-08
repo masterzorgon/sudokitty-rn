@@ -456,4 +456,47 @@ export const level3Puzzles: PartialPuzzleBank = {
       },
     },
   ],
+
+  'simple-colors': [
+    {
+      // Simple Colors (Color Trap) on digit 3.
+      // Conjugate pairs chain: color cells alternately.
+      // Uncolored cell sees both colors → eliminate.
+      puzzle: [
+        [2, 1, 4, 0, 0, 6, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 6, 0],
+        [0, 0, 0, 8, 6, 1, 7, 4, 2],
+        [9, 1, 2, 4, 0, 0, 6, 0, 7],
+        [3, 7, 4, 2, 6, 0, 9, 5, 0],
+        [8, 6, 5, 7, 0, 9, 0, 2, 4],
+        [1, 4, 8, 6, 9, 3, 2, 7, 5],
+        [7, 0, 9, 0, 2, 4, 0, 0, 6],
+        [0, 0, 6, 0, 0, 7, 0, 0, 9],
+      ],
+      solution: [
+        [2, 1, 4, 3, 7, 6, 5, 9, 8],
+        [5, 9, 7, 1, 4, 2, 8, 6, 3],
+        [6, 3, 8, 9, 5, 8, 7, 4, 2],
+        [9, 1, 2, 4, 3, 8, 6, 0, 7],
+        [3, 7, 4, 2, 6, 1, 9, 5, 8],
+        [8, 6, 5, 7, 0, 9, 3, 2, 4],
+        [1, 4, 8, 6, 9, 3, 2, 7, 5],
+        [7, 0, 9, 5, 2, 4, 0, 8, 6],
+        [4, 2, 6, 8, 0, 7, 0, 3, 9],
+      ],
+      techniqueResult: {
+        techniqueName: 'Simple Colors',
+        level: 3,
+        explanation: 'Simple Colors (Color Trap): 3 — uncolored cells see both colors',
+        highlightCells: [
+          { row: 0, col: 3 }, { row: 7, col: 3 },
+          { row: 3, col: 4 }, { row: 8, col: 4 },
+        ],
+        eliminations: [
+          { position: { row: 0, col: 6 }, candidates: [3] },
+        ],
+        placements: [],
+      },
+    },
+  ],
 };

@@ -287,3 +287,161 @@ export const siameseFishSteps: StepTemplate[] = [
     getMascotHint: () => '*playful pounce* double the fish, double the power!',
   },
 ];
+
+// ============================================
+// Coloring
+// ============================================
+
+export const multiColorsSteps: StepTemplate[] = [
+  {
+    getText: (result) => {
+      return `Color all conjugate pair chains for this candidate. You'll get multiple disconnected color pairs.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*sees many colors* two separate chains, two color pairs~',
+  },
+  {
+    getText: (result) => {
+      const isType2 = result.explanation.includes('Type 2');
+      if (isType2) {
+        return `Type 2: Cells of the same color see opposite colors of another pair. Since one opposite color must be true, all cells with this color are false.`;
+      }
+      return `Type 1: Cells from different color pairs share a house. The opposite colors of both pairs compete — cells seeing both can be eliminated.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
+      return `The color pair interaction eliminates ${elimCount} candidate${elimCount !== 1 ? 's' : ''}.`;
+    },
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*focused stare* the colors never lie!',
+  },
+];
+
+// ============================================
+// Last Resort
+// ============================================
+
+export const templatesSteps: StepTemplate[] = [
+  {
+    getText: () => `Templates enumerate all valid ways to place a digit in the grid — one per row, column, and box.`,
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*calculates* checking every possibility~',
+  },
+  {
+    getText: () => `By comparing all valid templates, cells that appear in none (or all) of them can be resolved.`,
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      if (result.placements.length > 0) {
+        return `This cell appears in every remaining template — the value must go here.`;
+      }
+      return `These cells don't appear in any valid template — the candidate can be eliminated.`;
+    },
+    getHighlightCells: (result) =>
+      result.placements.length > 0
+        ? result.placements.map((p) => p.position)
+        : result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*methodical nod* the templates have spoken!',
+  },
+];
+
+export const forcingChainSteps: StepTemplate[] = [
+  {
+    getText: () => `Assume each candidate of a cell is true and follow the chain of implications.`,
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*traces paths* every candidate tells a story~',
+  },
+  {
+    getText: (result) => {
+      const isContradiction = result.explanation.includes('Contradiction');
+      return isContradiction
+        ? `One candidate leads to a contradiction — an impossible state. It must be false.`
+        : `All candidates lead to the same conclusion — it must be true (verity).`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      if (result.placements.length > 0) {
+        return `The forcing chain proves this value must be placed here.`;
+      }
+      return `The forcing chain proves this candidate can be eliminated.`;
+    },
+    getHighlightCells: (result) =>
+      result.placements.length > 0
+        ? result.placements.map((p) => p.position)
+        : result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*determined look* the chains all agree!',
+  },
+];
+
+export const forcingNetSteps: StepTemplate[] = [
+  {
+    getText: () => `A Forcing Net extends chain logic with branching — when a cell has two candidates, both branches are explored.`,
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*weaves web* the net catches everything~',
+  },
+  {
+    getText: (result) => {
+      const isContradiction = result.explanation.includes('Contradiction');
+      return isContradiction
+        ? `The branching net leads to a contradiction — the starting assumption is false.`
+        : `All branches of the net converge on the same conclusion — a powerful verity.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      if (result.placements.length > 0) {
+        return `The forcing net proves this placement beyond all doubt.`;
+      }
+      return `The forcing net eliminates this candidate — no branch supports it.`;
+    },
+    getHighlightCells: (result) =>
+      result.placements.length > 0
+        ? result.placements.map((p) => p.position)
+        : result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*complex thinking* the net reveals the truth!',
+  },
+];
+
+export const krakenFishSteps: StepTemplate[] = [
+  {
+    getText: () => `A Kraken Fish starts with a finned fish where the possible eliminations can't see all fins.`,
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*mysterious eyes* the kraken stirs~',
+  },
+  {
+    getText: () => `Chains are built from each fin to the elimination target. If all chains prove the elimination is valid, the Kraken Fish succeeds.`,
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: () => `The fish and chains combine to prove this elimination — the Kraken Fish strikes!`,
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*dramatic pounce* fish plus chains equals power!',
+  },
+];
+
+export const bruteForceSteps: StepTemplate[] = [
+  {
+    getText: () => `When all logical techniques fail, Brute Force tries each candidate by trial and error.`,
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*rolls up sleeves* time to try everything~',
+  },
+  {
+    getText: () => `The solver picks a cell, assumes a value, and checks if the puzzle can be solved. If not, it backtracks.`,
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: () => `This value leads to a valid solution — place it and continue.`,
+    getHighlightCells: (result) =>
+      result.placements.length > 0
+        ? result.placements.map((p) => p.position)
+        : result.highlightCells,
+    getMascotHint: () => '*determined nod* brute force always works!',
+  },
+];

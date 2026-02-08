@@ -59,6 +59,7 @@ export const TECHNIQUE_IDS: Record<string, TechniqueInfo> = {
   'turbot-fish': { id: 'turbot-fish', name: 'Turbot Fish', level: 3 },
   'empty-rectangle': { id: 'empty-rectangle', name: 'Empty Rectangle', level: 3 },
   'sue-de-coq': { id: 'sue-de-coq', name: 'Sue de Coq', level: 3 },
+  'simple-colors': { id: 'simple-colors', name: 'Simple Colors', level: 3 },
   'swordfish': { id: 'swordfish', name: 'Swordfish', level: 4 },
   'jellyfish': { id: 'jellyfish', name: 'Jellyfish', level: 4 },
   'xy-wing': { id: 'xy-wing', name: 'XY-Wing', level: 4 },
@@ -72,6 +73,12 @@ export const TECHNIQUE_IDS: Record<string, TechniqueInfo> = {
   'franken-fish': { id: 'franken-fish', name: 'Franken Fish', level: 4 },
   'mutant-fish': { id: 'mutant-fish', name: 'Mutant Fish', level: 4 },
   'siamese-fish': { id: 'siamese-fish', name: 'Siamese Fish', level: 4 },
+  'multi-colors': { id: 'multi-colors', name: 'Multi Colors', level: 4 },
+  'templates': { id: 'templates', name: 'Templates', level: 4 },
+  'forcing-chain': { id: 'forcing-chain', name: 'Forcing Chain', level: 4 },
+  'forcing-net': { id: 'forcing-net', name: 'Forcing Net', level: 4 },
+  'kraken-fish': { id: 'kraken-fish', name: 'Kraken Fish', level: 4 },
+  'brute-force': { id: 'brute-force', name: 'Brute Force', level: 4 },
 };
 
 // Reverse lookup: technique name -> technique ID

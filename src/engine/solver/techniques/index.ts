@@ -22,6 +22,7 @@ import { TwoStringKite } from './level3/TwoStringKite';
 import { TurbotFish } from './level3/TurbotFish';
 import { EmptyRectangle } from './level3/EmptyRectangle';
 import { SueDeCoq } from './level3/SueDeCoq';
+import { SimpleColors } from './level3/SimpleColors';
 
 // Level 4 techniques
 import { Swordfish } from './level4/Swordfish';
@@ -37,6 +38,12 @@ import { AIC } from './level4/AIC';
 import { FrankenFish } from './level4/FrankenFish';
 import { MutantFish } from './level4/MutantFish';
 import { SiameseFish } from './level4/SiameseFish';
+import { MultiColors } from './level4/MultiColors';
+import { Templates } from './level4/Templates';
+import { ForcingChain } from './level4/ForcingChain';
+import { KrakenFish } from './level4/KrakenFish';
+import { ForcingNet } from './level4/ForcingNet';
+import { BruteForce as BruteForcetechnique } from './level4/BruteForce';
 
 // Re-export for convenience
 export { NakedSingle } from './level1/NakedSingle';
@@ -54,6 +61,7 @@ export { TwoStringKite } from './level3/TwoStringKite';
 export { TurbotFish } from './level3/TurbotFish';
 export { EmptyRectangle } from './level3/EmptyRectangle';
 export { SueDeCoq } from './level3/SueDeCoq';
+export { SimpleColors } from './level3/SimpleColors';
 export { Swordfish } from './level4/Swordfish';
 export { Jellyfish } from './level4/Jellyfish';
 export { XYWing } from './level4/XYWing';
@@ -67,6 +75,12 @@ export { AIC } from './level4/AIC';
 export { FrankenFish } from './level4/FrankenFish';
 export { MutantFish } from './level4/MutantFish';
 export { SiameseFish } from './level4/SiameseFish';
+export { MultiColors } from './level4/MultiColors';
+export { Templates } from './level4/Templates';
+export { ForcingChain } from './level4/ForcingChain';
+export { KrakenFish } from './level4/KrakenFish';
+export { ForcingNet } from './level4/ForcingNet';
+export { BruteForce } from './level4/BruteForce';
 
 /**
  * All techniques ordered by difficulty level.
@@ -91,6 +105,7 @@ export const ALL_TECHNIQUES: Technique[] = [
   new TurbotFish(),
   new EmptyRectangle(),
   new SueDeCoq(),
+  new SimpleColors(),
   // Level 4 - Expert
   new Swordfish(),
   new Jellyfish(),
@@ -105,6 +120,13 @@ export const ALL_TECHNIQUES: Technique[] = [
   new FrankenFish(),
   new MutantFish(),
   new SiameseFish(),
+  new MultiColors(),
+  // Level 4 - Last Resort (tried last)
+  new Templates(),
+  new ForcingChain(),
+  new KrakenFish(),
+  new ForcingNet(),
+  new BruteForcetechnique(),
 ];
 
 /**
@@ -127,6 +149,6 @@ export const getTechniquesForLevel = (level: TechniqueLevel): Technique[] => {
 export const TECHNIQUE_NAMES_BY_LEVEL: Record<TechniqueLevel, string[]> = {
   1: ['Naked Single', 'Hidden Single'],
   2: ['Naked Pair', 'Hidden Pair', 'Pointing Pair', 'Box/Line Reduction'],
-  3: ['Naked Triple', 'Hidden Triple', 'X-Wing', 'Finned Fish', 'Skyscraper', '2-String Kite', 'Turbot Fish', 'Empty Rectangle', 'Sue de Coq'],
-  4: ['Swordfish', 'Jellyfish', 'XY-Wing', 'XYZ-Wing', 'WXYZ-Wing', 'Unique Rectangle', 'Avoidable Rectangle', 'BUG', 'Almost Locked Sets', 'Alternating Inference Chains', 'Franken Fish', 'Mutant Fish', 'Siamese Fish'],
+  3: ['Naked Triple', 'Hidden Triple', 'X-Wing', 'Finned Fish', 'Skyscraper', '2-String Kite', 'Turbot Fish', 'Empty Rectangle', 'Sue de Coq', 'Simple Colors'],
+  4: ['Swordfish', 'Jellyfish', 'XY-Wing', 'XYZ-Wing', 'WXYZ-Wing', 'Unique Rectangle', 'Avoidable Rectangle', 'BUG', 'Almost Locked Sets', 'Alternating Inference Chains', 'Franken Fish', 'Mutant Fish', 'Siamese Fish', 'Multi Colors', 'Templates', 'Forcing Chain', 'Kraken Fish', 'Forcing Net', 'Brute Force'],
 };

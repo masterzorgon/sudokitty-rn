@@ -12,13 +12,14 @@ import { nakedPairSteps, hiddenPairSteps, pointingPairSteps, boxLineReductionSte
 import {
   nakedTripleSteps, hiddenTripleSteps, xWingSteps, finnedFishSteps,
   skyscraperSteps, twoStringKiteSteps, turbotFishSteps, emptyRectangleSteps,
-  sueDeCoqSteps,
+  sueDeCoqSteps, simpleColorsSteps,
 } from './level3';
 // Level 4
 import {
   swordfishSteps, jellyfishSteps, xyWingSteps, xyzWingSteps, wxyzWingSteps,
   uniqueRectangleSteps, avoidableRectangleSteps, bugSteps, almostLockedSetsSteps, aicSteps,
-  frankenFishSteps, mutantFishSteps, siameseFishSteps,
+  frankenFishSteps, mutantFishSteps, siameseFishSteps, multiColorsSteps,
+  templatesSteps, forcingChainSteps, forcingNetSteps, krakenFishSteps, bruteForceSteps,
 } from './level4';
 
 // Re-export types
@@ -45,6 +46,7 @@ export const TECHNIQUE_STEP_TEMPLATES: Record<string, StepTemplate[]> = {
   'Turbot Fish': turbotFishSteps,
   'Empty Rectangle': emptyRectangleSteps,
   'Sue de Coq': sueDeCoqSteps,
+  'Simple Colors': simpleColorsSteps,
   'Swordfish': swordfishSteps,
   'Jellyfish': jellyfishSteps,
   'XY-Wing': xyWingSteps,
@@ -58,6 +60,12 @@ export const TECHNIQUE_STEP_TEMPLATES: Record<string, StepTemplate[]> = {
   'Franken Fish': frankenFishSteps,
   'Mutant Fish': mutantFishSteps,
   'Siamese Fish': siameseFishSteps,
+  'Multi Colors': multiColorsSteps,
+  'Templates': templatesSteps,
+  'Forcing Chain': forcingChainSteps,
+  'Forcing Net': forcingNetSteps,
+  'Kraken Fish': krakenFishSteps,
+  'Brute Force': bruteForceSteps,
 };
 
 // ============================================

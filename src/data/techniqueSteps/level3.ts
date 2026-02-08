@@ -246,3 +246,37 @@ export const sueDeCoqSteps: StepTemplate[] = [
     getMascotHint: () => '*counts on paws* so many eliminations at once!',
   },
 ];
+
+// ============================================
+// Coloring
+// ============================================
+
+export const simpleColorsSteps: StepTemplate[] = [
+  {
+    getText: (result) => {
+      const isWrap = result.explanation.includes('Wrap');
+      const num = extractSDPCandidate(result.explanation);
+      return `Focus on candidate ${num ?? 'a number'}. Color conjugate pairs with two alternating colors along connected chains.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*paints with paws* two colors, one digit~',
+  },
+  {
+    getText: (result) => {
+      const isWrap = result.explanation.includes('Wrap');
+      if (isWrap) {
+        return `Color Wrap detected! Two cells with the same color see each other — that color can't be all true, so all cells with it are false.`;
+      }
+      return `Color Trap detected! An uncolored cell sees cells of both colors — since one color must be true, this cell can't have the candidate.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
+      return `Eliminate the candidate from ${elimCount} cell${elimCount !== 1 ? 's' : ''}.`;
+    },
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*satisfied purr* the colors revealed the truth!',
+  },
+];
