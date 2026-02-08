@@ -222,4 +222,130 @@ export const level4Puzzles: PartialPuzzleBank = {
       },
     },
   ],
+
+  'franken-fish': [
+    {
+      // Franken Swordfish: base sets r1,r5,b7, cover sets c1,c2,c5 on digit 8
+      puzzle: [
+        [0, 0, 6, 7, 0, 0, 3, 9, 1],
+        [0, 0, 9, 3, 0, 0, 4, 0, 0],
+        [0, 0, 3, 0, 0, 0, 6, 7, 9],
+        [9, 1, 2, 0, 3, 0, 6, 0, 7],
+        [3, 7, 4, 2, 6, 0, 9, 5, 0],
+        [8, 6, 5, 7, 0, 9, 0, 2, 4],
+        [0, 0, 0, 6, 9, 3, 2, 0, 5],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [6, 0, 0, 0, 0, 7, 0, 0, 0],
+      ],
+      solution: [
+        [4, 5, 6, 7, 8, 2, 3, 9, 1],
+        [2, 8, 9, 3, 1, 6, 4, 0, 5],
+        [1, 0, 3, 5, 4, 0, 6, 7, 9],
+        [9, 1, 2, 4, 3, 8, 6, 0, 7],
+        [3, 7, 4, 2, 6, 1, 9, 5, 8],
+        [8, 6, 5, 7, 0, 9, 1, 2, 4],
+        [0, 4, 1, 6, 9, 3, 2, 8, 5],
+        [7, 3, 8, 0, 2, 5, 0, 4, 6],
+        [6, 2, 0, 8, 0, 7, 5, 1, 3],
+      ],
+      techniqueResult: {
+        techniqueName: 'Franken Fish',
+        level: 4,
+        explanation: 'Franken Swordfish: 8 r1r5b7/c1c2c5',
+        highlightCells: [
+          { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 4 },
+          { row: 4, col: 5 }, { row: 4, col: 8 },
+          { row: 6, col: 0 }, { row: 7, col: 1 },
+        ],
+        eliminations: [
+          { position: { row: 2, col: 4 }, candidates: [8] },
+        ],
+        placements: [],
+      },
+    },
+  ],
+
+  'mutant-fish': [
+    {
+      // Mutant X-Wing: base sets r6,c2, cover sets c6,b4 on digit 9
+      // (This is equivalent to a 2-String Kite / Turbot Fish seen as a fish)
+      puzzle: [
+        [3, 6, 1, 7, 0, 0, 2, 9, 5],
+        [8, 4, 2, 3, 9, 5, 6, 7, 1],
+        [0, 0, 5, 0, 0, 0, 4, 8, 3],
+        [1, 0, 0, 8, 5, 0, 0, 0, 0],
+        [6, 2, 5, 0, 0, 0, 0, 1, 8],
+        [0, 0, 0, 0, 0, 1, 5, 0, 0],
+        [7, 0, 0, 0, 0, 0, 0, 5, 0],
+        [0, 0, 3, 0, 0, 0, 0, 0, 7],
+        [0, 5, 0, 0, 0, 7, 0, 0, 0],
+      ],
+      solution: [
+        [3, 6, 1, 7, 4, 8, 2, 9, 5],
+        [8, 4, 2, 3, 9, 5, 6, 7, 1],
+        [9, 7, 5, 6, 1, 2, 4, 8, 3],
+        [1, 3, 4, 8, 5, 6, 7, 2, 9],
+        [6, 2, 5, 9, 7, 4, 3, 1, 8],
+        [0, 8, 7, 2, 3, 1, 5, 6, 4],
+        [7, 1, 8, 4, 6, 3, 9, 5, 2],
+        [4, 9, 3, 5, 2, 0, 8, 0, 7],
+        [2, 5, 6, 1, 8, 7, 0, 4, 0],
+      ],
+      techniqueResult: {
+        techniqueName: 'Mutant Fish',
+        level: 4,
+        explanation: 'Mutant X-Wing: 9 r6c2/c6b4',
+        highlightCells: [
+          { row: 5, col: 0 }, { row: 5, col: 5 },
+          { row: 3, col: 1 }, { row: 6, col: 1 },
+        ],
+        eliminations: [
+          { position: { row: 6, col: 5 }, candidates: [9] },
+        ],
+        placements: [],
+      },
+    },
+  ],
+
+  'siamese-fish': [
+    {
+      // Siamese Sashimi Swordfish on digit 1.
+      // Two finned swordfish share base sets but differ in one cover set.
+      puzzle: [
+        [0, 0, 6, 0, 0, 0, 3, 0, 0],
+        [2, 6, 7, 5, 9, 4, 3, 8, 1],
+        [0, 3, 0, 8, 6, 1, 7, 4, 2],
+        [3, 9, 6, 4, 5, 2, 1, 7, 8],
+        [7, 1, 4, 6, 3, 8, 9, 2, 5],
+        [8, 5, 2, 7, 1, 9, 4, 3, 6],
+        [0, 8, 3, 9, 7, 5, 6, 1, 4],
+        [9, 7, 5, 1, 8, 6, 2, 0, 3],
+        [6, 0, 1, 3, 0, 0, 8, 5, 7],
+      ],
+      solution: [
+        [1, 4, 6, 2, 0, 7, 3, 9, 0],
+        [2, 6, 7, 5, 9, 4, 3, 8, 1],
+        [5, 3, 9, 8, 6, 1, 7, 4, 2],
+        [3, 9, 6, 4, 5, 2, 1, 7, 8],
+        [7, 1, 4, 6, 3, 8, 9, 2, 5],
+        [8, 5, 2, 7, 1, 9, 4, 3, 6],
+        [4, 8, 3, 9, 7, 5, 6, 1, 0],
+        [9, 7, 5, 1, 8, 6, 2, 0, 3],
+        [6, 2, 1, 3, 4, 0, 8, 5, 7],
+      ],
+      techniqueResult: {
+        techniqueName: 'Siamese Fish',
+        level: 4,
+        explanation: 'Siamese Swordfish: 4 with 2 eliminations',
+        highlightCells: [
+          { row: 0, col: 0 }, { row: 0, col: 3 },
+          { row: 0, col: 7 }, { row: 0, col: 8 },
+        ],
+        eliminations: [
+          { position: { row: 8, col: 5 }, candidates: [4] },
+        ],
+        placements: [],
+      },
+    },
+  ],
 };

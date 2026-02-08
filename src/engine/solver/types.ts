@@ -240,6 +240,26 @@ export const MOCHI_TECHNIQUE_HINTS: Record<string, string[]> = {
     "the empty rectangle hides a clever trick!",
     "*tilts head* the ER and the pair work together~",
   ],
+  'Sue de Coq': [
+    "*examines closely* two sectors, one clever trick~",
+    "the intersection has too many candidates... but look at the helpers!",
+    "*counts on paws* the locked sets overlap beautifully~",
+  ],
+  'Franken Fish': [
+    "*peers into the box* this fish swims through boxes~",
+    "the franken fish mixes boxes into the pattern!",
+    "*alert ears* boxes as base sets open new possibilities~",
+  ],
+  'Mutant Fish': [
+    "*wide eyes* rows and columns together? how mutant!",
+    "the mutant fish has the wildest base/cover sets~",
+    "*tilts head* all house types in one fish pattern~",
+  ],
+  'Siamese Fish': [
+    "*sees double* two fish, one pattern, double eliminations!",
+    "the siamese twins share cells but eliminate differently~",
+    "*playful pounce* combine both fish for maximum power~",
+  ],
 };
 
 /**

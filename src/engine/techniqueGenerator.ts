@@ -58,6 +58,7 @@ export const TECHNIQUE_IDS: Record<string, TechniqueInfo> = {
   'two-string-kite': { id: 'two-string-kite', name: '2-String Kite', level: 3 },
   'turbot-fish': { id: 'turbot-fish', name: 'Turbot Fish', level: 3 },
   'empty-rectangle': { id: 'empty-rectangle', name: 'Empty Rectangle', level: 3 },
+  'sue-de-coq': { id: 'sue-de-coq', name: 'Sue de Coq', level: 3 },
   'swordfish': { id: 'swordfish', name: 'Swordfish', level: 4 },
   'jellyfish': { id: 'jellyfish', name: 'Jellyfish', level: 4 },
   'xy-wing': { id: 'xy-wing', name: 'XY-Wing', level: 4 },
@@ -68,6 +69,9 @@ export const TECHNIQUE_IDS: Record<string, TechniqueInfo> = {
   'bug': { id: 'bug', name: 'BUG', level: 4 },
   'almost-locked-sets': { id: 'almost-locked-sets', name: 'Almost Locked Sets', level: 4 },
   'alternating-inference-chains': { id: 'alternating-inference-chains', name: 'Alternating Inference Chains', level: 4 },
+  'franken-fish': { id: 'franken-fish', name: 'Franken Fish', level: 4 },
+  'mutant-fish': { id: 'mutant-fish', name: 'Mutant Fish', level: 4 },
+  'siamese-fish': { id: 'siamese-fish', name: 'Siamese Fish', level: 4 },
 };
 
 // Reverse lookup: technique name -> technique ID

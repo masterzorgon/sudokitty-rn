@@ -156,11 +156,7 @@ function TypeSection({
     >
       {/* Section header */}
       <View style={styles.sectionHeader}>
-        <View style={[styles.sectionDot, { backgroundColor: color }]} />
-        <Text style={styles.sectionTitle}>{type.toLowerCase()}</Text>
-        {!isEmpty && (
-          <Text style={styles.sectionCount}>{techniques.length}</Text>
-        )}
+        <Text style={styles.sectionTitle}>{type}</Text>
       </View>
 
       {/* Technique cards or empty state */}
@@ -298,24 +294,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  sectionDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
   },
   sectionTitle: {
     ...typography.headline,
     color: colors.textPrimary,
-    flex: 1,
-  },
-  sectionCount: {
-    fontSize: 12,
-    color: colors.textLight,
   },
   sectionCards: {
     gap: spacing.sm,

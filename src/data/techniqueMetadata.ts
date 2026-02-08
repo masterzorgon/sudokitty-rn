@@ -349,6 +349,25 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
     hasSolver: true,
   },
 
+  // Level 3 - Miscellaneous
+  {
+    id: 'sue-de-coq',
+    name: 'Sue de Coq',
+    level: 3,
+    category: 'Advanced',
+    techniqueType: 'Miscellaneous',
+    shortDescription: 'Overlapping locked sets at a box/line intersection',
+    longDescription:
+      'Also known as Two-Sector Disjoint Subsets. At the intersection of a box and a row (or column), ' +
+      'when the cells have more candidates than cells, companion cells in the row and box can lock ' +
+      'subsets of those candidates. This creates two overlapping locked sets, allowing eliminations ' +
+      'from both the rest of the row and the rest of the box. Can produce many eliminations at once.',
+    icon: 'target',
+    color: CATEGORY_COLORS.Advanced,
+    isPlacement: false,
+    hasSolver: true,
+  },
+
   // Level 4 - Expert
   {
     id: 'swordfish',
@@ -505,6 +524,58 @@ export const TECHNIQUE_METADATA: TechniqueMetadata[] = [
       'BUG (Bivalue Universal Grave) occurs when all unsolved cells have exactly two candidates ' +
       'except one cell with three. To avoid the deadly BUG state (which implies multiple solutions), ' +
       'the odd candidate in that cell must be the solution. A quick, elegant deduction.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+
+  // Level 4 - Complex Fish
+  {
+    id: 'franken-fish',
+    name: 'Franken Fish',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Complex Fish',
+    shortDescription: 'Fish with boxes in the base or cover sets',
+    longDescription:
+      'A Franken Fish extends the basic fish pattern by allowing boxes as base or cover sets. ' +
+      'When at least one sector is a box, the fish becomes "Franken." This opens up many more ' +
+      'patterns including finned variants with endo fins and cannibalistic eliminations. ' +
+      'Covers Franken X-Wing, Franken Swordfish, and Franken Jellyfish.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'mutant-fish',
+    name: 'Mutant Fish',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Complex Fish',
+    shortDescription: 'Fish with rows and columns mixed in base or cover sets',
+    longDescription:
+      'The most general form of fish. Mutant Fish allow all house types (rows, columns, boxes) ' +
+      'freely in both base and cover sets, with rows and columns mixed. Smaller Mutant X-Wings ' +
+      'are often known as 2-String Kites or Turbot Fish. Larger variants are rare but powerful.',
+    icon: 'award',
+    color: CATEGORY_COLORS.Expert,
+    isPlacement: false,
+    hasSolver: true,
+  },
+  {
+    id: 'siamese-fish',
+    name: 'Siamese Fish',
+    level: 4,
+    category: 'Expert',
+    techniqueType: 'Complex Fish',
+    shortDescription: 'Two finned fish sharing cells with different eliminations',
+    longDescription:
+      'When two finned fish of the same type share the same base sets and differ in only one ' +
+      'cover set, they can be combined into a Siamese Fish. Each fish contributes different ' +
+      'eliminations, making the combined move more powerful than either alone. The simplest ' +
+      'Siamese Sashimi X-Wing is better known as a Skyscraper.',
     icon: 'award',
     color: CATEGORY_COLORS.Expert,
     isPlacement: false,

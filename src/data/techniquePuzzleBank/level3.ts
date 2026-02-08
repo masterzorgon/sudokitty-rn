@@ -410,4 +410,50 @@ export const level3Puzzles: PartialPuzzleBank = {
       },
     },
   ],
+
+  'sue-de-coq': [
+    {
+      // Sue de Coq: intersection of row 7 and box 7.
+      // Intersection cells r7c1,r7c3 contain candidates {3,4,5,9}.
+      // Row companion r7c7 has {4,5}. Box companion r8c3 has {3,9}.
+      // Eliminates 4,5 from rest of row 7, and 3,9 from rest of box 7.
+      puzzle: [
+        [1, 4, 8, 3, 2, 7, 0, 0, 9],
+        [2, 6, 7, 5, 9, 4, 3, 8, 1],
+        [0, 3, 0, 8, 6, 1, 7, 4, 2],
+        [3, 9, 6, 4, 5, 2, 1, 7, 8],
+        [7, 1, 4, 6, 3, 8, 9, 2, 5],
+        [8, 5, 2, 0, 0, 9, 0, 0, 0],
+        [0, 8, 0, 0, 0, 0, 0, 0, 0],
+        [0, 7, 0, 0, 0, 0, 0, 0, 0],
+        [0, 2, 1, 0, 0, 0, 8, 0, 0],
+      ],
+      solution: [
+        [1, 4, 8, 3, 2, 7, 5, 6, 9],
+        [2, 6, 7, 5, 9, 4, 3, 8, 1],
+        [5, 3, 9, 8, 6, 1, 7, 4, 2],
+        [3, 9, 6, 4, 5, 2, 1, 7, 8],
+        [7, 1, 4, 6, 3, 8, 9, 2, 5],
+        [8, 5, 2, 7, 1, 9, 4, 3, 6],
+        [4, 8, 3, 9, 7, 5, 6, 1, 0],
+        [9, 7, 5, 1, 8, 6, 2, 0, 0],
+        [6, 2, 1, 0, 4, 3, 8, 5, 7],
+      ],
+      techniqueResult: {
+        techniqueName: 'Sue de Coq',
+        level: 3,
+        explanation: 'Sue de Coq: candidates {3459} in row 7 and box 7',
+        highlightCells: [
+          { row: 6, col: 0 }, { row: 6, col: 2 },
+          { row: 6, col: 6 }, { row: 7, col: 2 },
+        ],
+        eliminations: [
+          { position: { row: 6, col: 3 }, candidates: [5] },
+          { position: { row: 6, col: 4 }, candidates: [5] },
+          { position: { row: 7, col: 0 }, candidates: [9] },
+        ],
+        placements: [],
+      },
+    },
+  ],
 };

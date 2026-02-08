@@ -215,3 +215,34 @@ export const emptyRectangleSteps: StepTemplate[] = [
     getMascotHint: () => '*tilts head* the rectangle reveals the answer!',
   },
 ];
+
+// ============================================
+// Miscellaneous
+// ============================================
+
+export const sueDeCoqSteps: StepTemplate[] = [
+  {
+    getText: (result) => {
+      // Extract candidates from explanation like "candidates {3459} in row 7 and box 6"
+      const match = result.explanation.match(/\{(\d+)\}/);
+      const cands = match ? match[1].split('').join(', ') : 'several candidates';
+      return `Look at the intersection of a box and a row/column. The cells there contain candidates {${cands}} — more than can fit!`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*examines closely* too many candidates for these cells~',
+  },
+  {
+    getText: (result) => {
+      return `Companion cells in the row and box each claim some of those excess candidates, forming two overlapping locked sets. This is a Sue de Coq!`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
+      return `The locked sets let us eliminate ${elimCount} candidate${elimCount !== 1 ? 's' : ''} from the rest of the row and box.`;
+    },
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*counts on paws* so many eliminations at once!',
+  },
+];

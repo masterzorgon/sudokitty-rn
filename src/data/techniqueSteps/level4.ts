@@ -205,3 +205,85 @@ export const aicSteps: StepTemplate[] = [
     getMascotHint: () => '*satisfied purr* the chain reveals the truth!',
   },
 ];
+
+// ============================================
+// Complex Fish
+// ============================================
+
+export const frankenFishSteps: StepTemplate[] = [
+  {
+    getText: (result) => {
+      return `This is a Franken Fish — a fish pattern that uses boxes as base or cover sets alongside rows/columns.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*peers into the box* this fish mixes in boxes~',
+  },
+  {
+    getText: (result) => {
+      const hasFins = result.explanation.includes('Finned');
+      return hasFins
+        ? `The fish has fins — base candidates not covered by cover sets. Eliminations must see all fins.`
+        : `All base candidates are covered. Standard fish eliminations apply.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
+      return `Eliminate ${elimCount} candidate${elimCount !== 1 ? 's' : ''} from cells in the cover sets that are not in the base sets.`;
+    },
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*swishes tail* the franken fish strikes!',
+  },
+];
+
+export const mutantFishSteps: StepTemplate[] = [
+  {
+    getText: (result) => {
+      return `This is a Mutant Fish — the most general fish form, with rows and columns mixed in the base or cover sets.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*wide eyes* rows and columns together!',
+  },
+  {
+    getText: (result) => {
+      const hasFins = result.explanation.includes('Finned');
+      return hasFins
+        ? `This mutant fish has fins. Only eliminations that see all fin cells are valid.`
+        : `The mutant fish is unfinned — all base candidates are covered.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
+      return `The mutant pattern eliminates ${elimCount} candidate${elimCount !== 1 ? 's' : ''}.`;
+    },
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*stretches* the mutant fish is powerful!',
+  },
+];
+
+export const siameseFishSteps: StepTemplate[] = [
+  {
+    getText: (result) => {
+      return `This is a Siamese Fish — two finned fish sharing the same cells but differing in one cover set.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+    getMascotHint: () => '*sees double* two fish in one!',
+  },
+  {
+    getText: (result) => {
+      return `Each fish produces different eliminations. Combined, the Siamese pair eliminates more than either alone.`;
+    },
+    getHighlightCells: (result) => result.highlightCells,
+  },
+  {
+    getText: (result) => {
+      const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
+      return `Together, the siamese twins eliminate ${elimCount} candidate${elimCount !== 1 ? 's' : ''}.`;
+    },
+    getHighlightCells: (result) => result.eliminations.map((e) => e.position),
+    getMascotHint: () => '*playful pounce* double the fish, double the power!',
+  },
+];

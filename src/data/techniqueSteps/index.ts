@@ -12,11 +12,13 @@ import { nakedPairSteps, hiddenPairSteps, pointingPairSteps, boxLineReductionSte
 import {
   nakedTripleSteps, hiddenTripleSteps, xWingSteps, finnedFishSteps,
   skyscraperSteps, twoStringKiteSteps, turbotFishSteps, emptyRectangleSteps,
+  sueDeCoqSteps,
 } from './level3';
 // Level 4
 import {
   swordfishSteps, jellyfishSteps, xyWingSteps, xyzWingSteps, wxyzWingSteps,
   uniqueRectangleSteps, avoidableRectangleSteps, bugSteps, almostLockedSetsSteps, aicSteps,
+  frankenFishSteps, mutantFishSteps, siameseFishSteps,
 } from './level4';
 
 // Re-export types
@@ -42,6 +44,7 @@ export const TECHNIQUE_STEP_TEMPLATES: Record<string, StepTemplate[]> = {
   '2-String Kite': twoStringKiteSteps,
   'Turbot Fish': turbotFishSteps,
   'Empty Rectangle': emptyRectangleSteps,
+  'Sue de Coq': sueDeCoqSteps,
   'Swordfish': swordfishSteps,
   'Jellyfish': jellyfishSteps,
   'XY-Wing': xyWingSteps,
@@ -52,6 +55,9 @@ export const TECHNIQUE_STEP_TEMPLATES: Record<string, StepTemplate[]> = {
   'BUG': bugSteps,
   'Almost Locked Sets': almostLockedSetsSteps,
   'Alternating Inference Chains': aicSteps,
+  'Franken Fish': frankenFishSteps,
+  'Mutant Fish': mutantFishSteps,
+  'Siamese Fish': siameseFishSteps,
 };
 
 // ============================================
