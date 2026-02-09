@@ -32,7 +32,7 @@ export interface TechniqueGenerationResult {
   hint?: Hint;
   attemptsTaken: number;
   timeMs: number;
-  source: 'generated' | 'curated';
+  source: 'generated' | 'curated' | 'cached';
   error?: 'TIMEOUT' | 'MAX_RETRIES' | 'NO_CURATED';
 }
 

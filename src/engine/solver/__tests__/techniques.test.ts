@@ -709,6 +709,16 @@ describe('WXYZ-Wing', () => {
 
 describe('Almost Locked Sets', () => {
   const technique = new AlmostLockedSets();
+  const curated = CURATED_PUZZLE_BANK['almost-locked-sets']?.[0];
+
+  test('should find technique in verified puzzle', () => {
+    expect(curated).toBeDefined();
+    const rawGrid = new CandidateGrid(curated.puzzle);
+    const result = technique.apply(rawGrid);
+    expect(result).not.toBeNull();
+    expect(result!.techniqueName).toBe('Almost Locked Sets');
+    expect(result!.eliminations.length).toBeGreaterThan(0);
+  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -733,6 +743,20 @@ describe('AIC', () => {
 
 describe('Skyscraper', () => {
   const technique = new Skyscraper();
+  const curated = CURATED_PUZZLE_BANK['skyscraper']?.[0];
+
+  test('should find technique in generator-captured puzzle', () => {
+    expect(curated).toBeDefined();
+    const rawGrid = new CandidateGrid(curated.puzzle);
+    let result = technique.apply(rawGrid);
+    if (!result) {
+      const grid = prepareGridForTechnique(curated.puzzle, 3);
+      result = technique.apply(grid);
+    }
+    expect(result).not.toBeNull();
+    expect(result!.techniqueName).toBe('Skyscraper');
+    expect(result!.eliminations.length).toBeGreaterThan(0);
+  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -742,6 +766,20 @@ describe('Skyscraper', () => {
 
 describe('2-String Kite', () => {
   const technique = new TwoStringKite();
+  const curated = CURATED_PUZZLE_BANK['two-string-kite']?.[0];
+
+  test('should find technique in generator-captured puzzle', () => {
+    expect(curated).toBeDefined();
+    const rawGrid = new CandidateGrid(curated.puzzle);
+    let result = technique.apply(rawGrid);
+    if (!result) {
+      const grid = prepareGridForTechnique(curated.puzzle, 3);
+      result = technique.apply(grid);
+    }
+    expect(result).not.toBeNull();
+    expect(result!.techniqueName).toBe('2-String Kite');
+    expect(result!.eliminations.length).toBeGreaterThan(0);
+  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -801,6 +839,16 @@ describe('Empty Rectangle', () => {
 
 describe('Sue de Coq', () => {
   const technique = new SueDeCoq();
+  const curated = CURATED_PUZZLE_BANK['sue-de-coq']?.[0];
+
+  test('should find technique in verified puzzle', () => {
+    expect(curated).toBeDefined();
+    const rawGrid = new CandidateGrid(curated.puzzle);
+    const result = technique.apply(rawGrid);
+    expect(result).not.toBeNull();
+    expect(result!.techniqueName).toBe('Sue de Coq');
+    expect(result!.eliminations.length).toBeGreaterThan(0);
+  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -952,6 +1000,16 @@ describe('Templates', () => {
 
 describe('Forcing Chain', () => {
   const technique = new ForcingChain();
+  const curated = CURATED_PUZZLE_BANK['forcing-chain']?.[0];
+
+  test('should find technique in verified puzzle', () => {
+    expect(curated).toBeDefined();
+    const rawGrid = new CandidateGrid(curated.puzzle);
+    const result = technique.apply(rawGrid);
+    expect(result).not.toBeNull();
+    expect(result!.techniqueName).toBe('Forcing Chain');
+    expect(result!.eliminations.length).toBeGreaterThan(0);
+  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);

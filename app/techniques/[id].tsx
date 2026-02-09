@@ -14,12 +14,14 @@ import { spacing, borderRadius, shadows } from '../../src/theme';
 import { getTechniqueMetadata, TechniqueMetadata } from '../../src/data/techniqueMetadata';
 import { renderSteps, RenderedStep } from '../../src/data/techniqueSteps';
 import {
-  generatePuzzleForTechnique,
-  generateWithFallback,
-  TechniqueGenerationResult,
+  getCuratedPuzzle,
   TECHNIQUE_IDS,
 } from '../../src/engine/techniqueGenerator';
 import { CURATED_PUZZLE_BANK } from '../../src/data/techniquePuzzleBank';
+import {
+  getCachedPuzzle,
+  consumeAndRefill,
+} from '../../src/services/puzzleCacheService';
 import {
   validateSelection,
   PlacementSelection,
@@ -48,13 +50,42 @@ interface PuzzleState {
 }
 
 // ============================================
-// Constants
+// Helpers
 // ============================================
 
-const GENERATION_CONFIG = {
-  maxRetries: 100,
-  timeoutMs: 2000,
-};
+/**
+ * Get the next puzzle for a technique using the cache-first, curated-fallback
+ * pattern. Supabase is never called synchronously — this is always instant.
+ */
+function getNextPuzzle(techniqueId: string): {
+  puzzle: number[][];
+  solution: number[][];
+  techniqueResult: TechniqueResult;
+} | null {
+  // 1. Try cache (synchronous, instant)
+  const cached = getCachedPuzzle(techniqueId);
+  if (cached) {
+    // Background: consume and refill
+    consumeAndRefill(techniqueId, cached.id);
+    return {
+      puzzle: cached.puzzle,
+      solution: cached.solution,
+      techniqueResult: cached.techniqueResult,
+    };
+  }
+
+  // 2. Cache miss: fall back to curated bank (synchronous, instant)
+  const curated = getCuratedPuzzle(CURATED_PUZZLE_BANK, techniqueId);
+  if (curated.success && curated.puzzle && curated.solution && curated.techniqueResult) {
+    return {
+      puzzle: curated.puzzle,
+      solution: curated.solution,
+      techniqueResult: curated.techniqueResult,
+    };
+  }
+
+  return null;
+}
 
 // ============================================
 // Main Screen
@@ -107,34 +138,25 @@ export default function TechniquePracticeScreen() {
   }, [techniqueId]);
 
   const generatePuzzle = useCallback(() => {
-    setMode('loading');
-    setGenerationError(null);
     setCurrentStep(0);
     setSelectedCells(new Set());
     setValidationResult(null);
+    setGenerationError(null);
 
-    // Use setTimeout to avoid blocking the UI thread
-    setTimeout(() => {
-      const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, GENERATION_CONFIG);
-
-      if (result.success && result.puzzle && result.solution && result.techniqueResult) {
-        const steps = renderSteps(result.techniqueResult);
-        setPuzzleState({
-          puzzle: result.puzzle,
-          solution: result.solution,
-          techniqueResult: result.techniqueResult,
-          steps,
-        });
-        setMode('intro');
-      } else {
-        setGenerationError(
-          result.error === 'TIMEOUT'
-            ? 'Puzzle generation took too long.'
-            : 'Could not find a suitable puzzle for this technique.'
-        );
-        setMode('error');
-      }
-    }, 50);
+    const next = getNextPuzzle(techniqueId);
+    if (next) {
+      const steps = renderSteps(next.techniqueResult);
+      setPuzzleState({
+        puzzle: next.puzzle,
+        solution: next.solution,
+        techniqueResult: next.techniqueResult,
+        steps,
+      });
+      setMode('intro');
+    } else {
+      setGenerationError('Could not find a suitable puzzle for this technique.');
+      setMode('error');
+    }
   }, [techniqueId]);
 
   // ============================================
@@ -164,25 +186,22 @@ export default function TechniquePracticeScreen() {
       completeDemo(techniqueId, timeSeconds);
       triggerHaptic(ImpactFeedbackStyle.Medium);
 
-      // Generate a new puzzle for find-it mode
-      setMode('loading');
-      setTimeout(() => {
-        const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, GENERATION_CONFIG);
-        if (result.success && result.puzzle && result.solution && result.techniqueResult) {
-          const steps = renderSteps(result.techniqueResult);
-          setPuzzleState({
-            puzzle: result.puzzle,
-            solution: result.solution,
-            techniqueResult: result.techniqueResult,
-            steps,
-          });
-          setMode('find-it');
-          resetFindState();
-        } else {
-          setMode('error');
-          setGenerationError('Could not generate a practice puzzle.');
-        }
-      }, 50);
+      // Generate a new puzzle for find-it mode (instant, no loading state)
+      const next = getNextPuzzle(techniqueId);
+      if (next) {
+        const steps = renderSteps(next.techniqueResult);
+        setPuzzleState({
+          puzzle: next.puzzle,
+          solution: next.solution,
+          techniqueResult: next.techniqueResult,
+          steps,
+        });
+        setMode('find-it');
+        resetFindState();
+      } else {
+        setMode('error');
+        setGenerationError('Could not generate a practice puzzle.');
+      }
     }
   };
 
@@ -307,22 +326,19 @@ export default function TechniquePracticeScreen() {
 
   const handleTryAnother = () => {
     resetFindState();
-    setMode('loading');
-    setTimeout(() => {
-      const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, GENERATION_CONFIG);
-      if (result.success && result.puzzle && result.solution && result.techniqueResult) {
-        const steps = renderSteps(result.techniqueResult);
-        setPuzzleState({
-          puzzle: result.puzzle,
-          solution: result.solution,
-          techniqueResult: result.techniqueResult,
-          steps,
-        });
-        setMode('find-it');
-      } else {
-        setMode('error');
-      }
-    }, 50);
+    const next = getNextPuzzle(techniqueId);
+    if (next) {
+      const steps = renderSteps(next.techniqueResult);
+      setPuzzleState({
+        puzzle: next.puzzle,
+        solution: next.solution,
+        techniqueResult: next.techniqueResult,
+        steps,
+      });
+      setMode('find-it');
+    } else {
+      setMode('error');
+    }
   };
 
   // ============================================

@@ -2,11 +2,13 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { View, StatusBar, AppState, AppStateStatus } from 'react-native';
 import 'react-native-reanimated';
 
 import { colors } from '../src/theme/colors';
+import { TECHNIQUE_IDS } from '../src/engine/techniqueGenerator';
+import { prefetchPuzzles } from '../src/services/puzzleCacheService';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -51,7 +53,26 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+const PREFETCH_COOLDOWN_MS = 60_000; // 60-second debounce for foreground prefetch
+
 function RootLayoutNav() {
+  const lastPrefetchRef = useRef<number>(0);
+
+  // Re-prefetch puzzle cache when the app returns to the foreground
+  useEffect(() => {
+    const handleAppStateChange = (state: AppStateStatus) => {
+      if (state === 'active') {
+        const now = Date.now();
+        if (now - lastPrefetchRef.current > PREFETCH_COOLDOWN_MS) {
+          lastPrefetchRef.current = now;
+          prefetchPuzzles(Object.keys(TECHNIQUE_IDS));
+        }
+      }
+    };
+    const sub = AppState.addEventListener('change', handleAppStateChange);
+    return () => sub.remove();
+  }, []);
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.cream }}>
       <StatusBar barStyle="dark-content" />

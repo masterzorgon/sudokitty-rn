@@ -8,7 +8,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "generate-puzzles": "ts-node --project scripts/tsconfig.scripts.json scripts/generate-puzzles.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -16,6 +17,7 @@
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/native": "^7.1.8",
     "@shopify/react-native-skia": "2.2.12",
+    "@supabase/supabase-js": "^2.95.3",
     "expo": "~54.0.31",
     "expo-blur": "~15.0.8",
     "expo-constants": "~18.0.13",
@@ -50,6 +52,7 @@
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "19.1.0",
     "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
     "typescript": "~5.9.2"
   },
   "private": true

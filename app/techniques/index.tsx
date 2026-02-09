@@ -25,6 +25,8 @@ import {
   COMPLETION_THRESHOLD,
 } from '../../src/stores/techniqueProgressStore';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../src/utils/haptics';
+import { TECHNIQUE_IDS } from '../../src/engine/techniqueGenerator';
+import { prefetchPuzzles } from '../../src/services/puzzleCacheService';
 
 // ============================================
 // Technique Card Component
@@ -195,6 +197,12 @@ export default function TechniquesListScreen() {
   useEffect(() => {
     loadState();
   }, [loadState]);
+
+  // Warm the puzzle cache while the user browses the technique list
+  useEffect(() => {
+    const ids = Object.keys(TECHNIQUE_IDS);
+    prefetchPuzzles(ids);
+  }, []);
 
   const handleSelectTechnique = (techniqueId: string) => {
     triggerHaptic(ImpactFeedbackStyle.Light);

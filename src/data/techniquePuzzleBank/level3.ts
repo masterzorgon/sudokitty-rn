@@ -236,9 +236,38 @@ export const level3Puzzles: PartialPuzzleBank = {
     },
   ],
 
-  'skyscraper': [],
+  'skyscraper': [
+    {
+      puzzle: [[6,4,7,9,1,5,8,2,3],[3,1,5,7,2,8,0,9,0],[0,0,2,0,0,6,1,5,7],[7,6,1,8,0,9,5,0,2],[4,0,9,6,0,0,0,8,1],[0,0,3,1,0,0,0,6,0],[1,0,0,0,9,0,2,0,0],[0,0,0,0,8,1,0,0,5],[0,3,0,0,6,7,0,1,0]],
+      solution: [[6,4,7,9,1,5,8,2,3],[3,1,5,7,2,8,6,9,4],[8,9,2,4,3,6,1,5,7],[7,6,1,8,4,9,5,3,2],[4,2,9,6,5,3,7,8,1],[5,8,3,1,7,2,4,6,9],[1,5,8,3,9,4,2,7,6],[9,7,6,2,8,1,3,4,5],[2,3,4,5,6,7,9,1,8]],
+      techniqueResult: {
+        techniqueName: 'Skyscraper',
+        level: 3,
+        explanation: 'Skyscraper: 3 in columns 6 and 7 connected by row 5',
+        highlightCells: [{ row: 4, col: 5 }, { row: 6, col: 5 }, { row: 4, col: 6 }, { row: 7, col: 6 }],
+        eliminations: [
+          { position: { row: 6, col: 7 }, candidates: [3] },
+          { position: { row: 7, col: 3 }, candidates: [3] },
+        ],
+        placements: [],
+      },
+    },
+  ],
 
-  'two-string-kite': [],
+  'two-string-kite': [
+    {
+      puzzle: [[7,2,8,6,5,4,1,9,3],[0,4,3,1,7,0,0,6,0],[6,0,1,0,3,0,0,0,7],[0,1,6,0,8,0,0,0,0],[8,0,0,0,0,7,0,1,6],[0,0,0,5,1,6,3,8,0],[1,0,0,0,6,5,9,0,0],[0,6,0,0,0,0,0,5,1],[4,8,5,0,9,1,6,0,2]],
+      solution: [[7,2,8,6,5,4,1,9,3],[9,4,3,1,7,2,8,6,5],[6,5,1,8,3,9,4,2,7],[5,1,6,4,8,3,2,7,9],[8,3,4,9,2,7,5,1,6],[2,9,7,5,1,6,3,8,4],[1,7,2,3,6,5,9,4,8],[3,6,9,2,4,8,7,5,1],[4,8,5,7,9,1,6,3,2]],
+      techniqueResult: {
+        techniqueName: '2-String Kite',
+        level: 3,
+        explanation: '2-String Kite: 2 in row 2 and column 8 connected in box 3',
+        highlightCells: [{ row: 1, col: 5 }, { row: 1, col: 6 }, { row: 2, col: 7 }, { row: 3, col: 7 }],
+        eliminations: [{ position: { row: 3, col: 5 }, candidates: [2] }],
+        placements: [],
+      },
+    },
+  ],
 
   'turbot-fish': [
     {
@@ -325,7 +354,26 @@ export const level3Puzzles: PartialPuzzleBank = {
     },
   ],
 
-  'sue-de-coq': [],
+  'sue-de-coq': [
+    {
+      // Verified: SDC solver finds "Sue de Coq: candidates {13578} in row 6 and box 5"
+      // Intersection cells F4,F6. Column companions F1,F8,F9. Box companions D6,E6.
+      puzzle: [[0,1,0,9,5,8,0,0,2],[0,0,6,3,4,7,5,1,0],[5,0,0,6,2,1,0,0,0],[0,0,7,0,6,0,0,3,0],[6,0,0,0,0,0,0,0,5],[0,4,0,0,9,0,2,0,0],[0,0,0,0,3,9,0,0,4],[0,9,0,5,1,6,7,0,3],[3,0,0,2,0,4,0,5,0]],
+      solution: [[0,1,0,9,5,8,0,0,2],[0,0,6,3,4,7,5,1,0],[5,0,0,6,2,1,0,0,0],[0,0,7,0,6,0,0,3,0],[6,0,0,0,0,0,0,0,5],[0,4,0,0,9,0,2,0,0],[0,0,0,0,3,9,0,0,4],[0,9,0,5,1,6,7,0,3],[3,0,0,2,0,4,0,5,0]],
+      techniqueResult: {
+        techniqueName: 'Sue de Coq',
+        level: 3,
+        explanation: 'Sue de Coq: candidates {13578} in row 6 and box 5',
+        highlightCells: [
+          { row: 5, col: 3 }, { row: 5, col: 5 },
+          { row: 5, col: 0 }, { row: 5, col: 7 }, { row: 5, col: 8 },
+          { row: 3, col: 5 }, { row: 4, col: 5 },
+        ],
+        eliminations: [{ position: { row: 5, col: 2 }, candidates: [1, 8] }],
+        placements: [],
+      },
+    },
+  ],
 
   'simple-colors': [
     {

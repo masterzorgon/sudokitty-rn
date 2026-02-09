@@ -117,34 +117,15 @@ export const level4Puzzles: PartialPuzzleBank = {
 
   'xyz-wing': [
     {
-      puzzle: [
-        [5, 0, 6, 4, 1, 0, 8, 0, 7],
-        [8, 9, 0, 0, 0, 0, 1, 5, 0],
-        [0, 0, 1, 8, 0, 5, 3, 0, 0],
-        [0, 0, 8, 0, 0, 1, 0, 0, 5],
-        [3, 0, 0, 0, 5, 0, 0, 1, 8],
-        [1, 5, 9, 0, 8, 0, 0, 7, 0],
-        [2, 1, 7, 5, 4, 8, 0, 0, 0],
-        [9, 0, 0, 7, 2, 6, 5, 8, 1],
-        [6, 8, 5, 1, 0, 0, 7, 4, 2],
-      ],
-      solution: [
-        [5, 3, 6, 4, 1, 9, 8, 2, 7],
-        [8, 9, 4, 3, 7, 2, 1, 5, 6],
-        [7, 2, 1, 8, 6, 5, 3, 9, 4],
-        [4, 7, 8, 2, 3, 1, 9, 6, 5],
-        [3, 6, 2, 9, 5, 7, 4, 1, 8],
-        [1, 5, 9, 6, 8, 4, 2, 7, 3],
-        [2, 1, 7, 5, 4, 8, 6, 3, 9],
-        [9, 4, 3, 7, 2, 6, 5, 8, 1],
-        [6, 8, 5, 1, 9, 3, 7, 4, 2],
-      ],
+      // Verified: solver finds XYZ-Wing on raw grid
+      puzzle: [[0,0,0,0,2,4,7,3,0],[5,4,0,3,7,0,2,6,0],[2,3,7,0,0,0,0,0,4],[7,0,0,0,3,0,8,4,0],[0,0,3,4,8,1,0,0,0],[0,8,4,0,6,0,0,0,3],[3,0,0,0,0,0,0,5,9],[0,7,0,0,9,3,0,0,2],[0,0,6,2,0,0,3,0,0]],
+      solution: [[0,0,0,0,2,4,7,3,0],[5,4,0,3,7,0,2,6,0],[2,3,7,0,0,0,0,0,4],[7,0,0,0,3,0,8,4,0],[0,0,3,4,8,1,0,0,0],[0,8,4,0,6,0,0,0,3],[3,0,0,0,0,0,0,5,9],[0,7,0,0,9,3,0,0,2],[0,0,6,2,0,0,3,0,0]],
       techniqueResult: {
         techniqueName: 'XYZ-Wing',
         level: 4,
-        explanation: 'XYZ-Wing: Pivot R3C8 (2,6,9), wings R1C8 (2,9) and R3C5 (6,9) eliminate 9',
-        highlightCells: [{ row: 2, col: 7 }, { row: 0, col: 7 }, { row: 2, col: 4 }],
-        eliminations: [{ position: { row: 2, col: 8 }, candidates: [9] }],
+        explanation: 'XYZ-Wing: Pivot R6C7 (1,5,9), wings R6C1 (1,9) and R5C7 (5,9) eliminate 9',
+        highlightCells: [{ row: 5, col: 6 }, { row: 5, col: 0 }, { row: 4, col: 6 }],
+        eliminations: [{ position: { row: 5, col: 7 }, candidates: [9] }],
         placements: [],
       },
     },
@@ -351,13 +332,46 @@ export const level4Puzzles: PartialPuzzleBank = {
 
   'templates': [],
 
-  'forcing-chain': [],
+  'forcing-chain': [
+    {
+      // Verified: solver finds Forcing Chain (Contradiction) on raw grid
+      puzzle: [[0,0,0,0,6,0,0,0,0],[0,0,7,0,0,9,5,0,1],[9,0,4,3,7,0,8,0,0],[3,0,0,0,0,7,2,5,8],[0,0,0,0,0,0,0,0,0],[7,8,5,0,0,0,0,0,3],[0,0,0,0,8,2,6,0,7],[2,0,6,7,0,0,9,8,0],[0,7,0,0,9,0,0,0,0]],
+      solution: [[0,0,0,0,6,0,0,0,0],[0,0,7,0,0,9,5,0,1],[9,0,4,3,7,0,8,0,0],[3,0,0,0,0,7,2,5,8],[0,0,0,0,0,0,0,0,0],[7,8,5,0,0,0,0,0,3],[0,0,0,0,8,2,6,0,7],[2,0,6,7,0,0,9,8,0],[0,7,0,0,9,0,0,0,0]],
+      techniqueResult: {
+        techniqueName: 'Forcing Chain',
+        level: 4,
+        explanation: 'Forcing Chain (Contradiction): 2 in R1C8 leads to contradiction',
+        highlightCells: [{ row: 0, col: 7 }],
+        eliminations: [{ position: { row: 0, col: 7 }, candidates: [2] }],
+        placements: [],
+      },
+    },
+  ],
 
   'forcing-net': [],
 
   'kraken-fish': [],
 
   'brute-force': [],
+
+  'almost-locked-sets': [
+    {
+      // Verified: solver finds ALS-XZ on raw grid
+      puzzle: [[9,1,0,7,0,0,0,0,3],[0,6,2,0,0,3,7,0,9],[7,3,5,0,0,4,0,8,6],[0,0,9,3,7,2,0,6,0],[0,2,3,0,5,0,0,7,0],[0,5,7,0,4,8,9,3,2],[2,7,0,4,0,0,3,0,0],[5,0,1,2,3,7,6,9,0],[3,9,0,0,0,0,0,2,7]],
+      solution: [[9,1,0,7,0,0,0,0,3],[0,6,2,0,0,3,7,0,9],[7,3,5,0,0,4,0,8,6],[0,0,9,3,7,2,0,6,0],[0,2,3,0,5,0,0,7,0],[0,5,7,0,4,8,9,3,2],[2,7,0,4,0,0,3,0,0],[5,0,1,2,3,7,6,9,0],[3,9,0,0,0,0,0,2,7]],
+      techniqueResult: {
+        techniqueName: 'Almost Locked Sets',
+        level: 4,
+        explanation: 'ALS-XZ: A={5,6} B={1,5,6,8,9} X=5 Z=6',
+        highlightCells: [
+          { row: 0, col: 5 }, { row: 1, col: 3 },
+          { row: 2, col: 3 }, { row: 4, col: 3 }, { row: 5, col: 3 },
+        ],
+        eliminations: [{ position: { row: 4, col: 5 }, candidates: [6] }],
+        placements: [],
+      },
+    },
+  ],
 
   'siamese-fish': [
     {
