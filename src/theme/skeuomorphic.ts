@@ -72,9 +72,9 @@ export const SKEU_VARIANTS: Record<SkeuVariant, SkeuVariantColors> = {
   },
   neutral: {
     gradient: ['#FFFFFF', '#FEFEFE', '#FFFFFF'],
-    edge: '#E8E8E8',
-    borderLight: 'rgba(255, 255, 255, 0.5)',
-    borderDark: 'rgba(0, 0, 0, 0.1)',
+    edge: '#D8D0CC',
+    borderLight: 'rgba(255, 255, 255, 0.8)',
+    borderDark: 'rgba(0, 0, 0, 0.15)',
     textColor: '#5D4E4E',
   },
 } as const;

@@ -1,40 +1,85 @@
 // 9x9 Sudoku grid container
-// Redesigned: soft dimensional card with warm shadow
+// Props-driven: works for both the main game and technique practice.
+// The game screen passes data via the useGameBoardProps() hook.
+// The technique screen passes data directly from puzzle state.
 
 import React, { useCallback, memo } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { SudokuCell, CELL_SIZE } from './SudokuCell';
-import { useGameStore, useRelatedCells } from '../../stores/gameStore';
+import { SudokuCell, CELL_SIZE, COMPACT_CELL_SIZE } from './SudokuCell';
 import { colors } from '../../theme/colors';
-import { borderRadius } from '../../theme';
 import { startGameAnimations } from '../../theme/animations';
-import { BOARD_SIZE } from '../../engine/types';
-import { positionKey } from '../../engine/types';
+import { BOARD_SIZE, Position, positionKey } from '../../engine/types';
 
-// Helper to determine if a box should have alt background (checkerboard pattern)
-// Boxes are numbered 0-8, left to right, top to bottom
-// Pattern: boxes 1, 3, 5, 7 get alt background (center cross + corners alternate)
-const isAltBox = (boxIndex: number): boolean => {
-  return boxIndex % 2 === 1;
-};
+// ============================================
+// Types
+// ============================================
 
-interface SudokuBoardProps {
-  animateEntrance?: boolean;
+/** Lightweight cell data that both game and technique screens can provide. */
+export interface SudokuCellData {
+  value: number | null;
+  isGiven: boolean;
+  isValid: boolean;
+  notes: Set<number>;
 }
 
-export const SudokuBoard = memo(({ animateEntrance = false }: SudokuBoardProps) => {
-  const board = useGameStore((s) => s.board);
-  const selectedCell = useGameStore((s) => s.selectedCell);
-  const highlightedNumber = useGameStore((s) => s.highlightedNumber);
-  const selectCell = useGameStore((s) => s.selectCell);
-  const relatedCells = useRelatedCells();
+export interface SudokuBoardProps {
+  /** 9x9 grid of cell data */
+  cells: SudokuCellData[][];
+  /** Currently selected cell position */
+  selectedCell?: Position | null;
+  /** Primary highlight set (orange) — technique pattern cells or game number-highlights */
+  highlightedCells?: Set<string>;
+  /** Secondary highlight set (coral) — elimination target cells in technique practice */
+  secondaryHighlightedCells?: Set<string>;
+  /** Related cells (row/col/box peers of selected cell) */
+  relatedCells?: Set<string>;
+  /** Number-based highlighting: all cells with this value get highlighted */
+  highlightedNumber?: number | null;
+  /** Cell press handler */
+  onCellPress?: (row: number, col: number) => void;
+  /** Whether cells are interactive (pressable) */
+  interactive?: boolean;
+  /** Animate board entrance with fade-in */
+  animateEntrance?: boolean;
+  /** Animate cell values with pop/shake/glow (game mode) */
+  animateValues?: boolean;
+  /** Use smaller cell size for technique practice */
+  compact?: boolean;
+  /** Show checkerboard box tinting */
+  showBoxTinting?: boolean;
+}
 
+// ============================================
+// Helpers
+// ============================================
+
+/** Boxes 1, 3, 5, 7 get alt background (checkerboard pattern) */
+const isAltBox = (boxIndex: number): boolean => boxIndex % 2 === 1;
+
+// ============================================
+// Component
+// ============================================
+
+export const SudokuBoard = memo(({
+  cells,
+  selectedCell,
+  highlightedCells,
+  secondaryHighlightedCells,
+  relatedCells,
+  highlightedNumber,
+  onCellPress,
+  interactive = true,
+  animateEntrance = false,
+  animateValues = true,
+  compact = false,
+  showBoxTinting = true,
+}: SudokuBoardProps) => {
   const handleCellPress = useCallback(
     (row: number, col: number) => {
-      selectCell({ row, col });
+      onCellPress?.(row, col);
     },
-    [selectCell]
+    [onCellPress],
   );
 
   return (
@@ -46,49 +91,60 @@ export const SudokuBoard = memo(({ animateEntrance = false }: SudokuBoardProps) 
       }
       style={styles.container}
     >
-      {/* Outer card with warm shadow */}
-      <View style={styles.cardOuter}>
-        <View style={styles.card}>
+      <View style={compact ? styles.cardOuterCompact : styles.cardOuter}>
+        <View style={compact ? styles.cardCompact : styles.card}>
           <View style={styles.board}>
             {Array.from({ length: BOARD_SIZE }, (_, row) => (
               <View key={row} style={styles.row}>
                 {Array.from({ length: BOARD_SIZE }, (_, col) => {
-                  const cell = board[row][col];
+                  const cellData = cells[row][col];
+                  const key = positionKey({ row, col });
+
                   const isSelected =
                     selectedCell?.row === row && selectedCell?.col === col;
-                  const isRelated = relatedCells.has(positionKey({ row, col }));
-                  const isHighlighted =
-                    highlightedNumber !== null && cell.value === highlightedNumber;
+                  const isRelated = relatedCells?.has(key) ?? false;
+                  const isPrimaryHighlight = highlightedCells?.has(key) ?? false;
+                  const isSecondaryHighlight =
+                    secondaryHighlightedCells?.has(key) ?? false;
+                  const isNumberHighlighted =
+                    highlightedNumber != null &&
+                    cellData.value === highlightedNumber;
+                  const isHighlighted = isPrimaryHighlight || isNumberHighlighted;
 
-                  // Determine which 3x3 box this cell belongs to
                   const boxRow = Math.floor(row / 3);
                   const boxCol = Math.floor(col / 3);
                   const boxIndex = boxRow * 3 + boxCol;
-                  const isInAltBox = isAltBox(boxIndex);
+                  const isInAltBox = showBoxTinting && isAltBox(boxIndex);
 
-                  // Calculate staggered delay for cascade effect
                   const cellDelay =
                     (row + col) * startGameAnimations.cellCascade.delayPerCell;
 
                   const cellContent = (
                     <SudokuCell
                       key={`${row}-${col}`}
-                      cell={cell}
+                      row={row}
+                      col={col}
+                      value={cellData.value}
+                      isGiven={cellData.isGiven}
+                      isValid={cellData.isValid}
+                      notes={cellData.notes}
                       isSelected={isSelected}
                       isRelated={isRelated}
                       isHighlighted={isHighlighted}
+                      isSecondaryHighlight={isSecondaryHighlight}
                       isInAltBox={isInAltBox}
-                      onPress={handleCellPress}
+                      onPress={interactive ? handleCellPress : undefined}
+                      animateValues={animateValues}
+                      compact={compact}
                     />
                   );
 
-                  // Wrap in Animated.View for cascade effect when animating
                   if (animateEntrance) {
                     return (
                       <Animated.View
                         key={`${row}-${col}`}
                         entering={FadeIn.delay(cellDelay).duration(
-                          startGameAnimations.cellCascade.duration
+                          startGameAnimations.cellCascade.duration,
                         )}
                       >
                         {cellContent}
@@ -107,16 +163,16 @@ export const SudokuBoard = memo(({ animateEntrance = false }: SudokuBoardProps) 
   );
 });
 
-const BOARD_WIDTH = CELL_SIZE * 9;
+// ============================================
+// Styles
+// ============================================
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    // No padding - grid spans edge-to-edge
   },
+  // Full-size game board
   cardOuter: {
-    // No rounded corners - edge-to-edge
-    // Warm shadow - subtle y-offset, low blur
     shadowColor: colors.boardShadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
@@ -126,9 +182,24 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.boardBackground,
     padding: 2,
-    // Inner subtle border
     borderWidth: 1,
     borderColor: colors.gridLineBold,
+  },
+  // Compact technique practice board
+  cardOuterCompact: {
+    shadowColor: colors.boardShadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  cardCompact: {
+    backgroundColor: colors.boardBackground,
+    padding: 1,
+    borderWidth: 2,
+    borderColor: colors.boxBorder,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   board: {
     overflow: 'hidden',

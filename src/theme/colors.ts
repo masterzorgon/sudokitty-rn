@@ -29,6 +29,10 @@ export const colors = {
   cellError: '#FFF0F0',
   cellGiven: '#FFFBF8',
 
+  // Technique practice highlights (higher contrast than game highlights)
+  techniqueHighlight: 'rgba(255, 157, 107, 0.35)',
+  techniqueHighlightSecondary: 'rgba(255, 92, 80, 0.3)',
+
   // Glow effect
   glowColor: 'rgba(255, 157, 107, 0.4)',
 

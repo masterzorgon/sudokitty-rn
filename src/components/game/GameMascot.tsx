@@ -78,11 +78,15 @@ const BubbleExiting = () => {
 interface GameMascotProps {
   /** The contextual message to display in the speech bubble (null = no bubble) */
   message: string | null;
+  /** Max number of lines for the bubble text (default: 2). Set to undefined for unlimited. */
+  maxLines?: number;
+  /** Whether the mascot zone height should be flexible (default: false = fixed 100px) */
+  flexibleHeight?: boolean;
 }
 
 // MARK: - Component
 
-export const GameMascot = memo(function GameMascot({ message }: GameMascotProps) {
+export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flexibleHeight = false }: GameMascotProps) {
   // Puff particle shared values - declared at top level for fixed allocation
   const p0x = useSharedValue(0);
   const p0y = useSharedValue(0);
@@ -150,7 +154,7 @@ export const GameMascot = memo(function GameMascot({ message }: GameMascotProps)
   return (
     <Animated.View 
       entering={FadeIn.duration(400).delay(200)}
-      style={styles.container}
+      style={[styles.container, flexibleHeight && styles.containerFlexible]}
     >
       {/* MochiCat on the left */}
       <View style={styles.mascotWrapper}>
@@ -183,7 +187,7 @@ export const GameMascot = memo(function GameMascot({ message }: GameMascotProps)
             {/* Tail pointing left toward the cat - border layer then fill layer */}
             <View style={styles.bubbleTailBorder} />
             <View style={styles.bubbleTail} />
-            <Text style={styles.bubbleText} numberOfLines={2}>
+            <Text style={styles.bubbleText} numberOfLines={maxLines || undefined}>
               {message}
             </Text>
           </Animated.View>
@@ -201,6 +205,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: GAME_LAYOUT.MASCOT_ZONE_HEIGHT,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
+  },
+  containerFlexible: {
+    height: undefined,
+    minHeight: GAME_LAYOUT.MASCOT_ZONE_HEIGHT,
+    alignItems: 'flex-end', // Pin children to bottom so cat stays anchored
   },
   mascotWrapper: {
     // Slight negative margin to overlap the mascot slightly
