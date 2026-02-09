@@ -125,6 +125,6 @@ const styles = StyleSheet.create({
     color: colors.textLight,
   },
   bottomActions: {
-    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
+    // No extra padding — parent introContent already has paddingHorizontal
   },
 });

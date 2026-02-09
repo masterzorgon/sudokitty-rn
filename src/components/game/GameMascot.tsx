@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: GAME_LAYOUT.MASCOT_ZONE_HEIGHT,
-    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
+    paddingLeft: GAME_LAYOUT.SCREEN_PADDING,
   },
   containerFlexible: {
     height: undefined,
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     // Slight negative margin to overlap the mascot slightly
     marginLeft: -10,
     marginRight: 15,
-    top: 12
+    top: 12,
   },
   bubbleContainer: {
     flex: 1,
