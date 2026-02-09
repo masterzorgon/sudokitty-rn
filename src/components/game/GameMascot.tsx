@@ -2,7 +2,7 @@
 // Presentational component - receives message as prop from parent
 
 import React, { useEffect, useRef, useMemo, useCallback, memo } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, ScrollView } from 'react-native';
 import Animated, {
   FadeIn,
   withSpring,
@@ -158,7 +158,7 @@ export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flex
     >
       {/* MochiCat on the left */}
       <View style={styles.mascotWrapper}>
-        <MochiCat size={GAME_LAYOUT.MASCOT_SIZE} animate={true} />
+        <MochiCat size={GAME_LAYOUT.MASCOT_SIZE} animate={true} variant="game" />
       </View>
 
       {/* Speech bubble on the right - only shown when message exists */}
@@ -182,14 +182,24 @@ export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flex
             key={message}
             entering={BubbleEntering}
             exiting={BubbleExiting}
-            style={styles.bubble}
+            style={[styles.bubble, flexibleHeight && styles.bubbleFlexible]}
           >
             {/* Tail pointing left toward the cat - border layer then fill layer */}
             <View style={styles.bubbleTailBorder} />
             <View style={styles.bubbleTail} />
-            <Text style={styles.bubbleText} numberOfLines={maxLines || undefined}>
-              {message}
-            </Text>
+            {flexibleHeight ? (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                bounces={false}
+                style={styles.bubbleScroll}
+              >
+                <Text style={styles.bubbleText}>{message}</Text>
+              </ScrollView>
+            ) : (
+              <Text style={styles.bubbleText} numberOfLines={maxLines || undefined}>
+                {message}
+              </Text>
+            )}
           </Animated.View>
         )}
       </View>
@@ -215,6 +225,7 @@ const styles = StyleSheet.create({
     // Slight negative margin to overlap the mascot slightly
     marginLeft: -10,
     marginRight: 15,
+    top: 12
   },
   bubbleContainer: {
     flex: 1,
@@ -230,7 +241,8 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   bubble: {
-    alignSelf: 'flex-start', // Shrink-wrap to content
+    alignSelf: 'flex-start', // Shrink-wrap to content (game screen)
+    marginBottom: GAME_LAYOUT.MASCOT_SIZE * 0.15, // Shift bubble up so tail aligns with cat's vertical center
     backgroundColor: colors.cardBackground,
     borderRadius: 16,
     paddingVertical: 12,
@@ -243,6 +255,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  bubbleFlexible: {
+    alignSelf: 'stretch', // Fill available width (technique screen)
+    maxHeight: 150, // Cap height so board stays fixed; content scrolls if longer
+  },
+  bubbleScroll: {
+    flexGrow: 0, // Don't expand beyond maxHeight
   },
   bubbleTailBorder: {
     position: 'absolute',

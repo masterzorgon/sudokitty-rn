@@ -49,7 +49,7 @@ export function ValidationFeedback({
         ) : (
           <View style={styles.buttonRow}>
             <View style={styles.buttonWrapper}>
-              <AppButton onPress={onTryAgain} label="try again" variant="secondary" />
+              <AppButton onPress={onTryAgain} label="try again" variant="neutral" />
             </View>
             <View style={styles.buttonWrapper}>
               <AppButton onPress={onTryAnother} label="new puzzle" />

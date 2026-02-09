@@ -44,7 +44,7 @@ export function AnimatedStepDot({ state }: { state: StepDotState }) {
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1, 2],
-      [colors.gridLine, colors.softOrange, "#4a3c3c"],
+      [colors.gridLine, colors.softOrange, colors.softOrange],
     );
 
     return { width, backgroundColor };

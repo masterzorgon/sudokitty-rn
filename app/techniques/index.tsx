@@ -10,7 +10,8 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { colors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
-import { spacing, borderRadius, shadows } from '../../src/theme';
+import { spacing, borderRadius } from '../../src/theme';
+import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import {
   getTechniquesGroupedByType,
   TechniqueMetadata,
@@ -27,6 +28,14 @@ import {
 import { triggerHaptic, ImpactFeedbackStyle } from '../../src/utils/haptics';
 import { TECHNIQUE_IDS } from '../../src/engine/techniqueGenerator';
 import { prefetchPuzzles } from '../../src/services/puzzleCacheService';
+
+// White skeuomorphic card colors (matches TechniquesCTA on home screen)
+const whiteCardColors = {
+  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+  edge: '#E0E0E0',
+  borderLight: 'rgba(255, 255, 255, 0.5)',
+  borderDark: 'rgba(0, 0, 0, 0.1)',
+};
 
 // ============================================
 // Technique Card Component
@@ -48,35 +57,33 @@ function TechniqueCard({
   if (!technique.hasSolver) {
     return (
       <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
-        <Pressable
+        <SkeuCard
           onPress={onPress}
-          style={({ pressed }) => [
-            styles.card,
-            pressed && styles.cardPressed,
-          ]}
+          variant="secondary"
+          customColors={whiteCardColors}
+          borderRadius={borderRadius.lg}
+          showHighlight={false}
+          contentStyle={styles.cardContent}
           accessibilityLabel={`${technique.name}, ${technique.category}, Coming soon`}
-          accessibilityRole="button"
         >
-          <View style={styles.cardContent}>
-            {/* Left: Name and difficulty badge */}
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>{technique.name}</Text>
-              <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
-                <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
-                  {technique.category}
-                </Text>
-              </View>
-            </View>
-
-            {/* Right: Coming Soon pill and chevron */}
-            <View style={styles.cardRight}>
-              <View style={styles.comingSoonPill}>
-                <Text style={styles.comingSoonText}>Coming Soon</Text>
-              </View>
-              <Feather name="chevron-right" size={18} color={colors.textLight} />
+          {/* Left: Name and difficulty badge */}
+          <View style={styles.cardText}>
+            <Text style={styles.cardTitle}>{technique.name}</Text>
+            <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
+              <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
+                {technique.category}
+              </Text>
             </View>
           </View>
-        </Pressable>
+
+          {/* Right: Coming Soon pill and chevron */}
+          <View style={styles.cardRight}>
+            <View style={styles.comingSoonPill}>
+              <Text style={styles.comingSoonText}>Coming Soon</Text>
+            </View>
+            <Feather name="chevron-right" size={18} color={colors.textLight} />
+          </View>
+        </SkeuCard>
       </Animated.View>
     );
   }
@@ -100,34 +107,32 @@ function TechniqueCard({
       : 'Not started';
 
   return (
-    <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
-      <Pressable
+      <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
+      <SkeuCard
         onPress={onPress}
-        style={({ pressed }) => [
-          styles.card,
-          pressed && styles.cardPressed,
-        ]}
+        variant="secondary"
+        customColors={whiteCardColors}
+        borderRadius={borderRadius.lg}
+        showHighlight={false}
+        contentStyle={styles.cardContent}
         accessibilityLabel={`${technique.name}, ${technique.category}, ${progressText}`}
-        accessibilityRole="button"
       >
-        <View style={styles.cardContent}>
-          {/* Left: Name and difficulty badge */}
-          <View style={styles.cardText}>
-            <Text style={styles.cardTitle}>{technique.name}</Text>
-            <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
-              <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
-                {technique.category}
-              </Text>
-            </View>
-          </View>
-
-          {/* Right: Status and chevron */}
-          <View style={styles.cardRight}>
-            <Feather name={statusIcon as any} size={16} color={statusColor} />
-            <Feather name="chevron-right" size={18} color={colors.textLight} />
+        {/* Left: Name and difficulty badge */}
+        <View style={styles.cardText}>
+          <Text style={styles.cardTitle}>{technique.name}</Text>
+          <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
+            <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
+              {technique.category}
+            </Text>
           </View>
         </View>
-      </Pressable>
+
+        {/* Right: Status and chevron */}
+        <View style={styles.cardRight}>
+          <Feather name={statusIcon as any} size={16} color={statusColor} />
+          <Feather name="chevron-right" size={18} color={colors.textLight} />
+        </View>
+      </SkeuCard>
     </Animated.View>
   );
 }
@@ -309,16 +314,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   sectionCards: {
-    gap: spacing.sm,
-  },
-  card: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
-    ...shadows.small,
-  },
-  cardPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.98 }],
+    gap: spacing.md,
   },
   cardContent: {
     flexDirection: 'row',

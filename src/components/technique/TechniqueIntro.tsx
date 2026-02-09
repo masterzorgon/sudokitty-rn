@@ -54,7 +54,7 @@ export function TechniqueIntro({ metadata, comingSoon, onStart, onBack }: Techni
 
       <View style={styles.bottomActions}>
         {comingSoon ? (
-          <AppButton onPress={onBack} label="back to techniques" variant="secondary" icon="arrow-left" iconPosition="left" />
+          <AppButton onPress={onBack} label="back to techniques" variant="neutral" icon="arrow-left" iconPosition="left" />
         ) : (
           <AppButton onPress={onStart} label="start demo" icon="play" />
         )}

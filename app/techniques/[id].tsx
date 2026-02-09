@@ -46,6 +46,21 @@ export default function TechniquePracticeScreen() {
         <StepIndicator stepCount={state.puzzleState.steps.length} currentStep={state.currentStep} />
       )}
 
+      {/* Phase indicator (find-it elimination mode) */}
+      {state.mode === 'find-it' && state.isElimination && !state.validationResult && (
+        <View style={styles.phaseIndicator}>
+          <View style={[styles.phaseDot, state.findPhase === 'pattern' && styles.phaseDotActive]} />
+          <Text style={[styles.phaseLabel, state.findPhase === 'pattern' && styles.phaseLabelActive]}>
+            pattern
+          </Text>
+          <Feather name="chevron-right" size={14} color={colors.textLight} />
+          <View style={[styles.phaseDot, state.findPhase === 'elimination' && styles.phaseDotActiveSecondary]} />
+          <Text style={[styles.phaseLabel, state.findPhase === 'elimination' && styles.phaseLabelActive]}>
+            eliminations
+          </Text>
+        </View>
+      )}
+
       {/* Loading state */}
       {state.mode === 'loading' && (
         <View style={styles.centeredContent}>
@@ -139,5 +154,32 @@ const styles = StyleSheet.create({
   },
   bottomActions: {
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
+  },
+  phaseIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+  },
+  phaseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.gridLine,
+  },
+  phaseDotActive: {
+    backgroundColor: colors.softOrange,
+  },
+  phaseDotActiveSecondary: {
+    backgroundColor: colors.coral,
+  },
+  phaseLabel: {
+    fontSize: 12,
+    color: colors.textLight,
+    fontFamily: 'OpenRunde-Medium',
+  },
+  phaseLabelActive: {
+    color: colors.textPrimary,
   },
 });

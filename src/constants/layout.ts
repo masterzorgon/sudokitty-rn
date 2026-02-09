@@ -9,7 +9,7 @@ export const GAME_LAYOUT = {
   PROGRESS_BAR_HEIGHT: 20,
   
   // Mascot zone
-  MASCOT_SIZE: 110,
+  MASCOT_SIZE: 120,
   MASCOT_ZONE_HEIGHT: 100,
   
   // Section labels

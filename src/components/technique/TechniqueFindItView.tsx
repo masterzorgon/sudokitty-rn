@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { Feather } from '@expo/vector-icons';
+
 
 import { colors } from '../../theme/colors';
 import { spacing } from '../../theme';
@@ -60,28 +60,10 @@ export function TechniqueFindItView({
 }: TechniqueFindItViewProps) {
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.gameLayout}>
-      {/* Flex spacer */}
-      <View style={styles.flexSpacer} />
-
-      {/* Mochi cat speech bubble */}
+      {/* Mochi cat speech bubble — fills space above board */}
       <View style={styles.mascotZone}>
         <GameMascot message={mochiMessage} maxLines={0} flexibleHeight />
       </View>
-
-      {/* Phase indicator for elimination techniques */}
-      {isElimination && !validationResult && (
-        <View style={styles.phaseIndicator}>
-          <View style={[styles.phaseDot, findPhase === 'pattern' && styles.phaseDotActive]} />
-          <Text style={[styles.phaseLabel, findPhase === 'pattern' && styles.phaseLabelActive]}>
-            pattern
-          </Text>
-          <Feather name="chevron-right" size={14} color={colors.textLight} />
-          <View style={[styles.phaseDot, findPhase === 'elimination' && styles.phaseDotActiveSecondary]} />
-          <Text style={[styles.phaseLabel, findPhase === 'elimination' && styles.phaseLabelActive]}>
-            eliminations
-          </Text>
-        </View>
-      )}
 
       {/* Board (edge-to-edge) */}
       <View style={styles.boardContainer}>
@@ -161,7 +143,7 @@ function FindItControls({
     return (
       <View style={styles.buttonRow}>
         <View style={styles.buttonWrapper}>
-          <AppButton onPress={onBackToPattern} label="back" variant="secondary" icon="chevron-left" iconPosition="left" />
+          <AppButton onPress={onBackToPattern} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
         </View>
         <View style={styles.buttonWrapper}>
           <AppButton onPress={onSubmitSelection} label="check answer" disabled={eliminationCellCount === 0} />
@@ -183,13 +165,12 @@ const styles = StyleSheet.create({
   gameLayout: {
     flex: 1,
   },
-  flexSpacer: {
-    flex: 1,
-  },
   mascotZone: {
+    flex: 1,
     width: '100%',
-    maxWidth: '80%',
+    maxWidth: '90%',
     alignSelf: 'center',
+    justifyContent: 'flex-end',
   },
   boardContainer: {
     alignItems: 'center',
@@ -198,33 +179,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
-  },
-  phaseIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingBottom: spacing.sm,
-  },
-  phaseDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.gridLine,
-  },
-  phaseDotActive: {
-    backgroundColor: colors.softOrange,
-  },
-  phaseDotActiveSecondary: {
-    backgroundColor: colors.coral,
-  },
-  phaseLabel: {
-    fontSize: 12,
-    color: colors.textLight,
-    fontFamily: 'OpenRunde-Medium',
-  },
-  phaseLabelActive: {
-    color: colors.textPrimary,
   },
   buttonRow: {
     flexDirection: 'row',

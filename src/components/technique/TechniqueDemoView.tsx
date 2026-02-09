@@ -38,10 +38,7 @@ export function TechniqueDemoView({
 
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.gameLayout}>
-      {/* Flex spacer to push content down */}
-      <View style={styles.flexSpacer} />
-
-      {/* Mochi cat speech bubble */}
+      {/* Mochi cat speech bubble — fills space above board */}
       <View style={styles.mascotZone}>
         <GameMascot message={mochiMessage} maxLines={0} flexibleHeight />
       </View>
@@ -62,13 +59,13 @@ export function TechniqueDemoView({
         <View style={styles.stepNav}>
           <View style={styles.stepNavButtonWrapper}>
             {currentStep > 0 && (
-              <AppButton onPress={onPrevious} label="back" variant="secondary" icon="chevron-left" iconPosition="left" />
+              <AppButton onPress={onPrevious} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
             )}
           </View>
           <View style={styles.stepNavButtonWrapper}>
             <AppButton
               onPress={onNext}
-              label={isLastStep ? 'start practice' : 'next'}
+              label={isLastStep ? 'practice' : 'next'}
               icon={isLastStep ? 'play' : 'chevron-right'}
             />
           </View>
@@ -86,13 +83,12 @@ const styles = StyleSheet.create({
   gameLayout: {
     flex: 1,
   },
-  flexSpacer: {
-    flex: 1,
-  },
   mascotZone: {
+    flex: 1,
     width: '100%',
-    maxWidth: '80%',
+    maxWidth: '90%',
     alignSelf: 'center',
+    justifyContent: 'flex-end',
   },
   boardContainer: {
     alignItems: 'center',

@@ -14,8 +14,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { durations } from '../../theme/animations';
 
-// SVG import - requires react-native-svg-transformer
+// SVG imports - requires react-native-svg-transformer
 import MochiCatSvg from '../../../assets/images/mochi/mochi-cat.svg';
+import MochiGameViewSvg from '../../../assets/images/mochi/mochi-game-view.svg';
 
 // MARK: - Types
 
@@ -24,6 +25,8 @@ interface MochiCatProps {
   size?: number;
   // Whether to animate a subtle breathing effect
   animate?: boolean;
+  // Which SVG variant to render (default: 'default')
+  variant?: 'default' | 'game';
 }
 
 // MARK: - Component
@@ -31,7 +34,9 @@ interface MochiCatProps {
 export function MochiCat({
   size = 180,
   animate = true,
+  variant = 'default',
 }: MochiCatProps) {
+  const SvgComponent = variant === 'game' ? MochiGameViewSvg : MochiCatSvg;
   // Breathing animation scale value
   const breatheScale = useSharedValue(1);
 
@@ -72,7 +77,7 @@ export function MochiCat({
     <View style={[styles.container, { width: size, height: size }]}>
       <Animated.View style={[styles.imageWrapper, animatedStyle]}>
         {/* SVG component - width/height props control size */}
-        <MochiCatSvg width={size} height={size} />
+        <SvgComponent width={size} height={size} />
       </Animated.View>
     </View>
   );
