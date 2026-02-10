@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   MOCHI_HISTORY: '@sudokitty/mochi_history',
   PUZZLE_CACHE: '@sudokitty/puzzle_cache',
   GAME_PUZZLE_CACHE: '@sudokitty/game_puzzle_cache',
+  DEVICE_ID: '@sudokitty/device_id',
 } as const;
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];

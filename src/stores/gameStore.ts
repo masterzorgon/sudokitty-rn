@@ -31,6 +31,7 @@ import {
   getCachedGamePuzzle,
   consumeAndRefillGamePuzzle,
 } from '../services/puzzleCacheService';
+import { useDailyChallengeStore } from './dailyChallengeStore';
 
 // Create empty cell
 const createCell = (
@@ -697,6 +698,16 @@ export const useGameStore = create<GameState & GameActions>()(
       },
     }))
   )
+);
+
+// Record game win for streak tracking — fires on ANY game win (regular or daily)
+useGameStore.subscribe(
+  (s) => s.gameStatus,
+  (gameStatus) => {
+    if (gameStatus === 'won') {
+      useDailyChallengeStore.getState().recordGameWin();
+    }
+  },
 );
 
 // Selectors for optimized subscriptions

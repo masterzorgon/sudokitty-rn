@@ -9,6 +9,7 @@ import 'react-native-reanimated';
 import { colors } from '../src/theme/colors';
 import { TECHNIQUE_IDS } from '../src/engine/techniqueGenerator';
 import { prefetchPuzzles, prefetchGamePuzzles } from '../src/services/puzzleCacheService';
+import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -58,10 +59,12 @@ const PREFETCH_COOLDOWN_MS = 60_000; // 60-second debounce for foreground prefet
 function RootLayoutNav() {
   const lastPrefetchRef = useRef<number>(0);
 
-  // Prefetch caches on initial mount
+  // Prefetch caches and sync streaks on initial mount
   useEffect(() => {
     prefetchGamePuzzles(['easy', 'medium', 'hard', 'expert']);
     prefetchPuzzles(Object.keys(TECHNIQUE_IDS));
+    // Pull remote streak data (background, best-effort)
+    useDailyChallengeStore.getState().syncFromRemote();
   }, []);
 
   // Re-prefetch puzzle cache when the app returns to the foreground

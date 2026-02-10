@@ -21,6 +21,7 @@ import {
   createEmptyDailyChallengeState,
 } from '../engine/types';
 import { storage, STORAGE_KEYS } from '../utils/storage';
+import { syncStreakToSupabase, pullStreakFromSupabase } from '../services/streakSyncService';
 
 interface DailyChallengeStore extends DailyChallengeState {
   // Loading state
@@ -33,6 +34,8 @@ interface DailyChallengeStore extends DailyChallengeState {
   loadState: () => Promise<void>;
   saveState: () => Promise<void>;
   completeChallenge: () => void;
+  recordGameWin: () => void; // Called on ANY game win (regular or daily)
+  syncFromRemote: () => Promise<void>; // Pull remote streak on launch
   getTodayChallenge: () => DailyChallenge;
   getActivityData: (weeks?: number) => ActivityDay[];
   isTodayCompleted: () => boolean;
@@ -71,6 +74,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
             state.lastCompletedDate = stored.lastCompletedDate;
             state.completedDates = stored.completedDates;
             state.totalMochiPoints = stored.totalMochiPoints;
+            state.totalGamesWon = stored.totalGamesWon ?? 0; // Backward-compatible
             state.mochiHistory = storedHistory || [];
             state.isLoaded = true;
           });
@@ -101,7 +105,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
 
       // Save state to AsyncStorage
       saveState: async () => {
-        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, mochiHistory } =
+        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, totalGamesWon, mochiHistory } =
           get();
         await storage.set<DailyChallengeState>(STORAGE_KEYS.DAILY_CHALLENGE_STATE, {
           currentStreak,
@@ -109,6 +113,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           lastCompletedDate,
           completedDates,
           totalMochiPoints,
+          totalGamesWon,
         });
         await storage.set<MochiHistoryEntry[]>(STORAGE_KEYS.MOCHI_HISTORY, mochiHistory);
       },
@@ -154,6 +159,89 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         });
 
         get().saveState();
+      },
+
+      // Record any game win (regular or daily) — updates streak + syncs to Supabase
+      recordGameWin: () => {
+        const today = getTodayDateString();
+        const yesterday = getYesterdayDateString();
+        const { lastCompletedDate, currentStreak, longestStreak, completedDates, totalGamesWon } = get();
+
+        let newStreak = currentStreak;
+        let newLastCompleted = lastCompletedDate;
+
+        // Only update streak once per day (first win of the day)
+        if (lastCompletedDate !== today) {
+          if (lastCompletedDate === yesterday) {
+            newStreak = currentStreak + 1;
+          } else {
+            newStreak = 1;
+          }
+          newLastCompleted = today;
+        }
+
+        const newLongest = Math.max(longestStreak, newStreak);
+        const newTotalGames = totalGamesWon + 1;
+
+        set((state) => {
+          state.currentStreak = newStreak;
+          state.longestStreak = newLongest;
+          state.lastCompletedDate = newLastCompleted;
+          state.totalGamesWon = newTotalGames;
+          // Add today to completedDates if not already there
+          if (!completedDates.includes(today)) {
+            state.completedDates = [...completedDates, today];
+          }
+        });
+
+        get().saveState();
+
+        // Background sync to Supabase (fire-and-forget)
+        syncStreakToSupabase({
+          currentStreak: newStreak,
+          longestStreak: newLongest,
+          lastCompletedDate: newLastCompleted,
+          totalGamesWon: newTotalGames,
+        });
+      },
+
+      // Pull streak from Supabase and adopt if remote is higher
+      syncFromRemote: async () => {
+        const remote = await pullStreakFromSupabase();
+        if (!remote) return;
+
+        const local = get();
+
+        // Adopt remote values if they're higher (e.g., after reinstall)
+        let updated = false;
+        if (remote.currentStreak > local.currentStreak) {
+          set((state) => {
+            state.currentStreak = remote.currentStreak;
+          });
+          updated = true;
+        }
+        if (remote.longestStreak > local.longestStreak) {
+          set((state) => {
+            state.longestStreak = remote.longestStreak;
+          });
+          updated = true;
+        }
+        if (remote.totalGamesWon > local.totalGamesWon) {
+          set((state) => {
+            state.totalGamesWon = remote.totalGamesWon;
+          });
+          updated = true;
+        }
+        if (remote.lastCompletedDate && (!local.lastCompletedDate || remote.lastCompletedDate > local.lastCompletedDate)) {
+          set((state) => {
+            state.lastCompletedDate = remote.lastCompletedDate;
+          });
+          updated = true;
+        }
+
+        if (updated) {
+          get().saveState();
+        }
       },
 
       // Get today's challenge configuration

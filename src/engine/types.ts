@@ -243,6 +243,7 @@ export interface DailyChallengeState {
   lastCompletedDate: string | null; // YYYY-MM-DD
   completedDates: string[]; // Array of completed date strings
   totalMochiPoints: number;
+  totalGamesWon: number; // Lifetime count of games won (any difficulty)
 }
 
 // Activity calendar day for display
@@ -301,6 +302,7 @@ export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
   lastCompletedDate: null,
   completedDates: [],
   totalMochiPoints: 0,
+  totalGamesWon: 0,
 });
 
 // ============================================
