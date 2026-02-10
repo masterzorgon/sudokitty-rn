@@ -34,6 +34,7 @@ import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
 import * as Haptics from 'expo-haptics';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
 import { trackFeedbackSubmitted } from '../src/utils/analytics';
+import { supabase } from '../src/lib/supabase';
 
 // Feedback categories
 type FeedbackCategory = 'issue' | 'suggestion' | 'compliment' | 'other';
@@ -197,8 +198,6 @@ export default function FeedbackScreen() {
     const deviceInfo = getDeviceInfo();
 
     try {
-      // TODO: Replace with actual Resend API endpoint
-      // For now, we'll simulate the API call
       const feedbackPayload = {
         category,
         name: name.trim(),
@@ -208,11 +207,12 @@ export default function FeedbackScreen() {
         timestamp: new Date().toISOString(),
       };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Send via Supabase Edge Function → Resend
+      const { error: fnError } = await supabase.functions.invoke('send-feedback', {
+        body: feedbackPayload,
+      });
 
-      // Log for debugging (will be replaced with actual API call)
-      console.log('Feedback submitted:', feedbackPayload);
+      if (fnError) throw fnError;
 
       // Track analytics event
       trackFeedbackSubmitted(category);
