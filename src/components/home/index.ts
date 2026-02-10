@@ -10,3 +10,4 @@ export { StatCard } from './StatCard';
 export { StatsCardGrid } from './StatsCardGrid';
 export { TechniquesCTA } from './TechniquesCTA';
 export { StreakPill } from './StreakPill';
+export { ActivityCalendar } from './ActivityCalendar';

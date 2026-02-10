@@ -9,22 +9,18 @@ import { typography } from '../../theme/typography';
 import { spacing, borderRadius, shadows } from '../../theme';
 
 interface StatCardProps {
-  icon: string;
   label: string;
   value: string | number;
   valueColor?: string;
 }
 
 export const StatCard = memo(({
-  icon,
   label,
   value,
-  valueColor,
 }: StatCardProps) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
-      <Text style={[styles.value, valueColor && { color: valueColor }]}>
+      <Text style={[styles.value]}>
         {value}
       </Text>
       <Text style={styles.label}>{label}</Text>

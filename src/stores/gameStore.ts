@@ -32,6 +32,7 @@ import {
   consumeAndRefillGamePuzzle,
 } from '../services/puzzleCacheService';
 import { useDailyChallengeStore } from './dailyChallengeStore';
+import { recordGameCompletion } from '../services/gameCompletionService';
 
 // Create empty cell
 const createCell = (
@@ -706,6 +707,23 @@ useGameStore.subscribe(
   (gameStatus) => {
     if (gameStatus === 'won') {
       useDailyChallengeStore.getState().recordGameWin();
+    }
+  },
+);
+
+// Log every game completion (win or loss) to Supabase for analytics
+useGameStore.subscribe(
+  (s) => s.gameStatus,
+  (gameStatus) => {
+    if (gameStatus === 'won' || gameStatus === 'lost') {
+      const { difficulty, timeElapsed, mistakeCount, hintsUsed } = useGameStore.getState();
+      recordGameCompletion({
+        difficulty,
+        timeSeconds: timeElapsed,
+        won: gameStatus === 'won',
+        mistakeCount,
+        hintsUsed,
+      });
     }
   },
 );

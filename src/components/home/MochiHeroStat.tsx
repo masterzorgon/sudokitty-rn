@@ -26,7 +26,6 @@ export const MochiHeroStat = memo(({
 
       {/* Main value row with emoji and rolling number */}
       <View style={styles.valueRow}>
-        <Text style={styles.emoji}>🍡</Text>
         <RollingNumber
           value={totalMochis}
           fontSize={48}
