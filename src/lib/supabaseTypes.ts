@@ -1,8 +1,8 @@
-// Type definitions for the Supabase puzzle_pool table and grid conversion utilities
+// Type definitions for the Supabase technique_puzzle_pool table and grid conversion utilities
 
 import { TechniqueResult } from '../engine/solver/types';
 
-/** Row shape returned from the puzzle_pool table / get_random_puzzles RPC */
+/** Row shape returned from the technique_puzzle_pool table / get_random_puzzles RPC */
 export interface PuzzlePoolRow {
   id: string;
   technique_id: string;

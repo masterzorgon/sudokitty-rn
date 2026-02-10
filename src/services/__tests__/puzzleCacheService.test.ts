@@ -8,6 +8,7 @@ import { TechniqueResult } from '../../engine/solver/types';
 const mockGetItem = jest.fn<Promise<string | null>, [string]>().mockResolvedValue(null);
 const mockSetItem = jest.fn<Promise<void>, [string, string]>().mockResolvedValue(undefined);
 const mockRemoveItem = jest.fn<Promise<void>, [string]>().mockResolvedValue(undefined);
+const mockMultiRemove = jest.fn<Promise<void>, [string[]]>().mockResolvedValue(undefined);
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   __esModule: true,
@@ -15,6 +16,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
     getItem: (...args: unknown[]) => mockGetItem(...(args as [string])),
     setItem: (...args: unknown[]) => mockSetItem(...(args as [string, string])),
     removeItem: (...args: unknown[]) => mockRemoveItem(...(args as [string])),
+    multiRemove: (...args: unknown[]) => mockMultiRemove(...(args as [string[]])),
     clear: jest.fn().mockResolvedValue(undefined),
   },
 }));
@@ -224,7 +226,10 @@ describe('puzzleCacheService', () => {
       await clearCache();
 
       expect(getCachedPuzzle('naked-pair')).toBeNull();
-      expect(mockRemoveItem).toHaveBeenCalledWith(STORAGE_KEYS.PUZZLE_CACHE);
+      expect(mockMultiRemove).toHaveBeenCalledWith([
+        STORAGE_KEYS.PUZZLE_CACHE,
+        STORAGE_KEYS.GAME_PUZZLE_CACHE,
+      ]);
     });
   });
 });

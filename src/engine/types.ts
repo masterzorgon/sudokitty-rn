@@ -29,6 +29,7 @@ export interface DifficultyConfig {
   name: Difficulty;
   clueRange: [number, number]; // [min, max] clues
   maxTechniqueLevel: number; // 1-4
+  minTechniqueLevel: number; // Puzzle must require AT LEAST this level
 }
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
@@ -36,21 +37,25 @@ export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
     name: 'easy',
     clueRange: [36, 50],
     maxTechniqueLevel: 1,
+    minTechniqueLevel: 1,
   },
   medium: {
     name: 'medium',
     clueRange: [30, 40],
     maxTechniqueLevel: 2,
+    minTechniqueLevel: 2,
   },
   hard: {
     name: 'hard',
     clueRange: [25, 32],
     maxTechniqueLevel: 3,
+    minTechniqueLevel: 2,
   },
   expert: {
     name: 'expert',
     clueRange: [22, 28],
     maxTechniqueLevel: 4,
+    minTechniqueLevel: 3,
   },
 };
 

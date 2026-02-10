@@ -302,16 +302,266 @@ export function consumeAndRefill(
 }
 
 /**
- * Clear the entire puzzle cache.
+ * Clear the entire puzzle cache (technique + game).
  *
  * Utility for settings screen "clear data" or debugging.
  */
 export async function clearCache(): Promise<void> {
   memoryCache = null;
+  gameMemoryCache = null;
   try {
-    await AsyncStorage.removeItem(STORAGE_KEYS.PUZZLE_CACHE);
-    log('Cache cleared');
+    await AsyncStorage.multiRemove([
+      STORAGE_KEYS.PUZZLE_CACHE,
+      STORAGE_KEYS.GAME_PUZZLE_CACHE,
+    ]);
+    log('All caches cleared');
   } catch (err) {
     log('Failed to clear cache:', err);
+  }
+}
+
+// ============================================
+// ============================================
+// GAME PUZZLE CACHE
+// Same pattern as technique cache, keyed by difficulty instead of technique_id.
+// ============================================
+// ============================================
+
+export interface CachedGamePuzzle {
+  id: string; // Supabase row UUID
+  difficulty: string;
+  puzzle: number[][];
+  solution: number[][];
+}
+
+interface GamePuzzleCacheStore {
+  schemaVersion: number;
+  updatedAt: number;
+  puzzles: Record<string, CachedGamePuzzle[]>; // difficulty -> array
+  recentlyServed: string[];
+}
+
+// ============================================
+// Game Cache State
+// ============================================
+
+let gameMemoryCache: GamePuzzleCacheStore | null = null;
+
+function createEmptyGameCache(): GamePuzzleCacheStore {
+  return {
+    schemaVersion: CACHE_SCHEMA_VERSION,
+    updatedAt: Date.now(),
+    puzzles: {},
+    recentlyServed: [],
+  };
+}
+
+// ============================================
+// Game Cache Concurrency Guard
+// ============================================
+
+let gameFetchInFlight: Promise<void> | null = null;
+
+async function gameFetchAndCache(difficulties: string[]): Promise<void> {
+  if (gameFetchInFlight) {
+    log('[Game] Fetch already in flight, waiting...');
+    return gameFetchInFlight;
+  }
+  gameFetchInFlight = doGameFetch(difficulties).finally(() => {
+    gameFetchInFlight = null;
+  });
+  return gameFetchInFlight;
+}
+
+// ============================================
+// Game Cache Supabase Fetch
+// ============================================
+
+interface GamePuzzlePoolRow {
+  id: string;
+  difficulty: string;
+  clue_count: number;
+  max_technique_level: number;
+  puzzle: string;
+  solution: string;
+  created_at: string;
+}
+
+async function doGameFetch(difficulties: string[]): Promise<void> {
+  if (difficulties.length === 0) return;
+
+  if (!gameMemoryCache) {
+    gameMemoryCache = createEmptyGameCache();
+  }
+
+  const excludeIds = gameMemoryCache.recentlyServed;
+
+  log(`[Game] Fetching puzzles for ${difficulties.length} difficulties`);
+
+  try {
+    // Fetch one puzzle per difficulty
+    for (const diff of difficulties) {
+      const { data, error } = await supabase.rpc('get_random_game_puzzle', {
+        target_difficulty: diff,
+        exclude_ids: excludeIds,
+      });
+
+      if (error) {
+        log(`[Game] RPC error for ${diff}:`, error.message);
+        continue;
+      }
+
+      const rows = Array.isArray(data) ? data : data ? [data] : [];
+      if (rows.length === 0) continue;
+
+      const row = rows[0] as GamePuzzlePoolRow;
+      const cached: CachedGamePuzzle = {
+        id: row.id,
+        difficulty: row.difficulty,
+        puzzle: compactToGrid(row.puzzle),
+        solution: compactToGrid(row.solution),
+      };
+
+      if (!gameMemoryCache.puzzles[diff]) {
+        gameMemoryCache.puzzles[diff] = [];
+      }
+
+      const existing = gameMemoryCache.puzzles[diff];
+      if (!existing.some((p) => p.id === cached.id)) {
+        existing.push(cached);
+      }
+    }
+
+    gameMemoryCache.updatedAt = Date.now();
+    await persistGameCache();
+  } catch (err) {
+    log('[Game] Fetch failed:', err);
+  }
+}
+
+// ============================================
+// Game Cache Persistence
+// ============================================
+
+async function persistGameCache(): Promise<void> {
+  if (!gameMemoryCache) return;
+  try {
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.GAME_PUZZLE_CACHE,
+      JSON.stringify(gameMemoryCache),
+    );
+  } catch (err) {
+    log('[Game] Failed to persist cache:', err);
+  }
+}
+
+async function loadGameCache(): Promise<GamePuzzleCacheStore | null> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEYS.GAME_PUZZLE_CACHE);
+    if (!raw) return null;
+    return JSON.parse(raw) as GamePuzzleCacheStore;
+  } catch (err) {
+    log('[Game] Failed to load cache:', err);
+    return null;
+  }
+}
+
+// ============================================
+// Game Cache Public API
+// ============================================
+
+/**
+ * Prefetch game puzzles from Supabase into the local cache.
+ * Called on app launch / foreground.
+ */
+export async function prefetchGamePuzzles(
+  difficulties: string[],
+): Promise<void> {
+  try {
+    if (!gameMemoryCache) {
+      const stored = await loadGameCache();
+      if (stored) {
+        if (stored.schemaVersion !== CACHE_SCHEMA_VERSION) {
+          log('[Game] Cache schema mismatch — evicting');
+          gameMemoryCache = createEmptyGameCache();
+        } else if (Date.now() - stored.updatedAt > CACHE_MAX_AGE_MS) {
+          log('[Game] Cache expired — creating fresh');
+          gameMemoryCache = createEmptyGameCache();
+        } else {
+          gameMemoryCache = stored;
+          const total = Object.values(stored.puzzles).reduce((s, a) => s + a.length, 0);
+          log(`[Game] Loaded cache: ${total} puzzles`);
+        }
+      } else {
+        gameMemoryCache = createEmptyGameCache();
+        log('[Game] No existing cache — starting fresh');
+      }
+    }
+
+    const needsRefill = difficulties.filter((d) => {
+      const cached = gameMemoryCache!.puzzles[d];
+      return !cached || cached.length < PUZZLES_PER_TECHNIQUE;
+    });
+
+    if (needsRefill.length === 0) {
+      log('[Game] All difficulties fully stocked');
+      return;
+    }
+
+    log(`[Game] ${needsRefill.length} difficulties need refill`);
+    await gameFetchAndCache(needsRefill);
+  } catch (err) {
+    log('[Game] prefetchGamePuzzles failed:', err);
+  }
+}
+
+/**
+ * Get a cached game puzzle for a difficulty.
+ * Synchronous — returns instantly or null.
+ */
+export function getCachedGamePuzzle(
+  difficulty: string,
+): CachedGamePuzzle | null {
+  if (!gameMemoryCache) {
+    log(`[Game] Cache miss (not loaded): ${difficulty}`);
+    return null;
+  }
+
+  const puzzles = gameMemoryCache.puzzles[difficulty];
+  if (!puzzles || puzzles.length === 0) {
+    log(`[Game] Cache miss (empty): ${difficulty}`);
+    return null;
+  }
+
+  log(`[Game] Cache hit: ${difficulty} (${puzzles.length} available)`);
+  return puzzles[0];
+}
+
+/**
+ * Consume a served game puzzle and trigger background refill.
+ * Fire-and-forget.
+ */
+export function consumeAndRefillGamePuzzle(
+  difficulty: string,
+  puzzleId: string,
+): void {
+  if (!gameMemoryCache) return;
+
+  const puzzles = gameMemoryCache.puzzles[difficulty];
+  if (puzzles) {
+    gameMemoryCache.puzzles[difficulty] = puzzles.filter((p) => p.id !== puzzleId);
+  }
+
+  gameMemoryCache.recentlyServed.push(puzzleId);
+  if (gameMemoryCache.recentlyServed.length > MAX_RECENTLY_SERVED) {
+    gameMemoryCache.recentlyServed = gameMemoryCache.recentlyServed.slice(-MAX_RECENTLY_SERVED);
+  }
+
+  persistGameCache();
+
+  const remaining = gameMemoryCache.puzzles[difficulty]?.length ?? 0;
+  if (remaining < REFILL_THRESHOLD) {
+    log(`[Game] Refill triggered for ${difficulty} (${remaining} remaining)`);
+    gameFetchAndCache([difficulty]);
   }
 }

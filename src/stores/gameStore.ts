@@ -27,6 +27,10 @@ import {
 import { generatePuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
 import { useSettingsStore } from './settingsStore';
+import {
+  getCachedGamePuzzle,
+  consumeAndRefillGamePuzzle,
+} from '../services/puzzleCacheService';
 
 // Create empty cell
 const createCell = (
@@ -262,9 +266,24 @@ export const useGameStore = create<GameState & GameActions>()(
     immer((set, get) => ({
       ...initialState,
 
-      // Start a new game
+      // Start a new game — cache-first for instant serving, on-device generation as fallback
       newGame: (difficulty: Difficulty) => {
-        const { puzzle, solution } = generatePuzzle(difficulty);
+        let puzzle: number[][];
+        let solution: number[][];
+
+        // 1. Try Supabase cache (instant, pre-validated)
+        const cached = getCachedGamePuzzle(difficulty);
+        if (cached) {
+          puzzle = cached.puzzle;
+          solution = cached.solution;
+          consumeAndRefillGamePuzzle(difficulty, cached.id);
+        } else {
+          // 2. Cache miss — generate on-device (with minTechniqueLevel validation)
+          const generated = generatePuzzle(difficulty);
+          puzzle = generated.puzzle;
+          solution = generated.solution;
+        }
+
         const board = createBoardFromPuzzle(puzzle, solution);
 
         set((state) => {

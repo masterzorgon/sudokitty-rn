@@ -3,7 +3,7 @@
  * Bulk Puzzle Generation Script
  *
  * Generates technique-specific puzzles using the existing engine and inserts
- * them into the Supabase `puzzle_pool` table.
+ * them into the Supabase `technique_puzzle_pool` table.
  *
  * Usage:
  *   npx ts-node --project scripts/tsconfig.scripts.json scripts/generate-puzzles.ts
@@ -25,6 +25,9 @@ import {
   TECHNIQUE_IDS,
   TechniqueInfo,
 } from '../src/engine/techniqueGenerator';
+import { generatePuzzle, countClues } from '../src/engine/generator';
+import { SudokuSolver, TechniqueLevel } from '../src/engine/solver';
+import { Difficulty, DIFFICULTY_CONFIG } from '../src/engine/types';
 import { gridToCompact } from '../src/lib/supabaseTypes';
 
 // ============================================
@@ -102,7 +105,7 @@ interface GenerationStats {
 
 async function getExistingCount(techniqueId: string): Promise<number> {
   const { count, error } = await supabase
-    .from('puzzle_pool')
+    .from('technique_puzzle_pool')
     .select('id', { count: 'exact', head: true })
     .eq('technique_id', techniqueId);
 
@@ -168,7 +171,7 @@ async function generateForTechnique(
 
       // Flush batch
       if (batch.length >= batchSize) {
-        const { error } = await supabase.from('puzzle_pool').insert(batch);
+        const { error } = await supabase.from('technique_puzzle_pool').insert(batch);
         if (error) {
           console.error(`  [${techniqueId}] Insert error: ${error.message}`);
         }
@@ -199,9 +202,123 @@ async function generateForTechnique(
 
   // Flush remaining batch
   if (batch.length > 0) {
-    const { error } = await supabase.from('puzzle_pool').insert(batch);
+    const { error } = await supabase.from('technique_puzzle_pool').insert(batch);
     if (error) {
       console.error(`  [${techniqueId}] Final insert error: ${error.message}`);
+    }
+  }
+
+  stats.elapsedMs = Date.now() - startTime;
+  return stats;
+}
+
+// ============================================
+// Game Puzzle Generation
+// ============================================
+
+const GAME_TARGET = parseInt(process.env.GAME_TARGET_PER_DIFFICULTY ?? '50', 10);
+const SKIP_GAME = process.env.SKIP_GAME === 'true';
+const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
+
+interface GameGenerationStats {
+  difficulty: string;
+  existingCount: number;
+  generated: number;
+  failed: number;
+  elapsedMs: number;
+}
+
+async function getExistingGameCount(difficulty: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('game_puzzle_pool')
+    .select('id', { count: 'exact', head: true })
+    .eq('difficulty', difficulty);
+
+  if (error) {
+    console.error(`  [game:${difficulty}] Error querying existing count: ${error.message}`);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+async function generateGamePuzzlesForDifficulty(
+  difficulty: Difficulty,
+): Promise<GameGenerationStats> {
+  const startTime = Date.now();
+  const config = DIFFICULTY_CONFIG[difficulty];
+  const stats: GameGenerationStats = {
+    difficulty,
+    existingCount: 0,
+    generated: 0,
+    failed: 0,
+    elapsedMs: 0,
+  };
+
+  stats.existingCount = await getExistingGameCount(difficulty);
+  const needed = GAME_TARGET - stats.existingCount;
+
+  if (needed <= 0) {
+    console.log(`  [game:${difficulty}] Already at target (${stats.existingCount}/${GAME_TARGET}), skipping`);
+    stats.elapsedMs = Date.now() - startTime;
+    return stats;
+  }
+
+  console.log(`  [game:${difficulty}] Need ${needed} more (${stats.existingCount} existing)`);
+
+  const batchSize = 10;
+  const batch: Array<{
+    difficulty: string;
+    clue_count: number;
+    max_technique_level: number;
+    puzzle: string;
+    solution: string;
+  }> = [];
+
+  for (let i = 0; i < needed; i++) {
+    // Generate with full validation (minTechniqueLevel enforced by generatePuzzle)
+    const result = generatePuzzle(difficulty);
+    const clues = countClues(result.puzzle);
+
+    // Verify technique level for the stats
+    const solver = new SudokuSolver({
+      maxTechniqueLevel: config.maxTechniqueLevel as TechniqueLevel,
+      trackSteps: false,
+    });
+    const solveResult = solver.solve(result.puzzle);
+
+    if (solveResult.solved) {
+      batch.push({
+        difficulty,
+        clue_count: clues,
+        max_technique_level: solveResult.maxLevelRequired as number,
+        puzzle: gridToCompact(result.puzzle),
+        solution: gridToCompact(result.solution),
+      });
+      stats.generated++;
+
+      if (batch.length >= batchSize) {
+        const { error } = await supabase.from('game_puzzle_pool').insert(batch);
+        if (error) {
+          console.error(`  [game:${difficulty}] Insert error: ${error.message}`);
+        }
+        batch.length = 0;
+      }
+
+      if (stats.generated % 5 === 0) {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        console.log(`  [game:${difficulty}] ${stats.generated}/${needed} generated (${elapsed}s elapsed)`);
+      }
+    } else {
+      stats.failed++;
+    }
+  }
+
+  // Flush remaining batch
+  if (batch.length > 0) {
+    const { error } = await supabase.from('game_puzzle_pool').insert(batch);
+    if (error) {
+      console.error(`  [game:${difficulty}] Final insert error: ${error.message}`);
     }
   }
 
@@ -268,6 +385,44 @@ async function main() {
     const elapsed = (stats.elapsedMs / 1000).toFixed(1);
     const total = stats.existingCount + stats.generated;
     console.log(`  L${stats.level} ${stats.techniqueName.padEnd(30)} ${total}/${TARGET_PER_TECHNIQUE} (${stats.generated} new, ${stats.failed} failed, ${elapsed}s)`);
+  }
+
+  // ============================================
+  // Phase 2: Game puzzles
+  // ============================================
+
+  if (!SKIP_GAME) {
+    console.log('');
+    console.log('=== Game Puzzle Generation ===');
+    console.log(`Target: ${GAME_TARGET} puzzles per difficulty`);
+    console.log('');
+
+    const gameStats: GameGenerationStats[] = [];
+    const gameStart = Date.now();
+
+    // Generate sequentially (each difficulty is already fast for easy/medium)
+    for (const diff of DIFFICULTIES) {
+      console.log(`Starting: ${diff}`);
+      const stats = await generateGamePuzzlesForDifficulty(diff);
+      gameStats.push(stats);
+      const elapsed = (stats.elapsedMs / 1000).toFixed(1);
+      console.log(`Done: ${diff} — ${stats.generated} generated, ${stats.failed} failed (${elapsed}s)`);
+    }
+
+    const gameElapsed = ((Date.now() - gameStart) / 1000).toFixed(1);
+    const gameTotalGenerated = gameStats.reduce((s, g) => s + g.generated, 0);
+
+    console.log('');
+    console.log('=== Game Puzzle Summary ===');
+    console.log(`Total generated: ${gameTotalGenerated}`);
+    console.log(`Total time: ${gameElapsed}s`);
+    console.log('');
+
+    for (const stats of gameStats) {
+      const elapsed = (stats.elapsedMs / 1000).toFixed(1);
+      const total = stats.existingCount + stats.generated;
+      console.log(`  ${stats.difficulty.padEnd(10)} ${total}/${GAME_TARGET} (${stats.generated} new, ${stats.failed} failed, ${elapsed}s)`);
+    }
   }
 }
 

@@ -227,23 +227,30 @@ const removeNumbersWithValidation = (
     return null;
   }
 
+  // Validate puzzle requires techniques at the expected difficulty
+  const minTechniqueLevel = config.minTechniqueLevel as TechniqueLevel;
+  const finalSolve = solver.solve(puzzle);
+  if (!finalSolve.solved || finalSolve.maxLevelRequired < minTechniqueLevel) {
+    // Puzzle too easy — doesn't require techniques at the target difficulty
+    return null;
+  }
+
   return puzzle;
 };
 
 // Generate a new puzzle with solution
 export const generatePuzzle = (difficulty: Difficulty): GeneratedPuzzle => {
-  const maxAttempts = 50;
+  const config = DIFFICULTY_CONFIG[difficulty];
+  const maxAttempts = 100;
 
+  // Primary path: full technique validation
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    // Create empty board
     const solution: number[][] = Array(BOARD_SIZE)
       .fill(null)
       .map(() => Array(BOARD_SIZE).fill(0));
 
-    // Fill with complete solution
     fillBoard(solution);
 
-    // Remove numbers with technique validation
     const puzzle = removeNumbersWithValidation(solution, difficulty);
 
     if (puzzle !== null) {
@@ -251,11 +258,37 @@ export const generatePuzzle = (difficulty: Difficulty): GeneratedPuzzle => {
     }
   }
 
-  // Fallback to simple generation if technique validation keeps failing
+  // Fallback: generate with simple method, but validate technique level.
+  // Try up to 20 attempts, keep the best one (highest maxLevelRequired).
+  const minTechniqueLevel = config.minTechniqueLevel as TechniqueLevel;
+  let bestPuzzle: GeneratedPuzzle | null = null;
+  let bestLevel = 0;
+
+  for (let i = 0; i < 20; i++) {
+    const result = generatePuzzleSimple(difficulty);
+    const solver = new SudokuSolver({
+      maxTechniqueLevel: config.maxTechniqueLevel as TechniqueLevel,
+      trackSteps: false,
+    });
+    const solveResult = solver.solve(result.puzzle);
+
+    if (solveResult.solved && solveResult.maxLevelRequired >= minTechniqueLevel) {
+      return result; // Fallback that meets minimum requirements
+    }
+
+    // Track the best fallback puzzle (highest technique level)
+    if (solveResult.solved && solveResult.maxLevelRequired > bestLevel) {
+      bestLevel = solveResult.maxLevelRequired;
+      bestPuzzle = result;
+    }
+  }
+
+  // Last resort: return the best puzzle we found, even if below minimum
   console.warn(
-    `Falling back to simple generation for ${difficulty} after ${maxAttempts} attempts`
+    `[Generator] Could not meet minTechniqueLevel for ${difficulty}. ` +
+    `Best: level ${bestLevel}, wanted: ${minTechniqueLevel}`
   );
-  return generatePuzzleSimple(difficulty);
+  return bestPuzzle ?? generatePuzzleSimple(difficulty);
 };
 
 // Simple puzzle generation without technique validation (fallback)
