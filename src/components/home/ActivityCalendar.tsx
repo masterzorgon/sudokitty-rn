@@ -1,37 +1,91 @@
 // Activity Calendar — GitHub-style heatmap of completed days
-// Shows 16 weeks of activity with colored squares
+// Starts from the user's first game completion, cells fill available width
 
-import React, { memo, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { memo, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, type LayoutChangeEvent } from 'react-native';
 
 import { colors } from '../../theme/colors';
-import { spacing, borderRadius } from '../../theme';
 import { ActivityDay } from '../../engine/types';
 
 // ============================================
 // Constants
 // ============================================
 
-const CELL_SIZE = 12;
 const CELL_GAP = 3;
 const ROWS = 7; // Sun-Sat
 const DAY_LABELS = ['', 'M', '', 'W', '', 'F', ''];
+const DAY_LABEL_WIDTH = 16;
 
 // ============================================
 // Types
 // ============================================
 
 interface ActivityCalendarProps {
-  activityData: ActivityDay[];
+  /** Array of YYYY-MM-DD date strings when the user completed a game */
+  completedDates: string[];
+}
+
+// ============================================
+// Helpers
+// ============================================
+
+function buildActivityGrid(completedDates: string[]): ActivityDay[] {
+  const completedSet = new Set(completedDates);
+
+  // Start from earliest completion, or 4 weeks ago if no completions yet
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let firstDate: Date;
+  if (completedDates.length > 0) {
+    const sorted = [...completedDates].sort();
+    firstDate = new Date(sorted[0] + 'T00:00:00');
+  } else {
+    firstDate = new Date(today);
+    firstDate.setDate(firstDate.getDate() - 27); // 4 weeks back
+  }
+  today.setHours(0, 0, 0, 0);
+
+  // Align start to the beginning of the week (Sunday)
+  const startDate = new Date(firstDate);
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+
+  const days: ActivityDay[] = [];
+  const current = new Date(startDate);
+
+  while (current <= today) {
+    const dateString = current.toISOString().split('T')[0];
+    days.push({
+      date: dateString,
+      completed: completedSet.has(dateString),
+    });
+    current.setDate(current.getDate() + 1);
+  }
+
+  // Pad the last week to fill the column
+  while (days.length % ROWS !== 0) {
+    days.push({ date: '', completed: false });
+  }
+
+  return days;
 }
 
 // ============================================
 // Component
 // ============================================
 
-export const ActivityCalendar = memo(({ activityData }: ActivityCalendarProps) => {
-  // Organize data into columns (weeks) of 7 days each
-  const { columns, monthLabels } = useMemo(() => {
+export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps) => {
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const handleLayout = (e: LayoutChangeEvent) => {
+    setContainerWidth(e.nativeEvent.layout.width);
+  };
+
+  // Build activity data from completedDates
+  const activityData = useMemo(() => buildActivityGrid(completedDates), [completedDates]);
+
+  // Organize into columns (weeks)
+  const columns = useMemo(() => {
     const cols: ActivityDay[][] = [];
     let currentCol: ActivityDay[] = [];
 
@@ -43,36 +97,24 @@ export const ActivityCalendar = memo(({ activityData }: ActivityCalendarProps) =
       }
     }
     if (currentCol.length > 0) {
-      // Pad incomplete last column
       while (currentCol.length < ROWS) {
         currentCol.push({ date: '', completed: false });
       }
       cols.push(currentCol);
     }
 
-    // Compute month labels for columns where a new month starts
-    const labels: { colIndex: number; label: string }[] = [];
-    let lastMonth = '';
-    for (let c = 0; c < cols.length; c++) {
-      // Use the first day of the week to determine the month
-      const firstDay = cols[c][0];
-      if (firstDay.date) {
-        const month = firstDay.date.substring(0, 7); // YYYY-MM
-        if (month !== lastMonth) {
-          const date = new Date(firstDay.date + 'T00:00:00');
-          labels.push({
-            colIndex: c,
-            label: date.toLocaleDateString('en-US', { month: 'short' }),
-          });
-          lastMonth = month;
-        }
-      }
-    }
-
-    return { columns: cols, monthLabels: labels };
+    return cols;
   }, [activityData]);
 
-  // Check if a day is within the last 30 days (for opacity)
+  // Calculate how many columns fit the screen at the target cell size
+  const TARGET_CELL_SIZE = 14;
+  const gridWidth = containerWidth - DAY_LABEL_WIDTH - CELL_GAP;
+  const maxCols = Math.floor((gridWidth + CELL_GAP) / (TARGET_CELL_SIZE + CELL_GAP));
+  // Use all available columns, or pad to fill the screen
+  const numCols = Math.max(columns.length, maxCols);
+  const cellSize = Math.floor((gridWidth - CELL_GAP * (numCols - 1)) / numCols);
+
+  // 30 days ago for opacity
   const thirtyDaysAgo = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() - 30);
@@ -80,54 +122,48 @@ export const ActivityCalendar = memo(({ activityData }: ActivityCalendarProps) =
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Day labels column */}
-      <View style={styles.dayLabels}>
-        {DAY_LABELS.map((label, i) => (
-          <View key={i} style={styles.dayLabelCell}>
-            <Text style={styles.dayLabelText}>{label}</Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Grid */}
-      <View style={styles.grid}>
-        {/* Month labels row */}
-        <View style={styles.monthLabelsRow}>
-          {columns.map((_, colIndex) => {
-            const monthLabel = monthLabels.find((m) => m.colIndex === colIndex);
-            return (
-              <View key={colIndex} style={styles.monthLabelCell}>
-                {monthLabel && (
-                  <Text style={styles.monthLabelText}>{monthLabel.label}</Text>
-                )}
+    <View style={styles.container} onLayout={handleLayout}>
+      {containerWidth > 0 && (
+        <>
+          {/* Day labels column */}
+          <View style={[styles.dayLabels, { width: DAY_LABEL_WIDTH }]}>
+            {DAY_LABELS.map((label, i) => (
+              <View key={i} style={{ height: cellSize, marginBottom: CELL_GAP, justifyContent: 'center' as const }}>
+                <Text style={styles.dayLabelText}>{label}</Text>
               </View>
-            );
-          })}
-        </View>
-
-        {/* Activity rows */}
-        {Array.from({ length: ROWS }, (_, rowIndex) => (
-          <View key={rowIndex} style={styles.row}>
-            {columns.map((col, colIndex) => {
-              const day = col[rowIndex];
-              const isCompleted = day?.completed ?? false;
-              const isRecent = day?.date ? day.date >= thirtyDaysAgo : false;
-
-              return (
-                <View
-                  key={colIndex}
-                  style={[
-                    styles.cell,
-                    isCompleted && styles.cellCompleted,
-                    isCompleted && !isRecent && styles.cellCompletedOld,
-                  ]}
-                />
-              );
-            })}
+            ))}
           </View>
-        ))}
-      </View>
+
+          {/* Grid */}
+          <View style={styles.grid}>
+            {Array.from({ length: ROWS }, (_, rowIndex) => (
+              <View key={rowIndex} style={styles.row}>
+                {Array.from({ length: numCols }, (_, colIndex) => {
+                  const day = columns[colIndex]?.[rowIndex];
+                  const isCompleted = day?.completed ?? false;
+                  const isRecent = day?.date ? day.date >= thirtyDaysAgo : false;
+
+                  return (
+                    <View
+                      key={colIndex}
+                      style={{
+                        width: cellSize,
+                        height: cellSize,
+                        borderRadius: cellSize > 10 ? 3 : 2,
+                        marginRight: CELL_GAP,
+                        marginBottom: CELL_GAP,
+                        backgroundColor: isCompleted
+                          ? (isRecent ? colors.softOrange : colors.softOrange + '66')
+                          : colors.gridLine,
+                      }}
+                    />
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </>
+      )}
     </View>
   );
 });
@@ -144,13 +180,6 @@ const styles = StyleSheet.create({
   },
   dayLabels: {
     marginRight: CELL_GAP,
-    justifyContent: 'flex-end', // Align with grid rows (skip month label row)
-  },
-  dayLabelCell: {
-    width: 14,
-    height: CELL_SIZE,
-    marginBottom: CELL_GAP,
-    justifyContent: 'center',
   },
   dayLabelText: {
     fontSize: 9,
@@ -160,34 +189,7 @@ const styles = StyleSheet.create({
   grid: {
     flex: 1,
   },
-  monthLabelsRow: {
-    flexDirection: 'row',
-    marginBottom: CELL_GAP,
-  },
-  monthLabelCell: {
-    width: CELL_SIZE,
-    marginRight: CELL_GAP,
-  },
-  monthLabelText: {
-    fontSize: 9,
-    color: colors.textLight,
-    fontFamily: 'OpenRunde-Medium',
-  },
   row: {
     flexDirection: 'row',
-    marginBottom: CELL_GAP,
-  },
-  cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    borderRadius: 2,
-    backgroundColor: colors.gridLine,
-    marginRight: CELL_GAP,
-  },
-  cellCompleted: {
-    backgroundColor: colors.softOrange,
-  },
-  cellCompletedOld: {
-    opacity: 0.4,
   },
 });

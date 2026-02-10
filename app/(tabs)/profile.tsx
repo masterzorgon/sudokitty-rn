@@ -1,45 +1,32 @@
-// Stats screen — Analytics dashboard with mochi chart, stat cards, and activity calendar
-// Replaces the placeholder profile screen
+// Stats screen — Analytics dashboard with stat cards and activity calendar
 
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
-import { ChartTimePeriod } from '../../src/engine/types';
 import {
   useDailyChallengeStore,
   useCurrentStreak,
   useLongestStreak,
-  useTotalMochiPoints,
 } from '../../src/stores/dailyChallengeStore';
 import { useCompletionCount } from '../../src/stores/techniqueProgressStore';
 import {
-  MochiHeroStat,
-  TimePeriodTabs,
-  MochiChart,
   StatCard,
   ActivityCalendar,
 } from '../../src/components/home';
 
 export default function ProfileScreen() {
-  // Chart period state (local)
-  const [period, setPeriod] = useState<ChartTimePeriod>('1M');
-
   // Store selectors (reactive)
-  const totalMochis = useTotalMochiPoints();
   const currentStreak = useCurrentStreak();
   const longestStreak = useLongestStreak();
   const totalGamesWon = useDailyChallengeStore((s) => s.totalGamesWon);
   const techniquesMastered = useCompletionCount();
 
-  // Store methods (computed per render)
-  const store = useDailyChallengeStore.getState();
-  const earnedToday = store.getMochiEarnedToday();
-  const mochiHistory = store.getMochiHistory(period);
-  const activityData = store.getActivityData(16);
+  // Activity data: from first completion to today
+  const completedDates = useDailyChallengeStore((s) => s.completedDates);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -52,24 +39,11 @@ export default function ProfileScreen() {
         {/* Header */}
         <Text style={styles.title}>stats</Text>
 
-         {/* Activity Calendar */}
-         <View style={styles.section}>
+        {/* Activity Calendar */}
+        <View style={styles.section}>
           <Text style={styles.sectionLabel}>activity</Text>
           <View style={styles.calendarCard}>
-            <ActivityCalendar activityData={activityData} />
-          </View>
-        </View>
-
-        {/* Mochi Hero Stat */}
-        <View style={styles.section}>
-          <MochiHeroStat totalMochis={totalMochis} earnedToday={earnedToday} />
-        </View>
-
-        {/* Mochi Chart */}
-        <View style={styles.section}>
-          <TimePeriodTabs selectedPeriod={period} onSelectPeriod={setPeriod} />
-          <View style={styles.chartContainer}>
-            <MochiChart data={mochiHistory} period={period} />
+            <ActivityCalendar completedDates={completedDates} />
           </View>
         </View>
 
@@ -132,12 +106,6 @@ const styles = StyleSheet.create({
     ...typography.headline,
     color: colors.textPrimary,
     marginBottom: spacing.md,
-  },
-  chartContainer: {
-    marginTop: spacing.md,
-    height: 180,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
   },
   statsRow: {
     flexDirection: 'row',
