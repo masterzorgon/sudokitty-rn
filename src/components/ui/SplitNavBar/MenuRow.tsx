@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 29,
-    fontWeight: '500',
+    fontFamily: 'Pally-Medium',
     color: colors.textPrimary,
     marginBottom: 2,
   },

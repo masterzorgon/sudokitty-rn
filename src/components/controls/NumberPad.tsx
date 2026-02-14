@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 24,
-    fontWeight: '700',
+    fontFamily: 'Pally-Bold',
     color: colors.textPrimary,
   },
   buttonTextHighlighted: {

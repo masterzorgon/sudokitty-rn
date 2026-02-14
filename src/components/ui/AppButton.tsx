@@ -103,6 +103,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 20,
-    fontWeight: '600',
+    fontFamily: 'Pally-Bold',
   },
 });

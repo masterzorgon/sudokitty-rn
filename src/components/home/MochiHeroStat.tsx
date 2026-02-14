@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
   },
   valueTextStyle: {
-    fontWeight: '700',
+    fontFamily: 'Pally-Bold',
   },
   todayBadge: {
     marginTop: spacing.sm,
@@ -82,6 +82,6 @@ const styles = StyleSheet.create({
   todayText: {
     ...typography.caption,
     color: colors.mint,
-    fontWeight: '600',
+    fontFamily: 'Pally-Bold',
   },
 });

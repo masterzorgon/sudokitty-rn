@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   label: {
     ...typography.caption,
     fontSize: 11,
-    fontWeight: '600',
+    fontFamily: 'Pally-Bold',
     color: colors.textLight,
     textTransform: 'uppercase',
     letterSpacing: 1.5,

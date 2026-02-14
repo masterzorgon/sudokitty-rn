@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   labelOptional: {
     ...typography.caption,
     color: colors.textLight,
-    fontWeight: '400',
+    fontFamily: 'Pally-Regular',
   },
   // Dropdown styles
   dropdown: {
@@ -494,7 +494,7 @@ const styles = StyleSheet.create({
   },
   modalOptionTextSelected: {
     color: colors.softOrange,
-    fontWeight: '600',
+    fontFamily: 'Pally-Bold',
   },
   // Input styles
   textInputSingle: {
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   },
   ctaButtonLabel: {
     ...typography.button,
-    fontWeight: '600',
+    fontFamily: 'Pally-Bold',
     fontSize: 17,
   },
 });

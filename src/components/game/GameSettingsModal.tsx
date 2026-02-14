@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     ...typography.body,
-    fontWeight: '600',
+    fontFamily: 'Pally-Bold',
     color: colors.textPrimary,
   },
   settingDescription: {

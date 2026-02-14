@@ -311,11 +311,11 @@ const staticStyles = StyleSheet.create({
   },
   givenValue: {
     color: colors.givenText,
-    fontWeight: '700',
+    fontFamily: 'Pally-Bold',
   },
   userValue: {
     color: colors.userEntryText,
-    fontWeight: '500',
+    fontFamily: 'Pally-Medium',
   },
   errorValue: {
     color: colors.errorText,

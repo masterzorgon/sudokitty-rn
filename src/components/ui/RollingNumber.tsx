@@ -180,7 +180,7 @@ export const RollingNumber = memo(({
 
   // Build text style (without fontSize - passed separately for precise control)
   const combinedTextStyle: TextStyle = useMemo(() => ({
-    fontWeight: '500',
+    fontFamily: 'Pally-Medium',
     ...(color ? { color } : {}),
     ...StyleSheet.flatten(textStyle),
   }), [color, textStyle]);
@@ -234,7 +234,7 @@ export const RollingTime = memo(({
 
   // Build text style (without fontSize - passed separately)
   const combinedTextStyle: TextStyle = useMemo(() => ({
-    fontWeight: '500',
+    fontFamily: 'Pally-Medium',
     ...(color ? { color } : {}),
     ...StyleSheet.flatten(textStyle),
   }), [color, textStyle]);
