@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   phaseLabel: {
     fontSize: 12,
     color: colors.textLight,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
   },
   phaseLabelActive: {
     color: colors.textPrimary,

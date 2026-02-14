@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   difficultyBadgeText: {
     fontSize: 10,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
   },
   cardRight: {
     flexDirection: 'row',
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   },
   comingSoonText: {
     fontSize: 10,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
     color: colors.textLight,
   },
   emptySection: {
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   emptySectionText: {
     fontSize: 12,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
     color: colors.textLight,
     fontStyle: 'italic',
   },

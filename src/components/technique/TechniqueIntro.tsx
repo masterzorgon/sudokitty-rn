@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     fontSize: 11,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
   },
   comingSoonBadge: {
     flexDirection: 'row',
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   comingSoonBadgeText: {
     fontSize: 13,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
     color: colors.textLight,
   },
   bottomActions: {

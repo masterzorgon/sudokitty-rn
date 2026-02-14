@@ -1,16 +1,16 @@
 // Typography system for Sudokitty
-// Uses Open Runde - a soft, rounded variant of Inter
+// Uses Pally - a soft, rounded display font
 // Perfect for the cute, friendly aesthetic of the app
 
 import { TextStyle } from 'react-native';
 
-// Font family names - Open Runde with different weights
+// Font family names - Pally with different weights
 // Each weight requires its own font file (OTF doesn't support weight variants)
 export const fontFamilies = {
-  regular: 'OpenRunde-Regular',
-  medium: 'OpenRunde-Medium',
-  semibold: 'OpenRunde-Semibold',
-  bold: 'OpenRunde-Bold',
+  regular: 'Pally-Regular',
+  medium: 'Pally-Medium',
+  semibold: 'Pally-Bold',  // Pally has no Semibold; use Bold as closest match
+  bold: 'Pally-Bold',
 };
 
 // Font weights mapping (for reference, actual weight is determined by fontFamily)

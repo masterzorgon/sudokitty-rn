@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   dayLabelText: {
     fontSize: 9,
     color: colors.textLight,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
   },
   grid: {
     flex: 1,

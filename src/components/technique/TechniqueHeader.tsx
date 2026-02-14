@@ -74,6 +74,6 @@ const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     fontSize: 11,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
   },
 });

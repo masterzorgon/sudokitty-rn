@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   debugText: {
     fontSize: 11,
-    fontFamily: 'OpenRunde-Medium',
+    fontFamily: 'Pally-Medium',
     color: colors.textLight,
   },
 });

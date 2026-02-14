@@ -100,7 +100,6 @@ export const SudokuCell = memo(({
   const errorShake = useSharedValue(0);
 
   // Wave completion animation shared values
-  const waveScale = useSharedValue(1);
   const waveGlow = useSharedValue(0);
   const waveTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -166,12 +165,7 @@ export const SudokuCell = memo(({
 
     for (const anim of completionAnimations) {
       const timer = setTimeout(() => {
-        // Scale pulse: 1 -> 1.12 -> 1
-        waveScale.value = withSequence(
-          withSpring(1.12, springConfigs.bouncy),
-          withSpring(1, springConfigs.gentle),
-        );
-        // Brief orange glow overlay
+        // Brief orange glow overlay (no scale — avoids displacing cells and border artifacts)
         waveGlow.value = withSequence(
           withTiming(1, timingConfigs.wave),
           withTiming(0, timingConfigs.waveFade),
@@ -188,7 +182,7 @@ export const SudokuCell = memo(({
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [
-      { scale: scale.value * waveScale.value },
+      { scale: scale.value },
       { translateX: errorShake.value },
     ],
   }));
@@ -313,7 +307,7 @@ const staticStyles = StyleSheet.create({
   },
   compactValue: {
     fontSize: 14,
-    fontFamily: 'OpenRunde-Semibold',
+    fontFamily: 'Pally-Bold',
   },
   givenValue: {
     color: colors.givenText,
