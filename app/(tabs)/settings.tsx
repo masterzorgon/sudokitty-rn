@@ -256,7 +256,7 @@ export default function SettingsScreen() {
           <Text style={styles.versionText}>
             Version {appVersion} ({buildNumber})
           </Text>
-          <Text style={styles.copyrightText}>Made with love by Sudokitty Team</Text>
+          <Text style={styles.copyrightText}>Made with love by Bridgeful</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,7 +1,7 @@
 // Individual Sudoku cell component with optional animations
 // Props-driven: works for both the main game (full animations) and technique practice (static)
 
-import React, { useEffect, memo } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import { Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -14,6 +14,7 @@ import Animated, {
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { springConfigs, timingConfigs, scales } from '../../theme/animations';
+import type { CellAnimationState } from '../../engine/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Grid spans full screen width (edge-to-edge) for the main game
@@ -41,6 +42,8 @@ export interface SudokuCellProps {
   // Feature flags
   animateValues?: boolean; // Enable pop/shake/glow (default: true)
   compact?: boolean; // Smaller cell size for technique practice
+  // Completion wave animations
+  completionAnimations?: CellAnimationState[];
 }
 
 // ============================================
@@ -85,6 +88,7 @@ export const SudokuCell = memo(({
   onPress,
   animateValues = true,
   compact = false,
+  completionAnimations,
 }: SudokuCellProps) => {
   const cellSize = compact ? COMPACT_CELL_SIZE : CELL_SIZE;
   const displayValue = value === 0 ? null : value;
@@ -94,6 +98,11 @@ export const SudokuCell = memo(({
   const glowOpacity = useSharedValue(0);
   const backgroundProgress = useSharedValue(0);
   const errorShake = useSharedValue(0);
+
+  // Wave completion animation shared values
+  const waveScale = useSharedValue(1);
+  const waveGlow = useSharedValue(0);
+  const waveTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Determine border styling for 3x3 box separation
   const isRightBoxBorder = (col + 1) % 3 === 0 && col < 8;
@@ -147,9 +156,39 @@ export const SudokuCell = memo(({
     }
   }, [isValid, animateValues]);
 
+  // Trigger completion wave animations (staggered per cell)
+  useEffect(() => {
+    // Clear previous wave timers
+    waveTimersRef.current.forEach(clearTimeout);
+    waveTimersRef.current = [];
+
+    if (!completionAnimations?.length || !animateValues) return;
+
+    for (const anim of completionAnimations) {
+      const timer = setTimeout(() => {
+        // Scale pulse: 1 -> 1.12 -> 1
+        waveScale.value = withSequence(
+          withSpring(1.12, springConfigs.bouncy),
+          withSpring(1, springConfigs.gentle),
+        );
+        // Brief orange glow overlay
+        waveGlow.value = withSequence(
+          withTiming(1, timingConfigs.wave),
+          withTiming(0, timingConfigs.waveFade),
+        );
+      }, anim.delay);
+      waveTimersRef.current.push(timer);
+    }
+
+    return () => {
+      waveTimersRef.current.forEach(clearTimeout);
+      waveTimersRef.current = [];
+    };
+  }, [completionAnimations, animateValues]);
+
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [
-      { scale: scale.value },
+      { scale: scale.value * waveScale.value },
       { translateX: errorShake.value },
     ],
   }));
@@ -177,6 +216,10 @@ export const SudokuCell = memo(({
     opacity: glowOpacity.value,
   }));
 
+  const animatedWaveGlowStyle = useAnimatedStyle(() => ({
+    opacity: waveGlow.value,
+  }));
+
   const handlePress = onPress ? () => onPress(row, col) : undefined;
 
   return (
@@ -199,6 +242,9 @@ export const SudokuCell = memo(({
 
       {/* Glow effect layer for correct answers */}
       {animateValues && <Animated.View style={[staticStyles.glow, animatedGlowStyle]} />}
+
+      {/* Wave glow effect layer for completion animations */}
+      {animateValues && <Animated.View style={[staticStyles.waveGlow, animatedWaveGlowStyle]} />}
 
       {/* Error background */}
       {!isValid && displayValue && <View style={staticStyles.errorBackground} />}
@@ -253,6 +299,10 @@ const staticStyles = StyleSheet.create({
   glow: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.glowColor,
+  },
+  waveGlow: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255, 157, 107, 0.30)', // softOrange at 30% opacity
   },
   errorBackground: {
     ...StyleSheet.absoluteFillObject,

@@ -4,13 +4,15 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SudokuBoard, useGameBoardProps } from '../board';
+import { useBoardAnimations } from '../../hooks/useBoardAnimations';
 
 export const AnimatedGameView = () => {
   const boardProps = useGameBoardProps();
+  const activeAnimations = useBoardAnimations();
 
   return (
     <View style={styles.boardContainer}>
-      <SudokuBoard {...boardProps} animateEntrance />
+      <SudokuBoard {...boardProps} activeAnimations={activeAnimations} animateEntrance />
     </View>
   );
 };

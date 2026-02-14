@@ -9,7 +9,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { SudokuCell, CELL_SIZE, COMPACT_CELL_SIZE } from './SudokuCell';
 import { colors } from '../../theme/colors';
 import { startGameAnimations } from '../../theme/animations';
-import { BOARD_SIZE, Position, positionKey } from '../../engine/types';
+import { BOARD_SIZE, Position, positionKey, CellAnimationState } from '../../engine/types';
 
 // ============================================
 // Types
@@ -48,6 +48,8 @@ export interface SudokuBoardProps {
   compact?: boolean;
   /** Show checkerboard box tinting */
   showBoxTinting?: boolean;
+  /** Active completion animations per cell (keyed by position key) */
+  activeAnimations?: Map<string, CellAnimationState[]>;
 }
 
 // ============================================
@@ -74,6 +76,7 @@ export const SudokuBoard = memo(({
   animateValues = true,
   compact = false,
   showBoxTinting = true,
+  activeAnimations,
 }: SudokuBoardProps) => {
   const handleCellPress = useCallback(
     (row: number, col: number) => {
@@ -119,6 +122,8 @@ export const SudokuBoard = memo(({
                   const cellDelay =
                     (row + col) * startGameAnimations.cellCascade.delayPerCell;
 
+                  const cellAnimations = activeAnimations?.get(key);
+
                   const cellContent = (
                     <SudokuCell
                       key={`${row}-${col}`}
@@ -136,6 +141,7 @@ export const SudokuBoard = memo(({
                       onPress={interactive ? handleCellPress : undefined}
                       animateValues={animateValues}
                       compact={compact}
+                      completionAnimations={cellAnimations}
                     />
                   );
 

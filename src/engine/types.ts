@@ -145,6 +145,18 @@ export interface MoveRecord {
   newNotes: Set<number>;
 }
 
+// Animation types for board completion waves
+export type CompletionAnimationType = 'row' | 'column' | 'box' | 'streak';
+
+export interface CellAnimationState {
+  /** The type of completion that triggered this animation */
+  type: CompletionAnimationType;
+  /** Delay in ms before this cell starts animating (stagger from epicenter) */
+  delay: number;
+  /** Unique key to distinguish animation batches (prevents re-triggering) */
+  batchId: number;
+}
+
 // Input result after placing a number
 export interface InputResult {
   isCorrect: boolean;

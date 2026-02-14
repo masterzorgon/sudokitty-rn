@@ -197,8 +197,11 @@ interface GameState {
   historyIndex: number;
 
   // Completion tracking (for wave animations)
-  lastCompletedUnit: CompletedUnit | null;
+  lastCompletedUnits: CompletedUnit[];
   lastCorrectCell: Position | null;
+
+  // Consecutive correct placements (for streak animations)
+  correctStreak: number;
 
   // Hint tracking (for technique-based hints)
   lastHint: Hint | null;
@@ -256,8 +259,9 @@ const initialState: GameState = {
   gameStatus: 'idle',
   history: [],
   historyIndex: -1,
-  lastCompletedUnit: null,
+  lastCompletedUnits: [],
   lastCorrectCell: null,
+  correctStreak: 0,
   lastHint: null,
   hintHighlightCells: [],
 };
@@ -301,8 +305,9 @@ export const useGameStore = create<GameState & GameActions>()(
           state.gameStatus = 'playing';
           state.history = [];
           state.historyIndex = -1;
-          state.lastCompletedUnit = null;
+          state.lastCompletedUnits = [];
           state.lastCorrectCell = null;
+          state.correctStreak = 0;
         });
       },
 
@@ -379,6 +384,7 @@ export const useGameStore = create<GameState & GameActions>()(
             if (!isCorrect) {
               // Wrong answer
               draft.mistakeCount++;
+              draft.correctStreak = 0;
               // Only end game if mistake limit is enabled in settings
               const { mistakeLimitEnabled } = useSettingsStore.getState();
               if (mistakeLimitEnabled && draft.mistakeCount >= MAX_MISTAKES) {
@@ -389,6 +395,7 @@ export const useGameStore = create<GameState & GameActions>()(
             } else {
               // Correct answer
               draft.lastCorrectCell = { row, col };
+              draft.correctStreak++;
 
               // Remove this number from notes in related cells
               clearRelatedNotes(draft.board, row, col, num);
@@ -425,7 +432,7 @@ export const useGameStore = create<GameState & GameActions>()(
               }
 
               if (result.completedUnits.length > 0) {
-                draft.lastCompletedUnit = result.completedUnits[0];
+                draft.lastCompletedUnits = result.completedUnits;
               }
 
               // Check for win
@@ -628,7 +635,7 @@ export const useGameStore = create<GameState & GameActions>()(
           restoreFromSnapshot(draft.board, snapshot);
           draft.historyIndex--;
           draft.lastCorrectCell = null;
-          draft.lastCompletedUnit = null;
+          draft.lastCompletedUnits = [];
         });
 
         return true;

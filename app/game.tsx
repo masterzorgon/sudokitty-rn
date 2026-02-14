@@ -231,6 +231,47 @@ export default function GameScreen() {
         <AnimatedGameView />
       </View>
 
+      {/* DEV ONLY: Debug buttons to trigger completion wave animations */}
+      {__DEV__ && (
+        <View style={styles.debugBar}>
+          <Pressable
+            style={styles.debugButton}
+            onPress={() => useGameStore.setState({
+              lastCompletedUnits: [{ type: 'row', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() }],
+            })}
+          >
+            <Text style={styles.debugText}>Row Wave</Text>
+          </Pressable>
+          <Pressable
+            style={styles.debugButton}
+            onPress={() => useGameStore.setState({
+              lastCompletedUnits: [{ type: 'column', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() }],
+            })}
+          >
+            <Text style={styles.debugText}>Col Wave</Text>
+          </Pressable>
+          <Pressable
+            style={styles.debugButton}
+            onPress={() => useGameStore.setState({
+              lastCompletedUnits: [{ type: 'box', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() }],
+            })}
+          >
+            <Text style={styles.debugText}>Box Wave</Text>
+          </Pressable>
+          <Pressable
+            style={styles.debugButton}
+            onPress={() => useGameStore.setState({
+              lastCompletedUnits: [
+                { type: 'row', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() },
+                { type: 'column', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() },
+              ],
+            })}
+          >
+            <Text style={styles.debugText}>Row+Col</Text>
+          </Pressable>
+        </View>
+      )}
+
       {/* BOTTOM ZONE - Controls */}
       <View style={styles.bottomZone}>
         <View style={styles.controlsContainer}>
@@ -341,5 +382,24 @@ const styles = StyleSheet.create({
   overlayButtonTextSecondary: {
     ...typography.button,
     color: colors.textSecondary,
+  },
+  // DEV ONLY: debug animation triggers
+  debugBar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+  },
+  debugButton: {
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  debugText: {
+    fontSize: 11,
+    fontFamily: 'OpenRunde-Medium',
+    color: colors.textLight,
   },
 });
