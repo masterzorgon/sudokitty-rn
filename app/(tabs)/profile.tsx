@@ -41,7 +41,6 @@ export default function ProfileScreen() {
 
         {/* Activity Calendar */}
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>activity</Text>
           <View style={styles.calendarCard}>
             <ActivityCalendar completedDates={completedDates} />
           </View>

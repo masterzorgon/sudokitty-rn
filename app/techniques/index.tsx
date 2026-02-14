@@ -26,8 +26,12 @@ import {
   COMPLETION_THRESHOLD,
 } from '../../src/stores/techniqueProgressStore';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../src/utils/haptics';
+import { trackPaywallOpened } from '../../src/utils/analytics';
 import { TECHNIQUE_IDS } from '../../src/engine/techniqueGenerator';
 import { prefetchPuzzles } from '../../src/services/puzzleCacheService';
+import { useIsPremium } from '../../src/stores/premiumStore';
+import { presentPaywall } from '../../src/lib/revenueCat';
+import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
 
 // White skeuomorphic card colors (matches TechniquesCTA on home screen)
 const whiteCardColors = {
@@ -44,10 +48,12 @@ const whiteCardColors = {
 function TechniqueCard({
   technique,
   index,
+  isLocked,
   onPress,
 }: {
   technique: TechniqueMetadata;
   index: number;
+  isLocked: boolean;
   onPress: () => void;
 }) {
   const progress = useTechniqueProgress(technique.id);
@@ -88,23 +94,30 @@ function TechniqueCard({
     );
   }
 
-  const statusIcon = progress.isCompleted
-    ? 'check-circle'
-    : progress.demoCompleted
-      ? 'play-circle'
-      : 'circle';
+  // Determine status icon: locked overrides progress-based icons
+  const statusIcon = isLocked
+    ? 'lock'
+    : progress.isCompleted
+      ? 'check-circle'
+      : progress.demoCompleted
+        ? 'play-circle'
+        : 'circle';
 
-  const statusColor = progress.isCompleted
-    ? '#4CAF50'
-    : progress.demoCompleted
-      ? colors.softOrange
-      : colors.textLight;
+  const statusColor = isLocked
+    ? colors.textLight
+    : progress.isCompleted
+      ? '#4CAF50'
+      : progress.demoCompleted
+        ? colors.softOrange
+        : colors.textLight;
 
-  const progressText = progress.isCompleted
-    ? 'Mastered'
-    : progress.demoCompleted
-      ? `${progress.findSuccesses}/${COMPLETION_THRESHOLD} found`
-      : 'Not started';
+  const progressText = isLocked
+    ? 'Premium'
+    : progress.isCompleted
+      ? 'Mastered'
+      : progress.demoCompleted
+        ? `${progress.findSuccesses}/${COMPLETION_THRESHOLD} found`
+        : 'Not started';
 
   return (
       <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
@@ -146,12 +159,14 @@ function TypeSection({
   color,
   techniques,
   sectionIndex,
+  isPremium,
   onSelectTechnique,
 }: {
   type: TechniqueType;
   color: string;
   techniques: TechniqueMetadata[];
   sectionIndex: number;
+  isPremium: boolean;
   onSelectTechnique: (id: string) => void;
 }) {
   const isEmpty = techniques.length === 0;
@@ -178,6 +193,7 @@ function TypeSection({
               key={technique.id}
               technique={technique}
               index={sectionIndex * 4 + index}
+              isLocked={!isPremium && technique.level >= 3}
               onPress={() => onSelectTechnique(technique.id)}
             />
           ))}
@@ -197,6 +213,7 @@ export default function TechniquesListScreen() {
   const completionCount = useCompletionCount();
   const groups = getTechniquesGroupedByType();
   const totalTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
+  const isPremium = useIsPremium();
 
   // Load progress on mount
   useEffect(() => {
@@ -209,7 +226,15 @@ export default function TechniquesListScreen() {
     prefetchPuzzles(ids);
   }, []);
 
-  const handleSelectTechnique = (techniqueId: string) => {
+  const handleSelectTechnique = async (techniqueId: string) => {
+    const meta = getTechniqueMetadata(techniqueId);
+    // Gate level 3-4 techniques behind premium
+    if (!isPremium && meta && meta.level >= 3) {
+      triggerHaptic(ImpactFeedbackStyle.Light);
+      trackPaywallOpened('technique_card');
+      await presentPaywall();
+      return;
+    }
     triggerHaptic(ImpactFeedbackStyle.Light);
     router.push({
       pathname: '/techniques/[id]',
@@ -250,6 +275,7 @@ export default function TechniquesListScreen() {
             color={group.color}
             techniques={group.techniques}
             sectionIndex={sectionIndex}
+            isPremium={isPremium}
             onSelectTechnique={handleSelectTechnique}
           />
         ))}

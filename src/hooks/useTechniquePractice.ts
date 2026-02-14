@@ -20,6 +20,7 @@ import {
   isPlacementTechnique,
 } from '../engine/validation';
 import { useTechniqueProgressStore } from '../stores/techniqueProgressStore';
+import { usePremiumStore } from '../stores/premiumStore';
 import { triggerHaptic, ImpactFeedbackStyle } from '../utils/haptics';
 import { Position, positionKey } from '../engine/types';
 import { TechniqueResult } from '../engine/solver/types';
@@ -28,7 +29,7 @@ import { TechniqueResult } from '../engine/solver/types';
 // Types (exported for sub-components)
 // ============================================
 
-export type PracticeMode = 'loading' | 'intro' | 'demo' | 'find-it' | 'error' | 'coming-soon';
+export type PracticeMode = 'loading' | 'intro' | 'demo' | 'find-it' | 'error' | 'coming-soon' | 'locked';
 export type FindPhase = 'pattern' | 'elimination';
 
 export interface PuzzleState {
@@ -134,6 +135,7 @@ export function useTechniquePractice() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const techniqueId = id ?? '';
   const metadata = getTechniqueMetadata(techniqueId);
+  const isPremium = usePremiumStore((s) => s.isPremium);
 
   // ---- State ----
   const [mode, setMode] = useState<PracticeMode>('loading');
@@ -206,14 +208,16 @@ export function useTechniquePractice() {
     );
   }, [techniqueId]);
 
-  // Generate puzzle on mount (skip for techniques without solvers)
+  // Generate puzzle on mount (skip for techniques without solvers or locked behind premium)
   useEffect(() => {
-    if (techniqueId && metadata?.hasSolver) {
+    if (!isPremium && metadata && metadata.level >= 3) {
+      setMode('locked');
+    } else if (techniqueId && metadata?.hasSolver) {
       generatePuzzle();
     } else if (techniqueId && metadata && !metadata.hasSolver) {
       setMode('coming-soon');
     }
-  }, [techniqueId]);
+  }, [techniqueId, isPremium]);
 
   // ---- Handlers ----
 

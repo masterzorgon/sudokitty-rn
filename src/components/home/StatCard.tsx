@@ -37,7 +37,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     alignItems: 'center',
-    ...shadows.medium,
   },
   icon: {
     fontSize: 24,

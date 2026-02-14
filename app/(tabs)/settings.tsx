@@ -29,6 +29,12 @@ import {
   trackExternalLinkOpened,
   trackPaywallOpened,
 } from '../../src/utils/analytics';
+import { useIsPremium } from '../../src/stores/premiumStore';
+import {
+  presentPaywallAlways,
+  presentCustomerCenter,
+  restorePurchases,
+} from '../../src/lib/revenueCat';
 
 // External URLs
 const RULES_URL = 'https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/';
@@ -47,6 +53,9 @@ export default function SettingsScreen() {
   const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
   const setTimerEnabled = useSettingsStore((s) => s.setTimerEnabled);
   const setMistakeLimitEnabled = useSettingsStore((s) => s.setMistakeLimitEnabled);
+
+  // Premium state
+  const isPremium = useIsPremium();
 
   // Store reset actions
   const resetGame = useGameStore((s) => s.resetGame);
@@ -74,10 +83,23 @@ export default function SettingsScreen() {
     }
   }, []);
 
-  const handleRemoveAds = useCallback(() => {
+  const handleUpgradePremium = useCallback(async () => {
     trackPaywallOpened('settings');
-    // TODO: Trigger paywall (RevenueCat)
-    Alert.alert('Coming Soon', 'Premium features will be available in a future update.');
+    await presentPaywallAlways();
+  }, []);
+
+  const handleRestorePurchases = useCallback(async () => {
+    const restored = await restorePurchases();
+    Alert.alert(
+      restored ? 'Restored!' : 'Nothing to Restore',
+      restored
+        ? 'Your premium access has been restored.'
+        : 'No previous purchases found.',
+    );
+  }, []);
+
+  const handleManageSubscription = useCallback(async () => {
+    await presentCustomerCenter();
   }, []);
 
   const handleSendFeedback = useCallback(() => {
@@ -175,14 +197,27 @@ export default function SettingsScreen() {
           />
         </SettingsSection>
 
-        {/* Premium - conditionally shown when not premium */}
-        {/* TODO: Add isPremium check when purchase state is available */}
+        {/* Premium */}
         <SettingsSection title="Premium">
+          {!isPremium && (
+            <SettingsLinkRow
+              label="Upgrade to Premium"
+              onPress={handleUpgradePremium}
+              icon="star"
+              accessibilityHint="Upgrade to unlock all premium features"
+            />
+          )}
           <SettingsLinkRow
-            label="Remove Ads"
-            onPress={handleRemoveAds}
-            icon="star"
-            accessibilityHint="Upgrade to remove advertisements"
+            label="Restore Purchases"
+            onPress={handleRestorePurchases}
+            icon="refresh-cw"
+            accessibilityHint="Restore previously purchased premium access"
+          />
+          <SettingsLinkRow
+            label="Manage Subscription"
+            onPress={handleManageSubscription}
+            icon="credit-card"
+            accessibilityHint="Manage your subscription or request a refund"
             isLast
           />
         </SettingsSection>

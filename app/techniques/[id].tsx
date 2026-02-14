@@ -20,6 +20,8 @@ import {
   TechniqueFindItView,
 } from '../../src/components/technique';
 import { AppButton } from '../../src/components/ui/AppButton';
+import { presentPaywall } from '../../src/lib/revenueCat';
+import { trackPaywallOpened } from '../../src/utils/analytics';
 
 // ============================================
 // Main Screen
@@ -78,6 +80,19 @@ export default function TechniquePracticeScreen() {
             <AppButton onPress={state.generatePuzzle} label="try again" />
           </View>
         </View>
+      )}
+
+      {/* Locked state (premium required) */}
+      {state.mode === 'locked' && (
+        <TechniqueIntro
+          metadata={state.metadata}
+          comingSoon={false}
+          onStart={async () => {
+            trackPaywallOpened('technique_detail');
+            await presentPaywall();
+          }}
+          onBack={state.handleBack}
+        />
       )}
 
       {/* Intro / Coming-soon */}
