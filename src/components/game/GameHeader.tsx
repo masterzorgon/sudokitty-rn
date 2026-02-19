@@ -52,7 +52,7 @@ const HintsIndicator = ({ used, total }: IconIndicatorProps) => (
           key={i}
           name={isRemaining ? 'bulb' : 'bulb-outline'}
           size={16}
-          color={isRemaining ? colors.softOrange : colors.gridLine}
+          color={isRemaining ? colors.softPink : colors.gridLine}
         />
       );
     })}
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopWidth: 1,
     borderTopColor: colors.gridLine,
+    height: 30,
   },
   section: {
     width: BOX_WIDTH,

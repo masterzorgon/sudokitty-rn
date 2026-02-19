@@ -28,7 +28,7 @@ export const StatsCardGrid = memo(({
         icon="🔥"
         label="Streak"
         value={streak > 0 ? `${streak} days` : '0 days'}
-        valueColor={colors.softOrange}
+        valueColor={colors.softPink}
       />
     </View>
   );

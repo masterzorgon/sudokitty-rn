@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   overlayButton: {
-    backgroundColor: colors.softOrange,
+    backgroundColor: colors.softPink,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.lg,

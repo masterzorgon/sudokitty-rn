@@ -3,9 +3,9 @@
 
 export const colors = {
   // Primary colors
-  cream: '#FFF8F0',
-  softOrange: '#FF9D6B',
-  peach: '#FFA070',
+  cream: '#FFF0F6',
+  softPink: '#FF6B9D',
+  peach: '#FF70A0',
   pink: '#FFD1DC',
   lavender: '#E8D5E8',
 
@@ -21,24 +21,24 @@ export const colors = {
 
   // Cell colors
   cellBackground: '#FFFFFF',
-  cellBackgroundAlt: '#FFFBF7', // Subtle cream tint for checkerboard boxes
-  cellSelected: '#FFE4D6',
-  cellSelectedGlow: 'rgba(255, 157, 107, 0.25)', // Soft glow for selection
-  cellRelated: '#FFF8F2',
-  cellHighlighted: '#FFF5EE',
+  cellBackgroundAlt: '#FFF7FB',
+  cellSelected: '#FFD6E4',
+  cellSelectedGlow: 'rgba(255, 107, 157, 0.25)',
+  cellRelated: '#FFF2F8',
+  cellHighlighted: '#FFEEF5',
   cellError: '#FFF0F0',
-  cellGiven: '#FFFBF8',
+  cellGiven: '#FFF8FB',
 
   // Technique practice highlights (higher contrast than game highlights)
-  techniqueHighlight: 'rgba(255, 157, 107, 0.35)',
+  techniqueHighlight: 'rgba(255, 107, 157, 0.35)',
   techniqueHighlightSecondary: 'rgba(255, 92, 80, 0.3)',
 
   // Glow effect
-  glowColor: 'rgba(255, 157, 107, 0.4)',
+  glowColor: 'rgba(255, 107, 157, 0.4)',
 
   // Grid colors - softer, warmer
-  gridLine: '#F0E8E4', // Hairline warm gray
-  gridLineBold: '#E8DCD8', // Box borders - slightly heavier but still soft
+  gridLine: '#F0E8E4',
+  gridLineBold: '#E8DCD8',
   boxBorder: '#E0D4D0',
 
   // Note text
@@ -55,7 +55,7 @@ export const colors = {
 
   // Tab bar
   tabBarBackground: '#FFFFFF',
-  tabBarActive: '#FF9D6B',
+  tabBarActive: '#FF6B9D',
   tabBarInactive: '#B0A0A0',
 
   // Floating nav bar
@@ -70,20 +70,20 @@ export const colors = {
 
   // Board card - lifted from cream background
   boardBackground: '#FEFEFE',
-  boardShadow: '#8B7070', // Warm brown for shadow
+  boardShadow: '#8B7070',
 
   // Button
-  buttonPrimary: '#FF9D6B',
+  buttonPrimary: '#FF6B9D',
   buttonSecondary: '#FFFFFF',
   buttonDisabled: '#E0D8D8',
 
   // 3D CTA Button colors
-  ctaPrimaryFace: '#FF9D6B',
-  ctaPrimaryEdge: '#E8875A',
-  ctaPrimaryHighlight: '#FFB890',
-  ctaSecondaryFace: '#FFF8F0',
-  ctaSecondaryEdge: '#E8DFD4',
-  ctaSecondaryHighlight: '#FFFCF8',
+  ctaPrimaryFace: '#FF6B9D',
+  ctaPrimaryEdge: '#E85A87',
+  ctaPrimaryHighlight: '#FF90B8',
+  ctaSecondaryFace: '#FFF0F8',
+  ctaSecondaryEdge: '#E8D4DF',
+  ctaSecondaryHighlight: '#FFF8FC',
   ctaSuccessFace: '#B8E6D0',
   ctaSuccessEdge: '#8FCDB5',
   ctaSuccessHighlight: '#D0F0E0',
@@ -92,16 +92,16 @@ export const colors = {
   ctaTextDark: '#4A3728',
 
   // NumberPad concave button colors
-  numberPadBase: '#FFF8F0',
-  numberPadPressed: '#F5EDE5',
+  numberPadBase: '#FFF0F8',
+  numberPadPressed: '#F5E5ED',
   numberPadText: '#4A3728',
-  numberPadActiveGlow: 'rgba(255, 157, 107, 0.3)',
+  numberPadActiveGlow: 'rgba(255, 107, 157, 0.3)',
   numberPadError: '#FFE5E5',
 
   // Gradients (as arrays for LinearGradient)
-  backgroundGradient: ['#FFF8F0', '#FFF0E8', '#FFE8E0'] as const,
-  buttonGradient: ['#FF9D6B', '#FFB890'] as const,
-  mochiGradient: ['#FFC4A0', '#FF9D6B'] as const,
+  backgroundGradient: ['#FFF0F8', '#FFE8F0', '#FFE0E8'] as const,
+  buttonGradient: ['#FF6B9D', '#FF90B8'] as const,
+  mochiGradient: ['#FFA0C4', '#FF6B9D'] as const,
 } as const;
 
 export type ColorName = keyof typeof colors;

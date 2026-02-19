@@ -153,7 +153,7 @@ export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps)
                         marginRight: CELL_GAP,
                         marginBottom: CELL_GAP,
                         backgroundColor: isCompleted
-                          ? (isRecent ? colors.softOrange : colors.softOrange + '66')
+                          ? (isRecent ? colors.softPink : colors.softPink + '66')
                           : colors.gridLine,
                       }}
                     />

@@ -67,7 +67,7 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
       <Feather
         name={tab.icon as keyof typeof Feather.glyphMap}
         size={LAYOUT.iconSize}
-        color={isActive ? colors.softOrange : colors.navInactive}
+        color={isActive ? colors.softPink : colors.navInactive}
       />
     </AnimatedPressable>
   );

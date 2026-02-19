@@ -175,7 +175,7 @@ export const MochiChart = memo(({
           <Line
             p1={vec(CHART_PADDING.left, y)}
             p2={vec(chartWidth - CHART_PADDING.right, y)}
-            color={colors.softOrange}
+            color={colors.softPink}
             style="stroke"
             strokeWidth={2}
             strokeCap="round"
@@ -207,7 +207,7 @@ export const MochiChart = memo(({
             strokeWidth={2.5}
             strokeCap="round"
             strokeJoin="round"
-            color={colors.softOrange}
+            color={colors.softPink}
           />
         )}
 

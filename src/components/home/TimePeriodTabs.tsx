@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabSelected: {
-    backgroundColor: colors.softOrange,
+    backgroundColor: colors.softPink,
   },
   tabText: {
     ...typography.caption,

@@ -8,6 +8,8 @@ import { Feather } from '@expo/vector-icons';
 
 import { SkeuButton } from './Skeuomorphic/SkeuButton';
 import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
+import { spacing, borderRadius } from '../../theme';
 import type { SkeuVariant } from '../../theme/skeuomorphic';
 
 // ============================================
@@ -35,10 +37,10 @@ export interface AppButtonProps {
 // Constants (match PrimaryActionPill)
 // ============================================
 
-const BORDER_RADIUS = 24;
+const BORDER_RADIUS = borderRadius.xl;
 const CONTENT_STYLE = {
   paddingVertical: 14,
-  paddingHorizontal: 24,
+  paddingHorizontal: spacing.xl,
   justifyContent: 'center' as const,
   alignItems: 'center' as const,
 };
@@ -99,10 +101,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   label: {
     fontSize: 20,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
   },
 });

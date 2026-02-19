@@ -136,7 +136,7 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
                     {item.label}
                   </Text>
                   {item.id === value && (
-                    <Feather name="check" size={20} color={colors.softOrange} />
+                    <Feather name="check" size={20} color={colors.softPink} />
                   )}
                 </Pressable>
               )}
@@ -363,7 +363,7 @@ export default function FeedbackScreen() {
         <View style={styles.footer}>
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator color={colors.softOrange} />
+              <ActivityIndicator color={colors.softPink} />
               <Text style={styles.loadingText}>Sending...</Text>
             </View>
           ) : (
@@ -493,7 +493,7 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   modalOptionTextSelected: {
-    color: colors.softOrange,
+    color: colors.softPink,
     fontFamily: 'Pally-Bold',
   },
   // Input styles

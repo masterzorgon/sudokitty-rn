@@ -37,7 +37,7 @@ export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
       {/* Left section - Icon and title */}
       <View style={styles.leftContent}>
         <View style={styles.iconContainer}>
-          <Feather name="award" size={20} color={colors.softOrange} />
+          <Feather name="award" size={20} color={colors.softPink} />
         </View>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>sudoku techniques</Text>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
-    color: colors.textLight,
+    color: colors.textPrimary,
   },
   rightContent: {
     flexDirection: "row",

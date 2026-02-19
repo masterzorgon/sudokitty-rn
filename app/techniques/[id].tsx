@@ -66,7 +66,7 @@ export default function TechniquePracticeScreen() {
       {/* Loading state */}
       {state.mode === 'loading' && (
         <View style={styles.centeredContent}>
-          <ActivityIndicator size="large" color={colors.softOrange} />
+          <ActivityIndicator size="large" color={colors.softPink} />
           <Text style={styles.loadingText}>generating puzzle...</Text>
         </View>
       )}
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gridLine,
   },
   phaseDotActive: {
-    backgroundColor: colors.softOrange,
+    backgroundColor: colors.softPink,
   },
   phaseDotActiveSecondary: {
     backgroundColor: colors.coral,

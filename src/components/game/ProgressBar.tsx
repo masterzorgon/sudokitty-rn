@@ -267,7 +267,6 @@ const styles = StyleSheet.create({
   percentageContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    width: 55, // Fixed width to fit "100%" without resizing bar
     justifyContent: 'flex-end',
   },
   percentSign: {

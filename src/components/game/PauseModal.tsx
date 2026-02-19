@@ -75,7 +75,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
           <Ionicons
             name="pause-circle"
             size={48}
-            color={colors.softOrange}
+            color={colors.softPink}
             style={styles.icon}
           />
 
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.softOrange,
+    backgroundColor: colors.softPink,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.lg,

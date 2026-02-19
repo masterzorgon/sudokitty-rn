@@ -108,7 +108,7 @@ function TechniqueCard({
     : progress.isCompleted
       ? '#4CAF50'
       : progress.demoCompleted
-        ? colors.softOrange
+        ? colors.softPink
         : colors.textLight;
 
   const progressText = isLocked

@@ -296,7 +296,7 @@ const staticStyles = StyleSheet.create({
   },
   waveGlow: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 157, 107, 0.30)', // softOrange at 30% opacity
+    backgroundColor: 'rgba(255, 107, 157, 0.30)', // softPink at 30% opacity
   },
   errorBackground: {
     ...StyleSheet.absoluteFillObject,
@@ -321,7 +321,7 @@ const staticStyles = StyleSheet.create({
     color: colors.errorText,
   },
   highlightedValue: {
-    color: colors.softOrange,
+    color: colors.softPink,
   },
   secondaryValue: {
     color: '#FF5C50', // coral
