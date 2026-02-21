@@ -8,3 +8,4 @@ export { PauseModal } from './PauseModal';
 export { ContinueGameButton } from './ContinueGameButton';
 export { GameMascot } from './GameMascot';
 export { GameSettingsModal } from './GameSettingsModal';
+export { HintModal } from './HintModal';

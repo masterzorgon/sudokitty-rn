@@ -158,7 +158,7 @@ export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flex
     >
       {/* MochiCat on the left */}
       <View style={styles.mascotWrapper}>
-        <MochiCat size={GAME_LAYOUT.MASCOT_SIZE} animate={true} variant="game" />
+        <MochiCat size={GAME_LAYOUT.MASCOT_SIZE} variant="game" />
       </View>
 
       {/* Speech bubble on the right - only shown when message exists */}

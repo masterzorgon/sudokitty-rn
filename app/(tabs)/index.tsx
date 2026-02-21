@@ -66,7 +66,7 @@ export default function HomeScreen() {
             entering={FadeInDown.delay(200).duration(500).springify()}
             style={styles.catContainer}
           >
-            <MochiCat size={180} animate={false} />
+            <MochiCat size={180} />
           </Animated.View>
 
           {/* Chat Bubble with Japanese greeting */}

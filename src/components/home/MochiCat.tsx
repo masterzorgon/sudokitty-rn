@@ -1,18 +1,8 @@
 // MochiCat - The adorable orange tabby mascot for Sudokitty
-// Displays the mochi cat character with optional breathing animation
+// Displays the mochi cat character as a static image
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  withSequence,
-  cancelAnimation,
-  Easing,
-} from 'react-native-reanimated';
-import { durations } from '../../theme/animations';
 
 // SVG imports - requires react-native-svg-transformer
 import MochiCatSvg from '../../../assets/images/mochi/mochi-cat.svg';
@@ -23,8 +13,6 @@ import MochiGameViewSvg from '../../../assets/images/mochi/mochi-game-view.svg';
 interface MochiCatProps {
   // Size of the cat image (width and height will be equal)
   size?: number;
-  // Whether to animate a subtle breathing effect
-  animate?: boolean;
   // Which SVG variant to render (default: 'default')
   variant?: 'default' | 'game';
 }
@@ -33,52 +21,15 @@ interface MochiCatProps {
 
 export function MochiCat({
   size = 180,
-  animate = true,
   variant = 'default',
 }: MochiCatProps) {
   const SvgComponent = variant === 'game' ? MochiGameViewSvg : MochiCatSvg;
-  // Breathing animation scale value
-  const breatheScale = useSharedValue(1);
-
-  // MARK: - Breathing Animation
-  // Creates a gentle, subtle breathing effect that makes mochi feel alive
-  useEffect(() => {
-    if (animate) {
-      breatheScale.value = withRepeat(
-        withSequence(
-          // Inhale - gentle scale up
-          withTiming(1.02, {
-            duration: durations.mochiBreathing,
-            easing: Easing.inOut(Easing.ease),
-          }),
-          // Exhale - back to normal
-          withTiming(1, {
-            duration: durations.mochiBreathing,
-            easing: Easing.inOut(Easing.ease),
-          })
-        ),
-        -1, // Repeat forever
-        false // Don't reverse, we handle both directions in sequence
-      );
-    } else {
-      // Cancel any running animation and reset to default scale
-      cancelAnimation(breatheScale);
-      breatheScale.value = 1;
-    }
-  }, [animate, breatheScale]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: breatheScale.value }],
-  }));
-
-  // MARK: - Render
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      <Animated.View style={[styles.imageWrapper, animatedStyle]}>
-        {/* SVG component - width/height props control size */}
+      <View style={styles.imageWrapper}>
         <SvgComponent width={size} height={size} />
-      </Animated.View>
+      </View>
     </View>
   );
 }
@@ -90,10 +41,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageWrapper: {
-    // Wrapper for animation transforms
-  },
-  image: {
-    // Image fills the container
-  },
+  imageWrapper: {},
 });

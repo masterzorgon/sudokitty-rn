@@ -230,6 +230,7 @@ interface GameActions {
   getStrategicHint: () => Hint | null;
   applyHint: (hint: Hint) => void;
   clearHintHighlight: () => void;
+  dismissHintModal: () => void;
 
   // Undo
   undo: () => boolean;
@@ -480,17 +481,61 @@ export const useGameStore = create<GameState & GameActions>()(
         });
       },
 
-      // Use a hint (unlimited hints enabled)
+      // Use a hint: try strategic placement first, fall back to random fill
       useHint: () => {
         const state = get();
         if (state.gameStatus !== 'playing') return null;
 
-        // Find random empty cell
+        // Try to find a strategic placement hint via the solver
+        const puzzle: number[][] = state.board.map((row) =>
+          row.map((cell) => cell.value ?? 0)
+        );
+        const solver = new SudokuSolver({
+          maxTechniqueLevel: 4,
+          trackSteps: true,
+        });
+        const strategicHint = solver.getHint(puzzle);
+
+        // Use strategic hint only if it produces a direct placement
+        if (strategicHint?.targetValue) {
+          const { targetCell, targetValue } = strategicHint;
+
+          set((draft) => {
+            draft.hintsUsed++;
+            draft.selectedCell = targetCell;
+
+            const snapshot = createSnapshot(draft.board);
+            draft.history = draft.history.slice(0, draft.historyIndex + 1);
+            draft.history.push(snapshot);
+            draft.historyIndex++;
+
+            const cell = draft.board[targetCell.row][targetCell.col];
+            cell.value = targetValue!;
+            cell.notes.clear();
+            cell.isValid = true;
+            draft.highlightedNumber = targetValue!;
+            draft.lastCorrectCell = targetCell;
+
+            clearRelatedNotes(draft.board, targetCell.row, targetCell.col, targetValue!);
+
+            // Store hint so the modal can display the explanation
+            draft.lastHint = strategicHint;
+            draft.hintHighlightCells = strategicHint.highlightCells;
+
+            if (isBoardComplete(draft.board)) {
+              draft.gameStatus = 'won';
+              draft.isTimerRunning = false;
+            }
+          });
+
+          return { row: targetCell.row, col: targetCell.col, value: targetValue! };
+        }
+
+        // Fallback: random empty cell, no modal
         const emptyCells: Position[] = [];
         for (let row = 0; row < BOARD_SIZE; row++) {
           for (let col = 0; col < BOARD_SIZE; col++) {
-            const cell = state.board[row][col];
-            if (cell.value === null) {
+            if (state.board[row][col].value === null) {
               emptyCells.push({ row, col });
             }
           }
@@ -505,13 +550,11 @@ export const useGameStore = create<GameState & GameActions>()(
           draft.hintsUsed++;
           draft.selectedCell = randomCell;
 
-          // Save snapshot for undo
           const snapshot = createSnapshot(draft.board);
           draft.history = draft.history.slice(0, draft.historyIndex + 1);
           draft.history.push(snapshot);
           draft.historyIndex++;
 
-          // Place the correct value
           const cell = draft.board[randomCell.row][randomCell.col];
           cell.value = correctValue;
           cell.notes.clear();
@@ -519,10 +562,8 @@ export const useGameStore = create<GameState & GameActions>()(
           draft.highlightedNumber = correctValue;
           draft.lastCorrectCell = randomCell;
 
-          // Clear related notes
           clearRelatedNotes(draft.board, randomCell.row, randomCell.col, correctValue);
 
-          // Check for win
           if (isBoardComplete(draft.board)) {
             draft.gameStatus = 'won';
             draft.isTimerRunning = false;
@@ -619,6 +660,14 @@ export const useGameStore = create<GameState & GameActions>()(
 
       // Clear hint highlight cells
       clearHintHighlight: () => {
+        set((draft) => {
+          draft.lastHint = null;
+          draft.hintHighlightCells = [];
+        });
+      },
+
+      // Dismiss the hint explanation modal
+      dismissHintModal: () => {
         set((draft) => {
           draft.lastHint = null;
           draft.hintHighlightCells = [];

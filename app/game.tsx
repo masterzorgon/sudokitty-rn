@@ -13,6 +13,7 @@ import {
   ProgressBar,
   GameMascot,
   GameSettingsModal,
+  HintModal,
 } from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
@@ -298,6 +299,9 @@ export default function GameScreen() {
         visible={isSettingsModalVisible}
         onClose={closeSettingsModal}
       />
+
+      {/* Hint explanation modal */}
+      <HintModal />
     </SafeAreaView>
   );
 }
