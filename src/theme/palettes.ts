@@ -45,6 +45,9 @@ export interface ColorPalette {
   buttonGradient: readonly [string, string];
   mochiGradient: readonly [string, string];
 
+  // Showcase gradient (bottom-to-top: deep, mid, light — 4th color is cream)
+  showcaseGradient: readonly [string, string, string];
+
   // Skeuomorphic primary variant
   skeuPrimaryGradient: readonly [string, string, string];
   skeuPrimaryEdge: string;
@@ -88,6 +91,8 @@ const pinkPalette: ColorPalette = {
   buttonGradient: ['#FF6B9D', '#FF90B8'],
   mochiGradient: ['#FFA0C4', '#FF6B9D'],
 
+  showcaseGradient: ['#FCA2BE', '#FFE4F2', '#FFF0F8'],
+
   skeuPrimaryGradient: ['#FF6B9D', '#FF558B', '#FF6093'],
   skeuPrimaryEdge: '#E85A87',
   skeuPrimaryBorderDark: 'rgba(232, 90, 135, 0.3)',
@@ -129,6 +134,8 @@ const orangePalette: ColorPalette = {
   backgroundGradient: ['#FFF5EE', '#FFEFE4', '#FFE8D8'],
   buttonGradient: ['#FF8C56', '#FFB088'],
   mochiGradient: ['#FFB088', '#FF8C56'],
+
+  showcaseGradient: ['#F0A870', '#FFE0C8', '#FFF2EA'],
 
   skeuPrimaryGradient: ['#FF8C56', '#FF7840', '#FF844C'],
   skeuPrimaryEdge: '#E07040',
@@ -172,6 +179,8 @@ const greenPalette: ColorPalette = {
   buttonGradient: ['#5CB85C', '#81C784'],
   mochiGradient: ['#81C784', '#5CB85C'],
 
+  showcaseGradient: ['#7CC47C', '#C8E6C9', '#E8F5E9'],
+
   skeuPrimaryGradient: ['#5CB85C', '#4CA84C', '#54B054'],
   skeuPrimaryEdge: '#489848',
   skeuPrimaryBorderDark: 'rgba(72, 152, 72, 0.3)',
@@ -213,6 +222,8 @@ const bluePalette: ColorPalette = {
   backgroundGradient: ['#F0F6FF', '#E8F0FA', '#E0E8F5'],
   buttonGradient: ['#5B9BD5', '#85B8E4'],
   mochiGradient: ['#85B8E4', '#5B9BD5'],
+
+  showcaseGradient: ['#7AAED0', '#B8D4F0', '#E0ECF8'],
 
   skeuPrimaryGradient: ['#5B9BD5', '#4A8BC5', '#5293CD'],
   skeuPrimaryEdge: '#4882B8',

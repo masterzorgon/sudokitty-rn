@@ -2,7 +2,7 @@
 // Presentational component - receives message as prop from parent
 
 import React, { useEffect, useRef, useMemo, useCallback, memo } from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
   FadeIn,
   withSpring,
@@ -14,9 +14,9 @@ import Animated, {
 import { Canvas, Circle } from '@shopify/react-native-skia';
 
 import { MochiCat } from '../home/MochiCat';
-import { colors, useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { useColors } from '../../theme/colors';
 import { GAME_LAYOUT } from '../../constants/layout';
+import { SpeechBubble } from '../ui/SpeechBubble';
 
 // MARK: - Puff Particle Component
 
@@ -185,24 +185,15 @@ export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flex
             key={message}
             entering={BubbleEntering}
             exiting={BubbleExiting}
-            style={[styles.bubble, flexibleHeight && styles.bubbleFlexible]}
+            style={flexibleHeight ? styles.bubbleWrapperFlexible : styles.bubbleWrapper}
           >
-            {/* Tail pointing left toward the cat - border layer then fill layer */}
-            <View style={styles.bubbleTailBorder} />
-            <View style={styles.bubbleTail} />
-            {flexibleHeight ? (
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                bounces={false}
-                style={styles.bubbleScroll}
-              >
-                <Text style={styles.bubbleText}>{message}</Text>
-              </ScrollView>
-            ) : (
-              <Text style={styles.bubbleText} numberOfLines={maxLines || undefined}>
-                {message}
-              </Text>
-            )}
+            <SpeechBubble
+              text={message}
+              pointerDirection="left"
+              pointerPosition={0.9}
+              maxLines={flexibleHeight ? undefined : (maxLines || undefined)}
+              scrollable={flexibleHeight}
+            />
           </Animated.View>
         )}
       </View>
@@ -243,62 +234,13 @@ const styles = StyleSheet.create({
     bottom: -20,
     zIndex: -1,
   },
-  bubble: {
-    alignSelf: 'flex-start', // Shrink-wrap to content (game screen)
-    marginBottom: GAME_LAYOUT.MASCOT_SIZE * 0.15, // Shift bubble up so tail aligns with cat's vertical center
-    backgroundColor: colors.cardBackground,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: colors.gridLine,
-    // Subtle shadow
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+  bubbleWrapper: {
+    alignSelf: 'flex-start',
+    marginBottom: GAME_LAYOUT.MASCOT_SIZE * 0.15,
   },
-  bubbleFlexible: {
-    alignSelf: 'stretch', // Fill available width (technique screen)
-    maxHeight: 150, // Cap height so board stays fixed; content scrolls if longer
-  },
-  bubbleScroll: {
-    flexGrow: 0, // Don't expand beyond maxHeight
-  },
-  bubbleTailBorder: {
-    position: 'absolute',
-    left: -10,
-    top: '90%',
-    marginTop: -9,
-    width: 0,
-    height: 0,
-    borderTopWidth: 9,
-    borderBottomWidth: 9,
-    borderRightWidth: 11,
-    borderTopColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderRightColor: colors.gridLine, // Border color
-  },
-  bubbleTail: {
-    position: 'absolute',
-    left: -8,
-    top: '90%',
-    marginTop: -8,
-    width: 0,
-    height: 0,
-    borderTopWidth: 8,
-    borderBottomWidth: 8,
-    borderRightWidth: 10,
-    borderTopColor: 'transparent',
-    borderBottomColor: 'transparent',
-    borderRightColor: colors.cardBackground, // Fill color
-  },
-  bubbleText: {
-    ...typography.body,
-    fontSize: 15,
-    color: colors.textSecondary,
-    lineHeight: 20,
-    textAlign: 'center',
+  bubbleWrapperFlexible: {
+    alignSelf: 'stretch',
+    maxHeight: 150,
+    marginBottom: GAME_LAYOUT.MASCOT_SIZE * 0.15,
   },
 });

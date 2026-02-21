@@ -34,16 +34,12 @@ export function TechniqueDemoView({
   onNext,
   onPrevious,
 }: TechniqueDemoViewProps) {
-  const isLastStep = currentStep === puzzleState.steps.length - 1;
-
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.gameLayout}>
-      {/* Mochi cat speech bubble — fills space above board */}
       <View style={styles.mascotZone}>
         <GameMascot message={mochiMessage} maxLines={0} flexibleHeight />
       </View>
 
-      {/* Board (edge-to-edge) */}
       <View style={styles.boardContainer}>
         <SudokuBoard
           cells={puzzleToCellData(puzzleState.puzzle)}
@@ -54,20 +50,13 @@ export function TechniqueDemoView({
         />
       </View>
 
-      {/* Bottom controls */}
       <View style={styles.bottomZone}>
         <View style={styles.stepNav}>
           <View style={styles.stepNavButtonWrapper}>
-            {currentStep > 0 && (
-              <AppButton onPress={onPrevious} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
-            )}
+            <AppButton onPress={onPrevious} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
           </View>
           <View style={styles.stepNavButtonWrapper}>
-            <AppButton
-              onPress={onNext}
-              label={isLastStep ? 'practice' : 'next'}
-              icon={isLastStep ? 'play' : 'chevron-right'}
-            />
+            <AppButton onPress={onNext} label="next" icon="chevron-right" />
           </View>
         </View>
       </View>

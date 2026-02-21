@@ -1,21 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-
-import { colors } from '../../theme/colors';
 import { spacing } from '../../theme';
 import { GAME_LAYOUT } from '../../constants/layout';
 import { SudokuBoard, puzzleToCellData } from '../board';
 import { GameMascot } from '../game';
 import { AppButton } from '../ui/AppButton';
-import { ValidationFeedback } from './ValidationFeedback';
+import { BottomSheet } from '../ui/BottomSheet';
 import type { ValidationResult } from '../../engine/validation';
 import type { FindPhase, PuzzleState } from '../../hooks/useTechniquePractice';
-
-// ============================================
-// Types
-// ============================================
 
 interface TechniqueFindItViewProps {
   puzzleState: PuzzleState;
@@ -33,12 +27,8 @@ interface TechniqueFindItViewProps {
   onBackToPattern: () => void;
   onSubmitSelection: () => void;
   onTryAgain: () => void;
-  onTryAnother: () => void;
+  onBack: () => void;
 }
-
-// ============================================
-// Component
-// ============================================
 
 export function TechniqueFindItView({
   puzzleState,
@@ -56,16 +46,16 @@ export function TechniqueFindItView({
   onBackToPattern,
   onSubmitSelection,
   onTryAgain,
-  onTryAnother,
+  onBack,
 }: TechniqueFindItViewProps) {
+  const showIncorrectModal = validationResult !== null && !validationResult.correct;
+
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.gameLayout}>
-      {/* Mochi cat speech bubble — fills space above board */}
       <View style={styles.mascotZone}>
         <GameMascot message={mochiMessage} maxLines={0} flexibleHeight />
       </View>
 
-      {/* Board (edge-to-edge) */}
       <View style={styles.boardContainer}>
         <SudokuBoard
           cells={puzzleToCellData(puzzleState.puzzle)}
@@ -78,34 +68,31 @@ export function TechniqueFindItView({
         />
       </View>
 
-      {/* Bottom controls */}
       <View style={styles.bottomZone}>
-        {!validationResult ? (
-          <FindItControls
-            isElimination={isElimination}
-            findPhase={findPhase}
-            patternCellCount={patternCellCount}
-            eliminationCellCount={eliminationCellCount}
-            selectedCellCount={selectedCellCount}
-            onConfirmPattern={onConfirmPattern}
-            onBackToPattern={onBackToPattern}
-            onSubmitSelection={onSubmitSelection}
-          />
-        ) : (
-          <ValidationFeedback
-            validationResult={validationResult}
-            onTryAgain={onTryAgain}
-            onTryAnother={onTryAnother}
-          />
-        )}
+        <FindItControls
+          isElimination={isElimination}
+          findPhase={findPhase}
+          patternCellCount={patternCellCount}
+          eliminationCellCount={eliminationCellCount}
+          selectedCellCount={selectedCellCount}
+          onConfirmPattern={onConfirmPattern}
+          onBackToPattern={onBackToPattern}
+          onSubmitSelection={onSubmitSelection}
+          onBack={onBack}
+        />
       </View>
+
+      <BottomSheet
+        visible={showIncorrectModal}
+        onDismiss={onTryAgain}
+        title="Not quite!"
+        description={validationResult?.feedback ?? ''}
+        action={{ label: 'Try Again', onPress: onTryAgain }}
+        dismissOnTapOutside={false}
+      />
     </Animated.View>
   );
 }
-
-// ============================================
-// Sub-component: Find-it controls
-// ============================================
 
 interface FindItControlsProps {
   isElimination: boolean;
@@ -116,6 +103,7 @@ interface FindItControlsProps {
   onConfirmPattern: () => void;
   onBackToPattern: () => void;
   onSubmitSelection: () => void;
+  onBack: () => void;
 }
 
 function FindItControls({
@@ -127,15 +115,18 @@ function FindItControls({
   onConfirmPattern,
   onBackToPattern,
   onSubmitSelection,
+  onBack,
 }: FindItControlsProps) {
   if (isElimination && findPhase === 'pattern') {
     return (
-      <AppButton
-        onPress={onConfirmPattern}
-        label="confirm pattern"
-        icon="chevron-right"
-        disabled={patternCellCount === 0}
-      />
+      <View style={styles.buttonRow}>
+        <View style={styles.buttonWrapper}>
+          <AppButton onPress={onBack} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <AppButton onPress={onConfirmPattern} label="confirm pattern" icon="chevron-right" disabled={patternCellCount === 0} />
+        </View>
+      </View>
     );
   }
 
@@ -146,20 +137,23 @@ function FindItControls({
           <AppButton onPress={onBackToPattern} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
         </View>
         <View style={styles.buttonWrapper}>
-          <AppButton onPress={onSubmitSelection} label="check answer" disabled={eliminationCellCount === 0} />
+          <AppButton onPress={onSubmitSelection} label="submit" disabled={eliminationCellCount === 0} />
         </View>
       </View>
     );
   }
 
   return (
-    <AppButton onPress={onSubmitSelection} label="check answer" disabled={selectedCellCount === 0} />
+    <View style={styles.buttonRow}>
+      <View style={styles.buttonWrapper}>
+        <AppButton onPress={onBack} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
+      </View>
+      <View style={styles.buttonWrapper}>
+        <AppButton onPress={onSubmitSelection} label="submit" disabled={selectedCellCount === 0} />
+      </View>
+    </View>
   );
 }
-
-// ============================================
-// Styles
-// ============================================
 
 const styles = StyleSheet.create({
   gameLayout: {

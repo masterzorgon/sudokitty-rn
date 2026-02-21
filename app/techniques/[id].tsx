@@ -1,4 +1,4 @@
-// Technique practice screen - Guided demo + Find-it mode
+// Technique practice screen - Unified sequence: Overview → Demo → Practice → Complete
 // Thin orchestrator: delegates state to useTechniquePractice hook
 // and rendering to extracted sub-components.
 
@@ -14,24 +14,23 @@ import { GAME_LAYOUT } from '../../src/constants/layout';
 import { useTechniquePractice } from '../../src/hooks/useTechniquePractice';
 import {
   TechniqueHeader,
-  StepIndicator,
-  TechniqueIntro,
   TechniqueDemoView,
   TechniqueFindItView,
 } from '../../src/components/technique';
+import { ShowcasePage } from '../../src/components/ui/ShowcasePage';
 import { AppButton } from '../../src/components/ui/AppButton';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { trackPaywallOpened } from '../../src/utils/analytics';
 
-// ============================================
-// Main Screen
-// ============================================
+import MochiTeacherSvg from '../../assets/images/mochi/mochi-teacher.svg';
+import MochiCelebrationSvg from '../../assets/images/mochi/mochi-celebration.svg';
+
+const MASCOT_SIZE = 180;
 
 export default function TechniquePracticeScreen() {
   const c = useColors();
   const state = useTechniquePractice();
 
-  // Technique not found
   if (!state.metadata) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
@@ -40,17 +39,19 @@ export default function TechniquePracticeScreen() {
     );
   }
 
+  const { metadata, phase, sequence } = state;
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
-      <TechniqueHeader metadata={state.metadata} onBack={state.handleBack} />
+      <TechniqueHeader
+        metadata={metadata}
+        onBack={state.handleBack}
+        stepCount={state.puzzleState && phase !== 'loading' && phase !== 'error' && phase !== 'coming-soon' && phase !== 'locked' ? sequence.totalSteps : undefined}
+        currentStep={state.puzzleState && phase !== 'loading' && phase !== 'error' && phase !== 'coming-soon' && phase !== 'locked' ? sequence.currentStep : undefined}
+      />
 
-      {/* Step progress dots (demo mode) */}
-      {state.mode === 'demo' && state.puzzleState && (
-        <StepIndicator stepCount={state.puzzleState.steps.length} currentStep={state.currentStep} />
-      )}
-
-      {/* Phase indicator (find-it elimination mode) */}
-      {state.mode === 'find-it' && state.isElimination && !state.validationResult && (
+      {/* Phase indicator (practice elimination mode) */}
+      {phase === 'practice' && state.isElimination && !state.validationResult && (
         <View style={styles.phaseIndicator}>
           <View style={[styles.phaseDot, state.findPhase === 'pattern' && { backgroundColor: c.accent }]} />
           <Text style={[styles.phaseLabel, state.findPhase === 'pattern' && styles.phaseLabelActive]}>
@@ -64,16 +65,16 @@ export default function TechniquePracticeScreen() {
         </View>
       )}
 
-      {/* Loading state */}
-      {state.mode === 'loading' && (
+      {/* Loading */}
+      {phase === 'loading' && (
         <View style={styles.centeredContent}>
           <ActivityIndicator size="large" color={c.accent} />
           <Text style={styles.loadingText}>generating puzzle...</Text>
         </View>
       )}
 
-      {/* Error state */}
-      {state.mode === 'error' && (
+      {/* Error */}
+      {phase === 'error' && (
         <View style={styles.centeredContent}>
           <Feather name="alert-circle" size={48} color={colors.textLight} />
           <Text style={styles.errorText}>{state.generationError}</Text>
@@ -83,45 +84,63 @@ export default function TechniquePracticeScreen() {
         </View>
       )}
 
-      {/* Locked state (premium required) */}
-      {state.mode === 'locked' && (
-        <TechniqueIntro
-          metadata={state.metadata}
-          comingSoon={false}
-          onStart={async () => {
-            trackPaywallOpened('technique_detail');
-            await presentPaywall();
+      {/* Coming soon */}
+      {phase === 'coming-soon' && (
+        <ShowcasePage
+          heading={metadata.name}
+          badge={{ label: metadata.category, color: metadata.color }}
+          mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          bodyText={metadata.longDescription}
+          action={{ label: 'back to techniques', onPress: state.handleBack, icon: 'arrow-left', iconPosition: 'left' }}
+        />
+      )}
+
+      {/* Locked */}
+      {phase === 'locked' && (
+        <ShowcasePage
+          heading={metadata.name}
+          badge={{ label: metadata.category, color: metadata.color }}
+          mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          bodyText={metadata.longDescription}
+          action={{
+            label: 'unlock',
+            onPress: async () => {
+              trackPaywallOpened('technique_detail');
+              await presentPaywall();
+            },
+            icon: 'lock',
+            iconPosition: 'left',
           }}
-          onBack={state.handleBack}
         />
       )}
 
-      {/* Intro / Coming-soon */}
-      {(state.mode === 'intro' || state.mode === 'coming-soon') && (
-        <TechniqueIntro
-          metadata={state.metadata}
-          comingSoon={state.mode === 'coming-soon'}
-          onStart={state.handleStartDemo}
-          onBack={state.handleBack}
+      {/* Overview (step 0) */}
+      {phase === 'overview' && (
+        <ShowcasePage
+          heading={metadata.name}
+          badge={{ label: metadata.category, color: metadata.color }}
+          mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          bodyText={metadata.longDescription}
+          action={{ label: 'next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
         />
       )}
 
-      {/* Demo mode */}
-      {state.mode === 'demo' && state.puzzleState && (
+      {/* Demo (steps 1..N) */}
+      {phase === 'demo' && state.puzzleState && (
         <TechniqueDemoView
           puzzleState={state.puzzleState}
-          currentStep={state.currentStep}
+          currentStep={state.demoStepIndex}
           mochiMessage={state.mochiMessage}
           boardHighlightSet={state.boardHighlightSet}
-          onNext={state.handleNextStep}
-          onPrevious={state.handlePreviousStep}
+          onNext={state.handleSequenceNext}
+          onPrevious={state.handleSequencePrevious}
         />
       )}
 
-      {/* Find-it mode */}
-      {state.mode === 'find-it' && state.puzzleState && (
+      {/* Practice (step N+1) */}
+      {phase === 'practice' && state.practicePuzzle && (
         <TechniqueFindItView
-          puzzleState={state.puzzleState}
+          puzzleState={state.practicePuzzle}
           mochiMessage={state.mochiMessage}
           isElimination={state.isElimination}
           findPhase={state.findPhase}
@@ -136,16 +155,22 @@ export default function TechniquePracticeScreen() {
           onBackToPattern={state.handleBackToPattern}
           onSubmitSelection={state.handleSubmitSelection}
           onTryAgain={state.resetFindState}
-          onTryAnother={state.handleTryAnother}
+          onBack={state.handleSequencePrevious}
+        />
+      )}
+
+      {/* Complete (step N+2) */}
+      {phase === 'complete' && (
+        <ShowcasePage
+          heading="Congratulations!"
+          mascotImage={<MochiCelebrationSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
+          action={{ label: 'done', onPress: state.handleBack, icon: 'check' }}
         />
       )}
     </SafeAreaView>
   );
 }
-
-// ============================================
-// Styles (screen-level only)
-// ============================================
 
 const styles = StyleSheet.create({
   container: {

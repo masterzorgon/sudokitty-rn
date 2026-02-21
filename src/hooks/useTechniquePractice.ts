@@ -24,12 +24,13 @@ import { usePremiumStore } from '../stores/premiumStore';
 import { triggerHaptic, ImpactFeedbackStyle } from '../utils/haptics';
 import { Position, positionKey } from '../engine/types';
 import { TechniqueResult } from '../engine/solver/types';
+import { useSequence } from './useSequence';
 
 // ============================================
-// Types (exported for sub-components)
+// Types
 // ============================================
 
-export type PracticeMode = 'loading' | 'intro' | 'demo' | 'find-it' | 'error' | 'coming-soon' | 'locked';
+export type TechniquePhase = 'loading' | 'overview' | 'demo' | 'practice' | 'complete' | 'error' | 'coming-soon' | 'locked';
 export type FindPhase = 'pattern' | 'elimination';
 
 export interface PuzzleState {
@@ -40,90 +41,32 @@ export interface PuzzleState {
 }
 
 // ============================================
-// Helpers (private)
+// Helpers
 // ============================================
 
-/**
- * Get the next puzzle for a technique using the cache-first, curated-fallback
- * pattern. Supabase is never called synchronously — this is always instant.
- */
 function getNextPuzzle(techniqueId: string): {
   puzzle: number[][];
   solution: number[][];
   techniqueResult: TechniqueResult;
 } | null {
-  // 1. Try cache (synchronous, instant)
   const cached = getCachedPuzzle(techniqueId);
   if (cached) {
     consumeAndRefill(techniqueId, cached.id);
-    return {
-      puzzle: cached.puzzle,
-      solution: cached.solution,
-      techniqueResult: cached.techniqueResult,
-    };
+    return { puzzle: cached.puzzle, solution: cached.solution, techniqueResult: cached.techniqueResult };
   }
-
-  // 2. Cache miss: fall back to curated bank (synchronous, instant)
   const curated = getCuratedPuzzle(CURATED_PUZZLE_BANK, techniqueId);
   if (curated.success && curated.puzzle && curated.solution && curated.techniqueResult) {
-    return {
-      puzzle: curated.puzzle,
-      solution: curated.solution,
-      techniqueResult: curated.techniqueResult,
-    };
+    return { puzzle: curated.puzzle, solution: curated.solution, techniqueResult: curated.techniqueResult };
   }
-
   return null;
 }
 
-/** Convert a raw puzzle result into a PuzzleState with rendered steps. */
 function toPuzzleState(raw: {
   puzzle: number[][];
   solution: number[][];
   techniqueResult: TechniqueResult;
 }): PuzzleState {
-  return {
-    puzzle: raw.puzzle,
-    solution: raw.solution,
-    techniqueResult: raw.techniqueResult,
-    steps: renderSteps(raw.techniqueResult),
-  };
-}
-
-/**
- * Deduplicated puzzle-loading logic. Tries the instant path (cache + curated),
- * then falls back to on-device generation with a setTimeout to avoid blocking.
- */
-function loadPuzzle(
-  techniqueId: string,
-  onSuccess: (ps: PuzzleState) => void,
-  onError: (msg?: string) => void,
-  setMode: (m: PracticeMode) => void,
-) {
-  // 1. Try instant paths (cache + curated bank)
-  const next = getNextPuzzle(techniqueId);
-  if (next) {
-    onSuccess(toPuzzleState(next));
-    return;
-  }
-
-  // 2. No instant puzzle — fall back to on-device generation
-  setMode('loading');
-  setTimeout(() => {
-    const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, {
-      maxRetries: 100,
-      timeoutMs: 5000,
-    });
-    if (result.success && result.puzzle && result.solution && result.techniqueResult) {
-      onSuccess(toPuzzleState({
-        puzzle: result.puzzle,
-        solution: result.solution,
-        techniqueResult: result.techniqueResult,
-      }));
-    } else {
-      onError();
-    }
-  }, 50);
+  return { ...raw, steps: renderSteps(raw.techniqueResult) };
 }
 
 // ============================================
@@ -137,27 +80,49 @@ export function useTechniquePractice() {
   const metadata = getTechniqueMetadata(techniqueId);
   const isPremium = usePremiumStore((s) => s.isPremium);
 
-  // ---- State ----
-  const [mode, setMode] = useState<PracticeMode>('loading');
+  // ---- Puzzle state ----
   const [puzzleState, setPuzzleState] = useState<PuzzleState | null>(null);
-  const [currentStep, setCurrentStep] = useState(0);
+  const [practicePuzzle, setPracticePuzzle] = useState<PuzzleState | null>(null);
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [statusOverride, setStatusOverride] = useState<'loading' | 'error' | 'coming-soon' | 'locked' | null>(null);
   const demoStartTime = useRef<number>(0);
 
-  // Two-phase selection for elimination techniques
   const [findPhase, setFindPhase] = useState<FindPhase>('pattern');
   const [patternCells, setPatternCells] = useState<Set<string>>(new Set());
   const [eliminationCells, setEliminationCells] = useState<Set<string>>(new Set());
 
-  const isElimination = puzzleState
-    ? !isPlacementTechnique(puzzleState.techniqueResult.techniqueName)
+  const isElimination = practicePuzzle
+    ? !isPlacementTechnique(practicePuzzle.techniqueResult.techniqueName)
     : false;
 
-  // ---- Store ----
+  // ---- Stores ----
   const completeDemo = useTechniqueProgressStore((s) => s.completeDemo);
   const recordFindAttempt = useTechniqueProgressStore((s) => s.recordFindAttempt);
+
+  // ---- Sequence ----
+  // Total steps: 1 (overview) + N (demo) + 1 (practice) + 1 (complete) = N + 3
+  const demoStepCount = puzzleState?.steps.length ?? 0;
+  const totalSteps = demoStepCount + 3;
+
+  const sequence = useSequence({ totalSteps });
+
+  // Derive the current phase from the sequence step
+  const phase: TechniquePhase = useMemo(() => {
+    if (statusOverride) return statusOverride;
+    if (!puzzleState) return 'loading';
+    if (sequence.currentStep === 0) return 'overview';
+    if (sequence.currentStep <= demoStepCount) return 'demo';
+    if (sequence.currentStep === demoStepCount + 1) return 'practice';
+    return 'complete';
+  }, [statusOverride, puzzleState, sequence.currentStep, demoStepCount]);
+
+  // The demo step index (0-based) within the demo phase
+  const demoStepIndex = useMemo(() => {
+    if (phase !== 'demo') return 0;
+    return sequence.currentStep - 1;
+  }, [phase, sequence.currentStep]);
 
   // ---- Shared helpers ----
   const resetFindState = useCallback(() => {
@@ -168,145 +133,144 @@ export function useTechniquePractice() {
     setFindPhase('pattern');
   }, []);
 
-  // ---- Mochi cat message ----
+  // ---- Mochi message ----
   const mochiMessage = useMemo((): string | null => {
-    if (mode === 'demo' && puzzleState) {
-      return puzzleState.steps[currentStep]?.text ?? null;
+    if (phase === 'demo' && puzzleState) {
+      return puzzleState.steps[demoStepIndex]?.text ?? null;
     }
-    if (mode === 'find-it' && puzzleState) {
-      if (validationResult) {
-        return validationResult.feedback;
-      }
-      if (!isElimination) {
-        return 'Tap the cell where you can apply this technique.';
-      }
+    if (phase === 'practice' && practicePuzzle) {
+      if (validationResult) return validationResult.feedback;
+      if (!isElimination) return 'Tap the cell where you can apply this technique.';
       return findPhase === 'pattern'
         ? 'Tap the cells that form the pattern (e.g., the pair, triple, or wings).'
         : 'Now tap the cells where candidates can be eliminated.';
     }
     return null;
-  }, [mode, puzzleState, currentStep, validationResult, isElimination, findPhase]);
+  }, [phase, puzzleState, demoStepIndex, practicePuzzle, validationResult, isElimination, findPhase]);
 
-  // ---- Puzzle generation ----
+  // ---- Puzzle loading ----
+  const loadPuzzleAsync = useCallback((
+    onSuccess: (ps: PuzzleState) => void,
+    onError: () => void,
+  ) => {
+    const next = getNextPuzzle(techniqueId);
+    if (next) {
+      onSuccess(toPuzzleState(next));
+      return;
+    }
+    setStatusOverride('loading');
+    setTimeout(() => {
+      const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, {
+        maxRetries: 100,
+        timeoutMs: 5000,
+      });
+      if (result.success && result.puzzle && result.solution && result.techniqueResult) {
+        onSuccess(toPuzzleState({ puzzle: result.puzzle, solution: result.solution, techniqueResult: result.techniqueResult }));
+      } else {
+        onError();
+      }
+    }, 50);
+  }, [techniqueId]);
+
   const generatePuzzle = useCallback(() => {
-    setCurrentStep(0);
-    setSelectedCells(new Set());
-    setValidationResult(null);
     setGenerationError(null);
+    setStatusOverride(null);
+    sequence.reset();
 
-    loadPuzzle(
-      techniqueId,
+    loadPuzzleAsync(
       (ps) => {
         setPuzzleState(ps);
-        setMode('intro');
+        setStatusOverride(null);
       },
       () => {
         setGenerationError('Could not find a suitable puzzle for this technique.');
-        setMode('error');
+        setStatusOverride('error');
       },
-      setMode,
     );
-  }, [techniqueId]);
+  }, [techniqueId, loadPuzzleAsync, sequence]);
 
-  // Generate puzzle on mount (skip for techniques without solvers or locked behind premium)
+  // Initial load
   useEffect(() => {
     if (!isPremium && metadata && metadata.level >= 3) {
-      setMode('locked');
+      setStatusOverride('locked');
     } else if (techniqueId && metadata?.hasSolver) {
       generatePuzzle();
     } else if (techniqueId && metadata && !metadata.hasSolver) {
-      setMode('coming-soon');
+      setStatusOverride('coming-soon');
     }
   }, [techniqueId, isPremium]);
 
-  // ---- Handlers ----
+  // Load practice puzzle when entering practice phase
+  useEffect(() => {
+    if (phase === 'practice' && !practicePuzzle) {
+      resetFindState();
+      loadPuzzleAsync(
+        (ps) => setPracticePuzzle(ps),
+        () => {
+          setGenerationError('Could not generate a practice puzzle.');
+          setStatusOverride('error');
+        },
+      );
+    }
+  }, [phase, practicePuzzle, loadPuzzleAsync, resetFindState]);
 
+  // Record demo start time when entering demo phase
+  useEffect(() => {
+    if (phase === 'demo' && demoStepIndex === 0) {
+      demoStartTime.current = Date.now();
+    }
+  }, [phase, demoStepIndex]);
+
+  // Record demo completion when leaving last demo step
+  const prevPhaseRef = useRef<TechniquePhase>('loading');
+  useEffect(() => {
+    if (prevPhaseRef.current === 'demo' && phase === 'practice') {
+      const timeSeconds = Math.round((Date.now() - demoStartTime.current) / 1000);
+      completeDemo(techniqueId, timeSeconds);
+    }
+    prevPhaseRef.current = phase;
+  }, [phase, techniqueId, completeDemo]);
+
+  // ---- Handlers ----
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
 
-  const handleStartDemo = useCallback(() => {
-    setMode('demo');
-    setCurrentStep(0);
-    demoStartTime.current = Date.now();
+  const handleSequenceNext = useCallback(() => {
     triggerHaptic(ImpactFeedbackStyle.Light);
-  }, []);
+    sequence.next();
+  }, [sequence]);
 
-  const handleNextStep = useCallback(() => {
-    if (!puzzleState) return;
-
-    if (currentStep < puzzleState.steps.length - 1) {
-      setCurrentStep((s) => s + 1);
-      triggerHaptic(ImpactFeedbackStyle.Light);
-    } else {
-      // Demo complete
-      const timeSeconds = Math.round((Date.now() - demoStartTime.current) / 1000);
-      completeDemo(techniqueId, timeSeconds);
-      triggerHaptic(ImpactFeedbackStyle.Medium);
-
-      // Load a new puzzle for find-it mode
-      loadPuzzle(
-        techniqueId,
-        (ps) => {
-          setPuzzleState(ps);
-          setMode('find-it');
-          resetFindState();
-        },
-        () => {
-          setGenerationError('Could not generate a practice puzzle.');
-          setMode('error');
-        },
-        setMode,
-      );
-    }
-  }, [puzzleState, currentStep, techniqueId, completeDemo, resetFindState]);
-
-  const handlePreviousStep = useCallback(() => {
-    if (currentStep > 0) {
-      setCurrentStep((s) => s - 1);
-      triggerHaptic(ImpactFeedbackStyle.Light);
-    }
-  }, [currentStep]);
+  const handleSequencePrevious = useCallback(() => {
+    triggerHaptic(ImpactFeedbackStyle.Light);
+    sequence.previous();
+  }, [sequence]);
 
   const handleCellPress = useCallback((row: number, col: number) => {
-    if (mode !== 'find-it' || !puzzleState) return;
-
+    if (phase !== 'practice' || !practicePuzzle) return;
     const key = positionKey({ row, col });
 
     if (!isElimination) {
       setSelectedCells((prev) => {
         const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.clear();
-          next.add(key);
-        }
+        if (next.has(key)) { next.delete(key); } else { next.clear(); next.add(key); }
         return next;
       });
     } else if (findPhase === 'pattern') {
       setPatternCells((prev) => {
         const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.add(key);
-        }
+        next.has(key) ? next.delete(key) : next.add(key);
         return next;
       });
     } else {
       setEliminationCells((prev) => {
         const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.add(key);
-        }
+        next.has(key) ? next.delete(key) : next.add(key);
         return next;
       });
     }
     triggerHaptic(ImpactFeedbackStyle.Light);
-  }, [mode, puzzleState, isElimination, findPhase]);
+  }, [phase, practicePuzzle, isElimination, findPhase]);
 
   const handleConfirmPattern = useCallback(() => {
     setFindPhase('elimination');
@@ -320,36 +284,25 @@ export function useTechniquePractice() {
   }, []);
 
   const handleSubmitSelection = useCallback(() => {
-    if (!puzzleState || mode !== 'find-it') return;
+    if (!practicePuzzle || phase !== 'practice') return;
+
+    let result: ValidationResult;
 
     if (!isElimination) {
-      const selectedPositions = Array.from(selectedCells).map((key) => {
+      const positions = Array.from(selectedCells).map((key) => {
         const [row, col] = key.split('-').map(Number);
         return { row, col } as Position;
       });
-
-      if (selectedPositions.length !== 1) {
+      if (positions.length !== 1) {
         setValidationResult({
-          correct: false,
-          patternCorrect: false,
-          eliminationCorrect: false,
-          placementCorrect: false,
+          correct: false, patternCorrect: false, eliminationCorrect: false, placementCorrect: false,
           feedback: 'Select exactly one cell where you think the value should be placed.',
         });
         return;
       }
-
-      const expected = puzzleState.techniqueResult.placements[0];
-      const selection: PlacementSelection = {
-        type: 'placement',
-        cell: selectedPositions[0],
-        value: expected?.value ?? 0,
-      };
-
-      const result = validateSelection(selection, puzzleState.techniqueResult, false);
-      setValidationResult(result);
-      recordFindAttempt(techniqueId, result.correct);
-      triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+      const expected = practicePuzzle.techniqueResult.placements[0];
+      const selection: PlacementSelection = { type: 'placement', cell: positions[0], value: expected?.value ?? 0 };
+      result = validateSelection(selection, practicePuzzle.techniqueResult, false);
     } else {
       const patternPositions = Array.from(patternCells).map((key) => {
         const [row, col] = key.split('-').map(Number);
@@ -359,87 +312,78 @@ export function useTechniquePractice() {
         const [row, col] = key.split('-').map(Number);
         return { row, col } as Position;
       });
-
-      const selection: EliminationSelection = {
-        type: 'elimination',
-        patternCells: patternPositions,
-        eliminationCells: eliminationPositions,
-      };
-
-      const result = validateSelection(selection, puzzleState.techniqueResult, false);
-      setValidationResult(result);
-      recordFindAttempt(techniqueId, result.correct);
-      triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+      const selection: EliminationSelection = { type: 'elimination', patternCells: patternPositions, eliminationCells: eliminationPositions };
+      result = validateSelection(selection, practicePuzzle.techniqueResult, false);
     }
-  }, [puzzleState, mode, isElimination, selectedCells, patternCells, eliminationCells, techniqueId, recordFindAttempt]);
+
+    setValidationResult(result);
+    triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+
+    if (result.correct) {
+      recordFindAttempt(techniqueId, true);
+      setTimeout(() => sequence.next(), 1500);
+    }
+  }, [practicePuzzle, phase, isElimination, selectedCells, patternCells, eliminationCells, techniqueId, recordFindAttempt, sequence]);
 
   const handleTryAnother = useCallback(() => {
     resetFindState();
-    loadPuzzle(
-      techniqueId,
-      (ps) => {
-        setPuzzleState(ps);
-        setMode('find-it');
-      },
-      () => {
-        setMode('error');
-      },
-      setMode,
+    setPracticePuzzle(null);
+    loadPuzzleAsync(
+      (ps) => setPracticePuzzle(ps),
+      () => setStatusOverride('error'),
     );
-  }, [techniqueId, resetFindState]);
+  }, [loadPuzzleAsync, resetFindState]);
 
-  // ---- Computed board highlights ----
-
+  // ---- Board highlights ----
   const boardHighlightSet = useMemo((): Set<string> => {
-    if (mode === 'find-it') {
+    if (phase === 'practice') {
       return isElimination ? new Set([...patternCells, ...eliminationCells]) : selectedCells;
     }
-    // Demo mode
-    const set = new Set<string>();
-    if (mode === 'demo' && puzzleState) {
-      const step = puzzleState.steps[currentStep];
-      if (step) {
-        step.highlightCells.forEach((pos) => set.add(positionKey(pos)));
-      }
+    if (phase === 'demo' && puzzleState) {
+      const set = new Set<string>();
+      const step = puzzleState.steps[demoStepIndex];
+      if (step) step.highlightCells.forEach((pos) => set.add(positionKey(pos)));
+      return set;
     }
-    return set;
-  }, [mode, isElimination, patternCells, eliminationCells, selectedCells, puzzleState, currentStep]);
+    return new Set();
+  }, [phase, isElimination, patternCells, eliminationCells, selectedCells, puzzleState, demoStepIndex]);
 
   const boardSecondarySet = useMemo((): Set<string> => {
-    return mode === 'find-it' && isElimination ? eliminationCells : new Set<string>();
-  }, [mode, isElimination, eliminationCells]);
-
-  // ---- Return ----
+    return phase === 'practice' && isElimination ? eliminationCells : new Set<string>();
+  }, [phase, isElimination, eliminationCells]);
 
   return {
-    // Identifiers
     techniqueId,
     metadata,
 
+    // Sequence
+    sequence,
+    phase,
+    demoStepIndex,
+    demoStepCount,
+
     // State
-    mode,
     puzzleState,
-    currentStep,
+    practicePuzzle,
     mochiMessage,
     isElimination,
     findPhase,
     validationResult,
     generationError,
 
-    // Board highlights
+    // Board
     boardHighlightSet,
     boardSecondarySet,
 
-    // Cell counts (for disabling buttons in sub-components)
+    // Cell counts
     patternCellCount: patternCells.size,
     eliminationCellCount: eliminationCells.size,
     selectedCellCount: selectedCells.size,
 
     // Handlers
     handleBack,
-    handleStartDemo,
-    handleNextStep,
-    handlePreviousStep,
+    handleSequenceNext,
+    handleSequencePrevious,
     handleCellPress,
     handleConfirmPattern,
     handleBackToPattern,
