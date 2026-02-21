@@ -14,7 +14,7 @@ import {
 import { useDerivedValue, withTiming } from 'react-native-reanimated';
 
 import { MochiHistoryEntry, ChartTimePeriod } from '../../engine/types';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 
@@ -126,6 +126,7 @@ export const MochiChart = memo(({
   period,
   height = 140,
 }: MochiChartProps) => {
+  const c = useColors();
   const screenWidth = Dimensions.get('window').width;
   const chartWidth = screenWidth - spacing.lg * 2 - spacing.md * 2; // Account for screen and card padding
 
@@ -175,7 +176,7 @@ export const MochiChart = memo(({
           <Line
             p1={vec(CHART_PADDING.left, y)}
             p2={vec(chartWidth - CHART_PADDING.right, y)}
-            color={colors.softPink}
+            color={c.accent}
             style="stroke"
             strokeWidth={2}
             strokeCap="round"
@@ -194,7 +195,7 @@ export const MochiChart = memo(({
             <LinearGradient
               start={vec(0, CHART_PADDING.top)}
               end={vec(0, height - CHART_PADDING.bottom)}
-              colors={['rgba(255, 157, 107, 0.4)', 'rgba(255, 157, 107, 0)']}
+              colors={[`${c.accentSecondary}66`, `${c.accentSecondary}00`]}
             />
           </Path>
         )}
@@ -207,7 +208,7 @@ export const MochiChart = memo(({
             strokeWidth={2.5}
             strokeCap="round"
             strokeJoin="round"
-            color={colors.softPink}
+            color={c.accent}
           />
         )}
 

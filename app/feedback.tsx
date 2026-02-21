@@ -27,7 +27,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
 
-import { colors } from '../src/theme/colors';
+import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
@@ -63,6 +63,7 @@ interface DropdownProps {
 }
 
 function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) {
+  const c = useColors();
   const [isOpen, setIsOpen] = useState(false);
   const scale = useSharedValue(1);
 
@@ -123,20 +124,20 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
                 <Pressable
                   style={[
                     styles.modalOption,
-                    item.id === value && styles.modalOptionSelected,
+                    item.id === value && { backgroundColor: c.cellSelected },
                   ]}
                   onPress={() => handleSelect(item)}
                 >
                   <Text
                     style={[
                       styles.modalOptionText,
-                      item.id === value && styles.modalOptionTextSelected,
+                      item.id === value && { color: c.accent, fontFamily: 'Pally-Bold' },
                     ]}
                   >
                     {item.label}
                   </Text>
                   {item.id === value && (
-                    <Feather name="check" size={20} color={colors.softPink} />
+                    <Feather name="check" size={20} color={c.accent} />
                   )}
                 </Pressable>
               )}
@@ -149,6 +150,7 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
 }
 
 export default function FeedbackScreen() {
+  const c = useColors();
   const router = useRouter();
   const [category, setCategory] = useState<FeedbackCategory>('issue');
   const [name, setName] = useState('');
@@ -245,7 +247,7 @@ export default function FeedbackScreen() {
   }, [router]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -345,7 +347,7 @@ export default function FeedbackScreen() {
           </View>
 
           {/* Device Info Note */}
-          <View style={styles.infoNote}>
+          <View style={[styles.infoNote, { backgroundColor: c.cellSelected }]}>
             <Feather
               name="info"
               size={16}
@@ -363,7 +365,7 @@ export default function FeedbackScreen() {
         <View style={styles.footer}>
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator color={colors.softPink} />
+              <ActivityIndicator color={c.accent} />
               <Text style={styles.loadingText}>Sending...</Text>
             </View>
           ) : (
@@ -392,7 +394,6 @@ export default function FeedbackScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   keyboardView: {
     flex: 1,
@@ -485,16 +486,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.gridLine,
   },
-  modalOptionSelected: {
-    backgroundColor: 'rgba(255, 157, 107, 0.1)',
-  },
   modalOptionText: {
     ...typography.body,
     color: colors.textPrimary,
-  },
-  modalOptionTextSelected: {
-    color: colors.softPink,
-    fontFamily: 'Pally-Bold',
   },
   // Input styles
   textInputSingle: {
@@ -534,7 +528,6 @@ const styles = StyleSheet.create({
   infoNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(255, 157, 107, 0.1)',
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.lg,

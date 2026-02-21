@@ -75,7 +75,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
           <Ionicons
             name="pause-circle"
             size={48}
-            color={colors.softPink}
+            color={c.accent}
             style={styles.icon}
           />
 
@@ -83,7 +83,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
 
           <View style={styles.statsContainer}>
             <View style={styles.statRow}>
-              <View style={styles.statItem}>
+              <View style={[styles.statItem, { backgroundColor: c.cream }]}>
                 <Ionicons name="time-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.statLabel}>time</Text>
                 <View style={styles.statValueContainer}>
@@ -96,7 +96,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
                 </View>
               </View>
 
-              <View style={styles.statItem}>
+              <View style={[styles.statItem, { backgroundColor: c.cream }]}>
                 <Ionicons name="speedometer-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.statLabel}>difficulty</Text>
                 <View style={styles.statValueContainer}>
@@ -106,7 +106,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
             </View>
 
             <View style={styles.statRow}>
-              <View style={styles.statItem}>
+              <View style={[styles.statItem, { backgroundColor: c.cream }]}>
                 <Ionicons name="close-circle-outline" size={20} color={mistakeCount > 0 ? colors.errorText : colors.textSecondary} />
                 <Text style={styles.statLabel}>mistakes</Text>
                 <View style={styles.statValueContainer}>
@@ -125,7 +125,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
                 </View>
               </View>
 
-              <View style={styles.statItem}>
+              <View style={[styles.statItem, { backgroundColor: c.cream }]}>
                 <Ionicons name="bulb-outline" size={20} color={colors.textSecondary} />
                 <Text style={styles.statLabel}>hints</Text>
                 <View style={styles.statValueContainer}>
@@ -141,7 +141,7 @@ export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
             </View>
           </View>
 
-          <Pressable style={styles.resumeButton} onPress={handleResume}>
+          <Pressable style={[styles.resumeButton, { backgroundColor: c.accent }]} onPress={handleResume}>
             <Ionicons name="play" size={20} color="#FFFFFF" />
             <Text style={styles.resumeText}>resume</Text>
           </Pressable>
@@ -191,7 +191,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xs,
-    backgroundColor: colors.cream,
     borderRadius: borderRadius.md,
     marginHorizontal: spacing.xs,
   },
@@ -226,7 +225,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.softPink,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.lg,

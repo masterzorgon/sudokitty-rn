@@ -4,7 +4,7 @@ import React from 'react';
 import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors } from '../../src/theme/colors';
+import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import {
@@ -19,6 +19,7 @@ import {
 } from '../../src/components/home';
 
 export default function ProfileScreen() {
+  const c = useColors();
   // Store selectors (reactive)
   const currentStreak = useCurrentStreak();
   const longestStreak = useLongestStreak();
@@ -29,7 +30,7 @@ export default function ProfileScreen() {
   const completedDates = useDailyChallengeStore((s) => s.completedDates);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -84,7 +85,6 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   scrollView: {
     flex: 1,

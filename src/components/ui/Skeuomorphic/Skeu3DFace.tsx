@@ -9,8 +9,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   SkeuVariant,
   CustomSkeuColors,
-  getVariantColors,
   SKEU_DIMENSIONS,
+  useThemedSkeuVariants,
 } from '../../../theme/skeuomorphic';
 import { CornerRadii, resolveCornerRadii } from './SkeuContext';
 
@@ -46,7 +46,16 @@ export function Skeu3DFace({
   style,
   children,
 }: Skeu3DFaceProps) {
-  const colors = getVariantColors(variant, customColors);
+  const themedVariants = useThemedSkeuVariants();
+  const colors = customColors
+    ? {
+        gradient: customColors.gradient,
+        edge: customColors.edge,
+        borderLight: customColors.borderLight ?? 'rgba(255, 255, 255, 0.3)',
+        borderDark: customColors.borderDark ?? 'rgba(0, 0, 0, 0.1)',
+        textColor: customColors.textColor ?? '#FFFFFF',
+      }
+    : themedVariants[variant];
   const radii = resolveCornerRadii(borderRadius, cornerRadii);
 
   const faceStyle: ViewStyle[] = [

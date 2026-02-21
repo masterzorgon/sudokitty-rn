@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 
-import { colors } from '../../src/theme/colors';
+import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import { GAME_LAYOUT } from '../../src/constants/layout';
@@ -28,19 +28,20 @@ import { trackPaywallOpened } from '../../src/utils/analytics';
 // ============================================
 
 export default function TechniquePracticeScreen() {
+  const c = useColors();
   const state = useTechniquePractice();
 
   // Technique not found
   if (!state.metadata) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
         <Text style={styles.errorText}>Technique not found: {state.techniqueId}</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
       <TechniqueHeader metadata={state.metadata} onBack={state.handleBack} />
 
       {/* Step progress dots (demo mode) */}
@@ -51,12 +52,12 @@ export default function TechniquePracticeScreen() {
       {/* Phase indicator (find-it elimination mode) */}
       {state.mode === 'find-it' && state.isElimination && !state.validationResult && (
         <View style={styles.phaseIndicator}>
-          <View style={[styles.phaseDot, state.findPhase === 'pattern' && styles.phaseDotActive]} />
+          <View style={[styles.phaseDot, state.findPhase === 'pattern' && { backgroundColor: c.accent }]} />
           <Text style={[styles.phaseLabel, state.findPhase === 'pattern' && styles.phaseLabelActive]}>
             pattern
           </Text>
           <Feather name="chevron-right" size={14} color={colors.textLight} />
-          <View style={[styles.phaseDot, state.findPhase === 'elimination' && styles.phaseDotActiveSecondary]} />
+          <View style={[styles.phaseDot, state.findPhase === 'elimination' && { backgroundColor: c.accentSecondary }]} />
           <Text style={[styles.phaseLabel, state.findPhase === 'elimination' && styles.phaseLabelActive]}>
             eliminations
           </Text>
@@ -66,7 +67,7 @@ export default function TechniquePracticeScreen() {
       {/* Loading state */}
       {state.mode === 'loading' && (
         <View style={styles.centeredContent}>
-          <ActivityIndicator size="large" color={colors.softPink} />
+          <ActivityIndicator size="large" color={c.accent} />
           <Text style={styles.loadingText}>generating puzzle...</Text>
         </View>
       )}
@@ -149,7 +150,6 @@ export default function TechniquePracticeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   centeredContent: {
     flex: 1,
@@ -182,12 +182,6 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: colors.gridLine,
-  },
-  phaseDotActive: {
-    backgroundColor: colors.softPink,
-  },
-  phaseDotActiveSecondary: {
-    backgroundColor: colors.coral,
   },
   phaseLabel: {
     fontSize: 12,

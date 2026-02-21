@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react';
 import { View, StatusBar, AppState, AppStateStatus } from 'react-native';
 import 'react-native-reanimated';
 
-import { colors } from '../src/theme/colors';
+import { useColors } from '../src/theme/colors';
 import { TECHNIQUE_IDS } from '../src/engine/techniqueGenerator';
 import { prefetchPuzzles, prefetchGamePuzzles } from '../src/services/puzzleCacheService';
 import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
@@ -56,6 +56,7 @@ export default function RootLayout() {
 const PREFETCH_COOLDOWN_MS = 60_000; // 60-second debounce for foreground prefetch
 
 function RootLayoutNav() {
+  const c = useColors();
   const lastPrefetchRef = useRef<number>(0);
 
   // Prefetch caches, sync streaks, and init RevenueCat on mount
@@ -88,12 +89,12 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.cream }}>
+    <View style={{ flex: 1, backgroundColor: c.cream }}>
       <StatusBar barStyle="dark-content" />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: colors.cream },
+          contentStyle: { backgroundColor: c.cream },
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -110,8 +111,8 @@ function RootLayoutNav() {
             presentation: 'modal',
             headerShown: true,
             headerTitle: 'Select Difficulty',
-            headerStyle: { backgroundColor: colors.cream },
-            headerTintColor: colors.textPrimary,
+            headerStyle: { backgroundColor: c.cream },
+            headerTintColor: c.textPrimary,
           }}
         />
         <Stack.Screen

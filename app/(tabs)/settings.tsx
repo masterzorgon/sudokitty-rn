@@ -2,12 +2,14 @@
 // Includes game preferences, learn, premium, support, and footer
 
 import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, Linking, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Linking, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
+import { Feather } from '@expo/vector-icons';
 
-import { colors } from '../../src/theme/colors';
+import { colors, useColors } from '../../src/theme/colors';
+import { PALETTES, THEME_NAMES, type ThemeName } from '../../src/theme/palettes';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import {
@@ -21,6 +23,7 @@ import {
   useHapticsEnabled,
   useTimerEnabled,
   useMistakeLimitEnabled,
+  useColorTheme,
 } from '../../src/stores/settingsStore';
 import { useGameStore } from '../../src/stores/gameStore';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
@@ -42,17 +45,20 @@ const PRIVACY_URL = 'https://example.com/privacy'; // TODO: Replace with actual 
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const c = useColors();
 
   // Settings state
   const soundsEnabled = useSoundsEnabled();
   const hapticsEnabled = useHapticsEnabled();
   const timerEnabled = useTimerEnabled();
   const mistakeLimitEnabled = useMistakeLimitEnabled();
+  const colorTheme = useColorTheme();
 
   const setSoundsEnabled = useSettingsStore((s) => s.setSoundsEnabled);
   const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
   const setTimerEnabled = useSettingsStore((s) => s.setTimerEnabled);
   const setMistakeLimitEnabled = useSettingsStore((s) => s.setMistakeLimitEnabled);
+  const setColorTheme = useSettingsStore((s) => s.setColorTheme);
 
   // Premium state
   const isPremium = useIsPremium();
@@ -138,7 +144,7 @@ export default function SettingsScreen() {
   }, [resetGame, resetDailyChallenge]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -146,6 +152,33 @@ export default function SettingsScreen() {
       >
         {/* Header */}
         <Text style={styles.title}>Settings</Text>
+
+        {/* Appearance - Theme Color Picker */}
+        <SettingsSection title="Appearance">
+          <View style={styles.themePickerRow}>
+            {THEME_NAMES.map((name) => {
+              const isActive = name === colorTheme;
+              const swatch = PALETTES[name].accent;
+              return (
+                <Pressable
+                  key={name}
+                  onPress={() => setColorTheme(name)}
+                  style={[
+                    styles.themeSwatch,
+                    { backgroundColor: swatch },
+                    isActive && styles.themeSwatchActive,
+                  ]}
+                  accessibilityLabel={`${name} theme`}
+                  accessibilityState={{ selected: isActive }}
+                >
+                  {isActive && (
+                    <Feather name="check" size={20} color="#FFFFFF" />
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        </SettingsSection>
 
         {/* Game Preferences */}
         <SettingsSection title="Game">
@@ -263,10 +296,11 @@ export default function SettingsScreen() {
   );
 }
 
+const SWATCH_SIZE = 44;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   scrollView: {
     flex: 1,
@@ -306,5 +340,28 @@ const styles = StyleSheet.create({
   copyrightText: {
     ...typography.small,
     color: colors.textLight,
+  },
+  themePickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+  },
+  themeSwatch: {
+    width: SWATCH_SIZE,
+    height: SWATCH_SIZE,
+    borderRadius: SWATCH_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  themeSwatchActive: {
+    borderWidth: 3,
+    borderColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
 });

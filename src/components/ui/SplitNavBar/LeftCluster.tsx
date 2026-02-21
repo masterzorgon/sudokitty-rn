@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { colors } from '@/src/theme/colors';
+import { colors, useColors } from '@/src/theme/colors';
 import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
 import { springConfigs } from '@/src/theme/animations';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
@@ -40,6 +40,7 @@ interface NavIconProps {
 }
 
 function NavIcon({ tab, isActive, onPress }: NavIconProps) {
+  const c = useColors();
   const scale = useSharedValue(isActive ? 1.08 : 1);
   const opacity = useSharedValue(isActive ? 1 : 0.7);
 
@@ -67,7 +68,7 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
       <Feather
         name={tab.icon as keyof typeof Feather.glyphMap}
         size={LAYOUT.iconSize}
-        color={isActive ? colors.softPink : colors.navInactive}
+        color={isActive ? c.accent : colors.navInactive}
       />
     </AnimatedPressable>
   );

@@ -6,6 +6,7 @@ import { StyleSheet, View, Text } from 'react-native';
 
 import { fontFamilies } from '../../theme/typography';
 import { spacing } from '../../theme';
+import { useColors } from '../../theme/colors';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import FlameIcon from '../../../assets/images/icons/flame.svg';
 
@@ -25,6 +26,7 @@ const ICON_SIZE = 32;
 // MARK: - Component
 
 export function StreakPill({ streakCount, onPress }: StreakPillProps) {
+  const c = useColors();
   return (
     <SkeuButton
       onPress={onPress ?? (() => {})}
@@ -37,7 +39,7 @@ export function StreakPill({ streakCount, onPress }: StreakPillProps) {
     >
       {/* Flame icon */}
       <View style={styles.iconContainer}>
-        <View style={styles.iconGlow} />
+        <View style={[styles.iconGlow, { backgroundColor: c.accentLight + '66' }]} />
         <FlameIcon width={ICON_SIZE} height={ICON_SIZE} fill="#FFFFFF" />
       </View>
 
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 36,
     height: 36,
-    backgroundColor: 'rgba(255, 150, 200, 0.4)',
+    
     borderRadius: 18,
   },
   textContainer: {

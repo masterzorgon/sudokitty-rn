@@ -19,7 +19,7 @@ import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
 import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { useGameMascotMessage } from '../src/hooks';
-import { colors } from '../src/theme/colors';
+import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius, shadows } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
@@ -39,6 +39,7 @@ const GameStatusOverlay = ({
   isDaily: boolean;
   mochiPointsEarned: number;
 }) => {
+  const c = useColors();
   const gameStatus = useGameStore((s) => s.gameStatus);
   const difficulty = useGameStore((s) => s.difficulty);
 
@@ -65,13 +66,13 @@ const GameStatusOverlay = ({
         </Text>
         <View style={styles.overlayButtons}>
           {isDaily && isWon ? (
-            <Pressable style={styles.overlayButton} onPress={onGoHome}>
+            <Pressable style={[styles.overlayButton, { backgroundColor: c.accent }]} onPress={onGoHome}>
               <Text style={styles.overlayButtonText}>back to daily</Text>
             </Pressable>
           ) : (
             <>
               <Pressable
-                style={styles.overlayButton}
+                style={[styles.overlayButton, { backgroundColor: c.accent }]}
                 onPress={() => onPlayAgain(difficulty)}
               >
                 <Text style={styles.overlayButtonText}>
@@ -79,7 +80,7 @@ const GameStatusOverlay = ({
                 </Text>
               </Pressable>
               <Pressable
-                style={styles.overlayButtonSecondary}
+                style={[styles.overlayButtonSecondary, { backgroundColor: c.cream }]}
                 onPress={onGoHome}
               >
                 <Text style={styles.overlayButtonTextSecondary}>
@@ -95,6 +96,7 @@ const GameStatusOverlay = ({
 };
 
 export default function GameScreen() {
+  const c = useColors();
   const router = useRouter();
   const params = useLocalSearchParams<{
     difficulty: Difficulty;
@@ -210,7 +212,7 @@ export default function GameScreen() {
   }, [gameStatus, resumeGame]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
       {/* TOP ZONE - Progress bar with back button and settings */}
       <View style={styles.topZone}>
         <ProgressBar onBack={handleGoBack} onSettingsPress={openSettingsModal} />
@@ -309,7 +311,6 @@ export default function GameScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   topZone: {
     paddingTop: spacing.sm,
@@ -366,7 +367,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   overlayButton: {
-    backgroundColor: colors.softPink,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.lg,
@@ -376,7 +376,6 @@ const styles = StyleSheet.create({
     color: colors.cardBackground,
   },
   overlayButtonSecondary: {
-    backgroundColor: colors.cream,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.lg,

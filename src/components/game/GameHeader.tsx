@@ -7,7 +7,7 @@ import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
 import { useTimerEnabled, useMistakeLimitEnabled } from '../../stores/settingsStore';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
@@ -43,7 +43,7 @@ const LivesIndicator = ({ used, total }: IconIndicatorProps) => (
 
 // Hints indicator - lightbulbs representing available hints
 // Filled bulbs = hints available, outline bulbs = hints used
-const HintsIndicator = ({ used, total }: IconIndicatorProps) => (
+const HintsIndicator = ({ used, total, accentColor }: IconIndicatorProps & { accentColor: string }) => (
   <View style={styles.iconRow}>
     {Array.from({ length: total }, (_, i) => {
       const isRemaining = i < (total - used);
@@ -52,7 +52,7 @@ const HintsIndicator = ({ used, total }: IconIndicatorProps) => (
           key={i}
           name={isRemaining ? 'bulb' : 'bulb-outline'}
           size={16}
-          color={isRemaining ? colors.softPink : colors.gridLine}
+          color={isRemaining ? accentColor : colors.gridLine}
         />
       );
     })}
@@ -60,6 +60,7 @@ const HintsIndicator = ({ used, total }: IconIndicatorProps) => (
 );
 
 export const GameHeader = () => {
+  const c = useColors();
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
@@ -97,7 +98,7 @@ export const GameHeader = () => {
 
       {/* Section 3: Hints */}
       <View style={styles.section}>
-        <HintsIndicator used={hintsUsed} total={MAX_HINTS} />
+        <HintsIndicator used={hintsUsed} total={MAX_HINTS} accentColor={c.accent} />
       </View>
     </View>
   );

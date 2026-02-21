@@ -5,13 +5,15 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { trackSettingChanged } from '../utils/analytics';
+import type { ThemeName } from '../theme/palettes';
 
 interface SettingsState {
   // Preferences with explicit defaults
-  soundsEnabled: boolean; // default: true (placeholder until expo-av added)
-  hapticsEnabled: boolean; // default: true
-  timerEnabled: boolean; // default: true (show/hide timer during gameplay)
-  mistakeLimitEnabled: boolean; // default: true (enable/disable mistake tracking)
+  soundsEnabled: boolean;
+  hapticsEnabled: boolean;
+  timerEnabled: boolean;
+  mistakeLimitEnabled: boolean;
+  colorTheme: ThemeName;
 }
 
 interface SettingsActions {
@@ -19,6 +21,7 @@ interface SettingsActions {
   setHapticsEnabled: (enabled: boolean) => void;
   setTimerEnabled: (enabled: boolean) => void;
   setMistakeLimitEnabled: (enabled: boolean) => void;
+  setColorTheme: (theme: ThemeName) => void;
   resetSettings: () => void;
 }
 
@@ -27,6 +30,7 @@ const initialState: SettingsState = {
   hapticsEnabled: true,
   timerEnabled: true,
   mistakeLimitEnabled: true,
+  colorTheme: 'pink',
 };
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
@@ -54,6 +58,11 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         trackSettingChanged('mistakeLimit', enabled);
       },
 
+      setColorTheme: (theme: ThemeName) => {
+        set({ colorTheme: theme });
+        trackSettingChanged('colorTheme', theme);
+      },
+
       resetSettings: () => {
         set(initialState);
       },
@@ -61,14 +70,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     {
       name: '@sudokitty/settings',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
-      // Migration for future schema changes
+      version: 2,
       migrate: (persistedState: unknown, version: number) => {
-        if (version === 0) {
-          // Future migrations can be added here
-          return persistedState as SettingsState & SettingsActions;
+        const state = persistedState as Record<string, unknown>;
+        if (version < 2) {
+          state.colorTheme = 'pink';
         }
-        return persistedState as SettingsState & SettingsActions;
+        return state as SettingsState & SettingsActions;
       },
     }
   )
@@ -79,3 +87,4 @@ export const useSoundsEnabled = () => useSettingsStore((s) => s.soundsEnabled);
 export const useHapticsEnabled = () => useSettingsStore((s) => s.hapticsEnabled);
 export const useTimerEnabled = () => useSettingsStore((s) => s.timerEnabled);
 export const useMistakeLimitEnabled = () => useSettingsStore((s) => s.mistakeLimitEnabled);
+export const useColorTheme = () => useSettingsStore((s) => s.colorTheme);

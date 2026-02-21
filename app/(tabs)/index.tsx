@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-import { colors } from '../../src/theme/colors';
+import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
@@ -32,6 +32,7 @@ const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
 // MARK: - Component
 
 export default function HomeScreen() {
+  const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -52,7 +53,7 @@ export default function HomeScreen() {
   // MARK: - Render
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <View style={styles.content}>
         {/* App Title */}
         <Animated.View entering={FadeIn.duration(400)}>
@@ -101,7 +102,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   content: {
     flex: 1,

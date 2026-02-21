@@ -7,7 +7,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 
 // ============================================
 // Constants
@@ -28,6 +28,7 @@ export type StepDotState = 'pending' | 'active' | 'completed';
 // ============================================
 
 export function AnimatedStepDot({ state }: { state: StepDotState }) {
+  const c = useColors();
   const progress = useSharedValue(state === 'active' ? 1 : state === 'completed' ? 2 : 0);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function AnimatedStepDot({ state }: { state: StepDotState }) {
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1, 2],
-      [colors.gridLine, colors.softPink, colors.softPink],
+      [colors.gridLine, c.accent, c.accent],
     );
 
     return { width, backgroundColor };

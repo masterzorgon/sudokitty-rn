@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ChartTimePeriod } from '../../engine/types';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { springConfigs } from '../../theme/animations';
@@ -28,10 +28,12 @@ const Tab = memo(({
   period,
   isSelected,
   onPress,
+  accentColor,
 }: {
   period: ChartTimePeriod;
   isSelected: boolean;
   onPress: () => void;
+  accentColor: string;
 }) => {
   const scale = useSharedValue(1);
 
@@ -51,7 +53,7 @@ const Tab = memo(({
     <AnimatedPressable
       style={[
         styles.tab,
-        isSelected && styles.tabSelected,
+        isSelected && { backgroundColor: accentColor },
         animatedStyle,
       ]}
       onPress={onPress}
@@ -74,6 +76,7 @@ export const TimePeriodTabs = memo(({
   selectedPeriod,
   onSelectPeriod,
 }: TimePeriodTabsProps) => {
+  const c = useColors();
   const handlePress = (period: ChartTimePeriod) => {
     if (period !== selectedPeriod) {
       triggerHaptic(ImpactFeedbackStyle.Light);
@@ -89,6 +92,7 @@ export const TimePeriodTabs = memo(({
           period={period}
           isSelected={period === selectedPeriod}
           onPress={() => handlePress(period)}
+          accentColor={c.accent}
         />
       ))}
     </View>
@@ -112,9 +116,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  tabSelected: {
-    backgroundColor: colors.softPink,
   },
   tabText: {
     ...typography.caption,

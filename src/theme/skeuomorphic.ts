@@ -96,3 +96,29 @@ export function getVariantColors(
   }
   return SKEU_VARIANTS[variant];
 }
+
+// MARK: - Themed Variant Hook
+
+import { useMemo } from 'react';
+import { useColors } from './colors';
+
+export function useThemedSkeuVariants(): Record<SkeuVariant, SkeuVariantColors> {
+  const c = useColors();
+  return useMemo(() => ({
+    ...SKEU_VARIANTS,
+    primary: {
+      gradient: c.skeuPrimaryGradient,
+      edge: c.skeuPrimaryEdge,
+      borderLight: 'rgba(255, 255, 255, 0.3)',
+      borderDark: c.skeuPrimaryBorderDark,
+      textColor: '#FFFFFF',
+    },
+    secondary: {
+      gradient: c.skeuSecondaryGradient,
+      edge: c.skeuSecondaryEdge,
+      borderLight: 'rgba(255, 255, 255, 0.5)',
+      borderDark: 'rgba(200, 190, 180, 0.3)',
+      textColor: '#5D4E4E',
+    },
+  }), [c]);
+}

@@ -8,8 +8,8 @@ import { ViewStyle } from 'react-native';
 import {
   SkeuVariant,
   CustomSkeuColors,
-  getVariantColors,
   SKEU_DIMENSIONS,
+  useThemedSkeuVariants,
 } from '../../../theme/skeuomorphic';
 import { SkeuContext, CornerRadii, resolveCornerRadii } from './SkeuContext';
 import { Skeu3DEdge } from './Skeu3DEdge';
@@ -53,7 +53,16 @@ export function Skeu3D({
   faceStyle,
   children,
 }: Skeu3DProps) {
-  const colors = getVariantColors(variant, customColors);
+  const themedVariants = useThemedSkeuVariants();
+  const colors = customColors
+    ? {
+        gradient: customColors.gradient,
+        edge: customColors.edge,
+        borderLight: customColors.borderLight ?? 'rgba(255, 255, 255, 0.3)',
+        borderDark: customColors.borderDark ?? 'rgba(0, 0, 0, 0.1)',
+        textColor: customColors.textColor ?? '#FFFFFF',
+      }
+    : themedVariants[variant];
   const radii = resolveCornerRadii(borderRadius, cornerRadii);
 
   // Provide context for any nested components that might need it

@@ -21,7 +21,7 @@ import {
   useTimerEnabled,
   useMistakeLimitEnabled,
 } from '../../stores/settingsStore';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius, shadows } from '../../theme';
 import { SkeuToggle } from '../ui/Skeuomorphic';
@@ -39,6 +39,7 @@ interface SettingRowProps {
   value: boolean;
   onValueChange: (value: boolean) => void;
   accessibilityHint?: string;
+  backgroundColor?: string;
 }
 
 // MARK: - Constants
@@ -53,9 +54,10 @@ function SettingRow({
   value,
   onValueChange,
   accessibilityHint,
+  backgroundColor,
 }: SettingRowProps) {
   return (
-    <View style={styles.settingRow}>
+    <View style={[styles.settingRow, backgroundColor && { backgroundColor }]}>
       <View style={styles.settingInfo}>
         <Text style={styles.settingLabel}>{label}</Text>
         {description && (
@@ -74,6 +76,7 @@ function SettingRow({
 // MARK: - GameSettingsModal Component
 
 export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) {
+  const c = useColors();
   // Settings state
   const soundsEnabled = useSoundsEnabled();
   const hapticsEnabled = useHapticsEnabled();
@@ -153,6 +156,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
               value={soundsEnabled}
               onValueChange={setSoundsEnabled}
               accessibilityHint="Toggle game sounds on or off"
+              backgroundColor={c.cream}
             />
 
             <SettingRow
@@ -161,6 +165,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
               value={hapticsEnabled}
               onValueChange={setHapticsEnabled}
               accessibilityHint="Toggle haptic feedback on or off"
+              backgroundColor={c.cream}
             />
 
             <SettingRow
@@ -169,6 +174,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
               value={timerEnabled}
               onValueChange={setTimerEnabled}
               accessibilityHint="Show or hide the game timer"
+              backgroundColor={c.cream}
             />
 
             <SettingRow
@@ -177,6 +183,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
               value={mistakeLimitEnabled}
               onValueChange={setMistakeLimitEnabled}
               accessibilityHint="Enable or disable the 3 mistake limit"
+              backgroundColor={c.cream}
             />
           </View>
 
@@ -239,7 +246,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.cream,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,

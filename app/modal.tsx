@@ -6,7 +6,7 @@ import { Platform, StyleSheet, View, Text, Pressable } from 'react-native';
 import { router } from 'expo-router';
 
 import { useGameStore } from '../src/stores/gameStore';
-import { colors } from '../src/theme/colors';
+import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius, shadows } from '../src/theme';
 import { Difficulty, DIFFICULTY_CONFIG } from '../src/engine/types';
@@ -17,13 +17,14 @@ interface DifficultyButtonProps {
 }
 
 const DifficultyButton = ({ difficulty, onPress }: DifficultyButtonProps) => {
+  const c = useColors();
   const config = DIFFICULTY_CONFIG[difficulty];
 
   return (
     <Pressable
       style={({ pressed }) => [
         styles.difficultyButton,
-        pressed && styles.difficultyButtonPressed,
+        pressed && { backgroundColor: c.cellSelected, transform: [{ scale: 0.98 }] },
       ]}
       onPress={() => onPress(difficulty)}
     >
@@ -34,6 +35,7 @@ const DifficultyButton = ({ difficulty, onPress }: DifficultyButtonProps) => {
 };
 
 export default function ModalScreen() {
+  const c = useColors();
   const newGame = useGameStore((s) => s.newGame);
 
   const handleSelectDifficulty = (difficulty: Difficulty) => {
@@ -42,7 +44,7 @@ export default function ModalScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: c.cream }]}>
       <Text style={styles.title}>choose your challenge</Text>
 
       <View style={styles.buttonContainer}>
@@ -61,7 +63,6 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.xl,
   },
@@ -80,10 +81,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     ...shadows.small,
   },
-  difficultyButtonPressed: {
-    backgroundColor: colors.cellSelected,
-    transform: [{ scale: 0.98 }],
-  },
+  difficultyButtonPressed: {},
   difficultyName: {
     ...typography.headline,
     color: colors.textPrimary,

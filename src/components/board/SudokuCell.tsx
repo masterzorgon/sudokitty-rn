@@ -11,7 +11,7 @@ import Animated, {
   withTiming,
   interpolateColor,
 } from 'react-native-reanimated';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { springConfigs, timingConfigs, scales } from '../../theme/animations';
 import type { CellAnimationState } from '../../engine/types';
@@ -90,6 +90,7 @@ export const SudokuCell = memo(({
   compact = false,
   completionAnimations,
 }: SudokuCellProps) => {
+  const c = useColors();
   const cellSize = compact ? COMPACT_CELL_SIZE : CELL_SIZE;
   const displayValue = value === 0 ? null : value;
 
@@ -108,7 +109,7 @@ export const SudokuCell = memo(({
   const isBottomBoxBorder = (row + 1) % 3 === 0 && row < 8;
 
   // Base background color depends on checkerboard box
-  const baseBackground = isInAltBox ? colors.cellBackgroundAlt : colors.cellBackground;
+  const baseBackground = isInAltBox ? c.cellBackgroundAlt : colors.cellBackground;
 
   // Update background animation when selection state changes
   useEffect(() => {
@@ -188,8 +189,8 @@ export const SudokuCell = memo(({
   }));
 
   // Use higher-contrast highlights in technique mode (animateValues=false)
-  const highlightColor = animateValues ? colors.cellHighlighted : colors.techniqueHighlight;
-  const secondaryColor = animateValues ? 'rgba(255, 92, 80, 0.15)' : colors.techniqueHighlightSecondary;
+  const highlightColor = animateValues ? c.cellHighlighted : c.techniqueHighlight;
+  const secondaryColor = animateValues ? 'rgba(255, 92, 80, 0.15)' : c.techniqueHighlightSecondary;
 
   const animatedBackgroundStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -198,9 +199,9 @@ export const SudokuCell = memo(({
       [
         baseBackground,
         highlightColor,
-        colors.cellRelated,
+        c.cellRelated,
         secondaryColor,
-        colors.cellSelected,
+        c.cellSelected,
       ],
     );
     return { backgroundColor };
@@ -238,7 +239,7 @@ export const SudokuCell = memo(({
       {animateValues && <Animated.View style={[staticStyles.glow, animatedGlowStyle]} />}
 
       {/* Wave glow effect layer for completion animations */}
-      {animateValues && <Animated.View style={[staticStyles.waveGlow, animatedWaveGlowStyle]} />}
+      {animateValues && <Animated.View style={[staticStyles.waveGlow, { backgroundColor: `${c.accent}4D` }, animatedWaveGlowStyle]} />}
 
       {/* Error background */}
       {!isValid && displayValue && <View style={staticStyles.errorBackground} />}
@@ -250,8 +251,8 @@ export const SudokuCell = memo(({
             compact ? staticStyles.compactValue : staticStyles.value,
             isGiven ? staticStyles.givenValue : staticStyles.userValue,
             !isValid && staticStyles.errorValue,
-            isHighlighted && !isSecondaryHighlight && staticStyles.highlightedValue,
-            isSecondaryHighlight && staticStyles.secondaryValue,
+            isHighlighted && !isSecondaryHighlight && { color: c.accent },
+            isSecondaryHighlight && { color: c.coral },
           ]}
         >
           {displayValue}
@@ -288,15 +289,12 @@ const staticStyles = StyleSheet.create({
   },
   selectionGlow: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.cellSelectedGlow,
   },
   glow: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.glowColor,
   },
   waveGlow: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 107, 157, 0.30)', // softPink at 30% opacity
   },
   errorBackground: {
     ...StyleSheet.absoluteFillObject,
@@ -319,12 +317,6 @@ const staticStyles = StyleSheet.create({
   },
   errorValue: {
     color: colors.errorText,
-  },
-  highlightedValue: {
-    color: colors.softPink,
-  },
-  secondaryValue: {
-    color: '#FF5C50', // coral
   },
 });
 

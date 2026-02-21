@@ -4,7 +4,7 @@ import React, { memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { StatCard } from './StatCard';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { spacing } from '../../theme';
 
 interface StatsCardGridProps {
@@ -16,6 +16,7 @@ export const StatsCardGrid = memo(({
   streak,
   globalRank,
 }: StatsCardGridProps) => {
+  const c = useColors();
   return (
     <View style={styles.grid}>
       <StatCard
@@ -28,7 +29,7 @@ export const StatsCardGrid = memo(({
         icon="🔥"
         label="Streak"
         value={streak > 0 ? `${streak} days` : '0 days'}
-        valueColor={colors.softPink}
+        valueColor={c.accent}
       />
     </View>
   );

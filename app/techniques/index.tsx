@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
-import { colors } from '../../src/theme/colors';
+import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
@@ -56,6 +56,7 @@ function TechniqueCard({
   isLocked: boolean;
   onPress: () => void;
 }) {
+  const c = useColors();
   const progress = useTechniqueProgress(technique.id);
   const difficultyColor = CATEGORY_COLORS[technique.category];
 
@@ -108,7 +109,7 @@ function TechniqueCard({
     : progress.isCompleted
       ? '#4CAF50'
       : progress.demoCompleted
-        ? colors.softPink
+        ? c.accent
         : colors.textLight;
 
   const progressText = isLocked
@@ -208,6 +209,7 @@ function TypeSection({
 // ============================================
 
 export default function TechniquesListScreen() {
+  const c = useColors();
   const router = useRouter();
   const loadState = useTechniqueProgressStore((s) => s.loadState);
   const completionCount = useCompletionCount();
@@ -247,7 +249,7 @@ export default function TechniquesListScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={handleBack} style={styles.backButton}>
@@ -294,7 +296,6 @@ export default function TechniquesListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.cream,
   },
   header: {
     flexDirection: 'row',

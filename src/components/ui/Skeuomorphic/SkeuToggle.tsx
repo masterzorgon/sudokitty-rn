@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { SKEU_VARIANTS } from '../../../theme/skeuomorphic';
+import { useThemedSkeuVariants } from '../../../theme/skeuomorphic';
 import { triggerHaptic, ImpactFeedbackStyle } from '../../../utils/haptics';
 
 // Toggle dimensions
@@ -25,22 +25,13 @@ const EDGE_HEIGHT = 3;
 const TRACK_RADIUS = TRACK_HEIGHT / 2;
 const THUMB_RADIUS = THUMB_SIZE / 2;
 
-// Animation timing
 const ANIMATION_DURATION = 200;
 
-// Colors
-const COLORS = {
-  // Off state (neutral gray)
-  offTrack: ['#E8E0E0', '#E0D8D8', '#E8E0E0'] as const,
-  offEdge: '#C8C0C0',
-  offThumb: ['#FFFFFF', '#FAFAFA', '#FFFFFF'] as const,
-  offThumbEdge: '#E0E0E0',
-  // On state (primary orange)
-  onTrack: SKEU_VARIANTS.primary.gradient,
-  onEdge: SKEU_VARIANTS.primary.edge,
-  onThumb: ['#FFFFFF', '#FAFAFA', '#FFFFFF'] as const,
-  onThumbEdge: '#E8E8E8',
-};
+const OFF_TRACK = ['#E8E0E0', '#E0D8D8', '#E8E0E0'] as const;
+const OFF_EDGE = '#C8C0C0';
+const THUMB_GRADIENT = ['#FFFFFF', '#FAFAFA', '#FFFFFF'] as const;
+const OFF_THUMB_EDGE = '#E0E0E0';
+const ON_THUMB_EDGE = '#E8E8E8';
 
 export interface SkeuToggleProps {
   value: boolean;
@@ -55,6 +46,10 @@ export function SkeuToggle({
   disabled = false,
   accessibilityLabel,
 }: SkeuToggleProps) {
+  const skeuVariants = useThemedSkeuVariants();
+  const onEdge = skeuVariants.primary.edge;
+  const onTrack = skeuVariants.primary.gradient;
+
   const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
@@ -70,40 +65,34 @@ export function SkeuToggle({
     onValueChange(!value);
   }, [disabled, value, onValueChange]);
 
-  // Animated thumb position
   const thumbAnimatedStyle = useAnimatedStyle(() => {
     const translateX = interpolate(
       progress.value,
       [0, 1],
       [THUMB_MARGIN, TRACK_WIDTH - THUMB_SIZE - THUMB_MARGIN]
     );
-    return {
-      transform: [{ translateX }],
-    };
+    return { transform: [{ translateX }] };
   });
 
-  // Animated track edge color
   const trackEdgeAnimatedStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1],
-      [COLORS.offEdge, COLORS.onEdge]
+      [OFF_EDGE, onEdge]
     );
     return { backgroundColor };
   });
 
-  // Animated thumb edge color
   const thumbEdgeAnimatedStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1],
-      [COLORS.offThumbEdge, COLORS.onThumbEdge]
+      [OFF_THUMB_EDGE, ON_THUMB_EDGE]
     );
     return { backgroundColor };
   });
 
-  // Interpolate gradient colors for track
-  const trackGradientColors = value ? COLORS.onTrack : COLORS.offTrack;
+  const trackGradientColors = value ? onTrack : OFF_TRACK;
 
   return (
     <Pressable
@@ -138,7 +127,7 @@ export function SkeuToggle({
         
         {/* Thumb face */}
         <LinearGradient
-          colors={COLORS.onThumb}
+          colors={THUMB_GRADIENT}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.thumbFace}

@@ -4,7 +4,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, type LayoutChangeEvent } from 'react-native';
 
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { ActivityDay } from '../../engine/types';
 
 // ============================================
@@ -75,6 +75,7 @@ function buildActivityGrid(completedDates: string[]): ActivityDay[] {
 // ============================================
 
 export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps) => {
+  const c = useColors();
   const [containerWidth, setContainerWidth] = useState(0);
 
   const handleLayout = (e: LayoutChangeEvent) => {
@@ -153,7 +154,7 @@ export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps)
                         marginRight: CELL_GAP,
                         marginBottom: CELL_GAP,
                         backgroundColor: isCompleted
-                          ? (isRecent ? colors.softPink : colors.softPink + '66')
+                          ? (isRecent ? c.accent : c.accent + '66')
                           : colors.gridLine,
                       }}
                     />

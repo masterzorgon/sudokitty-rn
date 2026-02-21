@@ -5,7 +5,7 @@ import React, { memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { colors } from "../../theme/colors";
+import { colors, useColors } from "../../theme/colors";
 import { typography } from "../../theme/typography";
 import { spacing, borderRadius } from "../../theme";
 import { SkeuCard } from "../ui/Skeuomorphic";
@@ -23,6 +23,7 @@ const whiteColors = {
 };
 
 export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
+  const c = useColors();
   return (
     <SkeuCard
       onPress={onPress}
@@ -36,8 +37,8 @@ export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
     >
       {/* Left section - Icon and title */}
       <View style={styles.leftContent}>
-        <View style={styles.iconContainer}>
-          <Feather name="award" size={20} color={colors.softPink} />
+        <View style={[styles.iconContainer, { backgroundColor: c.accent + '26' }]}>
+          <Feather name="award" size={20} color={c.accent} />
         </View>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>sudoku techniques</Text>
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: "rgba(255, 157, 107, 0.15)",
+    
     alignItems: "center",
     justifyContent: "center",
   },

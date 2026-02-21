@@ -15,14 +15,11 @@ import Animated, {
 import { Canvas, Circle } from '@shopify/react-native-skia';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import { useProgress } from '../../stores/gameStore';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { borderRadius } from '../../theme';
 import { RollingNumber } from '../ui';
 import { GAME_LAYOUT } from '../../constants/layout';
-
-// Particle system constants
-const PARTICLE_COLORS = ['#FF8C56', '#FF915E', '#FF9A6B', '#FFB088'];
 
 // Individual particle component that reads from shared values
 interface ParticleProps {
@@ -48,6 +45,7 @@ interface ProgressBarProps {
 }
 
 export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
+  const c = useColors();
   const progress = useProgress();
   const percentage = Math.round(progress * 100);
 
@@ -78,15 +76,21 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
   const p5y = useSharedValue(0);
   const p5opacity = useSharedValue(0);
 
+  // Particle colors from accent palette (inside component for theme support)
+  const particleColors = useMemo(
+    () => [c.accent, c.ctaPrimaryHighlight, c.accentLight, c.accentSecondary],
+    [c.accent, c.ctaPrimaryHighlight, c.accentLight, c.accentSecondary]
+  );
+
   // Particle pool referencing the shared values
   const particles = useMemo(() => [
-    { x: p0x, y: p0y, opacity: p0opacity, radius: 2.5, color: PARTICLE_COLORS[0] },
-    { x: p1x, y: p1y, opacity: p1opacity, radius: 3.0, color: PARTICLE_COLORS[1] },
-    { x: p2x, y: p2y, opacity: p2opacity, radius: 2.2, color: PARTICLE_COLORS[2] },
-    { x: p3x, y: p3y, opacity: p3opacity, radius: 2.8, color: PARTICLE_COLORS[3] },
-    { x: p4x, y: p4y, opacity: p4opacity, radius: 2.4, color: PARTICLE_COLORS[0] },
-    { x: p5x, y: p5y, opacity: p5opacity, radius: 3.2, color: PARTICLE_COLORS[1] },
-  ], []);
+    { x: p0x, y: p0y, opacity: p0opacity, radius: 2.5, color: particleColors[0] },
+    { x: p1x, y: p1y, opacity: p1opacity, radius: 3.0, color: particleColors[1] },
+    { x: p2x, y: p2y, opacity: p2opacity, radius: 2.2, color: particleColors[2] },
+    { x: p3x, y: p3y, opacity: p3opacity, radius: 2.8, color: particleColors[3] },
+    { x: p4x, y: p4y, opacity: p4opacity, radius: 2.4, color: particleColors[0] },
+    { x: p5x, y: p5y, opacity: p5opacity, radius: 3.2, color: particleColors[1] },
+  ], [particleColors]);
 
   // Spawn particles in a radial spray from the right edge of the progress fill
   const spawnParticles = () => {
@@ -161,11 +165,11 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
       >
         <View style={styles.barWrapper}>
           <View style={styles.barBackground}>
-            <Animated.View style={[styles.barFill, animatedFillStyle]}>
+            <Animated.View style={[styles.barFill, { backgroundColor: c.accent }, animatedFillStyle]}>
               {/* Middle highlight layer - slightly lighter, inset 2px */}
-              <View style={styles.barFillMiddle} />
+              <View style={[styles.barFillMiddle, { backgroundColor: c.ctaPrimaryHighlight }]} />
               {/* Top gloss layer - lightest, thin strip near top */}
-              <View style={styles.barFillGloss} />
+              <View style={[styles.barFillGloss, { backgroundColor: c.accentLight }]} />
             </Animated.View>
           </View>
           {/* Particle canvas overlay - outside overflow:hidden */}
@@ -242,7 +246,6 @@ const styles = StyleSheet.create({
   },
   barFill: {
     height: '100%',
-    backgroundColor: '#FF8C56', // Base layer - darkest
     borderRadius: borderRadius.full,
     overflow: 'hidden',
   },
@@ -252,7 +255,6 @@ const styles = StyleSheet.create({
     left: 2,
     right: 2,
     bottom: 2,
-    backgroundColor: '#FF915E', // Middle highlight - slightly lighter
     borderRadius: borderRadius.full,
   },
   barFillGloss: {
@@ -261,7 +263,6 @@ const styles = StyleSheet.create({
     left: 10,
     right: 10,
     height: 5,
-    backgroundColor: '#FF9A6B', // Top gloss - lightest
     borderRadius: 2,
   },
   percentageContainer: {

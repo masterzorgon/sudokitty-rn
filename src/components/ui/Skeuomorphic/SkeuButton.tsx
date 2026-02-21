@@ -11,6 +11,7 @@ import {
   SkeuVariant,
   CustomSkeuColors,
   SKEU_VARIANTS,
+  useThemedSkeuVariants,
 } from '../../../theme/skeuomorphic';
 import { useSkeuomorphicPress } from '../../../hooks/useSkeuomorphicPress';
 import { CornerRadii } from './SkeuContext';
@@ -98,9 +99,9 @@ export function SkeuButton({
     hapticStyle,
   });
 
-  // Get text color from variant for consumers to use
+  const themedVariants = useThemedSkeuVariants();
   const effectiveVariant = disabled ? 'disabled' : variant;
-  const textColor = customColors?.textColor ?? SKEU_VARIANTS[effectiveVariant].textColor;
+  const textColor = customColors?.textColor ?? themedVariants[effectiveVariant].textColor;
 
   // Wrap content with animation if enabled
   const content = (

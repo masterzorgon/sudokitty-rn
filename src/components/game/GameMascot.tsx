@@ -14,13 +14,9 @@ import Animated, {
 import { Canvas, Circle } from '@shopify/react-native-skia';
 
 import { MochiCat } from '../home/MochiCat';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { GAME_LAYOUT } from '../../constants/layout';
-
-// MARK: - Puff Particle Constants
-
-const PUFF_COLORS = ['#FFB088', '#FFCBA4', '#FFE4D6', '#FFA07A', '#FFD4B8'];
 
 // MARK: - Puff Particle Component
 
@@ -87,6 +83,13 @@ interface GameMascotProps {
 // MARK: - Component
 
 export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flexibleHeight = false }: GameMascotProps) {
+  const c = useColors();
+  // Puff colors from accent palette
+  const puffColors = useMemo(
+    () => [c.accent, c.accentLight, c.ctaPrimaryHighlight, c.accentSecondary, c.cream],
+    [c.accent, c.accentLight, c.ctaPrimaryHighlight, c.accentSecondary, c.cream]
+  );
+
   // Puff particle shared values - declared at top level for fixed allocation
   const p0x = useSharedValue(0);
   const p0y = useSharedValue(0);
@@ -106,12 +109,12 @@ export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flex
 
   // Fixed particle pool - no runtime allocations
   const puffParticles = useMemo(() => [
-    { x: p0x, y: p0y, opacity: p0opacity, radius: 5, color: PUFF_COLORS[0] },
-    { x: p1x, y: p1y, opacity: p1opacity, radius: 4.5, color: PUFF_COLORS[1] },
-    { x: p2x, y: p2y, opacity: p2opacity, radius: 5.5, color: PUFF_COLORS[2] },
-    { x: p3x, y: p3y, opacity: p3opacity, radius: 4, color: PUFF_COLORS[3] },
-    { x: p4x, y: p4y, opacity: p4opacity, radius: 5, color: PUFF_COLORS[4] },
-  ], []);
+    { x: p0x, y: p0y, opacity: p0opacity, radius: 5, color: puffColors[0] },
+    { x: p1x, y: p1y, opacity: p1opacity, radius: 4.5, color: puffColors[1] },
+    { x: p2x, y: p2y, opacity: p2opacity, radius: 5.5, color: puffColors[2] },
+    { x: p3x, y: p3y, opacity: p3opacity, radius: 4, color: puffColors[3] },
+    { x: p4x, y: p4y, opacity: p4opacity, radius: 5, color: puffColors[4] },
+  ], [puffColors]);
 
   // Track previous message for spawn detection
   const prevMessageRef = useRef<string | null>(null);
