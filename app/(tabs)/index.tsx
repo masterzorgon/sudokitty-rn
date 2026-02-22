@@ -2,11 +2,13 @@
 // Features split-flap animation for Japanese to English text transition
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Dimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Canvas, Circle, RadialGradient, vec } from '@shopify/react-native-skia';
 
 import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
@@ -28,6 +30,10 @@ import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
 // Nav bar bottomOffset: 16px
 // Gap above nav bar: 20px
 const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const GRADIENT_HEIGHT = SCREEN_HEIGHT * 0.45;
+const GLOW_RADIUS = SCREEN_WIDTH * 0.6;
 
 // MARK: - Component
 
@@ -59,6 +65,24 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+      {/* Atmospheric gradient background */}
+      <LinearGradient
+        colors={c.homeGradient as unknown as string[]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={styles.gradientOverlay}
+        pointerEvents="none"
+      />
+      <Canvas style={styles.glowCanvas} pointerEvents="none">
+        <Circle cx={SCREEN_WIDTH / 2} cy={0} r={GLOW_RADIUS}>
+          <RadialGradient
+            c={vec(SCREEN_WIDTH / 2, 0)}
+            r={GLOW_RADIUS}
+            colors={[c.homeGlowColor, 'transparent']}
+          />
+        </Circle>
+      </Canvas>
+
       <View style={styles.content}>
         {/* App Title */}
         <Animated.View entering={FadeIn.duration(400)}>
@@ -107,6 +131,20 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: GRADIENT_HEIGHT,
+  },
+  glowCanvas: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: GRADIENT_HEIGHT,
   },
   content: {
     flex: 1,

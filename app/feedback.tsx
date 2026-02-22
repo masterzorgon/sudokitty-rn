@@ -30,6 +30,7 @@ import { Pressable } from 'react-native';
 import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
+import { BackButton } from '../src/components/ui/BackButton';
 import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
 import * as Haptics from 'expo-haptics';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
@@ -242,10 +243,6 @@ export default function FeedbackScreen() {
     }
   }, [canSubmit, isSubmitting, category, name, email, message, getDeviceInfo, router]);
 
-  const handleBack = useCallback(() => {
-    router.back();
-  }, [router]);
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
       <KeyboardAvoidingView
@@ -255,13 +252,7 @@ export default function FeedbackScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Pressable
-            onPress={handleBack}
-            hitSlop={12}
-            style={styles.backButton}
-          >
-            <Feather name="arrow-left" size={24} color={colors.textPrimary} />
-          </Pressable>
+          <BackButton />
           <Text style={styles.title}>Send Feedback</Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -281,22 +272,6 @@ export default function FeedbackScreen() {
               options={CATEGORIES}
               onSelect={setCategory}
               disabled={isSubmitting}
-            />
-          </View>
-
-          {/* Name Input */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Your name</Text>
-            <TextInput
-              style={styles.textInputSingle}
-              placeholder="Enter your name"
-              placeholderTextColor={colors.textLight}
-              value={name}
-              onChangeText={setName}
-              maxLength={100}
-              editable={!isSubmitting}
-              autoCapitalize="words"
-              autoCorrect={false}
             />
           </View>
 
@@ -404,12 +379,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   title: {
     ...typography.headline,

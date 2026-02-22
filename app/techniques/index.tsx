@@ -11,6 +11,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
+import { BackButton } from '../../src/components/ui/BackButton';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import {
   getTechniquesGroupedByType,
@@ -232,24 +233,18 @@ export default function TechniquesListScreen() {
     });
   };
 
-  const handleBack = () => {
-    router.back();
-  };
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <Feather name="arrow-left" size={22} color={colors.textPrimary} />
-        </Pressable>
+        <BackButton />
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>techniques</Text>
           <Text style={styles.headerSubtitle}>
             {completionCount}/{totalTechniques} mastered
           </Text>
         </View>
-        <View style={styles.backButton} />
+        <View style={styles.headerSpacer} />
       </View>
 
       {/* Technique list */}
@@ -291,11 +286,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  backButton: {
+  headerSpacer: {
     width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerCenter: {
     flex: 1,

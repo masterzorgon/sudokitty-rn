@@ -121,6 +121,10 @@ export default function SettingsScreen() {
     }
   }, []);
 
+  const handleAppInfo = useCallback(() => {
+    router.push('/info');
+  }, [router]);
+
   const handleResetProgress = useCallback(() => {
     Alert.alert(
       'Reset Progress',
@@ -268,6 +272,12 @@ export default function SettingsScreen() {
             onPress={handlePrivacy}
             icon="shield"
             isExternal
+          />
+          <SettingsLinkRow
+            label="App Info"
+            onPress={handleAppInfo}
+            icon="info"
+            accessibilityHint="View app information"
             isLast
           />
         </SettingsSection>
@@ -284,13 +294,6 @@ export default function SettingsScreen() {
           />
         </View>
 
-        {/* Footer - App Version */}
-        <View style={styles.footer}>
-          <Text style={styles.versionText}>
-            Version {appVersion} ({buildNumber})
-          </Text>
-          <Text style={styles.copyrightText}>Made with love by Bridgeful</Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
