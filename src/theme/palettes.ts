@@ -65,6 +65,7 @@ export interface ColorPalette {
   // Mochi pill (skeuomorphic balance display)
   mochiPillBg: string;
   mochiPillBorder: string;
+  mochiPillEdge: string;
   mochiPillText: string;
 }
 
@@ -118,6 +119,7 @@ const pinkPalette: ColorPalette = {
 
   mochiPillBg: '#FFE8F0',
   mochiPillBorder: '#F0B8CC',
+  mochiPillEdge: '#D8869E',
   mochiPillText: '#8C3055',
 };
 
@@ -171,6 +173,7 @@ const orangePalette: ColorPalette = {
 
   mochiPillBg: '#FFEDDB',
   mochiPillBorder: '#F0C4A0',
+  mochiPillEdge: '#D89868',
   mochiPillText: '#8C4E20',
 };
 
@@ -224,6 +227,7 @@ const greenPalette: ColorPalette = {
 
   mochiPillBg: '#DEF0DE',
   mochiPillBorder: '#A8D4A8',
+  mochiPillEdge: '#78AC78',
   mochiPillText: '#2E5C2E',
 };
 
@@ -277,6 +281,7 @@ const bluePalette: ColorPalette = {
 
   mochiPillBg: '#DCEAF8',
   mochiPillBorder: '#A0C4E0',
+  mochiPillEdge: '#6894B8',
   mochiPillText: '#264060',
 };
 

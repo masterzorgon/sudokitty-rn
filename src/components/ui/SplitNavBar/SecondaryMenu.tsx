@@ -151,11 +151,10 @@ const styles = StyleSheet.create({
     // borderWidth: 1,
   },
   menu: {
-    // padding: LAYOUT.unfurlPadding,
     gap: LAYOUT.rowGap,
-    minWidth: 190,
+    minWidth: 228,
   },
   menuWide: {
-    minWidth: 320,
+    minWidth: 384,
   },
 });

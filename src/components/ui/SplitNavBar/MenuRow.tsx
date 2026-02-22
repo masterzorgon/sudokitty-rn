@@ -94,8 +94,8 @@ export function MenuRow({
         <Text style={styles.label}>{item.label}</Text>
         {maxMochis != null && (
           <View style={styles.rewardRow}>
-            <MochiPointIcon width={24} height={24} />
-            <Text style={styles.rewardText}>{maxMochis} mochis</Text>
+            <Text style={styles.rewardText}>earn {maxMochis} mochis</Text>
+            <MochiPointIcon width={20} height={20} />
           </View>
         )}
       </View>
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   rewardRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   rewardText: {
     fontSize: 16,

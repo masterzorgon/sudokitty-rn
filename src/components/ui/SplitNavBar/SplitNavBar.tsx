@@ -37,12 +37,11 @@ export function SplitNavBar({
   // Handle menu item selection
   const handleMenuSelect = useCallback(
     (item: MenuItem) => {
-      // if (item.action === 'quit_game') {
-      //   // Reset game state first so the pill text updates before it reappears
-      //   onQuitGame();
-      //   setTimeout(() => setIsMenuOpen(false), 350);
-      //   return;
-      // }
+      if (item.action === 'quit_game') {
+        onQuitGame();
+        setTimeout(() => setIsMenuOpen(false), 250);
+        return;
+      }
 
       setIsMenuOpen(false);
       setTimeout(() => {
