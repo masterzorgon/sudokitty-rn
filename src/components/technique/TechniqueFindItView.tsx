@@ -124,7 +124,7 @@ function FindItControls({
           <AppButton onPress={onBack} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
         </View>
         <View style={styles.buttonWrapper}>
-          <AppButton onPress={onConfirmPattern} label="confirm pattern" icon="chevron-right" disabled={patternCellCount === 0} />
+          <AppButton onPress={onConfirmPattern} label="submit" icon="chevron-right" disabled={patternCellCount === 0} />
         </View>
       </View>
     );
