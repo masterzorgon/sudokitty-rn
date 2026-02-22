@@ -346,7 +346,7 @@ export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
   longestStreak: 0,
   lastCompletedDate: null,
   completedDates: [],
-  totalMochiPoints: 0,
+  totalMochiPoints: 10000, // TODO: revert to 0 after testing
   totalGamesWon: 0,
 });
 
