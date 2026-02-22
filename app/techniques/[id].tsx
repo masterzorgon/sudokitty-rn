@@ -45,7 +45,7 @@ export default function TechniquePracticeScreen() {
   const mochiReward = getTechniqueReward(metadata.category);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
       <TechniqueHeader
         metadata={metadata}
         onBack={state.handleBack}

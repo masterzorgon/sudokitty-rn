@@ -11,7 +11,6 @@ import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { AppButton } from './AppButton';
 import { SpeechBubble } from './SpeechBubble';
-import { AtmosphericGradient } from './AtmosphericGradient';
 
 export interface ShowcasePageBadge {
   label: string;
@@ -102,13 +101,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.md,
-    paddingHorizontal: spacing.lg,
   },
   mascotSection: {
     width: '85%',
@@ -159,6 +158,5 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.lg,
   },
 });
