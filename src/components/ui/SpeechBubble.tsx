@@ -6,15 +6,15 @@ import { View, Text, ScrollView, StyleSheet, ViewStyle, TextStyle, LayoutChangeE
 import Svg, { Path } from 'react-native-svg';
 
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { typography, fontFamilies } from '../../theme/typography';
 
 type PointerDirection = 'up' | 'down' | 'left' | 'right';
 
 const BORDER_RADIUS = 16;
 const POINTER_WIDTH = 16;
 const POINTER_HEIGHT = 10;
-const STROKE_WIDTH = 1.5;
-const STROKE_COLOR = '#D0C8C4';
+const STROKE_WIDTH = 2;
+const STROKE_COLOR = '#8b7878';
 const FILL_COLOR = colors.cardBackground;
 
 export interface SpeechBubbleProps {
@@ -205,9 +205,9 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   text: {
-    ...typography.body,
+    fontFamily: fontFamilies.semibold,
     fontSize: 15,
-    color: colors.textSecondary,
+    color: '#8b7878',
     lineHeight: 20,
     textAlign: 'center',
   },

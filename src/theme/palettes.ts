@@ -76,10 +76,10 @@ const pinkPalette: ColorPalette = {
 
   cream: '#FFF0F6',
 
-  cellSelected: '#FFD6E4',
+  cellSelected: '#FFBDD4',
   cellSelectedGlow: 'rgba(255, 107, 157, 0.25)',
-  cellRelated: '#FFF2F8',
-  cellHighlighted: '#FFEEF5',
+  cellRelated: '#FFE8F0',
+  cellHighlighted: '#FFE0EB',
   cellGiven: '#FFF8FB',
   cellBackgroundAlt: '#FFF7FB',
 
@@ -130,10 +130,10 @@ const orangePalette: ColorPalette = {
 
   cream: '#FFF5EE',
 
-  cellSelected: '#FFE0C8',
+  cellSelected: '#FFCDA8',
   cellSelectedGlow: 'rgba(255, 140, 86, 0.25)',
-  cellRelated: '#FFF8F2',
-  cellHighlighted: '#FFF3EB',
+  cellRelated: '#FFF0E5',
+  cellHighlighted: '#FFE8D6',
   cellGiven: '#FFFAF6',
   cellBackgroundAlt: '#FFF8F3',
 
@@ -184,10 +184,10 @@ const greenPalette: ColorPalette = {
 
   cream: '#F2FBF2',
 
-  cellSelected: '#D4EDDA',
+  cellSelected: '#C1E5C8',
   cellSelectedGlow: 'rgba(92, 184, 92, 0.25)',
-  cellRelated: '#F0FAF0',
-  cellHighlighted: '#E8F5E9',
+  cellRelated: '#E8F5E8',
+  cellHighlighted: '#DAEEDE',
   cellGiven: '#F8FCF8',
   cellBackgroundAlt: '#F5FAF5',
 
@@ -238,10 +238,10 @@ const bluePalette: ColorPalette = {
 
   cream: '#F0F6FF',
 
-  cellSelected: '#D0E4F8',
+  cellSelected: '#B8D8F0',
   cellSelectedGlow: 'rgba(91, 155, 213, 0.25)',
-  cellRelated: '#F0F6FF',
-  cellHighlighted: '#E8F0FA',
+  cellRelated: '#E8F0FA',
+  cellHighlighted: '#DCE8F5',
   cellGiven: '#F8FAFF',
   cellBackgroundAlt: '#F5F8FE',
 

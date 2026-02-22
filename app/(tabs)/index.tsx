@@ -113,8 +113,8 @@ export default function HomeScreen() {
             <MochiCat size={180} variant="welcome" />
           </Animated.View>
 
-          {/* Chat Bubble with Japanese greeting */}
-          <ChatBubble text="こんにちは！" appearDelay={400} />
+          {/* Chat Bubble with dynamic random welcome message */}
+          <ChatBubble appearDelay={400} />
         </View>
 
         {/* Streak Pill */}
