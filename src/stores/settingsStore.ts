@@ -1,5 +1,5 @@
 // Settings store for user preferences
-// Handles sounds, haptics, timer visibility, and mistake limit settings
+// Handles sounds, haptics, timer visibility, unlimited mistakes/hints, and theme
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -8,11 +8,11 @@ import { trackSettingChanged } from '../utils/analytics';
 import type { ThemeName } from '../theme/palettes';
 
 interface SettingsState {
-  // Preferences with explicit defaults
   soundsEnabled: boolean;
   hapticsEnabled: boolean;
   timerEnabled: boolean;
-  mistakeLimitEnabled: boolean;
+  unlimitedMistakes: boolean;
+  unlimitedHints: boolean;
   colorTheme: ThemeName;
 }
 
@@ -20,7 +20,8 @@ interface SettingsActions {
   setSoundsEnabled: (enabled: boolean) => void;
   setHapticsEnabled: (enabled: boolean) => void;
   setTimerEnabled: (enabled: boolean) => void;
-  setMistakeLimitEnabled: (enabled: boolean) => void;
+  setUnlimitedMistakes: (enabled: boolean) => void;
+  setUnlimitedHints: (enabled: boolean) => void;
   setColorTheme: (theme: ThemeName) => void;
   resetSettings: () => void;
 }
@@ -29,7 +30,8 @@ const initialState: SettingsState = {
   soundsEnabled: true,
   hapticsEnabled: true,
   timerEnabled: true,
-  mistakeLimitEnabled: true,
+  unlimitedMistakes: false,
+  unlimitedHints: false,
   colorTheme: 'pink',
 };
 
@@ -53,9 +55,14 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         trackSettingChanged('timer', enabled);
       },
 
-      setMistakeLimitEnabled: (enabled: boolean) => {
-        set({ mistakeLimitEnabled: enabled });
-        trackSettingChanged('mistakeLimit', enabled);
+      setUnlimitedMistakes: (enabled: boolean) => {
+        set({ unlimitedMistakes: enabled });
+        trackSettingChanged('unlimitedMistakes', enabled);
+      },
+
+      setUnlimitedHints: (enabled: boolean) => {
+        set({ unlimitedHints: enabled });
+        trackSettingChanged('unlimitedHints', enabled);
       },
 
       setColorTheme: (theme: ThemeName) => {
@@ -70,11 +77,17 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
     {
       name: '@sudokitty/settings',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 2,
+      version: 3,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Record<string, unknown>;
         if (version < 2) {
           state.colorTheme = 'pink';
+        }
+        if (version < 3) {
+          const oldMistakeLimit = state.mistakeLimitEnabled as boolean | undefined;
+          state.unlimitedMistakes = oldMistakeLimit === false;
+          state.unlimitedHints = false;
+          delete state.mistakeLimitEnabled;
         }
         return state as SettingsState & SettingsActions;
       },
@@ -86,5 +99,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 export const useSoundsEnabled = () => useSettingsStore((s) => s.soundsEnabled);
 export const useHapticsEnabled = () => useSettingsStore((s) => s.hapticsEnabled);
 export const useTimerEnabled = () => useSettingsStore((s) => s.timerEnabled);
-export const useMistakeLimitEnabled = () => useSettingsStore((s) => s.mistakeLimitEnabled);
+export const useUnlimitedMistakes = () => useSettingsStore((s) => s.unlimitedMistakes);
+export const useUnlimitedHints = () => useSettingsStore((s) => s.unlimitedHints);
 export const useColorTheme = () => useSettingsStore((s) => s.colorTheme);

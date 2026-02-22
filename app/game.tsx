@@ -234,47 +234,6 @@ export default function GameScreen() {
         <AnimatedGameView />
       </View>
 
-      {/* DEV ONLY: Debug buttons to trigger completion wave animations */}
-      {__DEV__ && (
-        <View style={styles.debugBar}>
-          <Pressable
-            style={styles.debugButton}
-            onPress={() => useGameStore.setState({
-              lastCompletedUnits: [{ type: 'row', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() }],
-            })}
-          >
-            <Text style={styles.debugText}>Row Wave</Text>
-          </Pressable>
-          <Pressable
-            style={styles.debugButton}
-            onPress={() => useGameStore.setState({
-              lastCompletedUnits: [{ type: 'column', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() }],
-            })}
-          >
-            <Text style={styles.debugText}>Col Wave</Text>
-          </Pressable>
-          <Pressable
-            style={styles.debugButton}
-            onPress={() => useGameStore.setState({
-              lastCompletedUnits: [{ type: 'box', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() }],
-            })}
-          >
-            <Text style={styles.debugText}>Box Wave</Text>
-          </Pressable>
-          <Pressable
-            style={styles.debugButton}
-            onPress={() => useGameStore.setState({
-              lastCompletedUnits: [
-                { type: 'row', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() },
-                { type: 'column', index: 4, epicenter: { row: 4, col: 4 }, timestamp: Date.now() },
-              ],
-            })}
-          >
-            <Text style={styles.debugText}>Row+Col</Text>
-          </Pressable>
-        </View>
-      )}
-
       {/* BOTTOM ZONE - Controls */}
       <View style={styles.bottomZone}>
         <View style={styles.controlsContainer}>
@@ -328,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomZone: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.xxl + spacing.sm,
     paddingBottom: spacing.md,
   },
   controlsContainer: {

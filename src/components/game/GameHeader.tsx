@@ -6,7 +6,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
-import { useTimerEnabled, useMistakeLimitEnabled } from '../../stores/settingsStore';
+import { useTimerEnabled, useUnlimitedMistakes } from '../../stores/settingsStore';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
@@ -15,7 +15,7 @@ import { RollingTime } from '../ui';
 import { CELL_SIZE } from '../board/SudokuCell';
 
 // Width of a 3x3 box (matches the sudoku board's box width)
-const BOX_WIDTH = CELL_SIZE * 3;
+const BOX_WIDTH = 130;
 
 // Icon indicator props
 interface IconIndicatorProps {
@@ -67,7 +67,7 @@ export const GameHeader = () => {
 
   // Settings
   const timerEnabled = useTimerEnabled();
-  const mistakeLimitEnabled = useMistakeLimitEnabled();
+  const unlimitedMistakes = useUnlimitedMistakes();
 
   return (
     <View style={styles.container}>
@@ -88,7 +88,7 @@ export const GameHeader = () => {
 
       {/* Section 2: Lives (Mistakes) */}
       <View style={styles.section}>
-        {mistakeLimitEnabled && (
+        {!unlimitedMistakes && (
           <LivesIndicator used={mistakeCount} total={MAX_MISTAKES} />
         )}
       </View>
@@ -98,7 +98,7 @@ export const GameHeader = () => {
 
       {/* Section 3: Hints */}
       <View style={styles.section}>
-        <HintsIndicator used={hintsUsed} total={MAX_HINTS} accentColor={c.accent} />
+        <HintsIndicator used={hintsUsed} total={MAX_HINTS} accentColor="#F5C542" />
       </View>
     </View>
   );
@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.xs,
+    marginRight: 1,
   },
   separator: {
     width: 1,

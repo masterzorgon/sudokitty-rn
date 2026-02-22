@@ -2,7 +2,7 @@
 // Slides up from bottom with settings toggles
 // Pause state preservation is handled by the parent (game.tsx)
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -19,8 +19,11 @@ import {
   useSoundsEnabled,
   useHapticsEnabled,
   useTimerEnabled,
-  useMistakeLimitEnabled,
+  useUnlimitedMistakes,
+  useUnlimitedHints,
 } from '../../stores/settingsStore';
+import { useIsPremium } from '../../stores/premiumStore';
+import { presentPaywall } from '../../lib/revenueCat';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
@@ -77,24 +80,45 @@ function SettingRow({
 
 export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) {
   const c = useColors();
+  const isPremium = useIsPremium();
+
   // Settings state
   const soundsEnabled = useSoundsEnabled();
   const hapticsEnabled = useHapticsEnabled();
   const timerEnabled = useTimerEnabled();
-  const mistakeLimitEnabled = useMistakeLimitEnabled();
+  const unlimitedMistakes = useUnlimitedMistakes();
+  const unlimitedHints = useUnlimitedHints();
 
   // Settings actions
   const setSoundsEnabled = useSettingsStore((s) => s.setSoundsEnabled);
   const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
   const setTimerEnabled = useSettingsStore((s) => s.setTimerEnabled);
-  const setMistakeLimitEnabled = useSettingsStore((s) => s.setMistakeLimitEnabled);
+  const setUnlimitedMistakes = useSettingsStore((s) => s.setUnlimitedMistakes);
+  const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
+
+  const handlePremiumToggle = useCallback(
+    async (enabled: boolean, setter: (v: boolean) => void) => {
+      if (!enabled) {
+        setter(false);
+        return;
+      }
+      if (isPremium) {
+        setter(true);
+        return;
+      }
+      const purchased = await presentPaywall();
+      if (purchased) {
+        setter(true);
+      }
+    },
+    [isPremium],
+  );
 
   // Animation
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     if (visible) {
-      // Slide up when modal becomes visible
       Animated.spring(slideAnim, {
         toValue: 0,
         useNativeDriver: true,
@@ -102,13 +126,11 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
         friction: 11,
       }).start();
     } else {
-      // Reset position when modal closes
       slideAnim.setValue(SCREEN_HEIGHT);
     }
   }, [visible, slideAnim]);
 
   const handleClose = () => {
-    // Slide down before closing
     Animated.timing(slideAnim, {
       toValue: SCREEN_HEIGHT,
       duration: 250,
@@ -126,14 +148,11 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
       onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
-        {/* Dismiss area (tap outside to close) */}
         <Pressable style={styles.dismissArea} onPress={handleClose} />
 
-        {/* Modal content */}
         <Animated.View
           style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
         >
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Game Settings</Text>
             <Pressable
@@ -145,10 +164,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
             </Pressable>
           </View>
 
-          {/* Drag indicator */}
           <View style={styles.dragIndicator} />
 
-          {/* Settings list */}
           <View style={styles.settingsList}>
             <SettingRow
               label="Sounds"
@@ -178,16 +195,24 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
             />
 
             <SettingRow
-              label="Mistake Limit"
-              description="End game after 3 mistakes"
-              value={mistakeLimitEnabled}
-              onValueChange={setMistakeLimitEnabled}
-              accessibilityHint="Enable or disable the 3 mistake limit"
+              label="Unlimited Mistakes"
+              description="No penalty for wrong answers"
+              value={unlimitedMistakes}
+              onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
+              accessibilityHint="Toggle unlimited mistakes (premium feature)"
+              backgroundColor={c.cream}
+            />
+
+            <SettingRow
+              label="Unlimited Hints"
+              description="No limit on hints per game"
+              value={unlimitedHints}
+              onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
+              accessibilityHint="Toggle unlimited hints (premium feature)"
               backgroundColor={c.cream}
             />
           </View>
 
-          {/* Footer note */}
           <Text style={styles.footerNote}>
             Game is paused while settings are open
           </Text>
@@ -214,7 +239,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: borderRadius.xl,
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 20, // Extra padding for home indicator
+    paddingBottom: spacing.xl + 20,
   },
   dragIndicator: {
     width: 36,

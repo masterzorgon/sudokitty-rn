@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Canvas, Circle, RadialGradient, vec } from '@shopify/react-native-skia';
 
 import { colors, useColors } from '../../src/theme/colors';
+import { useColorTheme } from '../../src/stores/settingsStore';
 import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
@@ -39,6 +40,7 @@ const GLOW_RADIUS = SCREEN_WIDTH * 0.6;
 
 export default function HomeScreen() {
   const c = useColors();
+  const theme = useColorTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -67,13 +69,14 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       {/* Atmospheric gradient background */}
       <LinearGradient
-        colors={c.homeGradient as unknown as string[]}
+        key={`grad-${theme}`}
+        colors={[...c.homeGradient]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={styles.gradientOverlay}
         pointerEvents="none"
       />
-      <Canvas style={styles.glowCanvas} pointerEvents="none">
+      <Canvas key={`glow-${theme}`} style={styles.glowCanvas} pointerEvents="none">
         <Circle cx={SCREEN_WIDTH / 2} cy={0} r={GLOW_RADIUS}>
           <RadialGradient
             c={vec(SCREEN_WIDTH / 2, 0)}

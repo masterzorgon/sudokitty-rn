@@ -120,9 +120,7 @@ export const SudokuCell = memo(({
         : 0.6;
     } else {
       const targetValue = isSelected ? 1 : isRelated ? 0.4 : isHighlighted ? 0.25 : 0;
-      backgroundProgress.value = animateValues
-        ? withSpring(targetValue, springConfigs.default)
-        : targetValue;
+      backgroundProgress.value = targetValue;
     }
   }, [isSelected, isRelated, isHighlighted, isSecondaryHighlight, animateValues]);
 
@@ -199,7 +197,7 @@ export const SudokuCell = memo(({
       [
         baseBackground,
         highlightColor,
-        c.cellRelated,
+        c.cellHighlighted,
         secondaryColor,
         c.cellSelected,
       ],

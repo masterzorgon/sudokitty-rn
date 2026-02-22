@@ -22,7 +22,8 @@ import {
   useSoundsEnabled,
   useHapticsEnabled,
   useTimerEnabled,
-  useMistakeLimitEnabled,
+  useUnlimitedMistakes,
+  useUnlimitedHints,
   useColorTheme,
 } from '../../src/stores/settingsStore';
 import { useGameStore } from '../../src/stores/gameStore';
@@ -34,6 +35,7 @@ import {
 } from '../../src/utils/analytics';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import {
+  presentPaywall,
   presentPaywallAlways,
   presentCustomerCenter,
   restorePurchases,
@@ -51,13 +53,15 @@ export default function SettingsScreen() {
   const soundsEnabled = useSoundsEnabled();
   const hapticsEnabled = useHapticsEnabled();
   const timerEnabled = useTimerEnabled();
-  const mistakeLimitEnabled = useMistakeLimitEnabled();
+  const unlimitedMistakes = useUnlimitedMistakes();
+  const unlimitedHints = useUnlimitedHints();
   const colorTheme = useColorTheme();
 
   const setSoundsEnabled = useSettingsStore((s) => s.setSoundsEnabled);
   const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
   const setTimerEnabled = useSettingsStore((s) => s.setTimerEnabled);
-  const setMistakeLimitEnabled = useSettingsStore((s) => s.setMistakeLimitEnabled);
+  const setUnlimitedMistakes = useSettingsStore((s) => s.setUnlimitedMistakes);
+  const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
   const setColorTheme = useSettingsStore((s) => s.setColorTheme);
 
   // Premium state
@@ -88,6 +92,24 @@ export default function SettingsScreen() {
       Alert.alert('Error', 'Unable to open the link.');
     }
   }, []);
+
+  const handlePremiumToggle = useCallback(
+    async (enabled: boolean, setter: (v: boolean) => void) => {
+      if (!enabled) {
+        setter(false);
+        return;
+      }
+      if (isPremium) {
+        setter(true);
+        return;
+      }
+      const purchased = await presentPaywall();
+      if (purchased) {
+        setter(true);
+      }
+    },
+    [isPremium],
+  );
 
   const handleUpgradePremium = useCallback(async () => {
     trackPaywallOpened('settings');
@@ -208,11 +230,18 @@ export default function SettingsScreen() {
             accessibilityHint="Show or hide the game timer"
           />
           <SettingsToggleRow
-            label="Mistake Limit"
-            value={mistakeLimitEnabled}
-            onValueChange={setMistakeLimitEnabled}
+            label="Unlimited Mistakes"
+            value={unlimitedMistakes}
+            onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
             icon="alert-circle"
-            accessibilityHint="Enable or disable mistake tracking"
+            accessibilityHint="Toggle unlimited mistakes (premium feature)"
+          />
+          <SettingsToggleRow
+            label="Unlimited Hints"
+            value={unlimitedHints}
+            onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
+            icon="zap"
+            accessibilityHint="Toggle unlimited hints (premium feature)"
             isLast
           />
         </SettingsSection>

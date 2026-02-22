@@ -387,8 +387,8 @@ export const useGameStore = create<GameState & GameActions>()(
               draft.mistakeCount++;
               draft.correctStreak = 0;
               // Only end game if mistake limit is enabled in settings
-              const { mistakeLimitEnabled } = useSettingsStore.getState();
-              if (mistakeLimitEnabled && draft.mistakeCount >= MAX_MISTAKES) {
+              const { unlimitedMistakes } = useSettingsStore.getState();
+              if (!unlimitedMistakes && draft.mistakeCount >= MAX_MISTAKES) {
                 draft.gameStatus = 'lost';
                 draft.isTimerRunning = false;
                 result.isGameLost = true;
@@ -790,7 +790,11 @@ export const useIsNotesMode = () => useGameStore((s) => s.isNotesMode);
 export const useGameStatus = () => useGameStore((s) => s.gameStatus);
 export const useMistakeCount = () => useGameStore((s) => s.mistakeCount);
 export const useHintsUsed = () => useGameStore((s) => s.hintsUsed);
-export const useCanUseHint = () => true; // Unlimited hints enabled
+export const useCanUseHint = () => {
+  const hintsUsed = useGameStore((s) => s.hintsUsed);
+  const { unlimitedHints } = useSettingsStore.getState();
+  return unlimitedHints || hintsUsed < MAX_HINTS;
+};
 export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);
 
