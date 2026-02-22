@@ -98,9 +98,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'stretch',
     backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: colors.gridLine,
     height: 30,
+    borderWidth: 1,
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+    borderColor: colors.gridLineBold,
     marginHorizontal: 2,
   },
   section: {

@@ -177,7 +177,13 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'stretch',
   },
-  cardOuter: {},
+  cardOuter: {
+    // borderWidth: 1,
+    borderColor: colors.gridLineBold,
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
+    borderLeftWidth: 1,
+  },
   card: {
     backgroundColor: colors.boardBackground,
   },
