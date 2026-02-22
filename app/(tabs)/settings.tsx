@@ -267,7 +267,7 @@ export default function SettingsScreen() {
         <SettingsSection title="Premium">
           {!isPremium && (
             <SettingsLinkRow
-              label="Upgrade to Premium"
+              label="Remove Ads"
               onPress={handleUpgradePremium}
               icon="star"
               accessibilityHint="Upgrade to unlock all premium features"

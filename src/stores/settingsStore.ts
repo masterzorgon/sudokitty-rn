@@ -67,7 +67,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 
       setColorTheme: (theme: ThemeName) => {
         set({ colorTheme: theme });
-        trackSettingChanged('colorTheme', theme);
+        trackSettingChanged(`colorTheme_${theme}`, true);
       },
 
       resetSettings: () => {
@@ -89,7 +89,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           state.unlimitedHints = false;
           delete state.mistakeLimitEnabled;
         }
-        return state as SettingsState & SettingsActions;
+        return state as unknown as SettingsState & SettingsActions;
       },
     }
   )
