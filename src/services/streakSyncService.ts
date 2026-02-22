@@ -1,5 +1,5 @@
-// Streak Sync Service
-// Background sync of local streak state to/from Supabase user_streaks table.
+// Streak & Mochi Sync Service
+// Background sync of local state to/from Supabase user_streaks table.
 // Local state is always the source of truth for the UI.
 // Supabase sync is best-effort — failures are silent and don't affect the app.
 
@@ -13,8 +13,9 @@ import { getDeviceId } from '../utils/deviceId';
 export interface StreakState {
   currentStreak: number;
   longestStreak: number;
-  lastCompletedDate: string | null; // YYYY-MM-DD
+  lastCompletedDate: string | null;
   totalGamesWon: number;
+  totalMochiPoints: number;
 }
 
 interface UserStreaksRow {
@@ -23,6 +24,7 @@ interface UserStreaksRow {
   longest_streak: number;
   last_completed_date_local: string | null;
   total_games: number;
+  total_mochi_points: number;
   updated_at: string;
 }
 
@@ -39,9 +41,9 @@ function log(msg: string, ...args: unknown[]) {
 // ============================================
 
 /**
- * Push local streak state to Supabase.
+ * Push local state to Supabase.
  * Uses upsert so it creates or updates the row.
- * Fire-and-forget — call after every game win.
+ * Fire-and-forget — call after every game win or mochi balance change.
  */
 export async function syncStreakToSupabase(state: StreakState): Promise<void> {
   try {
@@ -54,6 +56,7 @@ export async function syncStreakToSupabase(state: StreakState): Promise<void> {
         longest_streak: state.longestStreak,
         last_completed_date_local: state.lastCompletedDate,
         total_games: state.totalGamesWon,
+        total_mochi_points: state.totalMochiPoints,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' },
@@ -66,16 +69,16 @@ export async function syncStreakToSupabase(state: StreakState): Promise<void> {
         streak: state.currentStreak,
         longest: state.longestStreak,
         totalGames: state.totalGamesWon,
+        mochis: state.totalMochiPoints,
       });
     }
   } catch (err) {
     log('Sync failed:', err);
-    // Silently fail — local state is the source of truth
   }
 }
 
 /**
- * Pull streak state from Supabase on app launch.
+ * Pull state from Supabase on app launch.
  * Returns the remote state if it exists, or null if no row / error.
  * The caller decides whether to adopt the remote values.
  */
@@ -90,7 +93,6 @@ export async function pullStreakFromSupabase(): Promise<StreakState | null> {
       .single();
 
     if (error) {
-      // PGRST116 = no rows found (expected on first launch)
       if (error.code !== 'PGRST116') {
         log('Pull error:', error.message);
       }
@@ -104,6 +106,7 @@ export async function pullStreakFromSupabase(): Promise<StreakState | null> {
       streak: row.current_streak,
       longest: row.longest_streak,
       totalGames: row.total_games,
+      mochis: row.total_mochi_points,
     });
 
     return {
@@ -111,6 +114,7 @@ export async function pullStreakFromSupabase(): Promise<StreakState | null> {
       longestStreak: row.longest_streak,
       lastCompletedDate: row.last_completed_date_local,
       totalGamesWon: row.total_games ?? 0,
+      totalMochiPoints: row.total_mochi_points ?? 0,
     };
   } catch (err) {
     log('Pull failed:', err);

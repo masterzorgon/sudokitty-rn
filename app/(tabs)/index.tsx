@@ -16,6 +16,7 @@ import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
   useDailyChallengeStore,
+  useTotalMochiPoints,
 } from '../../src/stores/dailyChallengeStore';
 import {
   MochiCat,
@@ -24,6 +25,7 @@ import {
   StreakPill,
 } from '../../src/components/home';
 import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
+import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 
 // MARK: - Constants
 
@@ -47,6 +49,7 @@ export default function HomeScreen() {
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
+  const totalMochis = useTotalMochiPoints();
 
   // Load state on mount
   useEffect(() => {
@@ -87,9 +90,14 @@ export default function HomeScreen() {
       </Canvas>
 
       <View style={styles.content}>
-        {/* App Title */}
-        <Animated.View entering={FadeIn.duration(400)}>
-          <Text style={styles.title}>sudokitty</Text>
+        {/* Header row: title + mochi balance */}
+        <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
+          {/* <Text style={styles.title}>sudokitty</Text> */}
+          <View style={styles.mochiPill}>
+            <MochiPointIcon width={36} height={36} />
+            <Text style={styles.mochiCount}>{totalMochis}</Text>
+            <Text style={styles.mochiCount}>mochis</Text>
+          </View>
         </Animated.View>
 
         {/* Mochi Cat Hero Section */}
@@ -154,10 +162,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   title: {
     ...typography.largeTitle,
     color: colors.textPrimary,
     textAlign: 'center',
+    flex: 1,
+  },
+  mochiPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    // position: 'absolute',
+    right: 0,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 100,
+    backgroundColor: "#fff",
+    borderColor: colors.ctaTextDark,
+  },
+  mochiCount: {
+    ...typography.title,
+    color: colors.textSecondary,
   },
   heroSection: {
     alignItems: 'center',

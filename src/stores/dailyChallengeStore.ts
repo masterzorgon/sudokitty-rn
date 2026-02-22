@@ -14,6 +14,7 @@ import {
   ChartTimePeriod,
   DAILY_MOCHI_POINTS,
   DAILY_DIFFICULTY_SCHEDULE,
+  CONTINUE_COST,
   PERIOD_MS,
   getTodayDateString,
   getYesterdayDateString,
@@ -45,9 +46,20 @@ interface DailyChallengeStore extends DailyChallengeState {
   getMochiHistory: (period: ChartTimePeriod) => MochiHistoryEntry[];
   getMochiEarnedToday: () => number;
   addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus') => void;
+  spendMochis: (amount: number, reason: string) => boolean;
 
   // For testing/debugging
   resetState: () => void;
+}
+
+function syncMochiBalance(state: DailyChallengeStore) {
+  syncStreakToSupabase({
+    currentStreak: state.currentStreak,
+    longestStreak: state.longestStreak,
+    lastCompletedDate: state.lastCompletedDate,
+    totalGamesWon: state.totalGamesWon,
+    totalMochiPoints: state.totalMochiPoints,
+  });
 }
 
 export const useDailyChallengeStore = create<DailyChallengeStore>()(
@@ -202,6 +214,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           longestStreak: newLongest,
           lastCompletedDate: newLastCompleted,
           totalGamesWon: newTotalGames,
+          totalMochiPoints: get().totalMochiPoints,
         });
       },
 
@@ -235,6 +248,12 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         if (remote.lastCompletedDate && (!local.lastCompletedDate || remote.lastCompletedDate > local.lastCompletedDate)) {
           set((state) => {
             state.lastCompletedDate = remote.lastCompletedDate;
+          });
+          updated = true;
+        }
+        if (remote.totalMochiPoints > local.totalMochiPoints) {
+          set((state) => {
+            state.totalMochiPoints = remote.totalMochiPoints;
           });
           updated = true;
         }
@@ -347,6 +366,32 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         });
 
         get().saveState();
+        syncMochiBalance(get());
+      },
+
+      spendMochis: (amount: number, _reason: string): boolean => {
+        const { totalMochiPoints, mochiHistory } = get();
+        if (totalMochiPoints < amount) return false;
+
+        const today = getTodayDateString();
+        const newTotal = totalMochiPoints - amount;
+
+        const entry: MochiHistoryEntry = {
+          date: today,
+          timestamp: Date.now(),
+          amount: -amount,
+          cumulativeTotal: newTotal,
+          source: 'spend',
+        };
+
+        set((state) => {
+          state.totalMochiPoints = newTotal;
+          state.mochiHistory = [...mochiHistory, entry];
+        });
+
+        get().saveState();
+        syncMochiBalance(get());
+        return true;
       },
 
       // Reset state (for testing)
@@ -377,3 +422,6 @@ export const useTotalMochiPoints = () =>
 
 export const useIsLoaded = () =>
   useDailyChallengeStore((state) => state.isLoaded);
+
+export const useCanAffordContinue = (difficulty: Difficulty) =>
+  useDailyChallengeStore((state) => state.totalMochiPoints >= CONTINUE_COST[difficulty]);

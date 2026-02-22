@@ -24,30 +24,49 @@ import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
-import { Difficulty, DAILY_MOCHI_POINTS } from '../src/engine/types';
+import {
+  Difficulty,
+  DAILY_MOCHI_POINTS,
+  CONTINUE_COST,
+  calculateMochiReward,
+} from '../src/engine/types';
+import { useTotalMochiPoints } from '../src/stores/dailyChallengeStore';
+import { showRewardedAd } from '../src/lib/rewardedAds';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
 
 // Game status overlay
 const GameStatusOverlay = ({
   onPlayAgain,
   onGoHome,
+  onContinue,
   isDaily,
-  mochiPointsEarned,
 }: {
   onPlayAgain: (difficulty: Difficulty) => void;
   onGoHome: () => void;
+  onContinue: () => void;
   isDaily: boolean;
-  mochiPointsEarned: number;
 }) => {
   const c = useColors();
   const gameStatus = useGameStore((s) => s.gameStatus);
   const difficulty = useGameStore((s) => s.difficulty);
+  const timeElapsed = useGameStore((s) => s.timeElapsed);
+  const canContinue = useGameStore((s) => s.canContinue);
+  const totalMochis = useTotalMochiPoints();
 
   if (gameStatus !== 'won' && gameStatus !== 'lost') {
     return null;
   }
 
   const isWon = gameStatus === 'won';
+  const mochiPointsEarned = isWon
+    ? isDaily
+      ? DAILY_MOCHI_POINTS[difficulty]
+      : calculateMochiReward(difficulty, timeElapsed)
+    : 0;
+
+  const continueCost = CONTINUE_COST[difficulty];
+  const canAfford = totalMochis >= continueCost;
+  const showContinue = !isWon && canContinue();
 
   return (
     <View style={styles.overlay}>
@@ -57,13 +76,38 @@ const GameStatusOverlay = ({
         </Text>
         <Text style={styles.overlayMessage}>
           {isWon
-            ? isDaily
-              ? `you earned ${mochiPointsEarned} mochi points!`
-              : 'you solved the puzzle!'
-            : isDaily
-              ? 'keep trying - you can do it!'
-              : 'too many mistakes... try again?'}
+            ? `you earned ${mochiPointsEarned} mochis!`
+            : 'too many mistakes...'}
         </Text>
+
+        {showContinue && (
+          <View style={styles.continueSection}>
+            <Text style={styles.mochiBalance}>{totalMochis} mochis</Text>
+            {canAfford ? (
+              <Pressable
+                style={[styles.overlayButton, { backgroundColor: '#F5C542' }]}
+                onPress={onContinue}
+              >
+                <Text style={[styles.overlayButtonText, { color: '#3D2E00' }]}>
+                  continue ({continueCost} mochis)
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                style={[styles.overlayButton, { backgroundColor: '#F5C542' }]}
+                onPress={async () => {
+                  const earned = await showRewardedAd();
+                  if (earned) onContinue();
+                }}
+              >
+                <Text style={[styles.overlayButtonText, { color: '#3D2E00' }]}>
+                  watch ad to continue
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
+
         <View style={styles.overlayButtons}>
           {isDaily && isWon ? (
             <Pressable style={[styles.overlayButton, { backgroundColor: c.accent }]} onPress={onGoHome}>
@@ -106,7 +150,6 @@ export default function GameScreen() {
 
   const isDaily = params.isDaily === 'true';
   const difficulty = params.difficulty;
-  const mochiPointsEarned = isDaily ? DAILY_MOCHI_POINTS[difficulty] : 0;
 
   const tick = useGameStore((s) => s.tick);
   const isTimerRunning = useGameStore((s) => s.isTimerRunning);
@@ -116,6 +159,8 @@ export default function GameScreen() {
   const pauseGame = useGameStore((s) => s.pauseGame);
   const resumeGame = useGameStore((s) => s.resumeGame);
   const resetGame = useGameStore((s) => s.resetGame);
+  const continueGame = useGameStore((s) => s.continueGame);
+  const spendMochis = useDailyChallengeStore((s) => s.spendMochis);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Daily challenge store
@@ -134,6 +179,9 @@ export default function GameScreen() {
   useEffect(() => {
     if (difficulty) {
       newGame(difficulty);
+      if (isDaily) {
+        useGameStore.setState({ isDaily: true });
+      }
       setTimeout(() => {
         startTimer();
       }, startGameAnimations.controlsDelay);
@@ -193,6 +241,14 @@ export default function GameScreen() {
     [newGame, startTimer]
   );
 
+  const handleContinue = useCallback(() => {
+    const cost = CONTINUE_COST[difficulty];
+    const spent = spendMochis(cost, 'continue');
+    if (spent) {
+      continueGame();
+    }
+  }, [difficulty, spendMochis, continueGame]);
+
   // Settings modal handlers with pause state preservation
   const openSettingsModal = useCallback(() => {
     triggerHaptic(ImpactFeedbackStyle.Light);
@@ -251,8 +307,8 @@ export default function GameScreen() {
       <GameStatusOverlay
         onPlayAgain={handlePlayAgain}
         onGoHome={handleGoHome}
+        onContinue={handleContinue}
         isDaily={isDaily}
-        mochiPointsEarned={mochiPointsEarned}
       />
 
       {/* Settings modal */}
@@ -319,6 +375,15 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.xl,
+  },
+  continueSection: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
+  },
+  mochiBalance: {
+    ...typography.caption,
+    color: colors.textLight,
   },
   overlayButtons: {
     flexDirection: 'row',

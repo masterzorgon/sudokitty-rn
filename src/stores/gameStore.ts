@@ -20,9 +20,11 @@ import {
   BOX_SIZE,
   MAX_MISTAKES,
   MAX_HINTS,
+  MAX_CONTINUES,
   getBoxIndex,
   getRelatedPositions,
   positionKey,
+  calculateMochiReward,
 } from '../engine/types';
 import { generatePuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
@@ -206,6 +208,10 @@ interface GameState {
   // Hint tracking (for technique-based hints)
   lastHint: Hint | null;
   hintHighlightCells: Position[];
+
+  // Continue / daily tracking
+  isDaily: boolean;
+  continueCount: number;
 }
 
 // Game actions interface
@@ -242,6 +248,10 @@ interface GameActions {
   pauseGame: () => void;
   resumeGame: () => void;
 
+  // Continue after losing
+  continueGame: () => boolean;
+  canContinue: () => boolean;
+
   // Progress
   getProgress: () => number;
 }
@@ -265,6 +275,8 @@ const initialState: GameState = {
   correctStreak: 0,
   lastHint: null,
   hintHighlightCells: [],
+  isDaily: false,
+  continueCount: 0,
 };
 
 // Create the store
@@ -309,6 +321,8 @@ export const useGameStore = create<GameState & GameActions>()(
           state.lastCompletedUnits = [];
           state.lastCorrectCell = null;
           state.correctStreak = 0;
+          state.isDaily = false;
+          state.continueCount = 0;
         });
       },
 
@@ -733,6 +747,25 @@ export const useGameStore = create<GameState & GameActions>()(
         });
       },
 
+      continueGame: (): boolean => {
+        const { continueCount, gameStatus } = get();
+        if (gameStatus !== 'lost' || continueCount >= MAX_CONTINUES) return false;
+
+        set((draft) => {
+          draft.mistakeCount = MAX_MISTAKES - 1;
+          draft.gameStatus = 'playing';
+          draft.isTimerRunning = true;
+          draft.continueCount += 1;
+        });
+
+        return true;
+      },
+
+      canContinue: (): boolean => {
+        const { continueCount, gameStatus } = get();
+        return gameStatus === 'lost' && continueCount < MAX_CONTINUES;
+      },
+
       // Get progress percentage
       getProgress: () => {
         const state = get();
@@ -757,12 +790,18 @@ export const useGameStore = create<GameState & GameActions>()(
   )
 );
 
-// Record game win for streak tracking — fires on ANY game win (regular or daily)
+// Record game win for streak tracking + award mochis for non-daily wins
 useGameStore.subscribe(
   (s) => s.gameStatus,
   (gameStatus) => {
     if (gameStatus === 'won') {
       useDailyChallengeStore.getState().recordGameWin();
+
+      const { isDaily, difficulty, timeElapsed } = useGameStore.getState();
+      if (!isDaily) {
+        const reward = calculateMochiReward(difficulty, timeElapsed);
+        useDailyChallengeStore.getState().addMochiHistoryEntry(reward, 'game');
+      }
     }
   },
 );
@@ -797,6 +836,7 @@ export const useCanUseHint = () => {
 };
 export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);
+export const useCanContinue = () => useGameStore((s) => s.canContinue);
 
 // Progress selector - subscribes to board changes and computes progress
 export const useProgress = () => useGameStore((s) => {

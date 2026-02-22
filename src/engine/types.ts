@@ -264,13 +264,46 @@ export interface ActivityDay {
   completed: boolean;
 }
 
-// Mochi points awarded by difficulty
+// Mochi points awarded by difficulty (daily challenges)
 export const DAILY_MOCHI_POINTS: Record<Difficulty, number> = {
   easy: 10,
   medium: 20,
   hard: 30,
   expert: 50,
 };
+
+// Mochi points for regular games (base reward before time bonus)
+export const GAME_BASE_MOCHIS: Record<Difficulty, number> = {
+  easy: 10,
+  medium: 25,
+  hard: 50,
+  expert: 100,
+};
+
+// Par times in seconds (completing under par earns up to 2x bonus)
+export const GAME_PAR_TIMES: Record<Difficulty, number> = {
+  easy: 300,
+  medium: 600,
+  hard: 900,
+  expert: 1200,
+};
+
+// Cost to continue a lost game (scaled by difficulty)
+export const CONTINUE_COST: Record<Difficulty, number> = {
+  easy: 15,
+  medium: 35,
+  hard: 75,
+  expert: 150,
+};
+
+export const MAX_CONTINUES = 1;
+
+export function calculateMochiReward(difficulty: Difficulty, timeSeconds: number): number {
+  const base = GAME_BASE_MOCHIS[difficulty];
+  const par = GAME_PAR_TIMES[difficulty];
+  const ratio = Math.min(2, Math.max(1, par / Math.max(timeSeconds, 1)));
+  return Math.round(base * ratio);
+}
 
 // Daily difficulty schedule (0 = Sunday, 6 = Saturday)
 export const DAILY_DIFFICULTY_SCHEDULE: Record<number, Difficulty> = {
@@ -327,7 +360,7 @@ export interface MochiHistoryEntry {
   timestamp: number;         // Unix timestamp for precise ordering
   amount: number;            // Mochis earned in this entry
   cumulativeTotal: number;   // Running total at this point
-  source: 'daily' | 'game' | 'bonus';  // Where mochis came from
+  source: 'daily' | 'game' | 'bonus' | 'spend';
 }
 
 // Time period options for chart filtering
