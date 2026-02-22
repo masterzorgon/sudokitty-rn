@@ -50,6 +50,11 @@ export default function HomeScreen() {
     router.push('/techniques');
   };
 
+  const handleStreakPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/profile');
+  };
+
   // MARK: - Render
 
   return (
@@ -79,7 +84,7 @@ export default function HomeScreen() {
           entering={FadeInUp.delay(800).duration(400)}
           style={styles.streakContainer}
         >
-          <StreakPill streakCount={currentStreak} />
+          <StreakPill streakCount={currentStreak} onPress={handleStreakPress} />
         </Animated.View>
       </View>
 

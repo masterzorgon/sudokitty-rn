@@ -40,13 +40,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.lg,
   },
-  bubble: {
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-  },
+  bubble: {},
   bubbleText: {
     fontFamily: fontFamilies.bold,
     fontSize: 28,
     color: colors.textSecondary,
+    paddingVertical: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    lineHeight: 32,
   },
 });

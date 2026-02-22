@@ -176,7 +176,7 @@ export function SpeechBubble({
         <Svg
           width={size.w}
           height={size.h}
-          style={StyleSheet.absoluteFill}
+          style={styles.svg}
         >
           <Path
             d={buildPath(size.w, size.h, pointerDirection, pointerPosition)}
@@ -195,11 +195,14 @@ export function SpeechBubble({
 
 const styles = StyleSheet.create({
   wrapper: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    overflow: 'visible',
+  },
+  svg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   text: {
     ...typography.body,

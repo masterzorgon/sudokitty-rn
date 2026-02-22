@@ -144,8 +144,6 @@ const styles = StyleSheet.create({
   },
   bubbleOverride: {
     width: '100%',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
   },
   actionContainer: {
     paddingBottom: spacing.xl,
