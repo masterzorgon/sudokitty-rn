@@ -61,6 +61,11 @@ export interface ColorPalette {
   // Home screen top gradient (luminous top -> mid -> light -> cream)
   homeGradient: readonly [string, string, string, string];
   homeGlowColor: string;
+
+  // Mochi pill (skeuomorphic balance display)
+  mochiPillBg: string;
+  mochiPillBorder: string;
+  mochiPillText: string;
 }
 
 const pinkPalette: ColorPalette = {
@@ -110,6 +115,10 @@ const pinkPalette: ColorPalette = {
 
   homeGradient: ['#FFB0D0', '#FFD0E4', '#FFECF4', '#FFF0F6'],
   homeGlowColor: 'rgba(255, 107, 157, 0.35)',
+
+  mochiPillBg: '#FFE8F0',
+  mochiPillBorder: '#F0B8CC',
+  mochiPillText: '#8C3055',
 };
 
 const orangePalette: ColorPalette = {
@@ -159,6 +168,10 @@ const orangePalette: ColorPalette = {
 
   homeGradient: ['#FFC8A0', '#FFDCC0', '#FFF0E4', '#FFF5EE'],
   homeGlowColor: 'rgba(255, 140, 86, 0.35)',
+
+  mochiPillBg: '#FFEDDB',
+  mochiPillBorder: '#F0C4A0',
+  mochiPillText: '#8C4E20',
 };
 
 const greenPalette: ColorPalette = {
@@ -208,6 +221,10 @@ const greenPalette: ColorPalette = {
 
   homeGradient: ['#A0D8A0', '#C0E8C0', '#E0F4E0', '#F2FBF2'],
   homeGlowColor: 'rgba(92, 184, 92, 0.35)',
+
+  mochiPillBg: '#DEF0DE',
+  mochiPillBorder: '#A8D4A8',
+  mochiPillText: '#2E5C2E',
 };
 
 const bluePalette: ColorPalette = {
@@ -257,6 +274,10 @@ const bluePalette: ColorPalette = {
 
   homeGradient: ['#C0D8F0', '#D8E8F8', '#ECF2FC', '#F0F6FF'],
   homeGlowColor: 'rgba(91, 155, 213, 0.15)',
+
+  mochiPillBg: '#DCEAF8',
+  mochiPillBorder: '#A0C4E0',
+  mochiPillText: '#264060',
 };
 
 export const PALETTES: Record<ThemeName, ColorPalette> = {

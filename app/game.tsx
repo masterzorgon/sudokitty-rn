@@ -31,7 +31,7 @@ import {
   calculateMochiReward,
 } from '../src/engine/types';
 import { useTotalMochiPoints } from '../src/stores/dailyChallengeStore';
-import { showRewardedAd } from '../src/lib/rewardedAds';
+import { showRewardedAd } from '@/src/lib/rewardedAds';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
 
 // Game status overlay

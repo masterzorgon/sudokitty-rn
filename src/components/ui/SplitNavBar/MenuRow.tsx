@@ -11,8 +11,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors } from '@/src/theme/colors';
 import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
-import { Difficulty } from '@/src/engine/types';
+import { Difficulty, GAME_BASE_MOCHIS } from '@/src/engine/types';
 import { MenuRowProps, LAYOUT } from './types';
+import MochiPointIcon from '../../../../assets/images/icons/mochi-point.svg';
 
 // Import mochi SVG characters for difficulty levels
 import MochiEasy from '../../../../assets/images/mochi/mochi-easy.svg';
@@ -48,6 +49,7 @@ export function MenuRow({
   isVisible,
   isLast,
 }: MenuRowProps) {
+  const maxMochis = item.difficulty ? GAME_BASE_MOCHIS[item.difficulty] * 2 : null;
   const isPressed = useSharedValue(0);
 
   const handlePressIn = useCallback(() => {
@@ -87,9 +89,15 @@ export function MenuRow({
           return MochiIcon ? <MochiIcon width={55} height={55} /> : null;
         })()}
       </View>
-      {/* menu item label */}
+      {/* menu item label + mochi reward */}
       <View style={styles.labelContainer}>
         <Text style={styles.label}>{item.label}</Text>
+        {maxMochis != null && (
+          <View style={styles.rewardRow}>
+            <MochiPointIcon width={24} height={24} />
+            <Text style={styles.rewardText}>{maxMochis} mochis</Text>
+          </View>
+        )}
       </View>
     </AnimatedPressable>
   );
@@ -109,12 +117,22 @@ const styles = StyleSheet.create({
   },
   labelContainer: {
     flex: 1,
+    gap: 2,
   },
   label: {
     fontSize: 29,
     fontFamily: 'Pally-Medium',
     color: colors.textPrimary,
-    marginBottom: 2,
+  },
+  rewardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  rewardText: {
+    fontSize: 16,
+    fontFamily: 'Pally-Medium',
+    color: colors.textSecondary,
   },
   iconContainer: {
     marginLeft: 12,

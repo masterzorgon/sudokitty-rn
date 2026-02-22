@@ -92,11 +92,14 @@ export default function HomeScreen() {
       <View style={styles.content}>
         {/* Header row: title + mochi balance */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
-          {/* <Text style={styles.title}>sudokitty</Text> */}
-          <View style={styles.mochiPill}>
-            <MochiPointIcon width={36} height={36} />
-            <Text style={styles.mochiCount}>{totalMochis}</Text>
-            <Text style={styles.mochiCount}>mochis</Text>
+          <Text style={styles.title}>sudokitty</Text>
+          <View style={styles.mochiPillOuter}>
+            <View style={[styles.mochiPillFace, { backgroundColor: c.mochiPillBg, borderColor: c.mochiPillBorder }]}>
+              <View style={[styles.mochiIconBadge, { backgroundColor: c.mochiPillBorder + '40' }]}>
+                <MochiPointIcon width={20} height={20} />
+              </View>
+              <Text style={[styles.mochiCount, { color: c.mochiPillText }]}>{totalMochis}</Text>
+            </View>
           </View>
         </Animated.View>
 
@@ -173,22 +176,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
-  mochiPill: {
+  mochiPillOuter: {
+    position: 'absolute',
+    right: 0,
+  },
+  mochiPillFace: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    // position: 'absolute',
-    right: 0,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    gap: spacing.xs,
+    paddingLeft: spacing.xs,
+    paddingRight: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: 100,
-    backgroundColor: "#fff",
-    borderColor: colors.ctaTextDark,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+  },
+  mochiIconBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mochiCount: {
-    ...typography.title,
-    color: colors.textSecondary,
+    fontFamily: 'Pally-Bold',
+    fontSize: 16,
   },
   heroSection: {
     alignItems: 'center',

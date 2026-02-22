@@ -2,8 +2,7 @@ import { Alert } from 'react-native';
 
 /**
  * Show a rewarded ad and return whether the user earned the reward.
- * Currently a placeholder -- returns false and shows an info alert.
- * TODO: Integrate Google AdMob or similar SDK.
+ * Placeholder until an ad SDK is integrated.
  */
 export async function showRewardedAd(): Promise<boolean> {
   Alert.alert(
