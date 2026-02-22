@@ -11,6 +11,7 @@ import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { AppButton } from './AppButton';
 import { SpeechBubble } from './SpeechBubble';
+import { AtmosphericGradient } from './AtmosphericGradient';
 
 export interface ShowcasePageBadge {
   label: string;
@@ -30,6 +31,7 @@ export interface ShowcasePageProps {
   mascotImage: React.ReactNode;
   bodyText: string;
   action?: ShowcasePageAction;
+  rewardPill?: React.ReactNode;
 }
 
 const GRADIENT_HEIGHT = 500;
@@ -41,12 +43,18 @@ export function ShowcasePage({
   mascotImage,
   bodyText,
   action,
+  rewardPill,
 }: ShowcasePageProps) {
   const c = useColors();
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        {rewardPill && (
+          <View style={styles.rewardPillContainer}>
+            {rewardPill}
+          </View>
+        )}
         <View style={styles.mascotSection}>
           <LinearGradient
             colors={[c.cream, c.showcaseGradient[2], c.showcaseGradient[1], c.showcaseGradient[0]]}
@@ -94,13 +102,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   mascotSection: {
     width: '85%',
@@ -111,11 +119,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  rewardPillContainer: {
+    alignItems: 'center',
+    paddingTop: spacing.md,
+  },
   headingArea: {
     zIndex: 2,
     alignItems: 'center',
     gap: spacing.xs,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.md,
   },
   heading: {
     ...typography.largeTitle,
@@ -147,5 +159,6 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
   },
 });

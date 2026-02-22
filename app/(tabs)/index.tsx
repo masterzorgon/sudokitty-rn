@@ -2,16 +2,13 @@
 // Features split-flap animation for Japanese to English text transition
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Text, Dimensions } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Canvas, Circle, RadialGradient, vec } from '@shopify/react-native-skia';
 
 import { colors, useColors } from '../../src/theme/colors';
-import { useColorTheme } from '../../src/stores/settingsStore';
 import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
@@ -25,7 +22,8 @@ import {
   StreakPill,
 } from '../../src/components/home';
 import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
-import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
+import { MochiRewardPill } from '../../src/components/ui/MochiRewardPill';
+import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
 
 // MARK: - Constants
 
@@ -34,15 +32,10 @@ import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 // Gap above nav bar: 20px
 const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const GRADIENT_HEIGHT = SCREEN_HEIGHT * 0.45;
-const GLOW_RADIUS = SCREEN_WIDTH * 0.6;
-
 // MARK: - Component
 
 export default function HomeScreen() {
   const c = useColors();
-  const theme = useColorTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
@@ -71,35 +64,18 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       {/* Atmospheric gradient background */}
-      <LinearGradient
-        key={`grad-${theme}`}
-        colors={[...c.homeGradient]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={styles.gradientOverlay}
-        pointerEvents="none"
-      />
-      <Canvas key={`glow-${theme}`} style={styles.glowCanvas} pointerEvents="none">
-        <Circle cx={SCREEN_WIDTH / 2} cy={0} r={GLOW_RADIUS}>
-          <RadialGradient
-            c={vec(SCREEN_WIDTH / 2, 0)}
-            r={GLOW_RADIUS}
-            colors={[c.homeGlowColor, 'transparent']}
-          />
-        </Circle>
-      </Canvas>
+      <AtmosphericGradient />
 
       <View style={styles.content}>
         {/* Header row: title + mochi balance */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
           <Text style={styles.title}>sudokitty</Text>
           <View style={styles.mochiPillOuter}>
-            <View style={[styles.mochiPillFace, { backgroundColor: c.mochiPillBg, borderColor: c.mochiPillBorder }]}>
-              <View style={[styles.mochiIconBadge, { backgroundColor: c.mochiPillBorder + '40' }]}>
-                <MochiPointIcon width={20} height={20} />
-              </View>
-              <Text style={[styles.mochiCount, { color: c.mochiPillText }]}>{totalMochis}</Text>
-            </View>
+            <MochiRewardPill 
+              mochis={totalMochis} 
+              variant="balance" 
+              size="medium" 
+            />
           </View>
         </Animated.View>
 
@@ -146,20 +122,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradientOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: GRADIENT_HEIGHT,
-  },
-  glowCanvas: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: GRADIENT_HEIGHT,
-  },
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
@@ -179,28 +141,6 @@ const styles = StyleSheet.create({
   mochiPillOuter: {
     position: 'absolute',
     right: 0,
-  },
-  mochiPillFace: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingLeft: spacing.xs,
-    paddingRight: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 100,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-  },
-  mochiIconBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mochiCount: {
-    fontFamily: 'Pally-Bold',
-    fontSize: 16,
   },
   heroSection: {
     alignItems: 'center',

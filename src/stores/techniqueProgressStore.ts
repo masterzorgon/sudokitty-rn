@@ -12,7 +12,9 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 import { storage, STORAGE_KEYS } from '../utils/storage';
-import { TECHNIQUE_METADATA } from '../data/techniqueMetadata';
+import { TECHNIQUE_METADATA, getTechniqueMetadata } from '../data/techniqueMetadata';
+import { getTechniqueReward } from '../constants/techniqueRewards';
+import { useDailyChallengeStore } from './dailyChallengeStore';
 
 // ============================================
 // Types
@@ -201,6 +203,13 @@ export const useTechniqueProgressStore = create<
           if (success) {
             progress.findSuccesses++;
             progress.findFailures = 0; // Reset consecutive failure counter
+            
+            // Award mochis for successful completion
+            const metadata = getTechniqueMetadata(techniqueId);
+            if (metadata) {
+              const reward = getTechniqueReward(metadata.category);
+              useDailyChallengeStore.getState().addMochiPoints(reward);
+            }
           } else {
             progress.findFailures++;
           }

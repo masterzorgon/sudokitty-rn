@@ -33,6 +33,8 @@ import { prefetchPuzzles } from '../../src/services/puzzleCacheService';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
+import { getTechniqueReward } from '../../src/constants/techniqueRewards';
+import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 
 // ============================================
 // Technique Card Component
@@ -86,30 +88,7 @@ function TechniqueCard({
     );
   }
 
-  // Determine status icon: locked overrides progress-based icons
-  const statusIcon = isLocked
-    ? 'lock'
-    : progress.isCompleted
-      ? 'check-circle'
-      : progress.demoCompleted
-        ? 'play-circle'
-        : 'circle';
-
-  const statusColor = isLocked
-    ? colors.textLight
-    : progress.isCompleted
-      ? '#4CAF50'
-      : progress.demoCompleted
-        ? c.accent
-        : colors.textLight;
-
-  const progressText = isLocked
-    ? 'Premium'
-    : progress.isCompleted
-      ? 'Mastered'
-      : progress.demoCompleted
-        ? `${progress.findSuccesses}/${COMPLETION_THRESHOLD} found`
-        : 'Not started';
+  const mochiReward = getTechniqueReward(technique.category);
 
   return (
       <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
@@ -118,21 +97,44 @@ function TechniqueCard({
         borderRadius={borderRadius.lg}
         showHighlight={false}
         contentStyle={styles.cardContent}
-        accessibilityLabel={`${technique.name}, ${technique.category}, ${progressText}`}
+        accessibilityLabel={`${technique.name}, ${technique.category}, earn ${mochiReward} mochis`}
       >
-        {/* Left: Name and difficulty badge */}
+        {/* Left: Name, badge, and reward */}
         <View style={styles.cardText}>
-          <Text style={styles.cardTitle}>{technique.name}</Text>
-          <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
-            <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
-              {technique.category}
-            </Text>
+          {/* Title row: name + badge */}
+          <View style={styles.titleRow}>
+            <Text style={styles.cardTitle}>{technique.name}</Text>
+            <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
+              <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
+                {technique.category}
+              </Text>
+            </View>
+          </View>
+          
+          {/* Reward row: earn X mochis + icon */}
+          <View style={styles.rewardRow}>
+            <Text style={styles.rewardText}>earn {mochiReward} mochis</Text>
+            <MochiPointIcon width={14} height={14} />
           </View>
         </View>
 
-        {/* Right: Status and chevron */}
+        {/* Right: 3-star progress or lock + chevron */}
         <View style={styles.cardRight}>
-          <Feather name={statusIcon as any} size={16} color={statusColor} />
+          {!isLocked ? (
+            <View style={styles.starsContainer}>
+              {[1, 2, 3].map((starNum) => (
+                <Feather
+                  key={starNum}
+                  name="star"
+                  size={14}
+                  color={starNum <= progress.findSuccesses ? '#FFD700' : colors.textLight}
+                  fill={starNum <= progress.findSuccesses ? '#FFD700' : 'transparent'}
+                />
+              ))}
+            </View>
+          ) : (
+            <Feather name="lock" size={14} color={colors.textLight} />
+          )}
           <Feather name="chevron-right" size={18} color={colors.textLight} />
         </View>
       </SkeuCard>
@@ -332,7 +334,12 @@ const styles = StyleSheet.create({
   },
   cardText: {
     flex: 1,
-    gap: 4,
+    gap: 6,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
   cardTitle: {
     ...typography.headline,
@@ -340,7 +347,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   difficultyBadge: {
-    alignSelf: 'flex-start',
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: borderRadius.full,
@@ -348,6 +354,20 @@ const styles = StyleSheet.create({
   difficultyBadgeText: {
     fontSize: 10,
     fontFamily: 'Pally-Medium',
+  },
+  rewardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  rewardText: {
+    fontSize: 11,
+    fontFamily: 'Pally-Medium',
+    color: colors.textSecondary,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    gap: 2,
   },
   cardRight: {
     flexDirection: 'row',
