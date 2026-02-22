@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { startGameAnimations } from '../../theme/animations';
 import { Difficulty, DIFFICULTY_CONFIG } from '../../engine/types';
 
@@ -119,7 +119,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.xl,
     borderRadius: borderRadius.lg,
-    ...shadows.medium,
   },
   difficultyName: {
     ...typography.headline,

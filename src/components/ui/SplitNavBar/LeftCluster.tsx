@@ -13,6 +13,7 @@ import Animated, {
 import { colors, useColors } from '@/src/theme/colors';
 import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
 import { springConfigs } from '@/src/theme/animations';
+import { useCardSkeuColors } from '@/src/theme/skeuomorphic';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
 import { Skeu3D } from '../Skeuomorphic';
 
@@ -24,14 +25,6 @@ const tabs: TabConfig[] = [
   { name: 'profile', icon: 'bar-chart-2', label: 'Stats' },
   { name: 'settings', icon: 'settings', label: 'Settings' },
 ];
-
-// White custom colors for the cluster
-const whiteColors = {
-  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-  edge: '#E0E0E0',
-  borderLight: 'rgba(255, 255, 255, 0.5)',
-  borderDark: 'rgba(0, 0, 0, 0.1)',
-};
 
 interface NavIconProps {
   tab: TabConfig;
@@ -75,10 +68,11 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
 }
 
 export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
+  const cardColors = useCardSkeuColors();
   return (
     <Skeu3D
       variant="secondary"
-      customColors={whiteColors}
+      customColors={cardColors}
       borderRadius={LAYOUT.rightPillRadius}
       showHighlight={false}
       faceStyle={styles.container}

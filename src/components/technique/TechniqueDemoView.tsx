@@ -53,10 +53,10 @@ export function TechniqueDemoView({
       <View style={styles.bottomZone}>
         <View style={styles.stepNav}>
           <View style={styles.stepNavButtonWrapper}>
-            <AppButton onPress={onPrevious} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
+            <AppButton onPress={onPrevious} label="back" variant="neutral" />
           </View>
           <View style={styles.stepNavButtonWrapper}>
-            <AppButton onPress={onNext} label="next" icon="chevron-right" />
+            <AppButton onPress={onNext} label="next" />
           </View>
         </View>
       </View>
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomZone: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.xxl + spacing.xxl,
     paddingBottom: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },

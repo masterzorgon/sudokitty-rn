@@ -7,11 +7,7 @@ import { Pressable, ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-import {
-  SkeuVariant,
-  CustomSkeuColors,
-  SKEU_VARIANTS,
-} from '../../../theme/skeuomorphic';
+import { useCardSkeuColors } from '../../../theme/skeuomorphic';
 import { useSkeuomorphicPress } from '../../../hooks/useSkeuomorphicPress';
 import { CornerRadii } from './SkeuContext';
 import { Skeu3D } from './Skeu3D';
@@ -23,11 +19,7 @@ export interface SkeuCardProps {
   /** Whether the card is disabled */
   disabled?: boolean;
 
-  // Appearance
-  /** Color variant preset */
-  variant?: SkeuVariant;
-  /** Custom colors (overrides variant) */
-  customColors?: CustomSkeuColors;
+  // Appearance (single theme-aware card look: white face + secondary edge/border)
   /** Uniform border radius for all corners */
   borderRadius?: number;
   /** Individual corner radii (overrides borderRadius) */
@@ -63,8 +55,6 @@ export function SkeuCard({
   disabled = false,
 
   // Appearance
-  variant = 'secondary',
-  customColors,
   borderRadius,
   cornerRadii,
   showHighlight = true,
@@ -84,21 +74,19 @@ export function SkeuCard({
   // Content
   children,
 }: SkeuCardProps) {
-  // Only use press animation if onPress is provided
   const isInteractive = !!onPress;
-  
+  const cardColors = useCardSkeuColors();
+
   const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
     onPress: onPress ?? (() => {}),
     disabled: disabled || !isInteractive,
     hapticStyle,
   });
 
-  const effectiveVariant = disabled ? 'disabled' : variant;
-
   const content = (
     <Skeu3D
-      variant={effectiveVariant}
-      customColors={customColors}
+      variant={disabled ? 'disabled' : 'secondary'}
+      customColors={disabled ? undefined : cardColors}
       borderRadius={borderRadius}
       cornerRadii={cornerRadii}
       showHighlight={showHighlight}
@@ -136,4 +124,4 @@ export function SkeuCard({
 }
 
 // Re-export for convenience
-export { SKEU_VARIANTS };
+export { SKEU_VARIANTS } from '../../../theme/skeuomorphic';

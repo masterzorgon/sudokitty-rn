@@ -7,22 +7,16 @@ import { View, StyleSheet, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import {
-  SkeuVariant,
-  CustomSkeuColors,
+  SkeuVariantColors,
   SKEU_DIMENSIONS,
-  useThemedSkeuVariants,
 } from '../../../theme/skeuomorphic';
-import { CornerRadii, resolveCornerRadii } from './SkeuContext';
+import { CornerRadii } from './SkeuContext';
 
 export interface Skeu3DFaceProps {
-  /** Color variant preset */
-  variant?: SkeuVariant;
-  /** Custom colors (overrides variant) */
-  customColors?: CustomSkeuColors;
-  /** Uniform border radius for all corners */
-  borderRadius?: number;
-  /** Individual corner radii (overrides borderRadius) */
-  cornerRadii?: CornerRadii;
+  /** Pre-resolved colors from parent Skeu3D */
+  resolvedColors: SkeuVariantColors;
+  /** Resolved corner radii */
+  cornerRadii: CornerRadii;
   /** Whether to show the gradient background (default: true) */
   showGradient?: boolean;
   /** Whether to show the top highlight (default: true) */
@@ -36,27 +30,14 @@ export interface Skeu3DFaceProps {
 }
 
 export function Skeu3DFace({
-  variant = 'primary',
-  customColors,
-  borderRadius,
-  cornerRadii,
+  resolvedColors: colors,
+  cornerRadii: radii,
   showGradient = true,
   showHighlight = true,
   highlightInset = 8,
   style,
   children,
 }: Skeu3DFaceProps) {
-  const themedVariants = useThemedSkeuVariants();
-  const colors = customColors
-    ? {
-        gradient: customColors.gradient,
-        edge: customColors.edge,
-        borderLight: customColors.borderLight ?? 'rgba(255, 255, 255, 0.3)',
-        borderDark: customColors.borderDark ?? 'rgba(0, 0, 0, 0.1)',
-        textColor: customColors.textColor ?? '#FFFFFF',
-      }
-    : themedVariants[variant];
-  const radii = resolveCornerRadii(borderRadius, cornerRadii);
 
   const faceStyle: ViewStyle[] = [
     styles.face,

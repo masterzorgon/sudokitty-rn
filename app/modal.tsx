@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { useGameStore } from '../src/stores/gameStore';
 import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
-import { spacing, borderRadius, shadows } from '../src/theme';
+import { spacing, borderRadius } from '../src/theme';
 import { Difficulty, DIFFICULTY_CONFIG } from '../src/engine/types';
 
 interface DifficultyButtonProps {
@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.cardBackground,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
-    ...shadows.small,
   },
   difficultyButtonPressed: {},
   difficultyName: {

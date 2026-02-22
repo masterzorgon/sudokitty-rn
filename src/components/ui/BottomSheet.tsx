@@ -14,7 +14,7 @@ import {
 
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { AppButton } from './AppButton';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -125,7 +125,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl + 20,
-    ...shadows.large,
   },
   dragIndicator: {
     width: 36,

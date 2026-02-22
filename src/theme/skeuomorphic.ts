@@ -122,3 +122,18 @@ export function useThemedSkeuVariants(): Record<SkeuVariant, SkeuVariantColors> 
     },
   }), [c]);
 }
+
+/** Single source of truth for SkeuCard and Skeu3D “white face” (theme-aware). */
+export function useCardSkeuColors(): SkeuVariantColors {
+  const c = useColors();
+  return useMemo(
+    () => ({
+      gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
+      edge: c.skeuCardEdge,
+      borderLight: 'rgba(255, 255, 255, 0.5)',
+      borderDark: c.skeuCardEdge,
+      textColor: '#5D4E4E',
+    }),
+    [c.skeuCardEdge]
+  );
+}

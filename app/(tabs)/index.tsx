@@ -122,13 +122,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.xl,
   },
-  catContainer: {
-    // Shadow for the cat to make it pop
-    shadowColor: colors.boardShadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
+  catContainer: {},
   streakContainer: {
     marginTop: spacing.xl,
     alignItems: 'center',

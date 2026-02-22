@@ -7,6 +7,7 @@ import { ViewStyle } from 'react-native';
 
 import {
   SkeuVariant,
+  SkeuVariantColors,
   CustomSkeuColors,
   SKEU_DIMENSIONS,
   useThemedSkeuVariants,
@@ -14,6 +15,23 @@ import {
 import { SkeuContext, CornerRadii, resolveCornerRadii } from './SkeuContext';
 import { Skeu3DEdge } from './Skeu3DEdge';
 import { Skeu3DFace } from './Skeu3DFace';
+
+function resolveColors(
+  customColors: CustomSkeuColors | undefined,
+  themedVariants: Record<SkeuVariant, SkeuVariantColors>,
+  variant: SkeuVariant,
+): SkeuVariantColors {
+  if (customColors) {
+    return {
+      gradient: customColors.gradient,
+      edge: customColors.edge,
+      borderLight: customColors.borderLight ?? 'rgba(255, 255, 255, 0.3)',
+      borderDark: customColors.borderDark ?? 'rgba(0, 0, 0, 0.1)',
+      textColor: customColors.textColor ?? '#FFFFFF',
+    };
+  }
+  return themedVariants[variant];
+}
 
 export interface Skeu3DProps {
   /** Color variant preset */
@@ -54,18 +72,9 @@ export function Skeu3D({
   children,
 }: Skeu3DProps) {
   const themedVariants = useThemedSkeuVariants();
-  const colors = customColors
-    ? {
-        gradient: customColors.gradient,
-        edge: customColors.edge,
-        borderLight: customColors.borderLight ?? 'rgba(255, 255, 255, 0.3)',
-        borderDark: customColors.borderDark ?? 'rgba(0, 0, 0, 0.1)',
-        textColor: customColors.textColor ?? '#FFFFFF',
-      }
-    : themedVariants[variant];
+  const colors = resolveColors(customColors, themedVariants, variant);
   const radii = resolveCornerRadii(borderRadius, cornerRadii);
 
-  // Provide context for any nested components that might need it
   const contextValue = {
     colors,
     radii,
@@ -75,15 +84,13 @@ export function Skeu3D({
   return (
     <SkeuContext.Provider value={contextValue}>
       <Skeu3DEdge
-        variant={variant}
-        customColors={customColors}
+        resolvedColors={colors}
         cornerRadii={radii}
         edgeHeight={edgeHeight}
         style={style}
       >
         <Skeu3DFace
-          variant={variant}
-          customColors={customColors}
+          resolvedColors={colors}
           cornerRadii={radii}
           showGradient={showGradient}
           showHighlight={showHighlight}

@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { MAX_MISTAKES } from '../../engine/types';
 import { RollingNumber, RollingTime } from '../ui';
 
@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     paddingBottom: spacing.xl + 20,
     alignItems: 'center',
-    ...shadows.large,
   },
   icon: {
     marginBottom: spacing.md,

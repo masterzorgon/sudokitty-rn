@@ -134,7 +134,7 @@ function FindItControls({
     return (
       <View style={styles.buttonRow}>
         <View style={styles.buttonWrapper}>
-          <AppButton onPress={onBackToPattern} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
+          <AppButton onPress={onBackToPattern} label="back" variant="neutral" />
         </View>
         <View style={styles.buttonWrapper}>
           <AppButton onPress={onSubmitSelection} label="submit" disabled={eliminationCellCount === 0} />
@@ -146,7 +146,7 @@ function FindItControls({
   return (
     <View style={styles.buttonRow}>
       <View style={styles.buttonWrapper}>
-        <AppButton onPress={onBack} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
+        <AppButton onPress={onBack} label="back" variant="neutral" />
       </View>
       <View style={styles.buttonWrapper}>
         <AppButton onPress={onSubmitSelection} label="submit" disabled={selectedCellCount === 0} />
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomZone: {
-    paddingTop: spacing.md,
+    paddingTop: spacing.xxl + spacing.xxl,
     paddingBottom: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },

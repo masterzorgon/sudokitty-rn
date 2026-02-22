@@ -33,14 +33,6 @@ import { useIsPremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
 
-// White skeuomorphic card colors (matches TechniquesCTA on home screen)
-const whiteCardColors = {
-  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-  edge: '#E0E0E0',
-  borderLight: 'rgba(255, 255, 255, 0.5)',
-  borderDark: 'rgba(0, 0, 0, 0.1)',
-};
-
 // ============================================
 // Technique Card Component
 // ============================================
@@ -66,8 +58,6 @@ function TechniqueCard({
       <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
         <SkeuCard
           onPress={onPress}
-          variant="secondary"
-          customColors={whiteCardColors}
           borderRadius={borderRadius.lg}
           showHighlight={false}
           contentStyle={styles.cardContent}
@@ -124,8 +114,6 @@ function TechniqueCard({
       <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
       <SkeuCard
         onPress={onPress}
-        variant="secondary"
-        customColors={whiteCardColors}
         borderRadius={borderRadius.lg}
         showHighlight={false}
         contentStyle={styles.cardContent}

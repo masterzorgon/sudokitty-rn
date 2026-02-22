@@ -14,21 +14,11 @@ interface TechniquesCTAProps {
   onPress: () => void;
 }
 
-// White custom colors for the card
-const whiteColors = {
-  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-  edge: '#E0E0E0',
-  borderLight: 'rgba(255, 255, 255, 0.5)',
-  borderDark: 'rgba(0, 0, 0, 0.1)',
-};
-
 export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
   const c = useColors();
   return (
     <SkeuCard
       onPress={onPress}
-      variant="secondary"
-      customColors={whiteColors}
       borderRadius={borderRadius.lg}
       showHighlight={false}
       style={styles.container}

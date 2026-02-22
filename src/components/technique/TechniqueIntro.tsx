@@ -5,7 +5,7 @@ import { Feather } from '@expo/vector-icons';
 
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { GAME_LAYOUT } from '../../constants/layout';
 import { AppButton } from '../ui/AppButton';
 import type { TechniqueMetadata } from '../../data/techniqueMetadata';
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     alignItems: 'center',
     gap: spacing.md,
-    ...shadows.medium,
   },
   introIcon: {
     width: 64,

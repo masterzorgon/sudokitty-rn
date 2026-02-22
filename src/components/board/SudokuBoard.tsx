@@ -178,13 +178,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   // Full-size game board
-  cardOuter: {
-    shadowColor: colors.boardShadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 6,
-  },
+  cardOuter: {},
   card: {
     backgroundColor: colors.boardBackground,
     padding: 2,
@@ -192,13 +186,7 @@ const styles = StyleSheet.create({
     borderColor: colors.gridLineBold,
   },
   // Compact technique practice board
-  cardOuterCompact: {
-    shadowColor: colors.boardShadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-  },
+  cardOuterCompact: {},
   cardCompact: {
     backgroundColor: colors.boardBackground,
     padding: 1,

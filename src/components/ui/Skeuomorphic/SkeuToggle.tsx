@@ -114,10 +114,7 @@ export function SkeuToggle({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.trackFace}
-        >
-          {/* Inner shadow for depth */}
-          <View style={styles.trackInnerShadow} />
-        </LinearGradient>
+        />
       </View>
 
       {/* Thumb */}
@@ -176,15 +173,6 @@ const styles = StyleSheet.create({
     borderRightColor: 'rgba(0, 0, 0, 0.1)',
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
-  trackInnerShadow: {
-    position: 'absolute',
-    top: 2,
-    left: 4,
-    right: 4,
-    height: 6,
-    borderRadius: 3,
-    // backgroundColor: 'rgba(0, 0, 0, 0.05)',
-  },
   thumbWrapper: {
     position: 'absolute',
     top: 0,
@@ -211,12 +199,6 @@ const styles = StyleSheet.create({
     borderLeftColor: 'rgba(255, 255, 255, 0.6)',
     borderRightColor: 'rgba(0, 0, 0, 0.08)',
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    // Shadow for thumb
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   thumbHighlight: {
     position: 'absolute',

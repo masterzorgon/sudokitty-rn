@@ -88,16 +88,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'rgba(255, 255, 255, 0.9)',
     letterSpacing: 0.5,
-    textShadowColor: 'rgba(194, 12, 80, 0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 0,
   },
   countText: {
     fontFamily: fontFamilies.bold,
     fontSize: 32,
     color: '#FFFFFF',
-    textShadowColor: 'rgba(194, 12, 80, 0.4)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 0,
   },
 });

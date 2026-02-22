@@ -54,6 +54,9 @@ export interface ColorPalette {
   skeuPrimaryBorderDark: string;
   skeuSecondaryGradient: readonly [string, string, string];
   skeuSecondaryEdge: string;
+
+  // Skeuomorphic card edge (white-faced cards use a lighter edge than secondary)
+  skeuCardEdge: string;
 }
 
 const pinkPalette: ColorPalette = {
@@ -98,6 +101,8 @@ const pinkPalette: ColorPalette = {
   skeuPrimaryBorderDark: 'rgba(232, 90, 135, 0.3)',
   skeuSecondaryGradient: ['#FFF7FB', '#FFF0F8', '#FFEBF5'],
   skeuSecondaryEdge: '#E8D4DF',
+
+  skeuCardEdge: '#F4E4EC',
 };
 
 const orangePalette: ColorPalette = {
@@ -142,6 +147,8 @@ const orangePalette: ColorPalette = {
   skeuPrimaryBorderDark: 'rgba(224, 112, 64, 0.3)',
   skeuSecondaryGradient: ['#FFF8F3', '#FFF5EE', '#FFF0E8'],
   skeuSecondaryEdge: '#E8D4C8',
+
+  skeuCardEdge: '#F4E4D8',
 };
 
 const greenPalette: ColorPalette = {
@@ -186,6 +193,8 @@ const greenPalette: ColorPalette = {
   skeuPrimaryBorderDark: 'rgba(72, 152, 72, 0.3)',
   skeuSecondaryGradient: ['#F5FAF5', '#F2FBF2', '#EDF8ED'],
   skeuSecondaryEdge: '#C8DCC8',
+
+  skeuCardEdge: '#D4ECD8',
 };
 
 const bluePalette: ColorPalette = {
@@ -230,6 +239,8 @@ const bluePalette: ColorPalette = {
   skeuPrimaryBorderDark: 'rgba(72, 130, 184, 0.3)',
   skeuSecondaryGradient: ['#F5F8FE', '#F0F6FF', '#EBF2FC'],
   skeuSecondaryEdge: '#C8D4E8',
+
+  skeuCardEdge: '#D4E4F4',
 };
 
 export const PALETTES: Record<ThemeName, ColorPalette> = {

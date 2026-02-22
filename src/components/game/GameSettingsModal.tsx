@@ -23,7 +23,7 @@ import {
 } from '../../stores/settingsStore';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing, borderRadius, shadows } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { SkeuToggle } from '../ui/Skeuomorphic';
 
 // MARK: - Types
@@ -215,7 +215,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl + 20, // Extra padding for home indicator
-    ...shadows.large,
   },
   dragIndicator: {
     width: 36,

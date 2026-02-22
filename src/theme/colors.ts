@@ -55,7 +55,6 @@ export const colors = {
 
   // Board card
   boardBackground: '#FEFEFE',
-  boardShadow: '#8B7070',
 
   // Button (neutral variants)
   buttonSecondary: '#FFFFFF',

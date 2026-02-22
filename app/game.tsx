@@ -21,7 +21,7 @@ import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { useGameMascotMessage } from '../src/hooks';
 import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
-import { spacing, borderRadius, shadows } from '../src/theme';
+import { spacing, borderRadius } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty, DAILY_MOCHI_POINTS } from '../src/engine/types';
@@ -349,7 +349,6 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
     marginHorizontal: spacing.xl,
     alignItems: 'center',
-    ...shadows.large,
   },
   overlayTitle: {
     ...typography.largeTitle,
