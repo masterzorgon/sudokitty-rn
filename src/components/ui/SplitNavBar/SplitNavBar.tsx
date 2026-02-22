@@ -25,9 +25,11 @@ export function SplitNavBar({
   const insets = useSafeAreaInsets();
   const hasResumableGame = useHasResumableGame();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isQuitting, setIsQuitting] = useState(false);
 
   // Determine primary action state based on game store
-  const primaryState: PrimaryActionState = hasResumableGame ? 'resume' : 'new_game';
+  // If quitting, immediately show "new_game" state
+  const primaryState: PrimaryActionState = (hasResumableGame && !isQuitting) ? 'resume' : 'new_game';
 
   // Handle primary pill press - always opens menu for both states
   const handlePrimaryPress = useCallback(() => {
@@ -38,8 +40,15 @@ export function SplitNavBar({
   const handleMenuSelect = useCallback(
     (item: MenuItem) => {
       if (item.action === 'quit_game') {
-        onQuitGame();
-        setTimeout(() => setIsMenuOpen(false), 250);
+        // Immediately switch button to "new game" state
+        setIsQuitting(true);
+        // Close menu to prevent flash of difficulty menu
+        setIsMenuOpen(false);
+        // Then quit game after menu animation completes
+        setTimeout(() => {
+          onQuitGame();
+          setIsQuitting(false);
+        }, 100);
         return;
       }
 
