@@ -108,8 +108,8 @@ const pinkPalette: ColorPalette = {
 
   skeuCardEdge: '#F4E4EC',
 
-  homeGradient: ['#FFD6E8', '#FFE8F2', '#FFF4FA', '#FFF0F6'],
-  homeGlowColor: 'rgba(255, 107, 157, 0.15)',
+  homeGradient: ['#FFB0D0', '#FFD0E4', '#FFECF4', '#FFF0F6'],
+  homeGlowColor: 'rgba(255, 107, 157, 0.35)',
 };
 
 const orangePalette: ColorPalette = {
@@ -157,8 +157,8 @@ const orangePalette: ColorPalette = {
 
   skeuCardEdge: '#F4E4D8',
 
-  homeGradient: ['#FFE0C8', '#FFEDE0', '#FFF6EE', '#FFF5EE'],
-  homeGlowColor: 'rgba(255, 140, 86, 0.15)',
+  homeGradient: ['#FFC8A0', '#FFDCC0', '#FFF0E4', '#FFF5EE'],
+  homeGlowColor: 'rgba(255, 140, 86, 0.35)',
 };
 
 const greenPalette: ColorPalette = {
@@ -206,8 +206,8 @@ const greenPalette: ColorPalette = {
 
   skeuCardEdge: '#D4ECD8',
 
-  homeGradient: ['#C8E6C9', '#DCEEDD', '#EDF6ED', '#F2FBF2'],
-  homeGlowColor: 'rgba(92, 184, 92, 0.15)',
+  homeGradient: ['#A0D8A0', '#C0E8C0', '#E0F4E0', '#F2FBF2'],
+  homeGlowColor: 'rgba(92, 184, 92, 0.35)',
 };
 
 const bluePalette: ColorPalette = {

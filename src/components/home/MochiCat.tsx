@@ -7,15 +7,20 @@ import { View, StyleSheet } from 'react-native';
 // SVG imports - requires react-native-svg-transformer
 import MochiCatSvg from '../../../assets/images/mochi/mochi-cat.svg';
 import MochiGameViewSvg from '../../../assets/images/mochi/mochi-game-view.svg';
+import MochiWelcomeSvg from '../../../assets/images/mochi/mochi-welcome.svg';
 
 // MARK: - Types
 
 interface MochiCatProps {
-  // Size of the cat image (width and height will be equal)
   size?: number;
-  // Which SVG variant to render (default: 'default')
-  variant?: 'default' | 'game';
+  variant?: 'default' | 'game' | 'welcome';
 }
+
+const SVG_MAP = {
+  default: MochiCatSvg,
+  game: MochiGameViewSvg,
+  welcome: MochiWelcomeSvg,
+} as const;
 
 // MARK: - Component
 
@@ -23,7 +28,7 @@ export function MochiCat({
   size = 180,
   variant = 'default',
 }: MochiCatProps) {
-  const SvgComponent = variant === 'game' ? MochiGameViewSvg : MochiCatSvg;
+  const SvgComponent = SVG_MAP[variant];
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
