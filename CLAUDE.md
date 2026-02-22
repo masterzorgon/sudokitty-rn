@@ -61,6 +61,17 @@
 - Keep components under 300 lines - extract when larger
 - Colocate related components in feature folders
 
+### User-Facing Copy
+- **All user-facing text must be written in lowercase** (except legal copy)
+- This includes: button labels, headings, titles, alert messages, form labels, settings options, navigation labels, error messages, success messages, and any text displayed to users
+- Legal copy (copyright notices, company names, terms of service) may use standard capitalization
+- Examples:
+  - ✅ "send feedback" (not "Send Feedback")
+  - ✅ "game settings" (not "Game Settings")
+  - ✅ "congratulations!" (not "Congratulations!")
+  - ✅ "reset progress" (not "Reset Progress")
+  - ✅ "© 2024 Bridgeful, LLC" (legal copy - standard capitalization OK)
+
 ## Design System
 
 ### Theme Location

@@ -81,7 +81,7 @@ export default function SettingsScreen() {
   // Handlers
   const handleHowToPlay = useCallback(() => {
     // TODO: Navigate to tutorial flow
-    Alert.alert('Coming Soon', 'The tutorial will be available in a future update.');
+    Alert.alert('coming soon', 'the tutorial will be available in a future update.');
   }, []);
 
   const handleRules = useCallback(async () => {
@@ -89,7 +89,7 @@ export default function SettingsScreen() {
       trackExternalLinkOpened('rules');
       await Linking.openURL(RULES_URL);
     } catch (error) {
-      Alert.alert('Error', 'Unable to open the link.');
+      Alert.alert('error', 'unable to open the link.');
     }
   }, []);
 
@@ -119,10 +119,10 @@ export default function SettingsScreen() {
   const handleRestorePurchases = useCallback(async () => {
     const restored = await restorePurchases();
     Alert.alert(
-      restored ? 'Restored!' : 'Nothing to Restore',
+      restored ? 'restored!' : 'nothing to restore',
       restored
-        ? 'Your premium access has been restored.'
-        : 'No previous purchases found.',
+        ? 'your premium access has been restored.'
+        : 'no previous purchases found.',
     );
   }, []);
 
@@ -139,7 +139,7 @@ export default function SettingsScreen() {
       trackExternalLinkOpened('privacy');
       await Linking.openURL(PRIVACY_URL);
     } catch (error) {
-      Alert.alert('Error', 'Unable to open the link.');
+      Alert.alert('error', 'unable to open the link.');
     }
   }, []);
 
@@ -149,12 +149,12 @@ export default function SettingsScreen() {
 
   const handleResetProgress = useCallback(() => {
     Alert.alert(
-      'Reset Progress',
-      'This will permanently delete all your game progress, stats, and streaks. This cannot be undone.',
+      'reset progress',
+      'this will permanently delete all your game progress, stats, and streaks. this cannot be undone.',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'cancel', style: 'cancel' },
         {
-          text: 'Reset',
+          text: 'reset',
           style: 'destructive',
           onPress: () => {
             // Reset all stores except settings
@@ -162,7 +162,7 @@ export default function SettingsScreen() {
             resetDailyChallenge();
             // TODO: Reset tutorial state when tutorialStore exists
             trackProgressReset();
-            Alert.alert('Done', 'Your progress has been reset.');
+            Alert.alert('done', 'your progress has been reset.');
           },
         },
       ]
@@ -177,10 +177,10 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>settings</Text>
 
         {/* Appearance - Theme Color Picker */}
-        <SettingsSection title="Appearance">
+        <SettingsSection title="appearance">
           <View style={styles.themePickerRow}>
             {THEME_NAMES.map((name) => {
               const isActive = name === colorTheme;
@@ -207,37 +207,37 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Game Preferences */}
-        <SettingsSection title="Game">
+        <SettingsSection title="game">
           <SettingsToggleRow
-            label="Sounds"
+            label="sounds"
             value={soundsEnabled}
             onValueChange={setSoundsEnabled}
             icon="volume-2"
             accessibilityHint="Toggle game sounds on or off"
           />
           <SettingsToggleRow
-            label="Haptics"
+            label="haptics"
             value={hapticsEnabled}
             onValueChange={setHapticsEnabled}
             icon="smartphone"
             accessibilityHint="Toggle haptic feedback on or off"
           />
           <SettingsToggleRow
-            label="Timer"
+            label="timer"
             value={timerEnabled}
             onValueChange={setTimerEnabled}
             icon="clock"
             accessibilityHint="Show or hide the game timer"
           />
           <SettingsToggleRow
-            label="Unlimited Mistakes"
+            label="unlimited mistakes"
             value={unlimitedMistakes}
             onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
             icon="alert-circle"
             accessibilityHint="Toggle unlimited mistakes (premium feature)"
           />
           <SettingsToggleRow
-            label="Unlimited Hints"
+            label="unlimited hints"
             value={unlimitedHints}
             onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
             icon="zap"
@@ -247,15 +247,15 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Learn */}
-        <SettingsSection title="Learn">
+        <SettingsSection title="learn">
           <SettingsLinkRow
-            label="How to Play"
+            label="how to play"
             onPress={handleHowToPlay}
             icon="help-circle"
             accessibilityHint="Open the tutorial"
           />
           <SettingsLinkRow
-            label="Sudoku Rules"
+            label="sudoku rules"
             onPress={handleRules}
             icon="book"
             isExternal
@@ -264,23 +264,23 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Premium */}
-        <SettingsSection title="Premium">
+        <SettingsSection title="premium">
           {!isPremium && (
             <SettingsLinkRow
-              label="Remove Ads"
+              label="remove ads"
               onPress={handleUpgradePremium}
               icon="star"
               accessibilityHint="Upgrade to unlock all premium features"
             />
           )}
           <SettingsLinkRow
-            label="Restore Purchases"
+            label="restore purchases"
             onPress={handleRestorePurchases}
             icon="refresh-cw"
             accessibilityHint="Restore previously purchased premium access"
           />
           <SettingsLinkRow
-            label="Manage Subscription"
+            label="manage subscription"
             onPress={handleManageSubscription}
             icon="credit-card"
             accessibilityHint="Manage your subscription or request a refund"
@@ -289,21 +289,21 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Support */}
-        <SettingsSection title="Support">
+        <SettingsSection title="support">
           <SettingsLinkRow
-            label="Send Feedback"
+            label="send feedback"
             onPress={handleSendFeedback}
             icon="message-circle"
             accessibilityHint="Send feedback to the developers"
           />
           <SettingsLinkRow
-            label="Privacy Preferences"
+            label="privacy preferences"
             onPress={handlePrivacy}
             icon="shield"
             isExternal
           />
           <SettingsLinkRow
-            label="App Info"
+            label="app info"
             onPress={handleAppInfo}
             icon="info"
             accessibilityHint="View app information"
@@ -314,7 +314,7 @@ export default function SettingsScreen() {
         {/* Reset Progress (standalone, not in a section) */}
         <View style={styles.resetContainer}>
           <SettingsLinkRow
-            label="Reset Progress"
+            label="reset progress"
             onPress={handleResetProgress}
             icon="trash-2"
             isDestructive

@@ -46,10 +46,10 @@ interface CategoryOption {
 }
 
 const CATEGORIES: CategoryOption[] = [
-  { id: 'issue', label: 'Issue / Bug' },
-  { id: 'suggestion', label: 'Suggestion' },
-  { id: 'compliment', label: 'Compliment' },
-  { id: 'other', label: 'Other' },
+  { id: 'issue', label: 'issue / bug' },
+  { id: 'suggestion', label: 'suggestion' },
+  { id: 'compliment', label: 'compliment' },
+  { id: 'other', label: 'other' },
 ];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -104,7 +104,7 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
         disabled={disabled}
       >
         <Text style={[styles.dropdownText, !selectedOption && styles.dropdownPlaceholder]}>
-          {selectedOption?.label || 'Select a reason'}
+          {selectedOption?.label || 'select a reason'}
         </Text>
         <Feather name="chevron-down" size={20} color={colors.textSecondary} />
       </AnimatedPressable>
@@ -222,8 +222,8 @@ export default function FeedbackScreen() {
 
       // Success
       Alert.alert(
-        'Thank You!',
-        'Your feedback has been sent. We really appreciate you taking the time to help us improve!',
+        'thank you!',
+        'your feedback has been sent. we really appreciate you taking the time to help us improve!',
         [
           {
             text: 'OK',
@@ -234,8 +234,8 @@ export default function FeedbackScreen() {
     } catch (error) {
       console.error('Failed to submit feedback:', error);
       Alert.alert(
-        'Oops!',
-        'Something went wrong while sending your feedback. Please try again.',
+        'oops!',
+        'something went wrong while sending your feedback. please try again.',
         [{ text: 'OK' }]
       );
     } finally {
@@ -253,7 +253,7 @@ export default function FeedbackScreen() {
         {/* Header */}
         <View style={styles.header}>
           <BackButton />
-          <Text style={styles.title}>Send Feedback</Text>
+          <Text style={styles.title}>send feedback</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -265,9 +265,9 @@ export default function FeedbackScreen() {
         >
           {/* Reason Dropdown */}
           <View style={styles.section}>
-            <Text style={styles.label}>Reason for reaching out</Text>
+            <Text style={styles.label}>reason for reaching out</Text>
             <Dropdown
-              label="Select a reason"
+              label="select a reason"
               value={category}
               options={CATEGORIES}
               onSelect={setCategory}
@@ -278,7 +278,7 @@ export default function FeedbackScreen() {
           {/* Email Input */}
           <View style={styles.section}>
             <Text style={styles.label}>
-              Email address{' '}
+              email address{' '}
               <Text style={styles.labelOptional}>(optional)</Text>
             </Text>
             <TextInput
@@ -303,7 +303,7 @@ export default function FeedbackScreen() {
 
           {/* Message Input */}
           <View style={styles.section}>
-            <Text style={styles.label}>Message</Text>
+            <Text style={styles.label}>message</Text>
             <TextInput
               style={styles.textInputMulti}
               placeholder="Share your thoughts, ideas, or report an issue..."
@@ -341,7 +341,7 @@ export default function FeedbackScreen() {
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator color={c.accent} />
-              <Text style={styles.loadingText}>Sending...</Text>
+              <Text style={styles.loadingText}>sending...</Text>
             </View>
           ) : (
             <SkeuButton
@@ -356,7 +356,7 @@ export default function FeedbackScreen() {
               showHighlight={false}
             >
               <Text style={[styles.ctaButtonLabel, { color: SKEU_VARIANTS[canSubmit ? 'primary' : 'disabled'].textColor }]}>
-                Send Feedback
+                send feedback
               </Text>
             </SkeuButton>
           )}

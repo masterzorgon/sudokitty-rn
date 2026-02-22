@@ -85,9 +85,9 @@ export function TechniqueFindItView({
       <BottomSheet
         visible={showIncorrectModal}
         onDismiss={onTryAgain}
-        title="Not quite!"
+        title="not quite!"
         description={validationResult?.feedback ?? ''}
-        action={{ label: 'Try Again', onPress: onTryAgain }}
+        action={{ label: 'try again', onPress: onTryAgain }}
         dismissOnTapOutside={false}
       />
     </Animated.View>

@@ -168,7 +168,7 @@ export default function TechniquePracticeScreen() {
       {/* Complete (step N+2) */}
       {phase === 'complete' && (
         <ShowcasePage
-          heading="Congratulations!"
+          heading="congratulations!"
           mascotImage={<MochiCelebrationSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
           bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
           action={{ label: 'done', onPress: state.handleBack, icon: 'check' }}

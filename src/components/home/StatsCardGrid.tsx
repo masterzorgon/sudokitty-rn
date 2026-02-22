@@ -21,13 +21,13 @@ export const StatsCardGrid = memo(({
     <View style={styles.grid}>
       <StatCard
         icon="🏆"
-        label="Global Rank"
+        label="global rank"
         value={`#${globalRank.toLocaleString()}`}
         valueColor={colors.textPrimary}
       />
       <StatCard
         icon="🔥"
-        label="Streak"
+        label="streak"
         value={streak > 0 ? `${streak} days` : '0 days'}
         valueColor={c.accent}
       />

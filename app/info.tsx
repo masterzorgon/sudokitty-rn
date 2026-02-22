@@ -10,9 +10,9 @@ import { BackButton } from '../src/components/ui/BackButton';
 import { MochiCat } from '../src/components/home';
 
 const INFO_ROWS: { label: string; getValue: (version: string) => string }[] = [
-  { label: 'App Name', getValue: () => 'sudokitty' },
-  { label: 'Version', getValue: (v) => v },
-  { label: 'Developer', getValue: () => "Bridgeful, LLC" },
+  { label: 'app name', getValue: () => 'sudokitty' },
+  { label: 'version', getValue: (v) => v },
+  { label: 'developer', getValue: () => "Bridgeful, LLC" },
 ];
 
 export default function InfoScreen() {
@@ -30,7 +30,7 @@ export default function InfoScreen() {
         <View style={styles.heroSection}>
           <MochiCat size={120} />
           <Text style={styles.appName}>sudokitty</Text>
-          <Text style={styles.versionSubtitle}>Version {appVersion}</Text>
+          <Text style={styles.versionSubtitle}>version {appVersion}</Text>
         </View>
 
         <View style={styles.infoCard}>

@@ -178,11 +178,8 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
   },
   cardOuter: {
-    // borderWidth: 1,
+    borderWidth: 1,
     borderColor: colors.gridLineBold,
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    borderLeftWidth: 1,
   },
   card: {
     backgroundColor: colors.boardBackground,

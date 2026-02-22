@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { MAX_MISTAKES } from '../../engine/types';
@@ -29,6 +29,7 @@ interface PauseModalProps {
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export const PauseModal = ({ visible, onResume }: PauseModalProps) => {
+  const c = useColors();
   const difficulty = useGameStore((s) => s.difficulty);
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);

@@ -17,7 +17,7 @@ export function HintModal() {
       onDismiss={dismissHintModal}
       title={lastHint?.techniqueName ?? ''}
       description={lastHint?.explanation ?? ''}
-      action={{ label: 'Apply Hint', onPress: dismissHintModal }}
+      action={{ label: 'apply hint', onPress: dismissHintModal }}
     />
   );
 }

@@ -154,7 +154,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
           style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Game Settings</Text>
+            <Text style={styles.title}>game settings</Text>
             <Pressable
               style={styles.closeButton}
               onPress={handleClose}
@@ -168,8 +168,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
 
           <View style={styles.settingsList}>
             <SettingRow
-              label="Sounds"
-              description="Game audio effects"
+              label="sounds"
+              description="game audio effects"
               value={soundsEnabled}
               onValueChange={setSoundsEnabled}
               accessibilityHint="Toggle game sounds on or off"
@@ -177,8 +177,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
             />
 
             <SettingRow
-              label="Haptics"
-              description="Vibration feedback"
+              label="haptics"
+              description="vibration feedback"
               value={hapticsEnabled}
               onValueChange={setHapticsEnabled}
               accessibilityHint="Toggle haptic feedback on or off"
@@ -186,8 +186,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
             />
 
             <SettingRow
-              label="Timer"
-              description="Show elapsed time"
+              label="timer"
+              description="show elapsed time"
               value={timerEnabled}
               onValueChange={setTimerEnabled}
               accessibilityHint="Show or hide the game timer"
@@ -195,8 +195,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
             />
 
             <SettingRow
-              label="Unlimited Mistakes"
-              description="No penalty for wrong answers"
+              label="unlimited mistakes"
+              description="no penalty for wrong answers"
               value={unlimitedMistakes}
               onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
               accessibilityHint="Toggle unlimited mistakes (premium feature)"
@@ -204,8 +204,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
             />
 
             <SettingRow
-              label="Unlimited Hints"
-              description="No limit on hints per game"
+              label="unlimited hints"
+              description="no limit on hints per game"
               value={unlimitedHints}
               onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
               accessibilityHint="Toggle unlimited hints (premium feature)"
@@ -214,7 +214,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
           </View>
 
           <Text style={styles.footerNote}>
-            Game is paused while settings are open
+            game is paused while settings are open
           </Text>
         </Animated.View>
       </View>
