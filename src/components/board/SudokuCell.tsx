@@ -104,9 +104,19 @@ export const SudokuCell = memo(({
   const waveGlow = useSharedValue(0);
   const waveTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Determine border styling for 3x3 box separation
-  const isRightBoxBorder = (col + 1) % 3 === 0 && col < 8;
-  const isBottomBoxBorder = (row + 1) % 3 === 0 && row < 8;
+  // Single-edge border strategy: each cell only draws right + bottom borders.
+  // The board container provides the outer frame (top, left, right, bottom).
+  const isLastCol = col === 8;
+  const isLastRow = row === 8;
+  const isRightBoxBorder = (col + 1) % 3 === 0 && !isLastCol;
+  const isBottomBoxBorder = (row + 1) % 3 === 0 && !isLastRow;
+
+  const borderStyle = {
+    borderRightWidth: isLastCol ? 0 : isRightBoxBorder ? 2 : 1,
+    borderBottomWidth: isLastRow ? 0 : isBottomBoxBorder ? 2 : 1,
+    borderRightColor: isRightBoxBorder ? colors.gridLineBold : colors.gridLine,
+    borderBottomColor: isBottomBoxBorder ? colors.gridLineBold : colors.gridLine,
+  };
 
   // Base background color depends on checkerboard box
   const baseBackground = isInAltBox ? c.cellBackgroundAlt : colors.cellBackground;
@@ -222,8 +232,7 @@ export const SudokuCell = memo(({
       style={[
         staticStyles.cell,
         { width: cellSize, height: cellSize },
-        isRightBoxBorder && staticStyles.rightBoxBorder,
-        isBottomBoxBorder && staticStyles.bottomBoxBorder,
+        borderStyle,
         animatedContainerStyle,
       ]}
     >
@@ -270,17 +279,6 @@ const staticStyles = StyleSheet.create({
   cell: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.gridLine,
-    overflow: 'hidden',
-  },
-  rightBoxBorder: {
-    borderRightWidth: 1.5,
-    borderRightColor: colors.gridLineBold,
-  },
-  bottomBoxBorder: {
-    borderBottomWidth: 1.5,
-    borderBottomColor: colors.gridLineBold,
   },
   background: {
     ...StyleSheet.absoluteFillObject,

@@ -1,7 +1,3 @@
-// Game stats bar - displays time, mistakes, and hints
-// Thin bar positioned between mascot and game grid
-// Uses visual dot indicators for mistakes/hints
-
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,19 +8,14 @@ import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
 import { RollingTime } from '../ui';
-import { CELL_SIZE } from '../board/SudokuCell';
 
-// Width of a 3x3 box (matches the sudoku board's box width)
 const BOX_WIDTH = 130;
 
-// Icon indicator props
 interface IconIndicatorProps {
   used: number;
   total: number;
 }
 
-// Lives indicator - hearts representing remaining lives
-// Filled hearts = lives remaining, outline hearts = lives lost
 const LivesIndicator = ({ used, total }: IconIndicatorProps) => (
   <View style={styles.iconRow}>
     {Array.from({ length: total }, (_, i) => {
@@ -41,8 +32,6 @@ const LivesIndicator = ({ used, total }: IconIndicatorProps) => (
   </View>
 );
 
-// Hints indicator - lightbulbs representing available hints
-// Filled bulbs = hints available, outline bulbs = hints used
 const HintsIndicator = ({ used, total, accentColor }: IconIndicatorProps & { accentColor: string }) => (
   <View style={styles.iconRow}>
     {Array.from({ length: total }, (_, i) => {
@@ -108,22 +97,21 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    justifyContent: 'center',
     backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: colors.gridLine,
+    borderWidth: 1,
+    borderColor: colors.gridLine,
     height: 30,
+    marginHorizontal: 2,
   },
   section: {
     width: BOX_WIDTH,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.xs,
-    marginRight: 1,
   },
   separator: {
-    width: 1,
-    backgroundColor: colors.gridLine,
+    width: 2,
+    backgroundColor: colors.gridLineBold,
   },
   iconRow: {
     flexDirection: 'row',

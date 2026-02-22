@@ -23,9 +23,9 @@ export const colors = {
   cellError: '#FFF0F0',
 
   // Grid colors
-  gridLine: '#F0E8E4',
-  gridLineBold: '#E8DCD8',
-  boxBorder: '#E0D4D0',
+  gridLine: '#D8CCC8',
+  gridLineBold: '#C0B0AC',
+  boxBorder: '#B8A8A4',
 
   // Note text
   noteText: '#8A7A72',

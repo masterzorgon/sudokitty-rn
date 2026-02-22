@@ -6,7 +6,7 @@
 import React, { useCallback, memo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { SudokuCell, CELL_SIZE, COMPACT_CELL_SIZE } from './SudokuCell';
+import { SudokuCell } from './SudokuCell';
 import { colors } from '../../theme/colors';
 import { startGameAnimations } from '../../theme/animations';
 import { BOARD_SIZE, Position, positionKey, CellAnimationState } from '../../engine/types';
@@ -175,28 +175,22 @@ export const SudokuBoard = memo(({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: 'stretch',
   },
-  // Full-size game board
   cardOuter: {},
   card: {
     backgroundColor: colors.boardBackground,
-    padding: 2,
-    borderWidth: 1,
-    borderColor: colors.gridLineBold,
   },
-  // Compact technique practice board
   cardOuterCompact: {},
   cardCompact: {
     backgroundColor: colors.boardBackground,
-    padding: 1,
     borderWidth: 2,
     borderColor: colors.boxBorder,
     borderRadius: 4,
     overflow: 'hidden',
   },
   board: {
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   row: {
     flexDirection: 'row',
