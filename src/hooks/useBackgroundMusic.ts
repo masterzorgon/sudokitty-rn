@@ -38,8 +38,11 @@ export function useBackgroundMusic() {
       
       if (!mountedRef.current) return;
 
+      // Read current gameStatus from store (closure value may be stale after async load)
+      const currentStatus = useGameStore.getState().gameStatus;
+
       // Auto-start if conditions are right
-      if (soundsEnabled && gameStatus === 'playing') {
+      if (soundsEnabled && currentStatus === 'playing') {
         await audioService.play(0); // Start at 0 for fade-in
         if (mountedRef.current) {
           currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
