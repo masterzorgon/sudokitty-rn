@@ -7,3 +7,5 @@ export { useSequence } from './useSequence';
 export type { SequenceConfig, SequenceState } from './useSequence';
 export { useTechniquePractice } from './useTechniquePractice';
 export type { TechniquePhase, FindPhase, PuzzleState } from './useTechniquePractice';
+
+export { useBackgroundMusic } from './useBackgroundMusic';

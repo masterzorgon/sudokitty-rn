@@ -15,32 +15,41 @@ const DEFAULT_GLOW_RADIUS = SCREEN_WIDTH * 0.6;
 export interface AtmosphericGradientProps {
   height?: number;
   glowRadius?: number;
+  reverse?: boolean;
+  intensity?: 'high' | 'low';
 }
 
 export function AtmosphericGradient({
   height = DEFAULT_GRADIENT_HEIGHT,
   glowRadius = DEFAULT_GLOW_RADIUS,
+  reverse = false,
+  intensity = 'high',
 }: AtmosphericGradientProps) {
   const c = useColors();
   const theme = useColorTheme();
+
+  const gradientColors = reverse ? [...c.homeGradient].reverse() : c.homeGradient;
+  const glowY = reverse ? height : 0;
+  const positioning = reverse ? { bottom: 0, top: undefined } : { top: 0, bottom: undefined };
+  const opacity = intensity === 'low' ? 0.3 : 1;
 
   return (
     <>
       {/* Linear gradient overlay */}
       <LinearGradient
-        key={`grad-${theme}`}
-        colors={[...c.homeGradient]}
+        key={`grad-${theme}-${reverse}-${intensity}`}
+        colors={gradientColors as any}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={[styles.gradientOverlay, { height }]}
+        style={[styles.gradientOverlay, { height, opacity }, positioning]}
         pointerEvents="none"
       />
       
-      {/* Radial glow at top center */}
-      <Canvas key={`glow-${theme}`} style={[styles.glowCanvas, { height }]} pointerEvents="none">
-        <Circle cx={SCREEN_WIDTH / 2} cy={0} r={glowRadius}>
+      {/* Radial glow at center */}
+      <Canvas key={`glow-${theme}-${reverse}-${intensity}`} style={[styles.glowCanvas, { height, opacity }, positioning]} pointerEvents="none">
+        <Circle cx={SCREEN_WIDTH / 2} cy={glowY} r={glowRadius}>
           <RadialGradient
-            c={vec(SCREEN_WIDTH / 2, 0)}
+            c={vec(SCREEN_WIDTH / 2, glowY)}
             r={glowRadius}
             colors={[c.homeGlowColor, 'transparent']}
           />
@@ -53,13 +62,11 @@ export function AtmosphericGradient({
 const styles = StyleSheet.create({
   gradientOverlay: {
     position: 'absolute',
-    top: 0,
     left: 0,
     right: 0,
   },
   glowCanvas: {
     position: 'absolute',
-    top: 0,
     left: 0,
     right: 0,
   },

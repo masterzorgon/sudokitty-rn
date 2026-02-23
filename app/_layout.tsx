@@ -12,6 +12,7 @@ import { prefetchPuzzles, prefetchGamePuzzles } from '../src/services/puzzleCach
 import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { initRevenueCat } from '../src/lib/revenueCat';
 import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStore';
+import { configureAudioSession } from '../src/services/audioService';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,12 +60,14 @@ function RootLayoutNav() {
   const c = useColors();
   const lastPrefetchRef = useRef<number>(0);
 
-  // Prefetch caches, sync streaks, and init RevenueCat on mount
+  // Prefetch caches, sync streaks, init audio, and init RevenueCat on mount
   useEffect(() => {
     prefetchGamePuzzles(['easy', 'medium', 'hard', 'expert']);
     prefetchPuzzles(Object.keys(TECHNIQUE_IDS));
     // Pull remote streak data (background, best-effort)
     useDailyChallengeStore.getState().syncFromRemote();
+    // Configure audio session for background music
+    configureAudioSession();
     // RevenueCat: init -> sync entitlements -> start real-time listener
     initRevenueCat().then(() => {
       usePremiumStore.getState().syncStatus();

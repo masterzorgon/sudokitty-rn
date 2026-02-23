@@ -4,7 +4,7 @@
 import React, { memo, useCallback } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 
-import { useGameStore } from '../../stores/gameStore';
+import { useGameStore, useRemainingCounts } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { SkeuButton } from '../ui/Skeuomorphic';
 
@@ -25,10 +25,36 @@ interface NumberButtonProps {
   number: number;
   onPress: (num: number) => void;
   isHighlighted: boolean;
+  remaining: number;
   disabled?: boolean;
 }
 
-const NumberButton = memo(({ number, onPress, isHighlighted, disabled = false }: NumberButtonProps) => {
+const DOTS_PER_ROW = 3;
+
+const RemainingDots = memo(({ count }: { count: number }) => {
+  if (count <= 0) return <View style={styles.dotsContainer} />;
+
+  const rows: number[] = [];
+  let left = count;
+  while (left > 0) {
+    rows.push(Math.min(left, DOTS_PER_ROW));
+    left -= DOTS_PER_ROW;
+  }
+
+  return (
+    <View style={styles.dotsContainer}>
+      {rows.map((dotsInRow, rowIdx) => (
+        <View key={rowIdx} style={styles.dotsRow}>
+          {Array.from({ length: dotsInRow }, (_, i) => (
+            <View key={i} style={styles.dot} />
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+});
+
+const NumberButton = memo(({ number, onPress, isHighlighted, remaining, disabled = false }: NumberButtonProps) => {
   const handlePress = useCallback(() => {
     onPress(number);
   }, [number, onPress]);
@@ -43,7 +69,7 @@ const NumberButton = memo(({ number, onPress, isHighlighted, disabled = false }:
         showHighlight={false}
         disabled={disabled}
         contentStyle={styles.buttonFace}
-        accessibilityLabel={`Number ${number}`}
+        accessibilityLabel={`Number ${number}, ${remaining} remaining`}
       >
         <Text
           style={[
@@ -54,6 +80,7 @@ const NumberButton = memo(({ number, onPress, isHighlighted, disabled = false }:
           {number}
         </Text>
       </SkeuButton>
+      <RemainingDots count={remaining} />
     </View>
   );
 });
@@ -62,6 +89,7 @@ export const NumberPad = memo(() => {
   const inputNumber = useGameStore((s) => s.inputNumber);
   const highlightedNumber = useGameStore((s) => s.highlightedNumber);
   const gameStatus = useGameStore((s) => s.gameStatus);
+  const remainingCounts = useRemainingCounts();
 
   const handleNumberPress = useCallback(
     (num: number) => {
@@ -81,6 +109,7 @@ export const NumberPad = memo(() => {
           number={num}
           onPress={handleNumberPress}
           isHighlighted={highlightedNumber === num}
+          remaining={remainingCounts[num]}
           disabled={isDisabled}
         />
       ))}
@@ -108,5 +137,22 @@ const styles = StyleSheet.create({
   },
   buttonTextHighlighted: {
     color: '#FFFFFF',
+  },
+  dotsContainer: {
+    alignItems: 'center',
+    marginTop: 10,
+    minHeight: 6,
+    gap: 3,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2.5,
+    backgroundColor: colors.textLight,
   },
 });

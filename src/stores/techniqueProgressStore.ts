@@ -208,7 +208,7 @@ export const useTechniqueProgressStore = create<
             const metadata = getTechniqueMetadata(techniqueId);
             if (metadata) {
               const reward = getTechniqueReward(metadata.category);
-              useDailyChallengeStore.getState().addMochiPoints(reward);
+              useDailyChallengeStore.getState().addMochiHistoryEntry(reward, 'game');
             }
           } else {
             progress.findFailures++;

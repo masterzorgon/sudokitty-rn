@@ -17,6 +17,7 @@ import {
   StatCard,
   ActivityCalendar,
 } from '../../src/components/home';
+import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
 
 export default function ProfileScreen() {
   const c = useColors();
@@ -31,6 +32,8 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+      <AtmosphericGradient />
+      <AtmosphericGradient reverse intensity="low" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

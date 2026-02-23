@@ -65,6 +65,7 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       {/* Atmospheric gradient background */}
       <AtmosphericGradient />
+      <AtmosphericGradient reverse intensity="low" />
 
       <View style={styles.content}>
         {/* Header row: title + mochi balance */}

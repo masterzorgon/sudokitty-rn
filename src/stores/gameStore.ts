@@ -3,6 +3,7 @@
 
 import { enableMapSet } from 'immer';
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 
 // Enable Immer's MapSet plugin to support Set in state
 enableMapSet();
@@ -901,4 +902,23 @@ export const useHintHighlightCells = () => useGameStore((s) => s.hintHighlightCe
 export const useHintHighlightSet = (): Set<string> => {
   const hintCells = useGameStore((s) => s.hintHighlightCells);
   return new Set(hintCells.map(positionKey));
+};
+
+// Remaining count per number (9 - placed count). Index 0 is unused.
+// Uses useShallow to prevent infinite re-renders from new array references.
+export const useRemainingCounts = (): number[] => {
+  return useGameStore(
+    useShallow((s) => {
+      const counts = new Array(10).fill(0);
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          const val = s.board[row][col].value;
+          if (val !== null && val >= 1 && val <= 9) {
+            counts[val]++;
+          }
+        }
+      }
+      return counts.map((c) => 9 - c);
+    })
+  );
 };

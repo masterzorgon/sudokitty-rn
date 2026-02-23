@@ -18,7 +18,7 @@ import {
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
 import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
-import { useGameMascotMessage } from '../src/hooks';
+import { useGameMascotMessage, useBackgroundMusic } from '../src/hooks';
 import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
@@ -174,6 +174,9 @@ export default function GameScreen() {
 
   // Mascot message hook
   const mascotMessage = useGameMascotMessage();
+
+  // Background music
+  useBackgroundMusic();
 
   // Initialize game on mount
   useEffect(() => {

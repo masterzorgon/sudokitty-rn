@@ -17,6 +17,7 @@ import {
   SettingsToggleRow,
   SettingsLinkRow,
 } from '../../src/components/settings';
+import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
 import {
   useSettingsStore,
   useSoundsEnabled,
@@ -171,6 +172,8 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+      <AtmosphericGradient />
+      <AtmosphericGradient reverse intensity="low" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
