@@ -15,6 +15,8 @@ import {
   useDailyChallengeStore,
   useTotalMochiPoints,
 } from '../../src/stores/dailyChallengeStore';
+import { useFishyStore, useTotalFishyPoints } from '../../src/stores/fishyStore';
+import FishyPointIcon from '../../assets/images/icons/fishy-point.svg';
 import {
   MochiCat,
   ChatBubble,
@@ -41,13 +43,16 @@ export default function HomeScreen() {
 
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
+  const loadFishyState = useFishyStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
   const totalMochis = useTotalMochiPoints();
+  const totalFishies = useTotalFishyPoints();
 
   // Load state on mount
   useEffect(() => {
     loadState();
-  }, [loadState]);
+    loadFishyState();
+  }, [loadState, loadFishyState]);
 
   const handleTechniquesPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -59,6 +64,11 @@ export default function HomeScreen() {
     router.push('/profile');
   };
 
+  const handleStorePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/store');
+  };
+
   // MARK: - Render
 
   return (
@@ -68,14 +78,23 @@ export default function HomeScreen() {
       <AtmosphericGradient reverse intensity="low" />
 
       <View style={styles.content}>
-        {/* Header row: title + mochi balance */}
+        {/* Header row: title + point balance pills */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
-          <Text style={styles.title}>sudokitty</Text>
+          <View style={styles.fishyPillOuter}>
+            <MochiRewardPill
+              mochis={totalFishies}
+              variant="balance"
+              size="large"
+              icon={FishyPointIcon}
+              onPress={handleStorePress}
+            />
+          </View>
           <View style={styles.mochiPillOuter}>
-            <MochiRewardPill 
-              mochis={totalMochis} 
-              variant="balance" 
-              size="medium" 
+            <MochiRewardPill
+              mochis={totalMochis}
+              variant="balance"
+              size="large"
+              onPress={handleStorePress}
             />
           </View>
         </Animated.View>
@@ -126,7 +145,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
+    paddingTop: spacing.xl,
   },
   headerRow: {
     flexDirection: 'row',
@@ -138,6 +157,10 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     textAlign: 'center',
     flex: 1,
+  },
+  fishyPillOuter: {
+    position: 'absolute',
+    left: 0,
   },
   mochiPillOuter: {
     position: 'absolute',

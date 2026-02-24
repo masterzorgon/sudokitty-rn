@@ -6,25 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const STORAGE_KEY = '@sudokitty:lastWelcomeMessage';
 
 export const WELCOME_MESSAGES = [
-  "i told a pigeon about you :p",
   "mochi has been in the walls o_o",
-  "it's giving tuesday vibes :,/",
-  "i collect rocks ;p",
-  "the moon hasn't texted back (´･_･`)",
-  "made a friend. it was a leaf (っ´▽`)っ",
-  "have you looked at a spoon lately (・o・)",
-  "nimbus cloud lost. mochi decided (≧◡≦)",
-  "mochi has opinions about gravel (｀・ω・´)",
-  "can i meet your hamster ;p",
-  "mochi apologized to a wall (・//・)",
-  "been thinking about soup (⊙ω⊙)",
-  "found a button. it means something (っ˘ω˘ς)",
-  "the sky was doing a lot today (＾▽＾)",
-  "punched a stranger today ;3",
-  "mochi cat farted :3",
-  "cat litter box is dirty :(",
-  "a bird looked at me too long (･ω･;)",
-  "mochi cat fears escalators :(",
 ] as const;
 
 /**

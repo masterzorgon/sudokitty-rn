@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   PUZZLE_CACHE: '@sudokitty/puzzle_cache',
   GAME_PUZZLE_CACHE: '@sudokitty/game_puzzle_cache',
   DEVICE_ID: '@sudokitty/device_id',
+  FISHY_STATE: '@sudokitty/fishy_state',
 } as const;
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];

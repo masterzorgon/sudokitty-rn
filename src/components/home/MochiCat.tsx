@@ -8,6 +8,7 @@ import { View, StyleSheet } from 'react-native';
 import MochiCatSvg from '../../../assets/images/mochi/mochi-cat.svg';
 import MochiGameViewSvg from '../../../assets/images/mochi/mochi-game-view.svg';
 import MochiWelcomeSvg from '../../../assets/images/mochi/mochi-welcome.svg';
+import { spacing } from '../../theme';
 
 // MARK: - Types
 
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: spacing.xl,
   },
   imageWrapper: {},
 });

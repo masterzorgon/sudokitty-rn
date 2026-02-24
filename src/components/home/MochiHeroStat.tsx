@@ -7,7 +7,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { RollingNumber } from '../ui/RollingNumber';
 import { colors } from '../../theme/colors';
-import { typography, fontSizes } from '../../theme/typography';
+import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 
 interface MochiHeroStatProps {

@@ -2,7 +2,8 @@
 // Matches the styling of the home screen mochi balance pill
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
 import { spacing } from '../../theme';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
@@ -12,6 +13,8 @@ export interface MochiRewardPillProps {
   label?: string | null; // null = show only number (for balance display)
   size?: 'small' | 'medium' | 'large';
   variant?: 'reward' | 'balance'; // reward shows "earn X mochis", balance shows just number
+  icon?: React.ComponentType<{ width: number; height: number }>;
+  onPress?: () => void; // balance variant only: renders a tappable + badge on the left
 }
 
 export function MochiRewardPill({
@@ -19,6 +22,8 @@ export function MochiRewardPill({
   label,
   size = 'medium',
   variant = 'reward',
+  icon: Icon = MochiPointIcon,
+  onPress,
 }: MochiRewardPillProps) {
   const c = useColors();
   
@@ -36,6 +41,13 @@ export function MochiRewardPill({
       ? `${label} ${mochis} mochis`
       : `earn ${mochis} mochis`;
 
+  const badgeStyle = {
+    backgroundColor: c.mochiPillBorder + '40',
+    width: sizeConfig.badgeSize,
+    height: sizeConfig.badgeSize,
+    borderRadius: sizeConfig.badgeSize / 2,
+  };
+
   return (
     <View
       style={[
@@ -44,22 +56,17 @@ export function MochiRewardPill({
         size === 'large' && styles.pillLarge,
       ]}
     >
-      <View
-        style={[
-          styles.iconBadge,
-          { 
-            backgroundColor: c.mochiPillBorder + '40',
-            width: sizeConfig.badgeSize,
-            height: sizeConfig.badgeSize,
-            borderRadius: sizeConfig.badgeSize / 2,
-          },
-        ]}
-      >
-        <MochiPointIcon width={sizeConfig.iconSize} height={sizeConfig.iconSize} />
-      </View>
+      {variant === 'balance' && onPress && (
+        <Pressable onPress={onPress} hitSlop={8} style={[styles.iconBadge, badgeStyle]}>
+          <Feather name="plus" size={sizeConfig.iconSize - 4} color={c.mochiPillText} />
+        </Pressable>
+      )}
       <Text style={[styles.text, { color: c.mochiPillText, fontSize: sizeConfig.fontSize }]}>
         {displayText}
       </Text>
+      <View style={[styles.iconBadge, badgeStyle]}>
+        <Icon width={sizeConfig.iconSize} height={sizeConfig.iconSize} />
+      </View>
     </View>
   );
 }
@@ -68,12 +75,14 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: 140,
     gap: spacing.xs,
     paddingLeft: spacing.xs,
     paddingRight: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: 100,
     alignSelf: 'center',
+    justifyContent: 'space-between',
     borderWidth: 1,
   },
   pillLarge: {

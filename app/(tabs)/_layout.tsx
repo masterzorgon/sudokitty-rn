@@ -46,7 +46,7 @@ export default function TabLayout() {
         const routeName = props.state.routes[props.state.index].name;
         // Default to 'index' if current route isn't a secondary tab
         const activeTab: SecondaryTab =
-          routeName === 'index' || routeName === 'profile' || routeName === 'settings'
+          routeName === 'index' || routeName === 'store' || routeName === 'settings'
             ? routeName
             : 'index';
 
@@ -73,6 +73,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" />
       <Tabs.Screen name="daily" />
       <Tabs.Screen name="profile" />
+      <Tabs.Screen name="store" />
       <Tabs.Screen name="settings" />
     </Tabs>
   );
