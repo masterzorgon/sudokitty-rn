@@ -1,7 +1,7 @@
 // Home screen - Landing page with mochi cat mascot and animated greeting
 // Features split-flap animation for Japanese to English text transition
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -9,24 +9,23 @@ import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated'
 import * as Haptics from 'expo-haptics';
 
 import { colors, useColors } from '../../src/theme/colors';
-import { typography } from '../../src/theme/typography';
+import { typography, fontFamilies } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
   useDailyChallengeStore,
   useTotalMochiPoints,
+  useCurrentStreak,
 } from '../../src/stores/dailyChallengeStore';
 import { useFishyStore, useTotalFishyPoints } from '../../src/stores/fishyStore';
-import FishyPointIcon from '../../assets/images/icons/fishy-point.svg';
 import {
   MochiCat,
-  ChatBubble,
   TechniquesCTA,
-  DailyChallengeCTA,
   StreakPill,
+  PointsHeaderPill,
 } from '../../src/components/home';
-import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
-import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { SpeechBubble } from '../../src/components/ui/SpeechBubble';
+import { getRandomWelcomeMessage } from '../../src/constants/welcomeMessages';
 import { runEconomyV2Migration } from '../../src/services/economyMigration';
 
 // MARK: - Constants
@@ -47,8 +46,11 @@ export default function HomeScreen() {
   const loadState = useDailyChallengeStore((s) => s.loadState);
   const loadFishyState = useFishyStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
-  const totalMochis = useTotalMochiPoints();
   const totalFishies = useTotalFishyPoints();
+  const totalMochis = useTotalMochiPoints();
+
+  // Welcome message for speech bubble
+  const [welcomeMessage, setWelcomeMessage] = useState('');
 
   // Run economy v2 migration, load state, then apply daily login bonus if new day
   useEffect(() => {
@@ -59,6 +61,10 @@ export default function HomeScreen() {
       useDailyChallengeStore.getState().applyDailyLoginBonusIfNeeded();
     })();
   }, [loadState, loadFishyState]);
+
+  useEffect(() => {
+    getRandomWelcomeMessage().then(setWelcomeMessage);
+  }, []);
 
   const handleTechniquesPress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -101,25 +107,11 @@ export default function HomeScreen() {
       <AtmosphericGradient reverse intensity="low" />
 
       <View style={styles.content}>
-        {/* Header row: title + point balance pills */}
+        {/* Header row: fishy pill | title | mochi pill */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
-          <View style={styles.fishyPillOuter}>
-            <RewardsPill
-              mochis={totalFishies}
-              variant="balance"
-              size="large"
-              icon={FishyPointIcon}
-              onPress={handleStorePress}
-            />
-          </View>
-          <View style={styles.mochiPillOuter}>
-            <RewardsPill
-              mochis={totalMochis}
-              variant="balance"
-              size="large"
-              onPress={handleStorePress}
-            />
-          </View>
+          <PointsHeaderPill type="fishies" value={totalFishies} onPress={handleStorePress} />
+          <Text style={[styles.headerTitle, { color: c.textPrimary }]}>sudokitty</Text>
+          <PointsHeaderPill type="mochis" value={totalMochis} onPress={handleStorePress} />
         </Animated.View>
 
         {/* Mochi Cat Hero Section */}
@@ -132,11 +124,22 @@ export default function HomeScreen() {
             <MochiCat size={180} variant="welcome" />
           </Animated.View>
 
-          {/* Chat Bubble with dynamic random welcome message */}
-          <ChatBubble appearDelay={400} />
+          {/* Speech bubble with dynamic random welcome message */}
+          {welcomeMessage ? (
+            <Animated.View
+              entering={FadeInUp.delay(400).duration(400).springify()}
+              style={styles.bubbleContainer}
+            >
+              <SpeechBubble
+                text={welcomeMessage}
+                pointerDirection="up"
+                textStyle={styles.bubbleText}
+              />
+            </Animated.View>
+          ) : null}
         </View>
 
-        {/* Streak Pill */}
+        {/* Streak pill */}
         <Animated.View
           entering={FadeInUp.delay(800).duration(400)}
           style={styles.streakContainer}
@@ -154,7 +157,6 @@ export default function HomeScreen() {
         ]}
       >
         <View style={styles.ctaStack}>
-          {/* <DailyChallengeCTA onPress={handleDailyChallengePress} /> */}
           <TechniquesCTA onPress={handleTechniquesPress} />
         </View>
       </Animated.View>
@@ -176,8 +178,14 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.md,
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  headerTitle: {
+    ...typography.largeTitle,
+    textAlign: 'center',
+    flex: 1,
+    marginHorizontal: spacing.sm,
   },
   title: {
     ...typography.largeTitle,
@@ -185,8 +193,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
-  fishyPillOuter: {},
-  mochiPillOuter: {},
   heroSection: {
     alignItems: 'center',
     marginTop: spacing.xl,
@@ -203,5 +209,19 @@ const styles = StyleSheet.create({
   },
   ctaStack: {
     gap: spacing.md,
+  },
+  bubbleContainer: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
+  bubbleText: {
+    fontFamily: fontFamilies.medium,
+    fontSize: 20,
+    color: '#8b7878',
+    paddingVertical: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
