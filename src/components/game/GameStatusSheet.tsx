@@ -21,7 +21,7 @@ import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { Difficulty } from '../../engine/types';
-import { calculateFishyReward, FISHIES_COST } from '../../constants/economy';
+import { calculateFishyReward, calculateFishyRewardBreakdown, FISHIES_COST } from '../../constants/economy';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -79,6 +79,7 @@ export function GameStatusSheet({
 
   const isWon = gameStatus === 'won';
   const fishiesEarned = isWon ? calculateFishyReward(difficulty, timeElapsed) : 0;
+  const rewardBreakdown = isWon ? calculateFishyRewardBreakdown(difficulty, timeElapsed) : null;
 
   const continueCostFishies = FISHIES_COST.continue;
   const canAffordContinue = totalFishies >= continueCostFishies;
@@ -111,11 +112,23 @@ export function GameStatusSheet({
           <Text style={styles.title}>
             {isWon ? 'purrfect!' : 'game over'}
           </Text>
-          <Text style={styles.message}>
-            {isWon
-              ? `you earned ${fishiesEarned} fishies!`
-              : 'too many mistakes...'}
-          </Text>
+          {isWon && rewardBreakdown ? (
+            <View style={styles.rewardBreakdown}>
+              <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
+                Base: {rewardBreakdown.base} fishies
+              </Text>
+              <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
+                Time bonus: {rewardBreakdown.timeBonus} fishies
+              </Text>
+              <Text style={[styles.rewardBreakdownTotal, { color: c.textPrimary }]}>
+                Total: {rewardBreakdown.total} fishies
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.message}>
+              {isWon ? `you earned ${fishiesEarned} fishies!` : 'too many mistakes...'}
+            </Text>
+          )}
 
           {showContinue && (
             <View style={styles.continueSection}>
@@ -226,6 +239,20 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.xl,
+  },
+  rewardBreakdown: {
+    marginBottom: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  rewardBreakdownLine: {
+    ...typography.body,
+    textAlign: 'center',
+  },
+  rewardBreakdownTotal: {
+    ...typography.headline,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
   continueSection: {
     alignItems: 'center',

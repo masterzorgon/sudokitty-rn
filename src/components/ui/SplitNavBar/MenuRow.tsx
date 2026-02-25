@@ -11,9 +11,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors } from '@/src/theme/colors';
 import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
-import { Difficulty, GAME_BASE_MOCHIS } from '@/src/engine/types';
-import { MenuRowProps, LAYOUT } from './types';
-import MochiPointIcon from '../../../../assets/images/icons/mochi-point.svg';
+import { Difficulty } from '@/src/engine/types';
+import { FISHIES_BASE } from '@/src/constants/economy';
+import { MenuRowProps } from './types';
+import FishyPointIcon from '../../../../assets/images/icons/fishy-point.svg';
 
 // Import mochi SVG characters for difficulty levels
 import MochiEasy from '../../../../assets/images/mochi/mochi-easy.svg';
@@ -49,7 +50,7 @@ export function MenuRow({
   isVisible,
   isLast,
 }: MenuRowProps) {
-  const maxMochis = item.difficulty ? GAME_BASE_MOCHIS[item.difficulty] * 2 : null;
+  const fishiesRewardLabel = item.difficulty ? `${FISHIES_BASE[item.difficulty]}+` : null;
   const isPressed = useSharedValue(0);
 
   const handlePressIn = useCallback(() => {
@@ -89,13 +90,13 @@ export function MenuRow({
           return MochiIcon ? <MochiIcon width={55} height={55} /> : null;
         })()}
       </View>
-      {/* menu item label + mochi reward */}
+      {/* menu item label + fishies reward */}
       <View style={styles.labelContainer}>
         <Text style={styles.label}>{item.label}</Text>
-        {maxMochis != null && (
+        {fishiesRewardLabel != null && (
           <View style={styles.rewardRow}>
-            <Text style={styles.rewardText}>earn {maxMochis} mochis</Text>
-            <MochiPointIcon width={20} height={20} />
+            <Text style={styles.rewardText}>earn {fishiesRewardLabel} fishies</Text>
+            <FishyPointIcon width={20} height={20} />
           </View>
         )}
       </View>

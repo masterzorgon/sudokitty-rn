@@ -15,6 +15,7 @@ import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { startGameAnimations } from '../../theme/animations';
 import { Difficulty, DIFFICULTY_CONFIG } from '../../engine/types';
+import { getFishiesRangeLabel } from '../../constants/economy';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -51,7 +52,7 @@ const DifficultyButton = ({ difficulty, onPress, index }: DifficultyButtonProps)
         onPressOut={handlePressOut}
       >
         <Text style={styles.difficultyName}>{config.name}</Text>
-        <Text style={styles.difficultyComment}>{config.mochiComment}</Text>
+        <Text style={styles.difficultyComment}>earn {getFishiesRangeLabel(difficulty)} fishies</Text>
       </AnimatedPressable>
     </Animated.View>
   );

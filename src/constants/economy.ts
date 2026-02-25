@@ -150,6 +150,37 @@ export function calculateFishyReward(difficulty: Difficulty, timeSeconds: number
   return base + bonus;
 }
 
+/**
+ * Display range of Fishies per difficulty (base to base + max time bonus).
+ * e.g. Easy "5-10", Expert "35-55".
+ */
+export function getFishiesRangeLabel(difficulty: Difficulty): string {
+  const base = FISHIES_BASE[difficulty];
+  const maxBonus = FISHIES_TIME_BONUS_MAX[difficulty];
+  return `${base}-${base + maxBonus}`;
+}
+
+/**
+ * Same logic as calculateFishyReward but returns base, timeBonus, and total
+ * for UI breakdown (e.g. win sheet).
+ */
+export function calculateFishyRewardBreakdown(
+  difficulty: Difficulty,
+  timeSeconds: number
+): { base: number; timeBonus: number; total: number } {
+  const base = FISHIES_BASE[difficulty];
+  const maxBonus = FISHIES_TIME_BONUS_MAX[difficulty];
+  const parSeconds = FISHIES_PAR_TIMES[difficulty];
+
+  if (timeSeconds >= parSeconds) {
+    return { base, timeBonus: 0, total: base };
+  }
+
+  const ratio = 1 - timeSeconds / parSeconds;
+  const timeBonus = Math.round(maxBonus * ratio);
+  return { base, timeBonus, total: base + timeBonus };
+}
+
 export function trimFishyHistory(history: FishyTransactionEntry[]): FishyTransactionEntry[] {
   if (history.length <= MAX_HISTORY_LENGTH) return history;
   return history.slice(-MAX_HISTORY_LENGTH);
