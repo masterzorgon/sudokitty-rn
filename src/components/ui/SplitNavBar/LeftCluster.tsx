@@ -80,7 +80,7 @@ export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
     <Skeu3D
       customColors={skeuColors}
       // borderRadius={LAYOUT.rightPillRadius}
-      borderRadius={borderRadius.lg}
+      borderRadius={borderRadius.full}
       showHighlight={false}
       faceStyle={styles.container}
     >

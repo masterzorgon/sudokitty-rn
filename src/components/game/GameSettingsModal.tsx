@@ -56,7 +56,6 @@ function SettingRow({
   description,
   value,
   onValueChange,
-  accessibilityHint,
   backgroundColor,
 }: SettingRowProps) {
   return (

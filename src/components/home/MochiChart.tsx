@@ -11,7 +11,6 @@ import {
   vec,
   Line,
 } from '@shopify/react-native-skia';
-import { useDerivedValue, withTiming } from 'react-native-reanimated';
 
 import { MochiHistoryEntry, ChartTimePeriod } from '../../engine/types';
 import { colors, useColors } from '../../theme/colors';

@@ -203,12 +203,14 @@ export const useTechniqueProgressStore = create<
           if (success) {
             progress.findSuccesses++;
             progress.findFailures = 0; // Reset consecutive failure counter
-            
-            // Award mochis for successful completion
-            const metadata = getTechniqueMetadata(techniqueId);
-            if (metadata) {
-              const reward = getTechniqueReward(metadata.category);
-              useDailyChallengeStore.getState().addMochiHistoryEntry(reward, 'game');
+
+            // Award mochis only when user earns 3rd star (mastery)
+            if (progress.findSuccesses === COMPLETION_THRESHOLD) {
+              const metadata = getTechniqueMetadata(techniqueId);
+              if (metadata) {
+                const reward = getTechniqueReward(metadata.category);
+                useDailyChallengeStore.getState().addMochiHistoryEntry(reward, 'game');
+              }
             }
           } else {
             progress.findFailures++;
