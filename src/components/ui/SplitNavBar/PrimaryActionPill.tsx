@@ -10,6 +10,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { borderRadius } from '@/src/theme';
 
 import { PrimaryActionPillProps, LAYOUT } from './types';
 import { SkeuButton, SKEU_VARIANTS } from '../Skeuomorphic';
@@ -38,7 +39,8 @@ export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryA
       <SkeuButton
         onPress={onPress}
         variant="primary"
-        borderRadius={LAYOUT.rightPillRadius}
+        // borderRadius={LAYOUT.rightPillRadius}
+        borderRadius={borderRadius.lg}
         showHighlight={false}
         hapticStyle={Haptics.ImpactFeedbackStyle.Medium}
         contentStyle={styles.face}

@@ -5,10 +5,11 @@ import React, { memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-import { colors, useColors } from "../../theme/colors";
+import { useColors } from "../../theme/colors";
 import { typography } from "../../theme/typography";
 import { spacing, borderRadius } from "../../theme";
-import { SkeuCard } from "../ui/Skeuomorphic";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import type { CustomSkeuColors } from "../ui/Skeuomorphic";
 
 interface TechniquesCTAProps {
   onPress: () => void;
@@ -16,9 +17,19 @@ interface TechniquesCTAProps {
 
 export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
   const c = useColors();
+
+  const skeuColors: CustomSkeuColors = {
+    gradient: [c.mochiPillBg, c.mochiPillBg, c.mochiPillBg] as readonly [string, string, string],
+    edge: c.mochiPillEdge,
+    borderLight: 'rgba(255, 255, 255, 0.5)',
+    borderDark: c.mochiPillBorder + '80',
+    textColor: c.mochiPillText,
+  };
+
   return (
-    <SkeuCard
+    <SkeuButton
       onPress={onPress}
+      customColors={skeuColors}
       borderRadius={borderRadius.lg}
       showHighlight={false}
       style={styles.container}
@@ -27,12 +38,12 @@ export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
     >
       {/* Left section - Icon and title */}
       <View style={styles.leftContent}>
-        <View style={[styles.iconContainer, { backgroundColor: c.accent + '26' }]}>
-          <Feather name="award" size={20} color={c.accent} />
+        <View style={[styles.iconContainer, { backgroundColor: c.mochiPillBorder + '40' }]}>
+          <Feather name="award" size={20} color={c.mochiPillText} />
         </View>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>sudoku techniques</Text>
-          <Text style={styles.subtitle}>learn advanced solving strategies</Text>
+          <Text style={[styles.title, { color: c.mochiPillText }]}>sudoku techniques</Text>
+          <Text style={[styles.subtitle, { color: c.mochiPillText }]}>learn advanced solving strategies</Text>
         </View>
       </View>
 
@@ -41,10 +52,10 @@ export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
         <Feather
           name="chevron-right"
           size={24}
-          color={colors.textLight}
+          color={c.mochiPillText}
         />
       </View>
-    </SkeuCard>
+    </SkeuButton>
   );
 });
 
@@ -71,7 +82,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    
     alignItems: "center",
     justifyContent: "center",
   },
@@ -81,11 +91,9 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.headline,
-    color: colors.textPrimary,
   },
   subtitle: {
     fontSize: 12,
-    color: colors.textPrimary,
   },
   rightContent: {
     flexDirection: "row",

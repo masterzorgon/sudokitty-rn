@@ -21,7 +21,7 @@ import { ShowcasePage } from '../../src/components/ui/ShowcasePage';
 import { AppButton } from '../../src/components/ui/AppButton';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { trackPaywallOpened } from '../../src/utils/analytics';
-import { MochiRewardPill } from '../../src/components/ui/MochiRewardPill';
+import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { getTechniqueReward } from '../../src/constants/techniqueRewards';
 
 import MochiTeacherSvg from '../../assets/images/mochi/mochi-teacher.svg';
@@ -95,7 +95,7 @@ export default function TechniquePracticeScreen() {
           mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
           bodyText={metadata.longDescription}
           action={{ label: 'back to techniques', onPress: state.handleBack, icon: 'arrow-left', iconPosition: 'left' }}
-          rewardPill={<MochiRewardPill mochis={mochiReward} size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
         />
       )}
 
@@ -115,7 +115,7 @@ export default function TechniquePracticeScreen() {
             icon: 'lock',
             iconPosition: 'left',
           }}
-          rewardPill={<MochiRewardPill mochis={mochiReward} size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
         />
       )}
 
@@ -127,7 +127,7 @@ export default function TechniquePracticeScreen() {
           mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
           bodyText={metadata.longDescription}
           action={{ label: 'next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
-          rewardPill={<MochiRewardPill mochis={mochiReward} size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
         />
       )}
 
@@ -172,7 +172,7 @@ export default function TechniquePracticeScreen() {
           mascotImage={<MochiCelebrationSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
           bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
           action={{ label: 'done', onPress: state.handleBack, icon: 'check' }}
-          rewardPill={<MochiRewardPill mochis={mochiReward} label="earned" size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} label="earned" size="large" />}
         />
       )}
     </SafeAreaView>

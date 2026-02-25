@@ -2,7 +2,7 @@
 // Separate from tabs for clean navigation experience
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { View, StyleSheet, Text, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -13,6 +13,7 @@ import {
   ProgressBar,
   GameMascot,
   GameSettingsModal,
+  GameStatusSheet,
   HintModal,
 } from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
@@ -20,124 +21,11 @@ import { useGameStore } from '../src/stores/gameStore';
 import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { useGameMascotMessage, useBackgroundMusic } from '../src/hooks';
 import { colors, useColors } from '../src/theme/colors';
-import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
-import {
-  Difficulty,
-  DAILY_MOCHI_POINTS,
-  CONTINUE_COST,
-  calculateMochiReward,
-} from '../src/engine/types';
-import { useTotalMochiPoints } from '../src/stores/dailyChallengeStore';
-import { showRewardedAd } from '@/src/lib/rewardedAds';
+import { Difficulty, CONTINUE_COST } from '../src/engine/types';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
-
-// Game status overlay
-const GameStatusOverlay = ({
-  onPlayAgain,
-  onGoHome,
-  onContinue,
-  isDaily,
-}: {
-  onPlayAgain: (difficulty: Difficulty) => void;
-  onGoHome: () => void;
-  onContinue: () => void;
-  isDaily: boolean;
-}) => {
-  const c = useColors();
-  const gameStatus = useGameStore((s) => s.gameStatus);
-  const difficulty = useGameStore((s) => s.difficulty);
-  const timeElapsed = useGameStore((s) => s.timeElapsed);
-  const canContinue = useGameStore((s) => s.canContinue);
-  const totalMochis = useTotalMochiPoints();
-
-  if (gameStatus !== 'won' && gameStatus !== 'lost') {
-    return null;
-  }
-
-  const isWon = gameStatus === 'won';
-  const mochiPointsEarned = isWon
-    ? isDaily
-      ? DAILY_MOCHI_POINTS[difficulty]
-      : calculateMochiReward(difficulty, timeElapsed)
-    : 0;
-
-  const continueCost = CONTINUE_COST[difficulty];
-  const canAfford = totalMochis >= continueCost;
-  const showContinue = !isWon && canContinue();
-
-  return (
-    <View style={styles.overlay}>
-      <View style={styles.overlayContent}>
-        <Text style={styles.overlayTitle}>
-          {isWon ? 'purrfect!' : 'game over'}
-        </Text>
-        <Text style={styles.overlayMessage}>
-          {isWon
-            ? `you earned ${mochiPointsEarned} mochis!`
-            : 'too many mistakes...'}
-        </Text>
-
-        {showContinue && (
-          <View style={styles.continueSection}>
-            <Text style={styles.mochiBalance}>{totalMochis} mochis</Text>
-            {canAfford ? (
-              <Pressable
-                style={[styles.overlayButton, { backgroundColor: '#F5C542' }]}
-                onPress={onContinue}
-              >
-                <Text style={[styles.overlayButtonText, { color: '#3D2E00' }]}>
-                  continue ({continueCost} mochis)
-                </Text>
-              </Pressable>
-            ) : (
-              <Pressable
-                style={[styles.overlayButton, { backgroundColor: '#F5C542' }]}
-                onPress={async () => {
-                  const earned = await showRewardedAd();
-                  if (earned) onContinue();
-                }}
-              >
-                <Text style={[styles.overlayButtonText, { color: '#3D2E00' }]}>
-                  watch ad to continue
-                </Text>
-              </Pressable>
-            )}
-          </View>
-        )}
-
-        <View style={styles.overlayButtons}>
-          {isDaily && isWon ? (
-            <Pressable style={[styles.overlayButton, { backgroundColor: c.accent }]} onPress={onGoHome}>
-              <Text style={styles.overlayButtonText}>back to daily</Text>
-            </Pressable>
-          ) : (
-            <>
-              <Pressable
-                style={[styles.overlayButton, { backgroundColor: c.accent }]}
-                onPress={() => onPlayAgain(difficulty)}
-              >
-                <Text style={styles.overlayButtonText}>
-                  {isDaily ? 'try again' : 'play again'}
-                </Text>
-              </Pressable>
-              <Pressable
-                style={[styles.overlayButtonSecondary, { backgroundColor: c.cream }]}
-                onPress={onGoHome}
-              >
-                <Text style={styles.overlayButtonTextSecondary}>
-                  {isDaily ? 'back to daily' : 'home'}
-                </Text>
-              </Pressable>
-            </>
-          )}
-        </View>
-      </View>
-    </View>
-  );
-};
 
 export default function GameScreen() {
   const c = useColors();
@@ -306,8 +194,8 @@ export default function GameScreen() {
         </View>
       </View>
 
-      {/* Game status overlay */}
-      <GameStatusOverlay
+      {/* Game status bottom sheet */}
+      <GameStatusSheet
         onPlayAgain={handlePlayAgain}
         onGoHome={handleGoHome}
         onContinue={handleContinue}
@@ -353,64 +241,6 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
-  },
-  // Overlay styles
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.overlayBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  overlayContent: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.xl,
-    padding: spacing.xl,
-    marginHorizontal: spacing.xl,
-    alignItems: 'center',
-  },
-  overlayTitle: {
-    ...typography.largeTitle,
-    color: colors.textPrimary,
-    marginBottom: spacing.md,
-  },
-  overlayMessage: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  continueSection: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-    gap: spacing.sm,
-  },
-  mochiBalance: {
-    ...typography.caption,
-    color: colors.textLight,
-  },
-  overlayButtons: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  overlayButton: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    borderRadius: borderRadius.lg,
-  },
-  overlayButtonText: {
-    ...typography.button,
-    color: colors.cardBackground,
-  },
-  overlayButtonSecondary: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.gridLine,
-  },
-  overlayButtonTextSecondary: {
-    ...typography.button,
-    color: colors.textSecondary,
   },
   // DEV ONLY: debug animation triggers
   debugBar: {

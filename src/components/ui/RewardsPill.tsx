@@ -1,14 +1,16 @@
-// Reusable mochi reward pill component
-// Matches the styling of the home screen mochi balance pill
+// Reusable rewards pill component
+// Displays a points balance or reward amount with a skeuomorphic pill style
 
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
 import { spacing } from '../../theme';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
+import { Skeu3D, SkeuButton } from './Skeuomorphic';
+import type { CustomSkeuColors } from './Skeuomorphic';
 
-export interface MochiRewardPillProps {
+export interface RewardsPillProps {
   mochis: number;
   label?: string | null; // null = show only number (for balance display)
   size?: 'small' | 'medium' | 'large';
@@ -17,16 +19,16 @@ export interface MochiRewardPillProps {
   onPress?: () => void; // balance variant only: renders a tappable + badge on the left
 }
 
-export function MochiRewardPill({
+export function RewardsPill({
   mochis,
   label,
   size = 'medium',
   variant = 'reward',
   icon: Icon = MochiPointIcon,
   onPress,
-}: MochiRewardPillProps) {
+}: RewardsPillProps) {
   const c = useColors();
-  
+
   // Size configurations
   const sizeConfig = {
     small: { iconSize: 14, fontSize: 13, badgeSize: 22 },
@@ -35,11 +37,12 @@ export function MochiRewardPill({
   }[size];
 
   // Determine display text
-  const displayText = variant === 'balance' 
-    ? `${mochis}`
-    : label !== null && label !== undefined
-      ? `${label} ${mochis} mochis`
-      : `earn ${mochis} mochis`;
+  const displayText =
+    variant === 'balance'
+      ? `${mochis}`
+      : label !== null && label !== undefined
+        ? `${label} ${mochis} mochis`
+        : `earn ${mochis} mochis`;
 
   const badgeStyle = {
     backgroundColor: c.mochiPillBorder + '40',
@@ -48,18 +51,25 @@ export function MochiRewardPill({
     borderRadius: sizeConfig.badgeSize / 2,
   };
 
-  return (
-    <View
-      style={[
-        styles.pill,
-        { backgroundColor: c.mochiPillBg, borderColor: c.mochiPillBorder },
-        size === 'large' && styles.pillLarge,
-      ]}
-    >
+  const skeuColors: CustomSkeuColors = {
+    gradient: [c.mochiPillBg, c.mochiPillBg, c.mochiPillBg] as readonly [string, string, string],
+    edge: c.mochiPillEdge,
+    borderLight: 'rgba(255, 255, 255, 0.5)',
+    borderDark: c.mochiPillBorder + '80',
+    textColor: c.mochiPillText,
+  };
+
+  const faceStyle = StyleSheet.flatten([
+    styles.face,
+    size === 'large' && styles.faceLarge,
+  ]) as ViewStyle;
+
+  const content = (
+    <>
       {variant === 'balance' && onPress && (
-        <Pressable onPress={onPress} hitSlop={8} style={[styles.iconBadge, badgeStyle]}>
+        <View style={[styles.iconBadge, badgeStyle]}>
           <Feather name="plus" size={sizeConfig.iconSize - 4} color={c.mochiPillText} />
-        </Pressable>
+        </View>
       )}
       <Text style={[styles.text, { color: c.mochiPillText, fontSize: sizeConfig.fontSize }]}>
         {displayText}
@@ -67,12 +77,40 @@ export function MochiRewardPill({
       <View style={[styles.iconBadge, badgeStyle]}>
         <Icon width={sizeConfig.iconSize} height={sizeConfig.iconSize} />
       </View>
-    </View>
+    </>
+  );
+
+  if (variant === 'balance' && onPress) {
+    return (
+      <SkeuButton
+        onPress={onPress}
+        customColors={skeuColors}
+        borderRadius={100}
+        style={styles.container}
+        contentStyle={faceStyle}
+      >
+        {content}
+      </SkeuButton>
+    );
+  }
+
+  return (
+    <Skeu3D
+      customColors={skeuColors}
+      borderRadius={100}
+      style={styles.container}
+      faceStyle={faceStyle}
+    >
+      {content}
+    </Skeu3D>
   );
 }
 
 const styles = StyleSheet.create({
-  pill: {
+  container: {
+    alignSelf: 'center',
+  },
+  face: {
     flexDirection: 'row',
     alignItems: 'center',
     width: 140,
@@ -80,16 +118,11 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.xs,
     paddingRight: spacing.md,
     paddingVertical: spacing.xs,
-    borderRadius: 100,
-    alignSelf: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
   },
-  pillLarge: {
-    gap: spacing.xs,
+  faceLarge: {
     paddingLeft: spacing.sm,
     paddingRight: spacing.sm,
-    paddingVertical: spacing.xs,
   },
   iconBadge: {
     alignItems: 'center',

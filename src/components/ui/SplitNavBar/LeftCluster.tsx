@@ -1,6 +1,3 @@
-// Left side secondary navigation cluster
-// Contains Home, Profile, and Settings icons
-
 import React from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
@@ -10,12 +7,13 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
-import { colors, useColors } from '@/src/theme/colors';
+import { useColors } from '@/src/theme/colors';
 import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
 import { springConfigs } from '@/src/theme/animations';
-import { useCardSkeuColors } from '@/src/theme/skeuomorphic';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
 import { Skeu3D } from '../Skeuomorphic';
+import type { CustomSkeuColors } from '../Skeuomorphic';
+import { borderRadius } from '@/src/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -61,19 +59,28 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
       <Feather
         name={tab.icon as keyof typeof Feather.glyphMap}
         size={LAYOUT.iconSize}
-        color={isActive ? c.accent : colors.navInactive}
+        color={isActive ? c.mochiPillText : c.mochiPillBorder}
       />
     </AnimatedPressable>
   );
 }
 
 export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
-  const cardColors = useCardSkeuColors();
+  const c = useColors();
+
+  const skeuColors: CustomSkeuColors = {
+    gradient: [c.mochiPillBg, c.mochiPillBg, c.mochiPillBg] as readonly [string, string, string],
+    edge: c.mochiPillEdge,
+    borderLight: 'rgba(255, 255, 255, 0.5)',
+    borderDark: c.mochiPillBorder + '80',
+    textColor: c.mochiPillText,
+  };
+
   return (
     <Skeu3D
-      variant="secondary"
-      customColors={cardColors}
-      borderRadius={LAYOUT.rightPillRadius}
+      customColors={skeuColors}
+      // borderRadius={LAYOUT.rightPillRadius}
+      borderRadius={borderRadius.lg}
       showHighlight={false}
       faceStyle={styles.container}
     >

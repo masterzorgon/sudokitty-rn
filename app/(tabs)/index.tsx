@@ -24,7 +24,7 @@ import {
   StreakPill,
 } from '../../src/components/home';
 import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
-import { MochiRewardPill } from '../../src/components/ui/MochiRewardPill';
+import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
 
 // MARK: - Constants
@@ -81,7 +81,7 @@ export default function HomeScreen() {
         {/* Header row: title + point balance pills */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
           <View style={styles.fishyPillOuter}>
-            <MochiRewardPill
+            <RewardsPill
               mochis={totalFishies}
               variant="balance"
               size="large"
@@ -90,7 +90,7 @@ export default function HomeScreen() {
             />
           </View>
           <View style={styles.mochiPillOuter}>
-            <MochiRewardPill
+            <RewardsPill
               mochis={totalMochis}
               variant="balance"
               size="large"

@@ -117,7 +117,7 @@ const pinkPalette: ColorPalette = {
   homeGradient: ['#FFB0D0', '#FFD0E4', '#FFECF4', '#FFF0F6'],
   homeGlowColor: 'rgba(255, 107, 157, 0.35)',
 
-  mochiPillBg: '#FFE8F0',
+  mochiPillBg: '#FFFFFF',
   mochiPillBorder: '#F0B8CC',
   mochiPillEdge: '#D8869E',
   mochiPillText: '#8C3055',
@@ -171,7 +171,7 @@ const orangePalette: ColorPalette = {
   homeGradient: ['#FFC8A0', '#FFDCC0', '#FFF0E4', '#FFF5EE'],
   homeGlowColor: 'rgba(255, 140, 86, 0.35)',
 
-  mochiPillBg: '#FFEDDB',
+  mochiPillBg: '#FFFFFF',
   mochiPillBorder: '#F0C4A0',
   mochiPillEdge: '#D89868',
   mochiPillText: '#8C4E20',
@@ -225,7 +225,7 @@ const greenPalette: ColorPalette = {
   homeGradient: ['#A0D8A0', '#C0E8C0', '#E0F4E0', '#F2FBF2'],
   homeGlowColor: 'rgba(92, 184, 92, 0.35)',
 
-  mochiPillBg: '#DEF0DE',
+  mochiPillBg: '#FFFFFF',
   mochiPillBorder: '#A8D4A8',
   mochiPillEdge: '#78AC78',
   mochiPillText: '#2E5C2E',
@@ -279,7 +279,7 @@ const bluePalette: ColorPalette = {
   homeGradient: ['#C0D8F0', '#D8E8F8', '#ECF2FC', '#F0F6FF'],
   homeGlowColor: 'rgba(91, 155, 213, 0.15)',
 
-  mochiPillBg: '#DCEAF8',
+  mochiPillBg: '#FFFFFF',
   mochiPillBorder: '#A0C4E0',
   mochiPillEdge: '#6894B8',
   mochiPillText: '#264060',

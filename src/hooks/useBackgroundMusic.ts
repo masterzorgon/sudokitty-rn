@@ -132,8 +132,8 @@ export function useBackgroundMusic() {
             currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
           }
         }
-      } else if (gameStatus === 'paused' || gameStatus === 'won' || gameStatus === 'lost') {
-        // Pause music
+      } else if (gameStatus === 'won' || gameStatus === 'lost') {
+        // Pause music when game ends (not when paused e.g. settings open)
         if (await audioService.isPlaying()) {
           currentFadeRef.current = audioService.fade(0, FADE_DURATION_MS);
           await new Promise((resolve) => setTimeout(resolve, FADE_DURATION_MS));

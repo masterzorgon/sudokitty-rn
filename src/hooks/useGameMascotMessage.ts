@@ -116,7 +116,7 @@ export function useGameMascotMessage(): string | null {
 
   // Unified message trigger with probability check
   const tryShowMessage = (eventKey: EventKey) => {
-    const config = EVENT_CONFIG[eventKey];
+    const config = EVENT_CONFIG[eventKey] as EventConfig;
     if (shouldRespond(config.probability)) {
       showMessage(
         pickRandom(config.messages),
@@ -137,7 +137,16 @@ export function useGameMascotMessage(): string | null {
   // Detect events and trigger messages
   useEffect(() => {
     const prevState = prevStateRef.current;
-    
+
+    // New game started from won/lost — clear persisted speech bubble
+    if (prevState?.gameStatus && ['won', 'lost'].includes(prevState.gameStatus) && gameStatus === 'playing') {
+      if (dismissTimerRef.current) {
+        clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = null;
+      }
+      setMessage(null);
+    }
+
     // Game just started (first render with playing status)
     if (prevState === null && gameStatus === 'playing') {
       tryShowMessage('gameStart');
