@@ -115,7 +115,7 @@ export default function TechniquePracticeScreen() {
             icon: 'lock',
             iconPosition: 'left',
           }}
-          rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} size="medium" />}
         />
       )}
 
@@ -127,7 +127,7 @@ export default function TechniquePracticeScreen() {
           mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
           bodyText={metadata.longDescription}
           action={{ label: 'next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
-          rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} size="medium" />}
         />
       )}
 
@@ -172,7 +172,7 @@ export default function TechniquePracticeScreen() {
           mascotImage={<MochiCelebrationSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
           bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
           action={{ label: 'done', onPress: state.handleBack, icon: 'check' }}
-          rewardPill={<RewardsPill mochis={mochiReward} label="earned" size="large" />}
+          rewardPill={<RewardsPill mochis={mochiReward} label="earned" size="medium" />}
         />
       )}
     </SafeAreaView>

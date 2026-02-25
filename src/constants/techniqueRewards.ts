@@ -1,13 +1,12 @@
-// Mochi rewards for technique completions
-// Rewards are given for each successful completion (3x total when mastered)
+// Mochi rewards for technique mastery (awarded once when the user earns 3 stars)
 
 import { TechniqueCategory } from '../data/techniqueMetadata';
 
 export const TECHNIQUE_MOCHI_REWARDS: Record<TechniqueCategory, number> = {
-  Beginner: 50,
-  Intermediate: 100,
-  Advanced: 200,
-  Expert: 400,
+  Beginner: 1,
+  Intermediate: 2,
+  Advanced: 4,
+  Expert: 6,
 };
 
 /**

@@ -43,18 +43,20 @@ export function useSheen(options: UseSheenOptions = {}): UseSheenReturn {
     enabled = true,
   } = options;
 
-  const sheenX = useSharedValue(-width);
+  // Rest position well off-screen left so skew doesn't leave a visible sliver (skewX shifts the bar)
+  const restX = -width - 40;
+  const sheenX = useSharedValue(restX);
 
   useEffect(() => {
     if (!enabled) {
-      sheenX.value = -width;
+      sheenX.value = restX;
       return;
     }
 
     sheenX.value = withRepeat(
       withSequence(
-        // Start off-screen left
-        withTiming(-width, { duration: 0 }),
+        // Start fully off-screen left
+        withTiming(restX, { duration: 0 }),
         // Wait before animating
         withDelay(
           interval - duration,

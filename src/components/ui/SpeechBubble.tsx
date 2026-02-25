@@ -13,8 +13,8 @@ type PointerDirection = 'up' | 'down' | 'left' | 'right';
 const BORDER_RADIUS = 16;
 const POINTER_WIDTH = 16;
 const POINTER_HEIGHT = 10;
-const STROKE_WIDTH = 2;
-const STROKE_COLOR = '#8b7878';
+const STROKE_WIDTH = 1.5;
+const STROKE_COLOR = '#d0c8c4';
 const FILL_COLOR = colors.cardBackground;
 
 export interface SpeechBubbleProps {

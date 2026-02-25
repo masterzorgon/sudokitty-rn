@@ -97,7 +97,7 @@ function TechniqueCard({
         borderRadius={borderRadius.lg}
         showHighlight={false}
         contentStyle={styles.cardContent}
-        accessibilityLabel={`${technique.name}, ${technique.category}, earn ${mochiReward} mochis`}
+        accessibilityLabel={`${technique.name}, ${technique.category}, earn ${mochiReward} ${mochiReward === 1 ? 'mochi' : 'mochis'}`}
       >
         {/* Left: Name, badge, and reward */}
         <View style={styles.cardText}>
@@ -111,9 +111,11 @@ function TechniqueCard({
             </View>
           </View>
           
-          {/* Reward row: earn X mochis + icon */}
+          {/* Reward row: earn X mochi(s) + icon */}
           <View style={styles.rewardRow}>
-            <Text style={styles.rewardText}>earn {mochiReward} mochis</Text>
+            <Text style={styles.rewardText}>
+              earn {mochiReward} {mochiReward === 1 ? 'mochi' : 'mochis'}
+            </Text>
             <MochiPointIcon width={14} height={14} />
           </View>
         </View>
