@@ -26,7 +26,7 @@ import {
   getRelatedPositions,
   positionKey,
 } from '../engine/types';
-import { generatePuzzle } from '../engine/generator';
+import { generatePuzzle, generateDailyPuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
 import { useSettingsStore } from './settingsStore';
 import { useFishyStore } from './fishyStore';
@@ -221,6 +221,7 @@ interface GameState {
 interface GameActions {
   // Initialization
   newGame: (difficulty: Difficulty) => void;
+  newDailyGame: (dateString: string, difficulty: Difficulty) => void;
   resetGame: () => void;
 
   // Cell interaction
@@ -332,6 +333,33 @@ export const useGameStore = create<GameState & GameActions>()(
           state.lastCorrectCell = null;
           state.correctStreak = 0;
           state.isDaily = false;
+          state.continueCount = 0;
+        });
+      },
+
+      // Start today's daily challenge (deterministic puzzle from date seed)
+      newDailyGame: (dateString: string, difficulty: Difficulty) => {
+        const generated = generateDailyPuzzle(dateString, difficulty);
+        const board = createBoardFromPuzzle(generated.puzzle, generated.solution);
+
+        set((state) => {
+          state.board = board;
+          state.difficulty = difficulty;
+          state.selectedCell = null;
+          state.highlightedNumber = null;
+          state.isNotesMode = false;
+          state.mistakeCount = 0;
+          state.hintsUsed = 0;
+          state.paidHintsRemaining = 0;
+          state.timeElapsed = 0;
+          state.isTimerRunning = false;
+          state.gameStatus = 'playing';
+          state.history = [];
+          state.historyIndex = -1;
+          state.lastCompletedUnits = [];
+          state.lastCorrectCell = null;
+          state.correctStreak = 0;
+          state.isDaily = true;
           state.continueCount = 0;
         });
       },

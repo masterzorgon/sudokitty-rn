@@ -9,5 +9,6 @@ export { TimePeriodTabs } from './TimePeriodTabs';
 export { StatCard } from './StatCard';
 export { StatsCardGrid } from './StatsCardGrid';
 export { TechniquesCTA } from './TechniquesCTA';
+export { DailyChallengeCTA } from './DailyChallengeCTA';
 export { StreakPill } from './StreakPill';
 export { ActivityCalendar } from './ActivityCalendar';

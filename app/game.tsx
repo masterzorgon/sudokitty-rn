@@ -43,6 +43,7 @@ export default function GameScreen() {
   const isTimerRunning = useGameStore((s) => s.isTimerRunning);
   const gameStatus = useGameStore((s) => s.gameStatus);
   const newGame = useGameStore((s) => s.newGame);
+  const newDailyGame = useGameStore((s) => s.newDailyGame);
   const startTimer = useGameStore((s) => s.startTimer);
   const pauseGame = useGameStore((s) => s.pauseGame);
   const resumeGame = useGameStore((s) => s.resumeGame);
@@ -68,9 +69,11 @@ export default function GameScreen() {
   // Initialize game on mount
   useEffect(() => {
     if (difficulty) {
-      newGame(difficulty);
       if (isDaily) {
-        useGameStore.setState({ isDaily: true });
+        const challenge = useDailyChallengeStore.getState().getTodayChallenge();
+        newDailyGame(challenge.date, challenge.difficulty);
+      } else {
+        newGame(difficulty);
       }
       setTimeout(() => {
         startTimer();

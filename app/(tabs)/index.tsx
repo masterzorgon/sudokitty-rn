@@ -2,7 +2,7 @@
 // Features split-flap animation for Japanese to English text transition
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -21,6 +21,7 @@ import {
   MochiCat,
   ChatBubble,
   TechniquesCTA,
+  DailyChallengeCTA,
   StreakPill,
 } from '../../src/components/home';
 import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
@@ -72,6 +73,23 @@ export default function HomeScreen() {
   const handleStorePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     router.push('/store');
+  };
+
+  const handleDailyChallengePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const dailyStore = useDailyChallengeStore.getState();
+    if (dailyStore.isTodayCompleted()) {
+      Alert.alert(
+        'Daily challenge',
+        "You've already completed today's puzzle. Come back tomorrow!",
+      );
+      return;
+    }
+    const challenge = dailyStore.getTodayChallenge();
+    router.push({
+      pathname: '/game',
+      params: { difficulty: challenge.difficulty, isDaily: 'true' },
+    });
   };
 
   // MARK: - Render
@@ -127,7 +145,7 @@ export default function HomeScreen() {
         </Animated.View>
       </View>
 
-      {/* Techniques CTA - fixed above nav bar */}
+      {/* CTA cards - fixed above nav bar */}
       <Animated.View
         entering={FadeInDown.delay(1000).duration(400)}
         style={[
@@ -135,7 +153,10 @@ export default function HomeScreen() {
           { bottom: insets.bottom + CTA_BOTTOM_OFFSET },
         ]}
       >
-        <TechniquesCTA onPress={handleTechniquesPress} />
+        <View style={styles.ctaStack}>
+          {/* <DailyChallengeCTA onPress={handleDailyChallengePress} /> */}
+          <TechniquesCTA onPress={handleTechniquesPress} />
+        </View>
       </Animated.View>
     </SafeAreaView>
   );
@@ -156,6 +177,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.md,
   },
   title: {
     ...typography.largeTitle,
@@ -163,14 +185,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     flex: 1,
   },
-  fishyPillOuter: {
-    position: 'absolute',
-    left: 0,
-  },
-  mochiPillOuter: {
-    position: 'absolute',
-    right: 0,
-  },
+  fishyPillOuter: {},
+  mochiPillOuter: {},
   heroSection: {
     alignItems: 'center',
     marginTop: spacing.xl,
@@ -184,5 +200,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: spacing.lg,
     right: spacing.lg,
+  },
+  ctaStack: {
+    gap: spacing.md,
   },
 });

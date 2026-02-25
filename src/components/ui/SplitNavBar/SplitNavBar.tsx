@@ -9,6 +9,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { colors } from '@/src/theme/colors';
+
 import { useHasResumableGame } from '@/src/stores/gameStore';
 import { SplitNavBarProps, PrimaryActionState, LAYOUT, MenuItem } from './types';
 import { LeftCluster } from './LeftCluster';
@@ -90,24 +92,28 @@ export function SplitNavBar({
       style={styles.container}
       pointerEvents="box-none"
     >
-      {/* Full-width blur background with soft top edge */}
-      <MaskedView
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-        maskElement={
-          <LinearGradient
-            colors={['transparent', 'black']}
-            locations={[0, 0.45]}
+      {/* Background: solid on home, blur with soft top edge on other tabs */}
+      {activeTab === 'index' ? (
+        <View style={[StyleSheet.absoluteFill]} pointerEvents="none" />
+      ) : (
+        <MaskedView
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+          maskElement={
+            <LinearGradient
+              colors={['transparent', 'black']}
+              locations={[0, 0.45]}
+              style={StyleSheet.absoluteFill}
+            />
+          }
+        >
+          <BlurView
+            intensity={200}
+            tint="light"
             style={StyleSheet.absoluteFill}
           />
-        }
-      >
-        <BlurView
-          intensity={200}
-          tint="light"
-          style={StyleSheet.absoluteFill}
-        />
-      </MaskedView>
+        </MaskedView>
+      )}
 
       {/* Secondary menu (rendered first for z-index) */}
       <SecondaryMenu
