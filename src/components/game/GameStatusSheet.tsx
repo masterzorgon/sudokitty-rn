@@ -14,18 +14,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { useGameStore } from '../../stores/gameStore';
-import { useTotalMochiPoints } from '../../stores/dailyChallengeStore';
+import { useFishyStore } from '../../stores/fishyStore';
 import { showRewardedAd } from '../../lib/rewardedAds';
 import { SkeuButton, SKEU_VARIANTS } from '../ui/Skeuomorphic';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
-import {
-  Difficulty,
-  DAILY_MOCHI_POINTS,
-  CONTINUE_COST,
-  calculateMochiReward,
-} from '../../engine/types';
+import { Difficulty } from '../../engine/types';
+import { calculateFishyReward, FISHIES_COST } from '../../constants/economy';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -33,6 +29,7 @@ export interface GameStatusSheetProps {
   onPlayAgain: (difficulty: Difficulty) => void;
   onGoHome: () => void;
   onContinue: () => void;
+  onGetFishies?: () => void;
   isDaily: boolean;
 }
 
@@ -40,6 +37,7 @@ export function GameStatusSheet({
   onPlayAgain,
   onGoHome,
   onContinue,
+  onGetFishies,
   isDaily,
 }: GameStatusSheetProps) {
   const c = useColors();
@@ -47,7 +45,7 @@ export function GameStatusSheet({
   const difficulty = useGameStore((s) => s.difficulty);
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const canContinue = useGameStore((s) => s.canContinue);
-  const totalMochis = useTotalMochiPoints();
+  const totalFishies = useFishyStore((s) => s.totalFishyPoints);
 
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const visible = gameStatus === 'won' || gameStatus === 'lost';
@@ -80,19 +78,16 @@ export function GameStatusSheet({
   }
 
   const isWon = gameStatus === 'won';
-  const mochiPointsEarned = isWon
-    ? isDaily
-      ? DAILY_MOCHI_POINTS[difficulty]
-      : calculateMochiReward(difficulty, timeElapsed)
-    : 0;
+  const fishiesEarned = isWon ? calculateFishyReward(difficulty, timeElapsed) : 0;
 
-  const continueCost = CONTINUE_COST[difficulty];
-  const canAfford = totalMochis >= continueCost;
+  const continueCostFishies = FISHIES_COST.continue;
+  const canAffordContinue = totalFishies >= continueCostFishies;
   const showContinue = !isWon && canContinue();
 
   const handlePrimaryPress = async () => {
-    if (canAfford) {
-      handleClose(onContinue);
+    if (canAffordContinue) {
+      const spent = useFishyStore.getState().spendFishies(continueCostFishies, 'continue');
+      if (spent) handleClose(onContinue);
     } else {
       const earned = await showRewardedAd();
       if (earned) handleClose(onContinue);
@@ -118,13 +113,13 @@ export function GameStatusSheet({
           </Text>
           <Text style={styles.message}>
             {isWon
-              ? `you earned ${mochiPointsEarned} mochis!`
+              ? `you earned ${fishiesEarned} fishies!`
               : 'too many mistakes...'}
           </Text>
 
           {showContinue && (
             <View style={styles.continueSection}>
-              <Text style={styles.mochiBalance}>{totalMochis} mochis</Text>
+              <Text style={styles.mochiBalance}>{totalFishies} fishies</Text>
               <SkeuButton
                 onPress={handlePrimaryPress}
                 variant="primary"
@@ -134,11 +129,20 @@ export function GameStatusSheet({
                 contentStyle={styles.primaryButtonContent}
               >
                 <Text style={[styles.primaryButtonText, { color: SKEU_VARIANTS.primary.textColor }]}>
-                  {canAfford
-                    ? `continue game (${continueCost} mochis)`
-                    : 'continue game'}
+                  {canAffordContinue
+                    ? `continue (${continueCostFishies} fishies)`
+                    : 'watch ad to continue'}
                 </Text>
               </SkeuButton>
+              {!canAffordContinue && onGetFishies && (
+                <Pressable
+                  style={styles.getFishiesRow}
+                  onPress={() => handleClose(onGetFishies)}
+                  hitSlop={8}
+                >
+                  <Text style={[styles.getFishiesText, { color: c.accent }]}>Get Fishies</Text>
+                </Pressable>
+              )}
             </View>
           )}
 
@@ -244,6 +248,12 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...typography.button,
+  },
+  getFishiesRow: {
+    paddingVertical: spacing.xs,
+  },
+  getFishiesText: {
+    ...typography.caption,
   },
   secondaryRow: {
     width: '100%',

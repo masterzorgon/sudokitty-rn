@@ -5,6 +5,9 @@
 import Purchases, { LOG_LEVEL, CustomerInfo } from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
 
+import { FISHIES_PACK_AMOUNTS } from '../constants/economy';
+import { useFishyStore } from '../stores/fishyStore';
+
 const API_KEY = process.env.EXPO_PUBLIC_RC_API_KEY ?? '';
 const ENTITLEMENT_ID = 'Sudokitty Premium';
 
@@ -107,6 +110,55 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
     return await Purchases.getCustomerInfo();
   } catch {
     return null;
+  }
+}
+
+// ============================================
+// Fishies packs (consumables)
+// ============================================
+
+const FISHIES_PACK_PRODUCT_IDS = [
+  'fishies_150',
+  'fishies_350',
+  'fishies_1000',
+  'fishies_2200',
+  'fishies_5000',
+] as const;
+
+/** Fetch store products for Fishies packs (for display and purchase). */
+export async function getFishiesPackProducts() {
+  try {
+    return await Purchases.getProducts([...FISHIES_PACK_PRODUCT_IDS]);
+  } catch {
+    return [] as Awaited<ReturnType<typeof Purchases.getProducts>>;
+  }
+}
+
+export type PurchaseFishiesPackResult =
+  | { success: true; amount: number }
+  | { success: false; cancelled?: boolean };
+
+/**
+ * Purchase a Fishies pack by product ID. On success, grants Fishies client-side and returns amount.
+ * For consumables, Restore does not re-grant; this is the only way to get IAP Fishies.
+ */
+export async function purchaseFishiesPack(productId: string): Promise<PurchaseFishiesPackResult> {
+  const amount = FISHIES_PACK_AMOUNTS[productId];
+  if (amount == null || amount <= 0) {
+    return { success: false };
+  }
+  try {
+    const products = await Purchases.getProducts([productId]);
+    const product = products[0];
+    if (!product) {
+      return { success: false };
+    }
+    await Purchases.purchaseStoreProduct(product);
+    useFishyStore.getState().addFishyPoints(amount, 'iap');
+    return { success: true, amount };
+  } catch (e: unknown) {
+    const err = e as { userCancelled?: boolean };
+    return { success: false, cancelled: err?.userCancelled === true };
   }
 }
 

@@ -256,6 +256,9 @@ export interface DailyChallengeState {
   completedDates: string[]; // Array of completed date strings
   totalMochiPoints: number;
   totalGamesWon: number; // Lifetime count of games won (any difficulty)
+  lastFirstPuzzleDate: string | null; // YYYY-MM-DD, for first-puzzle-of-day Fishies bonus
+  lastDailyLoginDate: string | null; // YYYY-MM-DD, for daily login Fishies bonus
+  streakFreezesCount: number; // Consumable: use one to avoid losing streak on a missed day
 }
 
 // Activity calendar day for display
@@ -346,8 +349,11 @@ export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
   longestStreak: 0,
   lastCompletedDate: null,
   completedDates: [],
-  totalMochiPoints: 10000, // TODO: revert to 0 after testing
+  totalMochiPoints: 0,
   totalGamesWon: 0,
+  lastFirstPuzzleDate: null,
+  lastDailyLoginDate: null,
+  streakFreezesCount: 0,
 });
 
 // ============================================
@@ -360,7 +366,7 @@ export interface MochiHistoryEntry {
   timestamp: number;         // Unix timestamp for precise ordering
   amount: number;            // Mochis earned in this entry
   cumulativeTotal: number;   // Running total at this point
-  source: 'daily' | 'game' | 'bonus' | 'spend';
+  source: 'daily' | 'game' | 'bonus' | 'spend' | 'conversion';
 }
 
 // Time period options for chart filtering

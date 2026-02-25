@@ -24,7 +24,7 @@ import { colors, useColors } from '../src/theme/colors';
 import { spacing, borderRadius } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
-import { Difficulty, CONTINUE_COST } from '../src/engine/types';
+import { Difficulty } from '../src/engine/types';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
 
 export default function GameScreen() {
@@ -48,7 +48,6 @@ export default function GameScreen() {
   const resumeGame = useGameStore((s) => s.resumeGame);
   const resetGame = useGameStore((s) => s.resetGame);
   const continueGame = useGameStore((s) => s.continueGame);
-  const spendMochis = useDailyChallengeStore((s) => s.spendMochis);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Daily challenge store
@@ -133,12 +132,8 @@ export default function GameScreen() {
   );
 
   const handleContinue = useCallback(() => {
-    const cost = CONTINUE_COST[difficulty];
-    const spent = spendMochis(cost, 'continue');
-    if (spent) {
-      continueGame();
-    }
-  }, [difficulty, spendMochis, continueGame]);
+    continueGame();
+  }, [continueGame]);
 
   // Settings modal handlers with pause state preservation
   const openSettingsModal = useCallback(() => {
@@ -199,6 +194,7 @@ export default function GameScreen() {
         onPlayAgain={handlePlayAgain}
         onGoHome={handleGoHome}
         onContinue={handleContinue}
+        onGetFishies={() => router.push('/(tabs)/store')}
         isDaily={isDaily}
       />
 

@@ -26,6 +26,7 @@ import {
 import { useCurrentStreak } from '../../src/stores/dailyChallengeStore';
 import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { runEconomyV2Migration } from '../../src/services/economyMigration';
 
 // MARK: - Constants
 
@@ -48,10 +49,14 @@ export default function HomeScreen() {
   const totalMochis = useTotalMochiPoints();
   const totalFishies = useTotalFishyPoints();
 
-  // Load state on mount
+  // Run economy v2 migration, load state, then apply daily login bonus if new day
   useEffect(() => {
-    loadState();
-    loadFishyState();
+    (async () => {
+      await runEconomyV2Migration();
+      loadState();
+      loadFishyState();
+      useDailyChallengeStore.getState().applyDailyLoginBonusIfNeeded();
+    })();
   }, [loadState, loadFishyState]);
 
   const handleTechniquesPress = () => {
