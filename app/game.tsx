@@ -197,7 +197,6 @@ export default function GameScreen() {
         onPlayAgain={handlePlayAgain}
         onGoHome={handleGoHome}
         onContinue={handleContinue}
-        onGetFishies={() => router.push('/(tabs)/store')}
         isDaily={isDaily}
       />
 

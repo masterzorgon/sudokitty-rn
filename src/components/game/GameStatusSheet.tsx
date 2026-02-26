@@ -29,7 +29,6 @@ export interface GameStatusSheetProps {
   onPlayAgain: (difficulty: Difficulty) => void;
   onGoHome: () => void;
   onContinue: () => void;
-  onGetFishies?: () => void;
   isDaily: boolean;
 }
 
@@ -37,7 +36,6 @@ export function GameStatusSheet({
   onPlayAgain,
   onGoHome,
   onContinue,
-  onGetFishies,
   isDaily,
 }: GameStatusSheetProps) {
   const c = useColors();
@@ -124,15 +122,14 @@ export function GameStatusSheet({
                 Total: {rewardBreakdown.total} fishies
               </Text>
             </View>
-          ) : (
+          ) : isWon ? (
             <Text style={styles.message}>
-              {isWon ? `you earned ${fishiesEarned} fishies!` : 'too many mistakes...'}
+              you earned {fishiesEarned} fishies!
             </Text>
-          )}
+          ) : null}
 
           {showContinue && (
             <View style={styles.continueSection}>
-              <Text style={styles.mochiBalance}>{totalFishies} fishies</Text>
               <SkeuButton
                 onPress={handlePrimaryPress}
                 variant="primary"
@@ -147,15 +144,6 @@ export function GameStatusSheet({
                     : 'watch ad to continue'}
                 </Text>
               </SkeuButton>
-              {!canAffordContinue && onGetFishies && (
-                <Pressable
-                  style={styles.getFishiesRow}
-                  onPress={() => handleClose(onGetFishies)}
-                  hitSlop={8}
-                >
-                  <Text style={[styles.getFishiesText, { color: c.accent }]}>Get Fishies</Text>
-                </Pressable>
-              )}
             </View>
           )}
 
@@ -259,10 +247,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     gap: spacing.sm,
   },
-  mochiBalance: {
-    ...typography.caption,
-    color: colors.textLight,
-  },
   primaryButton: {
     alignSelf: 'stretch',
     width: '100%',
@@ -275,12 +259,6 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     ...typography.button,
-  },
-  getFishiesRow: {
-    paddingVertical: spacing.xs,
-  },
-  getFishiesText: {
-    ...typography.caption,
   },
   secondaryRow: {
     width: '100%',
