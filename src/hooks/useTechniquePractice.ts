@@ -205,7 +205,10 @@ export function useTechniquePractice() {
     if (phase === 'practice' && !practicePuzzle) {
       resetFindState();
       loadPuzzleAsync(
-        (ps) => setPracticePuzzle(ps),
+        (ps) => {
+          setPracticePuzzle(ps);
+          setStatusOverride(null);
+        },
         () => {
           setGenerationError('Could not generate a practice puzzle.');
           setStatusOverride('error');
@@ -329,7 +332,10 @@ export function useTechniquePractice() {
     resetFindState();
     setPracticePuzzle(null);
     loadPuzzleAsync(
-      (ps) => setPracticePuzzle(ps),
+      (ps) => {
+        setPracticePuzzle(ps);
+        setStatusOverride(null);
+      },
       () => setStatusOverride('error'),
     );
   }, [loadPuzzleAsync, resetFindState]);
