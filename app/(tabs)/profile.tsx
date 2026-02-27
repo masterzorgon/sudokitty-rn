@@ -1,7 +1,7 @@
 // Stats screen — Analytics dashboard with stat cards and activity calendar
 
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, useColors } from '../../src/theme/colors';
@@ -18,6 +18,7 @@ import {
   ActivityCalendar,
 } from '../../src/components/home';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 
 export default function ProfileScreen() {
   const c = useColors();
@@ -34,14 +35,13 @@ export default function ProfileScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <AtmosphericGradient />
       <AtmosphericGradient reverse intensity="low" />
+      <ScreenHeader title="stats" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         bounces
       >
-        {/* Header */}
-        <Text style={styles.title}>stats</Text>
 
         {/* Activity Calendar */}
         <View style={styles.section}>
@@ -94,12 +94,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  title: {
-    ...typography.largeTitle,
-    color: colors.textPrimary,
-    marginBottom: spacing.lg,
+    paddingTop: 0,
   },
   section: {
     marginBottom: spacing.xl,

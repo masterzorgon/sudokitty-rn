@@ -21,7 +21,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const tabs: TabConfig[] = [
   { name: 'index', icon: 'home', label: 'home' },
   { name: 'store', icon: 'shopping-bag', label: 'store' },
-  { name: 'settings', icon: 'user', label: 'settings' },
+  { name: 'settings', icon: 'settings', label: 'settings' },
 ];
 
 interface NavIconProps {

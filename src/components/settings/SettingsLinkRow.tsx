@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 56,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.cardBackground,
   },
   borderBottom: {
     borderBottomWidth: StyleSheet.hairlineWidth,

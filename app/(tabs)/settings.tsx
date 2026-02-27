@@ -18,6 +18,8 @@ import {
   SettingsLinkRow,
 } from '../../src/components/settings';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
+import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import {
   useSettingsStore,
   useSoundsEnabled,
@@ -174,13 +176,12 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <AtmosphericGradient />
       <AtmosphericGradient reverse intensity="low" />
+      <ScreenHeader title="settings" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <Text style={styles.title}>settings</Text>
 
         {/* Appearance - Theme Color Picker */}
         <SettingsSection title="appearance">
@@ -315,7 +316,7 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Reset Progress (standalone, not in a section) */}
-        <View style={styles.resetContainer}>
+        <SkeuCard borderRadius={borderRadius.lg} style={styles.resetContainer}>
           <SettingsLinkRow
             label="reset progress"
             onPress={handleResetProgress}
@@ -324,7 +325,7 @@ export default function SettingsScreen() {
             accessibilityHint="Delete all game progress and statistics"
             isLast
           />
-        </View>
+        </SkeuCard>
 
       </ScrollView>
     </SafeAreaView>
@@ -342,19 +343,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingTop: 0,
     // Extra bottom padding to clear the floating SplitNavBar (~106px)
     paddingBottom: 120,
   },
-  title: {
-    ...typography.largeTitle,
-    color: colors.textPrimary,
-    marginBottom: spacing.xl,
-  },
   resetContainer: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
     marginBottom: spacing.xl,
   },
   footer: {

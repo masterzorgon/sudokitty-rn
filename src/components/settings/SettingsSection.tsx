@@ -1,12 +1,10 @@
-// Settings section wrapper component
-// Renders section header and wraps children in a card container
-
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
+import { SkeuCard } from '../ui/Skeuomorphic';
 
 interface SettingsSectionProps {
   title: string;
@@ -17,7 +15,9 @@ export function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
-      <View style={styles.card}>{children}</View>
+      <SkeuCard borderRadius={borderRadius.lg}>
+        {children}
+      </SkeuCard>
     </View>
   );
 }
@@ -33,10 +33,5 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: spacing.sm,
     marginLeft: spacing.xs,
-  },
-  card: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
   },
 });

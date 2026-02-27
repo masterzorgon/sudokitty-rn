@@ -2,14 +2,14 @@
 // Features split-flap animation for Japanese to English text transition
 
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { playFeedback } from '../../src/utils/feedback';
 
-import { colors, useColors } from '../../src/theme/colors';
-import { typography, fontFamilies } from '../../src/theme/typography';
+import { useColors } from '../../src/theme/colors';
+import { fontFamilies } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
   useDailyChallengeStore,
@@ -23,6 +23,7 @@ import {
   PointsHeaderPill,
 } from '../../src/components/home';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SpeechBubble } from '../../src/components/ui/SpeechBubble';
 import { getRandomWelcomeMessage } from '../../src/constants/welcomeMessages';
 import { runEconomyV2Migration } from '../../src/services/economyMigration';
@@ -102,13 +103,15 @@ export default function HomeScreen() {
       <AtmosphericGradient />
       <AtmosphericGradient reverse intensity="low" />
 
+      <Animated.View entering={FadeIn.duration(400)}>
+        <ScreenHeader
+          title="sudokitty"
+          left={<View />}
+          right={<PointsHeaderPill type="mochis" value={totalMochis} onPress={handleStorePress} />}
+        />
+      </Animated.View>
+
       <View style={styles.content}>
-        {/* Header row: title | mochi pill */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
-          <View style={styles.headerSpacer} />
-          <Text style={[styles.headerTitle, { color: c.textPrimary }]}>sudokitty</Text>
-          <PointsHeaderPill type="mochis" value={totalMochis} onPress={handleStorePress} />
-        </Animated.View>
 
         {/* Mochi Cat Hero Section */}
         <View style={styles.heroSection}>
@@ -169,28 +172,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  headerSpacer: {
-    width: 52,
-  },
-  headerTitle: {
-    ...typography.largeTitle,
-    textAlign: 'center',
-    flex: 1,
-    marginHorizontal: spacing.sm,
-  },
-  title: {
-    ...typography.largeTitle,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    flex: 1,
   },
   heroSection: {
     alignItems: 'center',

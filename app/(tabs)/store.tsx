@@ -15,6 +15,7 @@ import { useColors } from '../../src/theme/colors';
 import { typography, fontFamilies } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuButton, SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
@@ -285,11 +286,13 @@ export default function StoreScreen() {
       <AtmosphericGradient />
       <AtmosphericGradient reverse intensity="low" />
 
+      <ScreenHeader title="store" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+
         {/* Balance */}
         <View style={styles.balanceRow}>
           <MochiPointIcon width={24} height={24} />
@@ -460,6 +463,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.lg,
+    paddingTop: 0,
     paddingBottom: spacing.xxl,
   },
   balanceRow: {

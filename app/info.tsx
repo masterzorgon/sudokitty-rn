@@ -7,6 +7,7 @@ import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { BackButton } from '../src/components/ui/BackButton';
+import { SkeuCard } from '../src/components/ui/Skeuomorphic';
 import { MochiCat } from '../src/components/home';
 
 const INFO_ROWS: { label: string; getValue: (version: string) => string }[] = [
@@ -33,7 +34,7 @@ export default function InfoScreen() {
           <Text style={styles.versionSubtitle}>version {appVersion}</Text>
         </View>
 
-        <View style={styles.infoCard}>
+        <SkeuCard borderRadius={borderRadius.lg}>
           {INFO_ROWS.map((row, i) => (
             <View
               key={row.label}
@@ -46,7 +47,7 @@ export default function InfoScreen() {
               <Text style={styles.infoValue}>{row.getValue(appVersion)}</Text>
             </View>
           ))}
-        </View>
+        </SkeuCard>
       </View>
 
       <View style={styles.footer}>
@@ -84,11 +85,6 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.textSecondary,
     marginTop: spacing.xs,
-  },
-  infoCard: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
   },
   infoRow: {
     flexDirection: 'row',
