@@ -13,6 +13,7 @@ import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { initRevenueCat } from '../src/lib/revenueCat';
 import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStore';
 import { configureAudioSession } from '../src/services/audioService';
+import { preloadInterstitial, preloadRewarded } from '../src/services/adService';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -73,6 +74,9 @@ function RootLayoutNav() {
       usePremiumStore.getState().syncStatus();
       startPremiumListener();
     });
+    // Preload ads so they're ready when needed
+    preloadInterstitial();
+    preloadRewarded();
   }, []);
 
   // Re-prefetch puzzle cache when the app returns to the foreground

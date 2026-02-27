@@ -64,7 +64,11 @@ const ActionButton = memo(({
   );
 });
 
-export const ActionButtons = memo(() => {
+interface ActionButtonsProps {
+  onHintUnavailable?: () => void;
+}
+
+export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) => {
   const undo = useGameStore((s) => s.undo);
   const canUndo = useGameStore((s) => s.canUndo);
   const eraseCell = useGameStore((s) => s.eraseCell);
@@ -75,6 +79,18 @@ export const ActionButtons = memo(() => {
   const canUseHint = useCanUseHint();
 
   const isPlaying = gameStatus === 'playing';
+
+  const handleHintPress = () => {
+    if (canUseHint) {
+      useHint();
+    } else {
+      onHintUnavailable?.();
+    }
+  };
+
+  const hintDisabled = onHintUnavailable
+    ? !isPlaying
+    : !isPlaying || !canUseHint;
 
   return (
     <View style={styles.container}>
@@ -100,8 +116,8 @@ export const ActionButtons = memo(() => {
       <ActionButton
         icon="bulb-outline"
         label="hint"
-        onPress={useHint}
-        disabled={!isPlaying || !canUseHint}
+        onPress={handleHintPress}
+        disabled={hintDisabled}
       />
     </View>
   );

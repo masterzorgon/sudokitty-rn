@@ -15,6 +15,7 @@ import {
   GameSettingsModal,
   GameStatusSheet,
   HintModal,
+  HintAdSheet,
 } from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
@@ -26,6 +27,8 @@ import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty } from '../src/engine/types';
 import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
+import { showInterstitialIfReady } from '../src/services/adService';
+import { usePremiumStore } from '../src/stores/premiumStore';
 
 export default function GameScreen() {
   const c = useColors();
@@ -58,6 +61,9 @@ export default function GameScreen() {
 
   // Settings modal state
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+
+  // Hint ad sheet state
+  const [hintAdSheetVisible, setHintAdSheetVisible] = useState(false);
   const wasPausedBeforeModal = useRef(false);
 
   // Mascot message hook
@@ -124,14 +130,19 @@ export default function GameScreen() {
     router.back();
   }, [resetGame, router]);
 
+  const isPremium = usePremiumStore((s) => s.isPremium);
+
   const handlePlayAgain = useCallback(
-    (difficulty: Difficulty) => {
+    async (difficulty: Difficulty) => {
+      if (!isPremium) {
+        await showInterstitialIfReady();
+      }
       newGame(difficulty);
       setTimeout(() => {
         startTimer();
       }, startGameAnimations.controlsDelay);
     },
-    [newGame, startTimer]
+    [newGame, startTimer, isPremium]
   );
 
   const handleContinue = useCallback(() => {
@@ -183,7 +194,9 @@ export default function GameScreen() {
       <View style={styles.bottomZone}>
         <View style={styles.controlsContainer}>
           <Animated.View entering={FadeIn.duration(startGameAnimations.controlsFadeIn.duration)}>
-            <ActionButtons />
+            <ActionButtons
+              onHintUnavailable={!isPremium ? () => setHintAdSheetVisible(true) : undefined}
+            />
           </Animated.View>
 
           <Animated.View entering={FadeIn.delay(100).duration(startGameAnimations.controlsFadeIn.duration)}>
@@ -208,6 +221,12 @@ export default function GameScreen() {
 
       {/* Hint explanation modal */}
       <HintModal />
+
+      {/* Hint ad sheet for non-premium users */}
+      <HintAdSheet
+        visible={hintAdSheetVisible}
+        onClose={() => setHintAdSheetVisible(false)}
+      />
     </SafeAreaView>
   );
 }
