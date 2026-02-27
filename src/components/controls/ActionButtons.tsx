@@ -28,6 +28,7 @@ interface ActionButtonProps {
   onPress: () => void;
   isActive?: boolean;
   disabled?: boolean;
+  feedbackId?: 'erase' | 'notesToggle' | 'hint';
 }
 
 const ActionButton = memo(({
@@ -36,6 +37,7 @@ const ActionButton = memo(({
   onPress,
   isActive = false,
   disabled = false,
+  feedbackId,
 }: ActionButtonProps) => {
   const iconColor = disabled
     ? colors.textLight
@@ -52,6 +54,7 @@ const ActionButton = memo(({
         borderRadius={BUTTON_RADIUS}
         showHighlight={false}
         disabled={disabled}
+        feedbackId={feedbackId}
         contentStyle={styles.buttonFace}
         accessibilityLabel={`${label} button`}
       >
@@ -105,6 +108,7 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
         label="erase"
         onPress={eraseCell}
         disabled={!isPlaying}
+        feedbackId="erase"
       />
       <ActionButton
         icon={isNotesMode ? 'pencil' : 'pencil-outline'}
@@ -112,12 +116,14 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
         onPress={toggleNotesMode}
         isActive={isNotesMode}
         disabled={!isPlaying}
+        feedbackId="notesToggle"
       />
       <ActionButton
         icon="bulb-outline"
         label="hint"
         onPress={handleHintPress}
         disabled={hintDisabled}
+        feedbackId="hint"
       />
     </View>
   );

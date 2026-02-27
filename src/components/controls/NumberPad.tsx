@@ -6,6 +6,7 @@ import { View, StyleSheet, Text } from 'react-native';
 
 import { useGameStore, useRemainingCounts } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
+import { playFeedback } from '../../utils/feedback';
 import { SkeuButton } from '../ui/Skeuomorphic';
 
 const BUTTON_HEIGHT = 56;
@@ -89,14 +90,33 @@ export const NumberPad = memo(() => {
   const inputNumber = useGameStore((s) => s.inputNumber);
   const highlightedNumber = useGameStore((s) => s.highlightedNumber);
   const gameStatus = useGameStore((s) => s.gameStatus);
+  const isNotesMode = useGameStore((s) => s.isNotesMode);
   const remainingCounts = useRemainingCounts();
 
   const handleNumberPress = useCallback(
     (num: number) => {
       if (gameStatus !== 'playing') return;
-      inputNumber(num);
+      // Intentional silence: tapping fully-placed number (remaining=0) gets no feedback
+      if (remainingCounts[num] === 0) {
+        inputNumber(num);
+        return;
+      }
+      // Notes mode: selection tick (haptic only) per plan
+      if (isNotesMode) {
+        inputNumber(num);
+        playFeedback('selection');
+        return;
+      }
+      const result = inputNumber(num);
+      // Priority: gameWon > gameLost > unitComplete > correct > mistake
+      if (result.isGameWon) playFeedback('gameWon');
+      else if (result.isGameLost) playFeedback('gameLost');
+      else if (result.completedUnits.length > 0) playFeedback('unitComplete');
+      else if (result.isCorrect) playFeedback('correct');
+      else if (!result.isCorrect && result.completedUnits.length === 0)
+        playFeedback('mistake');
     },
-    [gameStatus, inputNumber]
+    [gameStatus, inputNumber, remainingCounts, isNotesMode]
   );
 
   const isDisabled = gameStatus !== 'playing';

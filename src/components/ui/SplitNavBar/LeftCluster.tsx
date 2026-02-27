@@ -8,7 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useColors } from '@/src/theme/colors';
-import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
+import { playFeedback } from '@/src/utils/feedback';
 import { springConfigs } from '@/src/theme/animations';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
 import { Skeu3D } from '../Skeuomorphic';
@@ -46,7 +46,7 @@ function NavIcon({ tab, isActive, onPress }: NavIconProps) {
   }));
 
   const handlePress = () => {
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     onPress();
   };
 

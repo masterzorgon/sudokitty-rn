@@ -12,7 +12,7 @@ import * as Haptics from 'expo-haptics';
 
 import { SKEU_TIMINGS, SKEU_DIMENSIONS } from '../theme/skeuomorphic';
 import { useReducedMotion } from './useReducedMotion';
-import { triggerHaptic } from '../utils/haptics';
+import { playFeedback, type FeedbackId } from '../utils/feedback';
 
 interface UseSkeuomorphicPressOptions {
   /** Scale factor when pressed (default: 0.96) */
@@ -23,8 +23,10 @@ interface UseSkeuomorphicPressOptions {
   duration?: number;
   /** Whether to trigger haptic feedback (default: true) */
   haptic?: boolean;
-  /** Haptic feedback style (default: Light) */
+  /** Feedback: 'tap' (light) or 'tapHeavy' (default: tap). Ignored if feedbackId is set. */
   hapticStyle?: Haptics.ImpactFeedbackStyle;
+  /** Override feedback with specific ID (e.g. 'erase', 'notesToggle', 'hint') */
+  feedbackId?: FeedbackId;
   /** Callback when pressed */
   onPress?: () => void;
   /** Whether the button is disabled */
@@ -39,6 +41,7 @@ export function useSkeuomorphicPress(options: UseSkeuomorphicPressOptions = {}) 
     duration = SKEU_TIMINGS.pressDuration,
     haptic = true,
     hapticStyle = Haptics.ImpactFeedbackStyle.Light,
+    feedbackId,
     onPress,
     disabled = false,
   } = options;
@@ -61,13 +64,19 @@ export function useSkeuomorphicPress(options: UseSkeuomorphicPressOptions = {}) 
 
   const handlePress = useCallback(() => {
     if (disabled) return;
-    // Haptics are preserved even with reduced motion (they're not visual)
-    // Uses centralized haptics utility which respects user settings
     if (haptic) {
-      triggerHaptic(hapticStyle);
+      if (feedbackId) {
+        playFeedback(feedbackId);
+      } else {
+        playFeedback(
+          hapticStyle === Haptics.ImpactFeedbackStyle.Medium
+            ? 'tapHeavy'
+            : 'tap'
+        );
+      }
     }
     onPress?.();
-  }, [haptic, hapticStyle, onPress, disabled]);
+  }, [haptic, hapticStyle, feedbackId, onPress, disabled]);
 
   const animatedStyle = useAnimatedStyle(() => {
     const currentScale = 1 - (1 - scale) * pressProgress.value;

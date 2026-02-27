@@ -26,7 +26,7 @@ import {
   useCompletionCount,
   COMPLETION_THRESHOLD,
 } from '../../src/stores/techniqueProgressStore';
-import { triggerHaptic, ImpactFeedbackStyle } from '../../src/utils/haptics';
+import { playFeedback } from '../../src/utils/feedback';
 import { trackPaywallOpened } from '../../src/utils/analytics';
 import { TECHNIQUE_IDS } from '../../src/engine/techniqueGenerator';
 import { prefetchPuzzles } from '../../src/services/puzzleCacheService';
@@ -225,12 +225,12 @@ export default function TechniquesListScreen() {
     const meta = getTechniqueMetadata(techniqueId);
     // Gate level 3-4 techniques behind premium
     if (!isPremium && meta && meta.level >= 3) {
-      triggerHaptic(ImpactFeedbackStyle.Light);
+      playFeedback('tap');
       trackPaywallOpened('technique_card');
       await presentPaywall();
       return;
     }
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     router.push({
       pathname: '/techniques/[id]',
       params: { id: techniqueId },

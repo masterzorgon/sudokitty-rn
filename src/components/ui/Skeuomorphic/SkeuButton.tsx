@@ -14,6 +14,7 @@ import {
   useThemedSkeuVariants,
 } from '../../../theme/skeuomorphic';
 import { useSkeuomorphicPress } from '../../../hooks/useSkeuomorphicPress';
+import type { FeedbackId } from '../../../utils/feedback';
 import { CornerRadii } from './SkeuContext';
 import { Skeu3D } from './Skeu3D';
 import { SheenOverlay } from './SheenOverlay';
@@ -42,8 +43,10 @@ export interface SkeuButtonProps {
   sheen?: boolean;
 
   // Animation
-  /** Haptic feedback style (default: Light) */
+  /** Haptic feedback style (default: Light). Ignored if feedbackId is set. */
   hapticStyle?: Haptics.ImpactFeedbackStyle;
+  /** Override with specific feedback (e.g. 'erase', 'notesToggle', 'hint') */
+  feedbackId?: FeedbackId;
   /** Disable built-in animation for custom animation (default: false) */
   disableAnimation?: boolean;
 
@@ -79,6 +82,7 @@ export function SkeuButton({
 
   // Animation
   hapticStyle = Haptics.ImpactFeedbackStyle.Light,
+  feedbackId,
   disableAnimation = false,
 
   // Layout
@@ -97,6 +101,7 @@ export function SkeuButton({
     onPress,
     disabled,
     hapticStyle,
+    feedbackId,
   });
 
   const themedVariants = useThemedSkeuVariants();

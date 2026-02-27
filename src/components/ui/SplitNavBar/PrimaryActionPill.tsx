@@ -9,7 +9,6 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 import { borderRadius } from '@/src/theme';
 
 import { PrimaryActionPillProps, LAYOUT } from './types';
@@ -39,10 +38,9 @@ export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryA
       <SkeuButton
         onPress={onPress}
         variant="primary"
-        // borderRadius={LAYOUT.rightPillRadius}
         borderRadius={borderRadius.xl}
         showHighlight={false}
-        hapticStyle={Haptics.ImpactFeedbackStyle.Medium}
+        feedbackId="tapHeavy"
         contentStyle={styles.face}
         accessibilityLabel={accessibilityLabel}
         testID={`primary-action-pill-${state}`}

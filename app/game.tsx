@@ -26,8 +26,9 @@ import { spacing, borderRadius } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty } from '../src/engine/types';
-import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
+import { playFeedback } from '../src/utils/feedback';
 import { showInterstitialIfReady } from '../src/services/adService';
+import { loadSfx, unloadSfx } from '../src/services/sfxService';
 import { usePremiumStore } from '../src/stores/premiumStore';
 
 export default function GameScreen() {
@@ -71,6 +72,14 @@ export default function GameScreen() {
 
   // Background music
   useBackgroundMusic();
+
+  // SFX lifecycle: load on mount, unload on unmount
+  useEffect(() => {
+    loadSfx();
+    return () => {
+      unloadSfx();
+    };
+  }, []);
 
   // Initialize game on mount
   useEffect(() => {
@@ -151,7 +160,7 @@ export default function GameScreen() {
 
   // Settings modal handlers with pause state preservation
   const openSettingsModal = useCallback(() => {
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     wasPausedBeforeModal.current = gameStatus === 'paused';
     if (gameStatus === 'playing') {
       pauseGame();

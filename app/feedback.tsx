@@ -32,8 +32,7 @@ import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { BackButton } from '../src/components/ui/BackButton';
 import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
-import * as Haptics from 'expo-haptics';
-import { triggerHaptic, ImpactFeedbackStyle } from '../src/utils/haptics';
+import { playFeedback } from '../src/utils/feedback';
 import { trackFeedbackSubmitted } from '../src/utils/analytics';
 import { supabase } from '../src/lib/supabase';
 
@@ -80,12 +79,12 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
 
   const handlePress = () => {
     if (disabled) return;
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     setIsOpen(true);
   };
 
   const handleSelect = (option: CategoryOption) => {
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     onSelect(option.id);
     setIsOpen(false);
   };
@@ -196,7 +195,7 @@ export default function FeedbackScreen() {
     if (!canSubmit || isSubmitting) return;
 
     setIsSubmitting(true);
-    triggerHaptic(ImpactFeedbackStyle.Medium);
+    playFeedback('tapHeavy');
 
     const deviceInfo = getDeviceInfo();
 
@@ -349,7 +348,7 @@ export default function FeedbackScreen() {
               variant={canSubmit ? 'primary' : 'disabled'}
               borderRadius={borderRadius.lg}
               disabled={!canSubmit}
-              hapticStyle={Haptics.ImpactFeedbackStyle.Medium}
+              feedbackId="tapHeavy"
               contentStyle={styles.ctaButtonContent}
               accessibilityLabel="Send Feedback"
               testID="send-feedback-button"

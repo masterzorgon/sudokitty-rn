@@ -6,7 +6,7 @@ import { View, StyleSheet, Text, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
+import { playFeedback } from '../../src/utils/feedback';
 
 import { colors, useColors } from '../../src/theme/colors';
 import { typography, fontFamilies } from '../../src/theme/typography';
@@ -67,22 +67,22 @@ export default function HomeScreen() {
   }, []);
 
   const handleTechniquesPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     router.push('/techniques');
   };
 
   const handleStreakPress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     router.push('/profile');
   };
 
   const handleStorePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     router.push('/store');
   };
 
   const handleDailyChallengePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     const dailyStore = useDailyChallengeStore.getState();
     if (dailyStore.isTodayCompleted()) {
       Alert.alert(

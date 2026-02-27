@@ -21,7 +21,7 @@ import {
 } from '../engine/validation';
 import { useTechniqueProgressStore } from '../stores/techniqueProgressStore';
 import { usePremiumStore } from '../stores/premiumStore';
-import { triggerHaptic, ImpactFeedbackStyle } from '../utils/haptics';
+import { playFeedback } from '../utils/feedback';
 import { Position, positionKey } from '../engine/types';
 import { TechniqueResult } from '../engine/solver/types';
 import { useSequence } from './useSequence';
@@ -240,12 +240,12 @@ export function useTechniquePractice() {
   }, [router]);
 
   const handleSequenceNext = useCallback(() => {
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     sequence.next();
   }, [sequence]);
 
   const handleSequencePrevious = useCallback(() => {
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     sequence.previous();
   }, [sequence]);
 
@@ -272,18 +272,18 @@ export function useTechniquePractice() {
         return next;
       });
     }
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('selection');
   }, [phase, practicePuzzle, isElimination, findPhase]);
 
   const handleConfirmPattern = useCallback(() => {
     setFindPhase('elimination');
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
   }, []);
 
   const handleBackToPattern = useCallback(() => {
     setFindPhase('pattern');
     setEliminationCells(new Set());
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
   }, []);
 
   const handleSubmitSelection = useCallback(() => {
@@ -320,7 +320,7 @@ export function useTechniquePractice() {
     }
 
     setValidationResult(result);
-    triggerHaptic(result.correct ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+    playFeedback(result.correct ? 'correct' : 'mistake');
 
     if (result.correct) {
       recordFindAttempt(techniqueId, true);

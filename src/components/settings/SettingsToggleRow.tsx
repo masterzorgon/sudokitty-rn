@@ -9,7 +9,7 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { SkeuToggle } from '../ui/Skeuomorphic';
-import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
+import { playFeedback } from '../../utils/feedback';
 
 interface SettingsToggleRowProps {
   label: string;
@@ -34,7 +34,7 @@ export function SettingsToggleRow({
 }: SettingsToggleRowProps) {
   const handleValueChange = useCallback(
     (newValue: boolean) => {
-      triggerHaptic(ImpactFeedbackStyle.Light);
+      playFeedback('tap');
       onValueChange(newValue);
     },
     [onValueChange]

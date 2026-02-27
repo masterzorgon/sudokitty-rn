@@ -13,7 +13,7 @@ import Animated, {
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
-import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
+import { playFeedback } from '../../utils/feedback';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -52,7 +52,7 @@ export function SettingsLinkRow({
 
   const handlePress = useCallback(() => {
     if (disabled) return;
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     onPress();
   }, [disabled, onPress]);
 

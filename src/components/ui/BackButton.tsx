@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 
 import { colors } from '../../theme/colors';
-import { triggerHaptic, ImpactFeedbackStyle } from '../../utils/haptics';
+import { playFeedback } from '../../utils/feedback';
 
 interface BackButtonProps {
   onPress?: () => void;
@@ -15,7 +15,7 @@ export function BackButton({ onPress, color = colors.textPrimary }: BackButtonPr
   const router = useRouter();
 
   const handlePress = useCallback(() => {
-    triggerHaptic(ImpactFeedbackStyle.Light);
+    playFeedback('tap');
     if (onPress) {
       onPress();
     } else {

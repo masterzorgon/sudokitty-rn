@@ -10,7 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { colors } from '@/src/theme/colors';
-import { triggerHaptic, ImpactFeedbackStyle } from '@/src/utils/haptics';
+import { playFeedback } from '@/src/utils/feedback';
 import { Difficulty } from '@/src/engine/types';
 import { FISHIES_BASE } from '@/src/constants/economy';
 import { MenuRowProps } from './types';
@@ -62,7 +62,7 @@ export function MenuRow({
   }, [isPressed]);
 
   const handlePress = useCallback(() => {
-    triggerHaptic(ImpactFeedbackStyle.Medium);
+    playFeedback('tapHeavy');
     onPress();
   }, [onPress]);
 

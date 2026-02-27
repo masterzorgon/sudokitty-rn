@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const STORAGE_KEY = '@sudokitty:lastWelcomeMessage';
 
 export const WELCOME_MESSAGES = [
-  "mochi has been in the walls o_o",
+  "ready to play :3",
 ] as const;
 
 /**
