@@ -22,7 +22,7 @@ import {
   StreakPill,
   PointsHeaderPill,
 } from '../../src/components/home';
-import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SpeechBubble } from '../../src/components/ui/SpeechBubble';
 import { getRandomWelcomeMessage } from '../../src/constants/welcomeMessages';
@@ -99,9 +99,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
-      {/* Atmospheric gradient background */}
-      <AtmosphericGradient />
-      <AtmosphericGradient reverse intensity="low" />
+      <ScreenBackground />
 
       <Animated.View entering={FadeIn.duration(400)}>
         <ScreenHeader

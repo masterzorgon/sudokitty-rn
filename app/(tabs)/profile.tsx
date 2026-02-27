@@ -17,7 +17,7 @@ import {
   StatCard,
   ActivityCalendar,
 } from '../../src/components/home';
-import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 
 export default function ProfileScreen() {
@@ -33,8 +33,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
-      <AtmosphericGradient />
-      <AtmosphericGradient reverse intensity="low" />
+      <ScreenBackground />
       <ScreenHeader title="stats" />
       <ScrollView
         style={styles.scrollView}

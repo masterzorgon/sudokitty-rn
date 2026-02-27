@@ -14,7 +14,7 @@ import type { PurchasesStoreProduct } from 'react-native-purchases';
 import { useColors } from '../../src/theme/colors';
 import { typography, fontFamilies } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
-import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuButton, SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
@@ -283,8 +283,7 @@ export default function StoreScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
-      <AtmosphericGradient />
-      <AtmosphericGradient reverse intensity="low" />
+      <ScreenBackground />
 
       <ScreenHeader title="store" />
       <ScrollView

@@ -1,23 +1,19 @@
-// Settings screen with grouped sections
-// Includes game preferences, learn, premium, support, and footer
-
 import React, { useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, Linking, Alert, Pressable } from 'react-native';
+import { StyleSheet, View, ScrollView, Linking, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
 
-import { colors, useColors } from '../../src/theme/colors';
-import { PALETTES, THEME_NAMES, type ThemeName } from '../../src/theme/palettes';
-import { typography } from '../../src/theme/typography';
+import { useColors } from '../../src/theme/colors';
+import { PALETTES, THEME_NAMES } from '../../src/theme/palettes';
 import { spacing, borderRadius } from '../../src/theme';
 import {
   SettingsSection,
   SettingsToggleRow,
   SettingsLinkRow,
 } from '../../src/components/settings';
-import { AtmosphericGradient } from '../../src/components/ui/AtmosphericGradient';
+import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import {
@@ -44,7 +40,6 @@ import {
   restorePurchases,
 } from '../../src/lib/revenueCat';
 
-// External URLs
 const RULES_URL = 'https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/';
 const PRIVACY_URL = 'https://example.com/privacy'; // TODO: Replace with actual privacy URL
 
@@ -67,34 +62,27 @@ export default function SettingsScreen() {
   const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
   const setColorTheme = useSettingsStore((s) => s.setColorTheme);
 
-  // Premium state
   const isPremium = useIsPremium();
 
-  // Store reset actions
   const resetGame = useGameStore((s) => s.resetGame);
   const resetDailyChallenge = useDailyChallengeStore((s) => s.resetState);
 
-  // App version
-  const appVersion = Constants.expoConfig?.version ?? '1.0.0';
-  const buildNumber =
-    Constants.expoConfig?.ios?.buildNumber ??
-    Constants.expoConfig?.android?.versionCode ??
-    '1';
-
-  // Handlers
-  const handleHowToPlay = useCallback(() => {
-    // TODO: Navigate to tutorial flow
-    Alert.alert('coming soon', 'the tutorial will be available in a future update.');
-  }, []);
-
-  const handleRules = useCallback(async () => {
-    try {
-      trackExternalLinkOpened('rules');
-      await Linking.openURL(RULES_URL);
-    } catch (error) {
-      Alert.alert('error', 'unable to open the link.');
-    }
-  }, []);
+  // Single navigation helper: string = internal route, object = external URL with analytics
+  const navigate = useCallback(
+    async (dest: string | { url: string; trackKey: string }) => {
+      if (typeof dest === 'string') {
+        router.push(dest as any);
+      } else {
+        try {
+          trackExternalLinkOpened(dest.trackKey);
+          await Linking.openURL(dest.url);
+        } catch {
+          Alert.alert('error', 'unable to open the link.');
+        }
+      }
+    },
+    [router],
+  );
 
   const handlePremiumToggle = useCallback(
     async (enabled: boolean, setter: (v: boolean) => void) => {
@@ -133,23 +121,6 @@ export default function SettingsScreen() {
     await presentCustomerCenter();
   }, []);
 
-  const handleSendFeedback = useCallback(() => {
-    router.push('/feedback');
-  }, [router]);
-
-  const handlePrivacy = useCallback(async () => {
-    try {
-      trackExternalLinkOpened('privacy');
-      await Linking.openURL(PRIVACY_URL);
-    } catch (error) {
-      Alert.alert('error', 'unable to open the link.');
-    }
-  }, []);
-
-  const handleAppInfo = useCallback(() => {
-    router.push('/info');
-  }, [router]);
-
   const handleResetProgress = useCallback(() => {
     Alert.alert(
       'reset progress',
@@ -160,10 +131,8 @@ export default function SettingsScreen() {
           text: 'reset',
           style: 'destructive',
           onPress: () => {
-            // Reset all stores except settings
             resetGame();
             resetDailyChallenge();
-            // TODO: Reset tutorial state when tutorialStore exists
             trackProgressReset();
             Alert.alert('done', 'your progress has been reset.');
           },
@@ -174,8 +143,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
-      <AtmosphericGradient />
-      <AtmosphericGradient reverse intensity="low" />
+      <ScreenBackground />
       <ScreenHeader title="settings" />
       <ScrollView
         style={styles.scrollView}
@@ -254,13 +222,18 @@ export default function SettingsScreen() {
         <SettingsSection title="learn">
           <SettingsLinkRow
             label="how to play"
-            onPress={handleHowToPlay}
+            onPress={() => navigate('/tutorial')}
             icon="help-circle"
-            accessibilityHint="Open the tutorial"
+            accessibilityHint="Open the interactive tutorial"
+          />
+          <SettingsLinkRow
+            label="advanced techniques"
+            onPress={() => navigate('/techniques')}
+            icon="award"
           />
           <SettingsLinkRow
             label="sudoku rules"
-            onPress={handleRules}
+            onPress={() => navigate({ url: RULES_URL, trackKey: 'rules' })}
             icon="book"
             isExternal
             isLast
@@ -296,26 +269,26 @@ export default function SettingsScreen() {
         <SettingsSection title="support">
           <SettingsLinkRow
             label="send feedback"
-            onPress={handleSendFeedback}
+            onPress={() => navigate('/feedback')}
             icon="message-circle"
             accessibilityHint="Send feedback to the developers"
           />
           <SettingsLinkRow
             label="privacy preferences"
-            onPress={handlePrivacy}
+            onPress={() => navigate({ url: PRIVACY_URL, trackKey: 'privacy' })}
             icon="shield"
             isExternal
           />
           <SettingsLinkRow
             label="app info"
-            onPress={handleAppInfo}
+            onPress={() => navigate('/info')}
             icon="info"
             accessibilityHint="View app information"
             isLast
           />
         </SettingsSection>
 
-        {/* Reset Progress (standalone, not in a section) */}
+        {/* Reset Progress */}
         <SkeuCard borderRadius={borderRadius.lg} style={styles.resetContainer}>
           <SettingsLinkRow
             label="reset progress"
@@ -344,24 +317,10 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: spacing.lg,
     paddingTop: 0,
-    // Extra bottom padding to clear the floating SplitNavBar (~106px)
     paddingBottom: 120,
   },
   resetContainer: {
     marginBottom: spacing.xl,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl,
-  },
-  versionText: {
-    ...typography.caption,
-    color: colors.textLight,
-    marginBottom: spacing.xs,
-  },
-  copyrightText: {
-    ...typography.small,
-    color: colors.textLight,
   },
   themePickerRow: {
     flexDirection: 'row',

@@ -1,10 +1,8 @@
-// Atmospheric gradient background with radial glow
-// Reusable across home screen and tutorial/showcase pages
-
 import React from 'react';
 import { StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Canvas, Circle, RadialGradient, vec } from '@shopify/react-native-skia';
+
 import { useColors } from '../../theme/colors';
 import { useColorTheme } from '../../stores/settingsStore';
 
@@ -12,19 +10,19 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const DEFAULT_GRADIENT_HEIGHT = SCREEN_HEIGHT * 0.45;
 const DEFAULT_GLOW_RADIUS = SCREEN_WIDTH * 0.6;
 
-export interface AtmosphericGradientProps {
+interface GradientLayerProps {
   height?: number;
   glowRadius?: number;
   reverse?: boolean;
   intensity?: 'high' | 'low';
 }
 
-export function AtmosphericGradient({
+function GradientLayer({
   height = DEFAULT_GRADIENT_HEIGHT,
   glowRadius = DEFAULT_GLOW_RADIUS,
   reverse = false,
   intensity = 'high',
-}: AtmosphericGradientProps) {
+}: GradientLayerProps) {
   const c = useColors();
   const theme = useColorTheme();
 
@@ -35,18 +33,19 @@ export function AtmosphericGradient({
 
   return (
     <>
-      {/* Linear gradient overlay */}
       <LinearGradient
         key={`grad-${theme}-${reverse}-${intensity}`}
         colors={gradientColors as any}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
-        style={[styles.gradientOverlay, { height, opacity }, positioning]}
+        style={[styles.layer, { height, opacity }, positioning]}
         pointerEvents="none"
       />
-      
-      {/* Radial glow at center */}
-      <Canvas key={`glow-${theme}-${reverse}-${intensity}`} style={[styles.glowCanvas, { height, opacity }, positioning]} pointerEvents="none">
+      <Canvas
+        key={`glow-${theme}-${reverse}-${intensity}`}
+        style={[styles.layer, { height, opacity }, positioning]}
+        pointerEvents="none"
+      >
         <Circle cx={SCREEN_WIDTH / 2} cy={glowY} r={glowRadius}>
           <RadialGradient
             c={vec(SCREEN_WIDTH / 2, glowY)}
@@ -59,13 +58,33 @@ export function AtmosphericGradient({
   );
 }
 
+interface ScreenBackgroundProps {
+  /** Show the top gradient. Default: true */
+  showTop?: boolean;
+  /** Intensity of the top gradient. Default: 'high' */
+  topIntensity?: 'high' | 'low';
+  /** Show the bottom reversed gradient. Default: true */
+  showBottom?: boolean;
+  /** Intensity of the bottom gradient. Default: 'low' */
+  bottomIntensity?: 'high' | 'low';
+}
+
+export function ScreenBackground({
+  showTop = true,
+  topIntensity = 'high',
+  showBottom = true,
+  bottomIntensity = 'low',
+}: ScreenBackgroundProps) {
+  return (
+    <>
+      {showTop && <GradientLayer intensity={topIntensity} />}
+      {showBottom && <GradientLayer reverse intensity={bottomIntensity} />}
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
-  gradientOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-  },
-  glowCanvas: {
+  layer: {
     position: 'absolute',
     left: 0,
     right: 0,
