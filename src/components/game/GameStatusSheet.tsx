@@ -14,14 +14,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 
 import { useGameStore } from '../../stores/gameStore';
-import { useFishyStore } from '../../stores/fishyStore';
+import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
 import { showRewardedAd } from '../../lib/rewardedAds';
 import { SkeuButton, SKEU_VARIANTS } from '../ui/Skeuomorphic';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
-import { Difficulty } from '../../engine/types';
-import { calculateFishyReward, calculateFishyRewardBreakdown, FISHIES_COST } from '../../constants/economy';
+import { Difficulty, calculateMochiReward, calculateMochiRewardBreakdown } from '../../engine/types';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -43,7 +42,6 @@ export function GameStatusSheet({
   const difficulty = useGameStore((s) => s.difficulty);
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const canContinue = useGameStore((s) => s.canContinue);
-  const totalFishies = useFishyStore((s) => s.totalFishyPoints);
 
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const visible = gameStatus === 'won' || gameStatus === 'lost';
@@ -76,21 +74,20 @@ export function GameStatusSheet({
   }
 
   const isWon = gameStatus === 'won';
-  const fishiesEarned = isWon ? calculateFishyReward(difficulty, timeElapsed) : 0;
-  const rewardBreakdown = isWon ? calculateFishyRewardBreakdown(difficulty, timeElapsed) : null;
+  // Daily challenges have flat reward; regular games have time-based reward
+  const mochisEarned = isWon
+    ? isDaily
+      ? useDailyChallengeStore.getState().getTodayChallenge().mochiPoints
+      : calculateMochiReward(difficulty, timeElapsed)
+    : 0;
+  const rewardBreakdown =
+    isWon && !isDaily ? calculateMochiRewardBreakdown(difficulty, timeElapsed) : null;
 
-  const continueCostFishies = FISHIES_COST.continue;
-  const canAffordContinue = totalFishies >= continueCostFishies;
   const showContinue = !isWon && canContinue();
 
   const handlePrimaryPress = async () => {
-    if (canAffordContinue) {
-      const spent = useFishyStore.getState().spendFishies(continueCostFishies, 'continue');
-      if (spent) handleClose(onContinue);
-    } else {
-      const earned = await showRewardedAd();
-      if (earned) handleClose(onContinue);
-    }
+    const earned = await showRewardedAd();
+    if (earned) handleClose(onContinue);
   };
 
   return (
@@ -113,18 +110,18 @@ export function GameStatusSheet({
           {isWon && rewardBreakdown ? (
             <View style={styles.rewardBreakdown}>
               <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
-                Base: {rewardBreakdown.base} fishies
+                Base: {rewardBreakdown.base} mochis
               </Text>
               <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
-                Time bonus: {rewardBreakdown.timeBonus} fishies
+                Time bonus: {rewardBreakdown.timeBonus} mochis
               </Text>
               <Text style={[styles.rewardBreakdownTotal, { color: c.textPrimary }]}>
-                Total: {rewardBreakdown.total} fishies
+                Total: {rewardBreakdown.total} mochis
               </Text>
             </View>
           ) : isWon ? (
             <Text style={styles.message}>
-              you earned {fishiesEarned} fishies!
+              you earned {mochisEarned} mochis!
             </Text>
           ) : null}
 
@@ -139,9 +136,7 @@ export function GameStatusSheet({
                 contentStyle={styles.primaryButtonContent}
               >
                 <Text style={[styles.primaryButtonText, { color: SKEU_VARIANTS.primary.textColor }]}>
-                  {canAffordContinue
-                    ? `continue (${continueCostFishies} fishies)`
-                    : 'watch ad to continue'}
+                  watch ad to continue
                 </Text>
               </SkeuButton>
             </View>

@@ -11,10 +11,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors } from '@/src/theme/colors';
 import { playFeedback } from '@/src/utils/feedback';
-import { Difficulty } from '@/src/engine/types';
-import { FISHIES_BASE } from '@/src/constants/economy';
+import { Difficulty, GAME_BASE_MOCHIS } from '@/src/engine/types';
 import { MenuRowProps } from './types';
-import FishyPointIcon from '../../../../assets/images/icons/fishy-point.svg';
+import MochiPointIcon from '../../../../assets/images/icons/mochi-point.svg';
 
 // Import mochi SVG characters for difficulty levels
 import MochiEasy from '../../../../assets/images/mochi/mochi-easy.svg';
@@ -50,7 +49,7 @@ export function MenuRow({
   isVisible,
   isLast,
 }: MenuRowProps) {
-  const fishiesRewardLabel = item.difficulty ? `${FISHIES_BASE[item.difficulty]}+` : null;
+  const mochisRewardLabel = item.difficulty ? `${GAME_BASE_MOCHIS[item.difficulty]}+` : null;
   const isPressed = useSharedValue(0);
 
   const handlePressIn = useCallback(() => {
@@ -90,13 +89,13 @@ export function MenuRow({
           return MochiIcon ? <MochiIcon width={55} height={55} /> : null;
         })()}
       </View>
-      {/* menu item label + fishies reward */}
+      {/* menu item label + mochis reward */}
       <View style={styles.labelContainer}>
         <Text style={styles.label}>{item.label}</Text>
-        {fishiesRewardLabel != null && (
+        {mochisRewardLabel != null && (
           <View style={styles.rewardRow}>
-            <Text style={styles.rewardText}>earn {fishiesRewardLabel} fishies</Text>
-            <FishyPointIcon width={20} height={20} />
+            <Text style={styles.rewardText}>earn {mochisRewardLabel} mochis</Text>
+            <MochiPointIcon width={20} height={20} />
           </View>
         )}
       </View>

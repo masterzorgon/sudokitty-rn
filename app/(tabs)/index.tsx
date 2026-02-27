@@ -16,7 +16,6 @@ import {
   useTotalMochiPoints,
   useCurrentStreak,
 } from '../../src/stores/dailyChallengeStore';
-import { useFishyStore, useTotalFishyPoints } from '../../src/stores/fishyStore';
 import {
   MochiCat,
   TechniquesCTA,
@@ -44,9 +43,7 @@ export default function HomeScreen() {
 
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
-  const loadFishyState = useFishyStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
-  const totalFishies = useTotalFishyPoints();
   const totalMochis = useTotalMochiPoints();
 
   // Welcome message for speech bubble
@@ -57,10 +54,9 @@ export default function HomeScreen() {
     (async () => {
       await runEconomyV2Migration();
       loadState();
-      loadFishyState();
       useDailyChallengeStore.getState().applyDailyLoginBonusIfNeeded();
     })();
-  }, [loadState, loadFishyState]);
+  }, [loadState]);
 
   useEffect(() => {
     getRandomWelcomeMessage().then(setWelcomeMessage);
@@ -107,9 +103,9 @@ export default function HomeScreen() {
       <AtmosphericGradient reverse intensity="low" />
 
       <View style={styles.content}>
-        {/* Header row: fishy pill | title | mochi pill */}
+        {/* Header row: title | mochi pill */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.headerRow}>
-          <PointsHeaderPill type="fishies" value={totalFishies} onPress={handleStorePress} />
+          <View style={styles.headerSpacer} />
           <Text style={[styles.headerTitle, { color: c.textPrimary }]}>sudokitty</Text>
           <PointsHeaderPill type="mochis" value={totalMochis} onPress={handleStorePress} />
         </Animated.View>
@@ -180,6 +176,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
+  },
+  headerSpacer: {
+    width: 52,
   },
   headerTitle: {
     ...typography.largeTitle,

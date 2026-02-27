@@ -2,11 +2,10 @@
 // All purchase/entitlement logic lives here. Other modules import from
 // this file, never directly from react-native-purchases.
 
-import Purchases, { LOG_LEVEL, CustomerInfo } from 'react-native-purchases';
+import Purchases, { LOG_LEVEL, CustomerInfo, PurchasesStoreProduct } from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
-
-import { FISHIES_PACK_AMOUNTS } from '../constants/economy';
-import { useFishyStore } from '../stores/fishyStore';
+import { MOCHI_PACK_PRODUCT_IDS, MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../constants/economy';
+import { useDailyChallengeStore } from '../stores/dailyChallengeStore';
 
 const API_KEY = process.env.EXPO_PUBLIC_RC_API_KEY ?? '';
 const ENTITLEMENT_ID = 'Sudokitty Premium';
@@ -114,51 +113,35 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
 }
 
 // ============================================
-// Fishies packs (consumables)
+// Mochi Pack Consumables
 // ============================================
 
-const FISHIES_PACK_PRODUCT_IDS = [
-  'fishies_150',
-  'fishies_350',
-  'fishies_1000',
-  'fishies_2200',
-  'fishies_5000',
-] as const;
-
-/** Fetch store products for Fishies packs (for display and purchase). */
-export async function getFishiesPackProducts() {
+/** Fetch mochi pack products from RevenueCat. Returns empty array on failure. */
+export async function getMochiPackProducts(): Promise<PurchasesStoreProduct[]> {
   try {
-    return await Purchases.getProducts([...FISHIES_PACK_PRODUCT_IDS]);
+    return await Purchases.getProducts([...MOCHI_PACK_PRODUCT_IDS]);
   } catch {
-    return [] as Awaited<ReturnType<typeof Purchases.getProducts>>;
+    return [];
   }
 }
 
-export type PurchaseFishiesPackResult =
-  | { success: true; amount: number }
-  | { success: false; cancelled?: boolean };
-
-/**
- * Purchase a Fishies pack by product ID. On success, grants Fishies client-side and returns amount.
- * For consumables, Restore does not re-grant; this is the only way to get IAP Fishies.
- */
-export async function purchaseFishiesPack(productId: string): Promise<PurchaseFishiesPackResult> {
-  const amount = FISHIES_PACK_AMOUNTS[productId];
-  if (amount == null || amount <= 0) {
-    return { success: false };
-  }
+/** Purchase a mochi pack consumable. Credits mochis on success. */
+export async function purchaseMochiPack(
+  product: PurchasesStoreProduct,
+): Promise<{ success: boolean; amount?: number }> {
   try {
-    const products = await Purchases.getProducts([productId]);
-    const product = products[0];
-    if (!product) {
-      return { success: false };
-    }
     await Purchases.purchaseStoreProduct(product);
-    useFishyStore.getState().addFishyPoints(amount, 'iap');
+
+    const productId = product.identifier as MochiPackProductId;
+    const amount = MOCHI_PACK_AMOUNTS[productId];
+    if (!amount) return { success: false };
+
+    useDailyChallengeStore.getState().addMochiHistoryEntry(amount, 'iap');
+
     return { success: true, amount };
-  } catch (e: unknown) {
-    const err = e as { userCancelled?: boolean };
-    return { success: false, cancelled: err?.userCancelled === true };
+  } catch (error: any) {
+    if (error.userCancelled) return { success: false };
+    throw error;
   }
 }
 

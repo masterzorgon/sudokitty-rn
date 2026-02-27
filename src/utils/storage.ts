@@ -11,7 +11,6 @@ export const STORAGE_KEYS = {
   PUZZLE_CACHE: '@sudokitty/puzzle_cache',
   GAME_PUZZLE_CACHE: '@sudokitty/game_puzzle_cache',
   DEVICE_ID: '@sudokitty/device_id',
-  FISHY_STATE: '@sudokitty/fishy_state',
   ECONOMY_V2_APPLIED: '@sudokitty/economy_v2_applied',
 } as const;
 

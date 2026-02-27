@@ -9,8 +9,7 @@ import { useGameStore } from '../src/stores/gameStore';
 import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
-import { Difficulty, DIFFICULTY_CONFIG } from '../src/engine/types';
-import { getFishiesRangeLabel } from '../src/constants/economy';
+import { Difficulty, DIFFICULTY_CONFIG, getMochisRangeLabel } from '../src/engine/types';
 
 interface DifficultyButtonProps {
   difficulty: Difficulty;
@@ -30,7 +29,7 @@ const DifficultyButton = ({ difficulty, onPress }: DifficultyButtonProps) => {
       onPress={() => onPress(difficulty)}
     >
       <Text style={styles.difficultyName}>{config.name}</Text>
-      <Text style={styles.difficultyComment}>earn {getFishiesRangeLabel(difficulty)} fishies</Text>
+      <Text style={styles.difficultyComment}>earn {getMochisRangeLabel(difficulty)} mochis</Text>
     </Pressable>
   );
 };

@@ -25,12 +25,11 @@ import {
   getBoxIndex,
   getRelatedPositions,
   positionKey,
+  calculateMochiReward,
 } from '../engine/types';
 import { generatePuzzle, generateDailyPuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
 import { useSettingsStore } from './settingsStore';
-import { useFishyStore } from './fishyStore';
-import { calculateFishyReward, FIRST_PUZZLE_FISHIES, FISHIES_COST } from '../constants/economy';
 import {
   getCachedGamePuzzle,
   consumeAndRefillGamePuzzle,
@@ -256,10 +255,7 @@ interface GameActions {
   continueGame: () => boolean;
   canContinue: () => boolean;
 
-  // Fishies consumables (in-game)
   addPaidHints: (count: number) => void;
-  buyOneLife: () => boolean;
-  buyFullLifeRefill: () => boolean;
 
   // Progress
   getProgress: () => number;
@@ -540,11 +536,8 @@ export const useGameStore = create<GameState & GameActions>()(
 
         const { unlimitedHints } = useSettingsStore.getState();
         const canUseFree = unlimitedHints || state.hintsUsed < MAX_HINTS;
-        if (!canUseFree) {
-          if (state.paidHintsRemaining <= 0) {
-            const spent = useFishyStore.getState().spendFishies(FISHIES_COST.hint, 'hint');
-            if (!spent) return null;
-          }
+        if (!canUseFree && state.paidHintsRemaining <= 0) {
+          return null; // Caller shows HintAdSheet for ad-based hint
         }
 
         const usePaidSlot = !canUseFree;
@@ -677,11 +670,8 @@ export const useGameStore = create<GameState & GameActions>()(
 
         const { unlimitedHints } = useSettingsStore.getState();
         const canUseFree = unlimitedHints || state.hintsUsed < MAX_HINTS;
-        if (!canUseFree) {
-          if (state.paidHintsRemaining <= 0) {
-            const spent = useFishyStore.getState().spendFishies(FISHIES_COST.hint, 'hint');
-            if (!spent) return;
-          }
+        if (!canUseFree && state.paidHintsRemaining <= 0) {
+          return; // No hint available; caller can show HintAdSheet
         }
         const usePaidSlot = !canUseFree;
 
@@ -740,28 +730,6 @@ export const useGameStore = create<GameState & GameActions>()(
         set((state) => {
           state.paidHintsRemaining += count;
         });
-      },
-
-      buyOneLife: (): boolean => {
-        const state = get();
-        if (state.gameStatus !== 'playing' || state.mistakeCount <= 0) return false;
-        const spent = useFishyStore.getState().spendFishies(FISHIES_COST.life, 'life');
-        if (!spent) return false;
-        set((draft) => {
-          draft.mistakeCount = Math.max(0, draft.mistakeCount - 1);
-        });
-        return true;
-      },
-
-      buyFullLifeRefill: (): boolean => {
-        const state = get();
-        if (state.gameStatus !== 'playing') return false;
-        const spent = useFishyStore.getState().spendFishies(FISHIES_COST.life_refill, 'life_refill');
-        if (!spent) return false;
-        set((draft) => {
-          draft.mistakeCount = 0;
-        });
-        return true;
       },
 
       // Clear hint highlight cells
@@ -882,20 +850,23 @@ export const useGameStore = create<GameState & GameActions>()(
   )
 );
 
-// Record game win for streak tracking and award Fishies (win only)
+// Record game win for streak tracking and award Mochis (win only)
 useGameStore.subscribe(
   (s) => s.gameStatus,
   (gameStatus) => {
     if (gameStatus === 'won') {
       useDailyChallengeStore.getState().recordGameWin();
 
-      const { difficulty, timeElapsed } = useGameStore.getState();
-      const fishyReward = calculateFishyReward(difficulty, timeElapsed);
-      useFishyStore.getState().addFishyPoints(fishyReward, 'game');
+      const { difficulty, timeElapsed, isDaily } = useGameStore.getState();
+      // Regular games: award mochis. Daily challenges get mochis from completeChallenge.
+      if (!isDaily) {
+        const mochiReward = calculateMochiReward(difficulty, timeElapsed);
+        useDailyChallengeStore.getState().addMochiHistoryEntry(mochiReward, 'game');
+      }
 
       const isFirstPuzzleOfDay = useDailyChallengeStore.getState().recordFirstPuzzleOfDayIfNeeded();
       if (isFirstPuzzleOfDay) {
-        useFishyStore.getState().addFishyPoints(FIRST_PUZZLE_FISHIES, 'first_puzzle');
+        useDailyChallengeStore.getState().addMochiHistoryEntry(15, 'bonus');
       }
     }
   },
@@ -927,14 +898,8 @@ export const useHintsUsed = () => useGameStore((s) => s.hintsUsed);
 export const useCanUseHint = () => {
   const hintsUsed = useGameStore((s) => s.hintsUsed);
   const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
-  const totalFishies = useFishyStore((s) => s.totalFishyPoints);
   const { unlimitedHints } = useSettingsStore.getState();
-  return (
-    unlimitedHints ||
-    hintsUsed < MAX_HINTS ||
-    paidHintsRemaining > 0 ||
-    totalFishies >= FISHIES_COST.hint
-  );
+  return unlimitedHints || hintsUsed < MAX_HINTS || paidHintsRemaining > 0;
 };
 export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);

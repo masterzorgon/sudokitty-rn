@@ -6,6 +6,8 @@ import { AppState, AppStateStatus } from 'react-native';
 import * as audioService from '../services/audioService';
 import { useSoundsEnabled } from '../stores/settingsStore';
 import { useGameStore } from '../stores/gameStore';
+import { useActiveTrackId } from '../stores/ownedTracksStore';
+import { getTrackById } from '../constants/backingTracks';
 
 // ============================================
 // Constants
@@ -21,10 +23,12 @@ const FADE_DURATION_MS = 500;
 export function useBackgroundMusic() {
   const soundsEnabled = useSoundsEnabled();
   const gameStatus = useGameStore((s) => s.gameStatus);
+  const activeTrackId = useActiveTrackId();
   
   const mountedRef = useRef(true);
   const currentFadeRef = useRef<{ cancel: () => void } | null>(null);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const initialTrackRef = useRef(activeTrackId);
 
   // ============================================
   // Load and initialize on mount
@@ -34,16 +38,15 @@ export function useBackgroundMusic() {
     mountedRef.current = true;
 
     (async () => {
-      await audioService.loadBackgroundMusic();
+      const track = getTrackById(initialTrackRef.current);
+      await audioService.loadBackgroundMusic(track?.asset);
       
       if (!mountedRef.current) return;
 
-      // Read current gameStatus from store (closure value may be stale after async load)
       const currentStatus = useGameStore.getState().gameStatus;
 
-      // Auto-start if conditions are right
       if (soundsEnabled && currentStatus === 'playing') {
-        await audioService.play(0); // Start at 0 for fade-in
+        await audioService.play(0);
         if (mountedRef.current) {
           currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
         }
@@ -53,13 +56,11 @@ export function useBackgroundMusic() {
     return () => {
       mountedRef.current = false;
       
-      // Cancel any in-flight fade
       if (currentFadeRef.current) {
         currentFadeRef.current.cancel();
         currentFadeRef.current = null;
       }
 
-      // Fade out and unload
       (async () => {
         if (await audioService.isPlaying()) {
           const fadeOut = audioService.fade(0, FADE_DURATION_MS);
@@ -71,6 +72,19 @@ export function useBackgroundMusic() {
       })();
     };
   }, []);
+
+  // ============================================
+  // Watch activeTrackId changes
+  // ============================================
+
+  useEffect(() => {
+    if (!mountedRef.current || !audioService.isLoaded()) return;
+
+    const track = getTrackById(activeTrackId);
+    if (track) {
+      audioService.switchTrack(track.asset);
+    }
+  }, [activeTrackId]);
 
   // ============================================
   // Watch soundsEnabled toggle

@@ -1,4 +1,4 @@
-// Compact currency pill for home header (cream/skeuomorphic): fishy or mochi icon + count; tap → store
+// Compact currency pill for home header (cream/skeuomorphic): mochi icon + count; tap → store
 
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
@@ -6,7 +6,6 @@ import { useColors } from '../../theme/colors';
 import { spacing } from '../../theme';
 import type { CustomSkeuColors } from '../ui/Skeuomorphic';
 import { SkeuButton } from '../ui/Skeuomorphic';
-import FishyPointIcon from '../../../assets/images/icons/fishy-point.svg';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 
 const PILL_WIDTH_RATIO = 0.18; // was 0.2, reduced by 20%
@@ -16,7 +15,7 @@ const ICON_CIRCLE_SIZE = 26;
 const FONT_SIZE = 14;
 const PILL_BORDER_RADIUS = 999;
 
-export type PointsHeaderPillType = 'fishies' | 'mochis';
+export type PointsHeaderPillType = 'mochis';
 
 export interface PointsHeaderPillProps {
   type: PointsHeaderPillType;
@@ -54,8 +53,7 @@ export function PointsHeaderPill({ type, value, onPress }: PointsHeaderPillProps
     width: pillWidth,
   };
 
-  const Icon = type === 'fishies' ? FishyPointIcon : MochiPointIcon;
-  const label = type === 'fishies' ? 'Fishies' : 'Mochis';
+  const label = 'Mochis';
 
   return (
     <SkeuButton
@@ -67,7 +65,7 @@ export function PointsHeaderPill({ type, value, onPress }: PointsHeaderPillProps
       accessibilityLabel={`${value} ${label}, open store`}
     >
       <View style={[styles.iconCircle, iconCircleStyle]}>
-        <Icon width={ICON_SIZE} height={ICON_SIZE} />
+        <MochiPointIcon width={ICON_SIZE} height={ICON_SIZE} />
       </View>
       <Text style={[styles.countText, { color: c.mochiPillText }]}>{value}</Text>
     </SkeuButton>

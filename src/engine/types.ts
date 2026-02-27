@@ -308,6 +308,25 @@ export function calculateMochiReward(difficulty: Difficulty, timeSeconds: number
   return Math.round(base * ratio);
 }
 
+/** Display range of Mochis per difficulty (base to 2x max). e.g. Easy "10-20", Expert "100-200". */
+export function getMochisRangeLabel(difficulty: Difficulty): string {
+  const base = GAME_BASE_MOCHIS[difficulty];
+  return `${base}-${base * 2}`;
+}
+
+/** Same as calculateMochiReward but returns base, timeBonus, and total for UI breakdown. */
+export function calculateMochiRewardBreakdown(
+  difficulty: Difficulty,
+  timeSeconds: number
+): { base: number; timeBonus: number; total: number } {
+  const base = GAME_BASE_MOCHIS[difficulty];
+  const par = GAME_PAR_TIMES[difficulty];
+  const ratio = Math.min(2, Math.max(1, par / Math.max(timeSeconds, 1)));
+  const total = Math.round(base * ratio);
+  const timeBonus = Math.max(0, total - base);
+  return { base, timeBonus, total };
+}
+
 // Daily difficulty schedule (0 = Sunday, 6 = Saturday)
 export const DAILY_DIFFICULTY_SCHEDULE: Record<number, Difficulty> = {
   0: 'easy',    // Sunday
@@ -366,7 +385,7 @@ export interface MochiHistoryEntry {
   timestamp: number;         // Unix timestamp for precise ordering
   amount: number;            // Mochis earned in this entry
   cumulativeTotal: number;   // Running total at this point
-  source: 'daily' | 'game' | 'bonus' | 'spend' | 'conversion';
+  source: 'daily' | 'game' | 'bonus' | 'spend' | 'conversion' | 'iap';
 }
 
 // Time period options for chart filtering

@@ -1,10 +1,9 @@
 // Economy Sync Service
-// Pushes local Fishies/Mochis and related fields to Supabase user_economy.
+// Pushes local Mochis and related fields to Supabase user_economy.
 // Local state is source of truth; sync is best-effort and failures are silent.
 
 import { supabase } from '../lib/supabase';
 import { getDeviceId } from '../utils/deviceId';
-import { useFishyStore } from '../stores/fishyStore';
 import { useDailyChallengeStore } from '../stores/dailyChallengeStore';
 
 // ============================================
@@ -12,7 +11,6 @@ import { useDailyChallengeStore } from '../stores/dailyChallengeStore';
 // ============================================
 
 export interface EconomyState {
-  totalFishyPoints: number;
   totalMochiPoints: number;
   streakFreezesCount: number;
   lastDailyLoginDate: string | null;
@@ -42,13 +40,11 @@ function log(msg: string, ...args: unknown[]) {
 // ============================================
 
 /**
- * Build current economy state from both stores.
+ * Build current economy state from daily challenge store.
  */
 export function getEconomyState(): EconomyState {
-  const fishy = useFishyStore.getState();
   const daily = useDailyChallengeStore.getState();
   return {
-    totalFishyPoints: fishy.totalFishyPoints,
     totalMochiPoints: daily.totalMochiPoints,
     streakFreezesCount: daily.streakFreezesCount ?? 0,
     lastDailyLoginDate: daily.lastDailyLoginDate ?? null,
@@ -58,7 +54,7 @@ export function getEconomyState(): EconomyState {
 
 /**
  * Push current economy state to Supabase.
- * Call after any balance or economy-field change (Fishies, Mochis, streak freezes, dates).
+ * Call after any balance or economy-field change (Mochis, streak freezes, dates).
  * Fire-and-forget; errors are logged only in dev.
  */
 export async function syncEconomyToSupabase(state?: EconomyState): Promise<void> {
@@ -69,7 +65,7 @@ export async function syncEconomyToSupabase(state?: EconomyState): Promise<void>
     const { error } = await supabase.from('user_economy').upsert(
       {
         user_id: deviceId,
-        total_fishy_points: s.totalFishyPoints,
+        total_fishy_points: 0,
         total_mochi_points: s.totalMochiPoints,
         streak_freeze_count: s.streakFreezesCount,
         last_daily_login_date: s.lastDailyLoginDate,
@@ -82,10 +78,7 @@ export async function syncEconomyToSupabase(state?: EconomyState): Promise<void>
     if (error) {
       log('Upsert error:', error.message);
     } else {
-      log('Synced to Supabase:', {
-        fishies: s.totalFishyPoints,
-        mochis: s.totalMochiPoints,
-      });
+      log('Synced to Supabase:', { mochis: s.totalMochiPoints });
     }
   } catch (err) {
     log('Sync failed:', err);
@@ -117,13 +110,9 @@ export async function pullEconomyFromSupabase(): Promise<EconomyState | null> {
     if (!data) return null;
 
     const row = data as UserEconomyRow;
-    log('Pulled from Supabase:', {
-      fishies: row.total_fishy_points,
-      mochis: row.total_mochi_points,
-    });
+    log('Pulled from Supabase:', { mochis: row.total_mochi_points });
 
     return {
-      totalFishyPoints: row.total_fishy_points ?? 0,
       totalMochiPoints: row.total_mochi_points ?? 0,
       streakFreezesCount: row.streak_freeze_count ?? 0,
       lastDailyLoginDate: row.last_daily_login_date ?? null,

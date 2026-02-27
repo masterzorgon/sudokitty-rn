@@ -28,6 +28,9 @@ async function ensureAudioModule() {
 
 const FADE_DURATION_MS = 500;
 const FADE_STEPS = 10;
+const CROSSFADE_MS = 300;
+const MUSIC_VOLUME = 0.35;
+const DEFAULT_ASSET = require('../../assets/audio/game-background.m4a');
 
 // ============================================
 // Internal State
@@ -63,23 +66,23 @@ export async function configureAudioSession(): Promise<void> {
 // ============================================
 
 /**
- * Load the background music into memory
- * Idempotent - no-ops if already loaded
+ * Load the background music into memory.
+ * @param asset - Metro asset number from require(). Falls back to default track.
  */
-export async function loadBackgroundMusic(): Promise<void> {
+export async function loadBackgroundMusic(asset?: number): Promise<void> {
   if (loaded || sound) {
-    return; // Already loaded
+    return;
   }
 
   if (!await ensureAudioModule() || !Audio) return;
   try {
-    const musicAsset = require('../../assets/audio/game-background.m4a');
+    const musicAsset = asset ?? DEFAULT_ASSET;
     const { sound: loadedSound } = await Audio.Sound.createAsync(
       musicAsset,
       {
         shouldPlay: false,
         isLooping: true,
-        volume: 0, // Start at 0 for fade-in
+        volume: 0,
       }
     );
 
@@ -217,6 +220,32 @@ export function fade(
 
   currentFade = cancelHandle;
   return cancelHandle;
+}
+
+// ============================================
+// Track Switching
+// ============================================
+
+/**
+ * Crossfade to a different track.
+ * Fades out current → unloads → loads new → fades in.
+ * If not currently playing, swaps silently.
+ */
+export async function switchTrack(asset: number): Promise<void> {
+  const wasPlaying = await isPlaying();
+
+  if (wasPlaying) {
+    fade(0, CROSSFADE_MS);
+    await new Promise((r) => setTimeout(r, CROSSFADE_MS));
+  }
+
+  await unload();
+  await loadBackgroundMusic(asset);
+
+  if (wasPlaying) {
+    await play(0);
+    fade(MUSIC_VOLUME, CROSSFADE_MS);
+  }
 }
 
 // ============================================
