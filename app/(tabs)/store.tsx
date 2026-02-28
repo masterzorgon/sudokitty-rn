@@ -179,7 +179,7 @@ export default function StoreScreen() {
     playFeedback('tap');
     setSheetConfig({
       image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} resizeMode="contain" />,
-      title: `Protect your streak with 1 Streak Freeze!`,
+      title: `Each streak freeze protects your streak for 1 missed day!`,
       price: MOCHIS_COST.streak_freeze,
       currency: 'mochis',
       buttonLabel: `BUY FOR ${MOCHIS_COST.streak_freeze}`,

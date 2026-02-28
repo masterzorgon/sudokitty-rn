@@ -30,7 +30,7 @@ const FADE_DURATION_MS = 500;
 const FADE_STEPS = 10;
 const CROSSFADE_MS = 300;
 const MUSIC_VOLUME = 0.35;
-const DEFAULT_ASSET = require('../../assets/audio/game-background.m4a');
+const DEFAULT_ASSET = require('../../assets/audio/tracks/mochi-morning.m4a');
 
 // ============================================
 // Internal State

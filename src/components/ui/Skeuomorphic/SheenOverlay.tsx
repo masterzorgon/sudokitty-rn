@@ -1,60 +1,76 @@
 // Animated sheen overlay
 // A skewed white bar that sweeps across periodically
+// Self-sizes by measuring its parent container via onLayout
 
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { useSheen } from '../../../hooks/useSheen';
-import { SKEU_DIMENSIONS, SKEU_TIMINGS } from '../../../theme/skeuomorphic';
+import { SKEU_TIMINGS } from '../../../theme/skeuomorphic';
 
 interface SheenOverlayProps {
-  /** Width of the sheen bar (default: 60) */
-  width?: number;
-  /** Duration of the sweep animation in ms (default: 400) */
+  /** Duration of the sweep animation in ms */
   duration?: number;
-  /** Interval between sweeps in ms (default: 3000) */
+  /** Interval between sweeps in ms */
   interval?: number;
-  /** Target X position to sweep to (default: 250) */
-  targetX?: number;
   /** Whether the animation is enabled (default: true) */
   enabled?: boolean;
   /** Opacity of the sheen (default: 0.3) */
   opacity?: number;
+  /** Fraction of container width used for the sheen bar (default: 0.35) */
+  sheenWidthRatio?: number;
 }
 
 export function SheenOverlay({
-  width = SKEU_DIMENSIONS.sheenWidth,
   duration = SKEU_TIMINGS.sheenDuration,
   interval = SKEU_TIMINGS.sheenInterval,
-  targetX = 250,
   enabled = true,
   opacity = 0.3,
+  sheenWidthRatio = 0.35,
 }: SheenOverlayProps) {
-  const { sheenStyle } = useSheen({
-    width,
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const handleLayout = useCallback((e: LayoutChangeEvent) => {
+    const w = e.nativeEvent.layout.width;
+    if (w > 0 && w !== containerWidth) setContainerWidth(w);
+  }, [containerWidth]);
+
+  const { sheenStyle, sheenWidth } = useSheen({
+    containerWidth,
     duration,
     interval,
-    targetX,
     enabled,
+    sheenWidthRatio,
   });
 
   return (
-    <Animated.View
-      style={[
-        styles.sheen,
-        { width, backgroundColor: `rgba(255, 255, 255, ${opacity})` },
-        sheenStyle,
-      ]}
-      pointerEvents="none"
-    />
+    <View style={containerStyle} onLayout={handleLayout} pointerEvents="none">
+      {containerWidth > 0 && (
+        <Animated.View
+          style={[
+            sheenBaseStyle,
+            { width: sheenWidth, backgroundColor: `rgba(255, 255, 255, ${opacity})` },
+            sheenStyle as any,
+          ]}
+          pointerEvents="none"
+        />
+      )}
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  sheen: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-  },
-});
+const containerStyle: ViewStyle = {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  overflow: 'hidden',
+};
+
+const sheenBaseStyle: ViewStyle = {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+};

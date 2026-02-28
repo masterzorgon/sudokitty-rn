@@ -226,6 +226,10 @@ export default function GameScreen() {
       <GameSettingsModal
         visible={isSettingsModalVisible}
         onClose={closeSettingsModal}
+        onNavigateToStore={() => {
+          closeSettingsModal();
+          router.push('/store');
+        }}
       />
 
       {/* Hint explanation modal */}

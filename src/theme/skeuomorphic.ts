@@ -16,7 +16,6 @@ export const SKEU_DIMENSIONS = {
   pressScale: 0.96,
   pressDepth: 2,
   highlightHeight: '40%',
-  sheenWidth: 60,
 } as const;
 
 // MARK: - Types

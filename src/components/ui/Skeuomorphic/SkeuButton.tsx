@@ -119,7 +119,7 @@ export function SkeuButton({
       highlightInset={highlightInset}
       faceStyle={contentStyle}
     >
-      {sheen && <SheenOverlay width={260} targetX={400} opacity={0.25} />}
+      {sheen && <SheenOverlay opacity={0.25} />}
       {children}
     </Skeu3D>
   );

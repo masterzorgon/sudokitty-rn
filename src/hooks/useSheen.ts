@@ -1,7 +1,8 @@
 // Hook for sheen animation
 // Provides a repeating sweep animation for glossy effect
+// Derives sheen width and animation range from the measured container width
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -12,65 +13,74 @@ import {
   Easing,
 } from 'react-native-reanimated';
 
-import { SKEU_TIMINGS, SKEU_DIMENSIONS } from '../theme/skeuomorphic';
+import { SKEU_TIMINGS } from '../theme/skeuomorphic';
 
 interface UseSheenOptions {
-  /** Width of the sheen bar (default: 60) */
-  width?: number;
-  /** Duration of the sweep animation in ms (default: 400) */
+  /** Measured parent width (0 = not yet measured, animation disabled) */
+  containerWidth: number;
+  /** Duration of the sweep animation in ms (default: sheenDuration) */
   duration?: number;
-  /** Interval between sweeps in ms (default: 3000) */
+  /** Interval between sweeps in ms (default: sheenInterval) */
   interval?: number;
-  /** Target X position to sweep to (default: 250) */
-  targetX?: number;
   /** Whether the animation is enabled (default: true) */
   enabled?: boolean;
+  /** Fraction of container width used for the sheen bar (default: 0.35) */
+  sheenWidthRatio?: number;
 }
 
 interface UseSheenReturn {
   /** Animated style to apply to the sheen overlay */
   sheenStyle: ReturnType<typeof useAnimatedStyle>;
-  /** Current X position shared value for additional control */
-  sheenX: ReturnType<typeof useSharedValue>;
+  /** Computed sheen bar width */
+  sheenWidth: number;
 }
 
-export function useSheen(options: UseSheenOptions = {}): UseSheenReturn {
+const MIN_SHEEN_WIDTH = 30;
+const MAX_SHEEN_WIDTH = 200;
+const SKEW_BUFFER = 20;
+
+export function useSheen(options: UseSheenOptions): UseSheenReturn {
   const {
-    width = SKEU_DIMENSIONS.sheenWidth,
+    containerWidth,
     duration = SKEU_TIMINGS.sheenDuration,
     interval = SKEU_TIMINGS.sheenInterval,
-    targetX = 250,
     enabled = true,
+    sheenWidthRatio = 0.35,
   } = options;
 
-  // Rest position well off-screen left so skew doesn't leave a visible sliver (skewX shifts the bar)
-  const restX = -width - 40;
+  const sheenWidth = useMemo(
+    () => Math.max(MIN_SHEEN_WIDTH, Math.min(containerWidth * sheenWidthRatio, MAX_SHEEN_WIDTH)),
+    [containerWidth, sheenWidthRatio],
+  );
+
+  const restX = -sheenWidth - SKEW_BUFFER;
+  const endX = containerWidth + SKEW_BUFFER;
+
   const sheenX = useSharedValue(restX);
 
+  const active = enabled && containerWidth > 0;
+
   useEffect(() => {
-    if (!enabled) {
+    if (!active) {
       sheenX.value = restX;
       return;
     }
 
     sheenX.value = withRepeat(
       withSequence(
-        // Start fully off-screen left
         withTiming(restX, { duration: 0 }),
-        // Wait before animating
         withDelay(
           interval - duration,
-          // Sweep across
-          withTiming(targetX, {
+          withTiming(endX, {
             duration,
             easing: Easing.inOut(Easing.ease),
-          })
-        )
+          }),
+        ),
       ),
-      -1, // Repeat forever
-      false
+      -1,
+      false,
     );
-  }, [sheenX, width, duration, interval, targetX, enabled]);
+  }, [sheenX, active, restX, endX, duration, interval]);
 
   const sheenStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: sheenX.value }, { skewX: '-20deg' }],
@@ -78,6 +88,6 @@ export function useSheen(options: UseSheenOptions = {}): UseSheenReturn {
 
   return {
     sheenStyle,
-    sheenX,
+    sheenWidth,
   };
 }
