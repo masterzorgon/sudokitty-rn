@@ -58,6 +58,13 @@ export default function HomeScreen() {
   // Welcome message for speech bubble
   const [welcomeMessage, setWelcomeMessage] = useState('');
 
+  // DEV ONLY: Credit 500 mochis for testing — remove after use
+  useEffect(() => {
+    if (__DEV__) {
+      useDailyChallengeStore.getState().addMochiHistoryEntry(500, 'bonus');
+    }
+  }, []);
+
   // Run economy v2 migration, load state, then apply daily login bonus if new day
   useEffect(() => {
     (async () => {

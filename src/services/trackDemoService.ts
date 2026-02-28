@@ -1,7 +1,14 @@
 let Audio: typeof import('expo-av').Audio | null = null;
 
 let demoSound: any | null = null;
-let demoTimeout: ReturnType<typeof setTimeout> | null = null;
+let progressInterval: ReturnType<typeof setInterval> | null = null;
+let fadeInterval: ReturnType<typeof setInterval> | null = null;
+let endTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const FADE_DURATION_MS = 2000;
+const FADE_STEP_MS = 200;
+const PROGRESS_STEP_MS = 100;
+const BASE_VOLUME = 0.5;
 
 async function ensureAudio(): Promise<boolean> {
   if (!Audio) {
@@ -16,7 +23,16 @@ async function ensureAudio(): Promise<boolean> {
   return true;
 }
 
-export async function playDemo(asset: number, durationMs: number = 8000): Promise<void> {
+export interface DemoCallbacks {
+  onProgress?: (fraction: number) => void;
+  onComplete?: () => void;
+}
+
+export async function playDemo(
+  asset: number,
+  durationMs: number = 20000,
+  callbacks?: DemoCallbacks,
+): Promise<void> {
   await stopDemo();
 
   if (!(await ensureAudio()) || !Audio) return;
@@ -24,26 +40,65 @@ export async function playDemo(asset: number, durationMs: number = 8000): Promis
   try {
     const { sound } = await Audio.Sound.createAsync(asset, {
       shouldPlay: true,
-      volume: 0.5,
+      volume: BASE_VOLUME,
     });
     demoSound = sound;
-    demoTimeout = setTimeout(() => {
-      stopDemo();
+
+    const startTime = Date.now();
+    const fadeStartMs = durationMs - FADE_DURATION_MS;
+
+    progressInterval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const fraction = Math.min(1, elapsed / durationMs);
+      callbacks?.onProgress?.(fraction);
+
+      if (elapsed >= fadeStartMs && !fadeInterval) {
+        startFade(durationMs - elapsed);
+      }
+    }, PROGRESS_STEP_MS);
+
+    endTimeout = setTimeout(() => {
+      const wasSound = demoSound;
+      clearTimers();
+      if (wasSound) {
+        try { wasSound.unloadAsync(); } catch {}
+      }
+      demoSound = null;
+      callbacks?.onComplete?.();
     }, durationMs);
   } catch {
     demoSound = null;
   }
 }
 
+function startFade(remainingMs: number) {
+  if (!demoSound || fadeInterval) return;
+  const steps = Math.max(1, Math.floor(remainingMs / FADE_STEP_MS));
+  const volumeStep = BASE_VOLUME / steps;
+  let currentVolume = BASE_VOLUME;
+
+  fadeInterval = setInterval(() => {
+    currentVolume = Math.max(0, currentVolume - volumeStep);
+    if (demoSound) {
+      try { demoSound.setStatusAsync({ volume: currentVolume }); } catch {}
+    }
+    if (currentVolume <= 0 && fadeInterval) {
+      clearInterval(fadeInterval);
+      fadeInterval = null;
+    }
+  }, FADE_STEP_MS);
+}
+
+function clearTimers() {
+  if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+  if (fadeInterval) { clearInterval(fadeInterval); fadeInterval = null; }
+  if (endTimeout) { clearTimeout(endTimeout); endTimeout = null; }
+}
+
 export async function stopDemo(): Promise<void> {
-  if (demoTimeout) {
-    clearTimeout(demoTimeout);
-    demoTimeout = null;
-  }
+  clearTimers();
   if (demoSound) {
-    try {
-      await demoSound.unloadAsync();
-    } catch {}
+    try { await demoSound.unloadAsync(); } catch {}
     demoSound = null;
   }
 }

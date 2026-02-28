@@ -27,6 +27,7 @@ import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backin
 import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, MOCHI_PACK_PRODUCT_IDS, type MochiPackProductId } from '../../src/constants/economy';
 import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
+import { DemoPlayButton } from '../../src/components/ui/DemoPlayButton';
 import { playFeedback } from '../../src/utils/feedback';
 import { LinearGradient as ExpoGradient } from 'expo-linear-gradient';
 import { SectionTitle } from '../../src/components/ui/SectionTitle';
@@ -88,6 +89,7 @@ export default function StoreScreen() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [purchaseInProgress, setPurchaseInProgress] = useState<string | null>(null);
   const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
+  const [demoProgress, setDemoProgress] = useState(0);
   const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
 
   const mountedRef = useRef(true);
@@ -133,10 +135,22 @@ export default function StoreScreen() {
     if (demoPlayingTrackId === track.id) {
       await stopDemo();
       setDemoPlayingTrackId(null);
+      setDemoProgress(0);
     } else {
+      await stopDemo();
       setDemoPlayingTrackId(track.id);
-      await playDemo(track.asset, track.demoDurationMs);
-      if (mountedRef.current) setDemoPlayingTrackId(null);
+      setDemoProgress(0);
+      await playDemo(track.asset, track.demoDurationMs, {
+        onProgress: (fraction) => {
+          if (mountedRef.current) setDemoProgress(fraction);
+        },
+        onComplete: () => {
+          if (mountedRef.current) {
+            setDemoPlayingTrackId(null);
+            setDemoProgress(0);
+          }
+        },
+      });
     }
   }, [demoPlayingTrackId]);
 
@@ -318,17 +332,12 @@ export default function StoreScreen() {
             <StoreItemRow
               key={track.id}
               icon={
-                <Pressable
+                <DemoPlayButton
+                  isPlaying={isDemoPlaying}
+                  progress={isDemoPlaying ? demoProgress : 0}
                   onPress={() => handleToggleDemo(track)}
-                  style={[styles.iconCircle, { backgroundColor: c.accentLight + '40' }]}
-                  accessibilityLabel={isDemoPlaying ? 'Stop preview' : 'Play preview'}
-                >
-                  <Ionicons
-                    name={isDemoPlaying ? 'pause' : 'play'}
-                    size={20}
-                    color={c.accent}
-                  />
-                </Pressable>
+                  size={48}
+                />
               }
               title={track.name}
               subtitle={

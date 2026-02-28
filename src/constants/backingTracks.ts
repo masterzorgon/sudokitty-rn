@@ -8,7 +8,7 @@ export interface BackingTrackDef {
   demoDurationMs: number;
 }
 
-const DEFAULT_DEMO_MS = 8000;
+const DEFAULT_DEMO_MS = 20000;
 
 export const BACKING_TRACKS: BackingTrackDef[] = [
   { id: 'default', name: 'Mochi Morning', cost: 0, asset: require('../../assets/audio/tracks/mochi-morning.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
