@@ -67,6 +67,12 @@ export interface ColorPalette {
   mochiPillBorder: string;
   mochiPillEdge: string;
   mochiPillText: string;
+
+  // Freeze pill (streak freeze count)
+  freezePillBg: string;
+  freezePillBorder: string;
+  freezePillEdge: string;
+  freezePillText: string;
 }
 
 const pinkPalette: ColorPalette = {
@@ -121,6 +127,11 @@ const pinkPalette: ColorPalette = {
   mochiPillBorder: '#F0B8CC',
   mochiPillEdge: '#D8869E',
   mochiPillText: '#8C3055',
+
+  freezePillBg: '#FFFFFF',
+  freezePillBorder: '#A0C8E8',
+  freezePillEdge: '#6898C0',
+  freezePillText: '#264A6E',
 };
 
 const orangePalette: ColorPalette = {
@@ -175,6 +186,11 @@ const orangePalette: ColorPalette = {
   mochiPillBorder: '#F0C4A0',
   mochiPillEdge: '#D89868',
   mochiPillText: '#8C4E20',
+
+  freezePillBg: '#FFFFFF',
+  freezePillBorder: '#A0C8E8',
+  freezePillEdge: '#6898C0',
+  freezePillText: '#264A6E',
 };
 
 const greenPalette: ColorPalette = {
@@ -229,6 +245,11 @@ const greenPalette: ColorPalette = {
   mochiPillBorder: '#A8D4A8',
   mochiPillEdge: '#78AC78',
   mochiPillText: '#2E5C2E',
+
+  freezePillBg: '#FFFFFF',
+  freezePillBorder: '#A0C8E8',
+  freezePillEdge: '#6898C0',
+  freezePillText: '#264A6E',
 };
 
 const bluePalette: ColorPalette = {
@@ -283,6 +304,11 @@ const bluePalette: ColorPalette = {
   mochiPillBorder: '#A0C4E0',
   mochiPillEdge: '#6894B8',
   mochiPillText: '#264060',
+
+  freezePillBg: '#FFFFFF',
+  freezePillBorder: '#A0C8E8',
+  freezePillEdge: '#6898C0',
+  freezePillText: '#264A6E',
 };
 
 export const PALETTES: Record<ThemeName, ColorPalette> = {

@@ -30,6 +30,7 @@ export default function ProfileScreen() {
 
   // Activity data: from first completion to today
   const completedDates = useDailyChallengeStore((s) => s.completedDates);
+  const frozenDates = useDailyChallengeStore((s) => s.frozenDates);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
@@ -45,7 +46,7 @@ export default function ProfileScreen() {
         {/* Activity Calendar */}
         <View style={styles.section}>
           <View style={styles.calendarCard}>
-            <ActivityCalendar completedDates={completedDates} />
+            <ActivityCalendar completedDates={completedDates} frozenDates={frozenDates} />
           </View>
         </View>
 

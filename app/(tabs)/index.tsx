@@ -1,8 +1,7 @@
 // Home screen - Landing page with mochi cat mascot and animated greeting
-// Features split-flap animation for Japanese to English text transition
 
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Image, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -23,8 +22,13 @@ import {
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SpeechBubble } from '../../src/components/ui/SpeechBubble';
+import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
 import { getRandomWelcomeMessage } from '../../src/constants/welcomeMessages';
 import { runEconomyV2Migration } from '../../src/services/economyMigration';
+import { getMochiPackProducts } from '../../src/lib/revenueCat';
+import { MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../../src/constants/economy';
+
+const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 
 // MARK: - Constants
 
@@ -43,6 +47,13 @@ export default function HomeScreen() {
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
+  const streakLostInfo = useDailyChallengeStore((s) => s.streakLostInfo);
+  const reigniteStreak = useDailyChallengeStore((s) => s.reigniteStreak);
+  const clearStreakLostInfo = useDailyChallengeStore((s) => s.clearStreakLostInfo);
+  const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
+
+  // Purchase sheet for reigniting streak
+  const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
 
   // Welcome message for speech bubble
   const [welcomeMessage, setWelcomeMessage] = useState('');
@@ -55,6 +66,41 @@ export default function HomeScreen() {
       useDailyChallengeStore.getState().applyDailyLoginBonusIfNeeded();
     })();
   }, [loadState]);
+
+  // Show reignite sheet when streak is lost
+  const handleInsufficientFunds = useCallback(async (itemPrice: number) => {
+    const deficit = itemPrice - totalMochis;
+    const sortedAmounts = Object.entries(MOCHI_PACK_AMOUNTS)
+      .sort(([, a], [, b]) => a - b);
+
+    const targetPack = sortedAmounts.find(([, amount]) => amount >= deficit);
+    const packId = (targetPack ? targetPack[0] : sortedAmounts[sortedAmounts.length - 1][0]) as MochiPackProductId;
+
+    const packProducts = await getMochiPackProducts();
+    const product = packProducts.find((p) => p.identifier === packId);
+    if (!product) {
+      router.push('/store');
+      return;
+    }
+
+    router.push('/store');
+  }, [totalMochis, router]);
+
+  useEffect(() => {
+    if (streakLostInfo) {
+      setSheetConfig({
+        image: <Image source={MochiFreezeImg} style={{ width: 160, height: 160 }} resizeMode="contain" />,
+        title: `Reignite your ${streakLostInfo.previousStreak}-day streak?`,
+        price: streakLostInfo.reigniteCost,
+        currency: 'mochis',
+        buttonLabel: `REIGNITE FOR ${streakLostInfo.reigniteCost}`,
+        onConfirm: () => {
+          reigniteStreak();
+        },
+        onInsufficientFunds: () => handleInsufficientFunds(streakLostInfo.reigniteCost),
+      });
+    }
+  }, [streakLostInfo, reigniteStreak, handleInsufficientFunds]);
 
   useEffect(() => {
     getRandomWelcomeMessage().then(setWelcomeMessage);
@@ -96,7 +142,7 @@ export default function HomeScreen() {
       <Animated.View entering={FadeIn.duration(400)}>
         <ScreenHeader
           title="sudokitty"
-          left={<View />}
+          showFreezePill
           showMochiPill
         />
       </Animated.View>
@@ -149,6 +195,14 @@ export default function HomeScreen() {
           <TechniquesCTA onPress={handleTechniquesPress} />
         </View>
       </Animated.View>
+
+      <PurchaseSheet
+        config={sheetConfig}
+        onDismiss={() => {
+          setSheetConfig(null);
+          clearStreakLostInfo();
+        }}
+      />
     </SafeAreaView>
   );
 }

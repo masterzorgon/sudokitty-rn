@@ -18,6 +18,8 @@ import {
   getTodayDateString,
   getYesterdayDateString,
   getDateSeed,
+  daysBetweenDates,
+  addDaysToDate,
   createEmptyDailyChallengeState,
 } from '../engine/types';
 import { storage, STORAGE_KEYS } from '../utils/storage';
@@ -52,6 +54,8 @@ interface DailyChallengeStore extends DailyChallengeState {
   applyDailyLoginBonusIfNeeded: () => void;
   buyStreakFreeze: () => boolean;
   consumeStreakFreezeIfAvailable: () => boolean;
+  reigniteStreak: () => boolean;
+  clearStreakLostInfo: () => void;
 
   // For testing/debugging
   resetState: () => void;
@@ -95,14 +99,16 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
             state.lastFirstPuzzleDate = stored.lastFirstPuzzleDate ?? null;
             state.lastDailyLoginDate = stored.lastDailyLoginDate ?? null;
             state.streakFreezesCount = stored.streakFreezesCount ?? 0;
+            state.frozenDates = stored.frozenDates ?? [];
+            state.streakLostInfo = stored.streakLostInfo ?? null;
             state.mochiHistory = storedHistory || [];
             state.isLoaded = true;
           });
 
-          // Check if streak needs to be reset (missed a day)
+          // Check if streak needs to be reset (missed one or more days)
           const today = getTodayDateString();
           const yesterday = getYesterdayDateString();
-          const { lastCompletedDate, currentStreak } = get();
+          const { lastCompletedDate, currentStreak, streakFreezesCount } = get();
 
           if (
             lastCompletedDate !== null &&
@@ -110,13 +116,32 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
             lastCompletedDate !== yesterday &&
             currentStreak > 0
           ) {
-            const consumed = get().consumeStreakFreezeIfAvailable();
-            if (!consumed) {
-              set((state) => {
-                state.currentStreak = 0;
-              });
-              get().saveState();
+            const missedDays = daysBetweenDates(lastCompletedDate, yesterday);
+            const freezesToUse = Math.min(missedDays, streakFreezesCount ?? 0);
+            const previousStreak = currentStreak;
+
+            const newFrozenDates: string[] = [];
+            for (let i = 0; i < freezesToUse; i++) {
+              newFrozenDates.push(addDaysToDate(lastCompletedDate, i + 1));
             }
+
+            const cutoff = addDaysToDate(today, -90);
+
+            set((state) => {
+              state.streakFreezesCount = Math.max(0, (state.streakFreezesCount ?? 0) - freezesToUse);
+              state.frozenDates = [...state.frozenDates, ...newFrozenDates].filter((d) => d >= cutoff);
+
+              if (freezesToUse < missedDays) {
+                state.currentStreak = 0;
+                state.streakLostInfo = {
+                  previousStreak,
+                  reigniteCost: MOCHIS_COST.streak_reignite,
+                };
+              }
+            });
+
+            get().saveState();
+            void syncEconomyToSupabase();
           }
         } else {
           set((state) => {
@@ -127,7 +152,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
 
       // Save state to AsyncStorage
       saveState: async () => {
-        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, totalGamesWon, lastFirstPuzzleDate, lastDailyLoginDate, streakFreezesCount, mochiHistory } =
+        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, totalGamesWon, lastFirstPuzzleDate, lastDailyLoginDate, streakFreezesCount, frozenDates, streakLostInfo, mochiHistory } =
           get();
         await storage.set<DailyChallengeState>(STORAGE_KEYS.DAILY_CHALLENGE_STATE, {
           currentStreak,
@@ -139,6 +164,8 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           lastFirstPuzzleDate: lastFirstPuzzleDate ?? null,
           lastDailyLoginDate: lastDailyLoginDate ?? null,
           streakFreezesCount,
+          frozenDates,
+          streakLostInfo,
         });
         await storage.set<MochiHistoryEntry[]>(STORAGE_KEYS.MOCHI_HISTORY, mochiHistory);
       },
@@ -294,15 +321,14 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
 
       // Get activity data for calendar (default 52 weeks)
       getActivityData: (weeks = 52): ActivityDay[] => {
-        const { completedDates } = get();
+        const { completedDates, frozenDates } = get();
         const completedSet = new Set(completedDates);
+        const frozenSet = new Set(frozenDates);
         const days: ActivityDay[] = [];
 
         const today = new Date();
-        // Start from the beginning of the week (Sunday) for weeks * 7 days ago
         const startDate = new Date(today);
         startDate.setDate(today.getDate() - (weeks * 7) + 1);
-        // Adjust to start on Sunday
         startDate.setDate(startDate.getDate() - startDate.getDay());
 
         const endDate = new Date(today);
@@ -313,6 +339,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           days.push({
             date: dateString,
             completed: completedSet.has(dateString),
+            frozen: frozenSet.has(dateString),
           });
           current.setDate(current.getDate() + 1);
         }
@@ -455,6 +482,46 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         return true;
       },
 
+      reigniteStreak: (): boolean => {
+        const { streakLostInfo, totalMochiPoints } = get();
+        if (!streakLostInfo) return false;
+        if (totalMochiPoints < streakLostInfo.reigniteCost) return false;
+
+        const cost = streakLostInfo.reigniteCost;
+        const restored = streakLostInfo.previousStreak;
+
+        set((state) => {
+          state.totalMochiPoints -= cost;
+          state.currentStreak = restored;
+          state.streakLostInfo = null;
+        });
+
+        const today = getTodayDateString();
+        const { mochiHistory } = get();
+        const entry: MochiHistoryEntry = {
+          date: today,
+          timestamp: Date.now(),
+          amount: -cost,
+          cumulativeTotal: get().totalMochiPoints,
+          source: 'spend',
+        };
+        set((state) => {
+          state.mochiHistory = [...mochiHistory, entry];
+        });
+
+        get().saveState();
+        syncMochiBalance(get());
+        void syncEconomyToSupabase();
+        return true;
+      },
+
+      clearStreakLostInfo: () => {
+        set((state) => {
+          state.streakLostInfo = null;
+        });
+        get().saveState();
+      },
+
       // Reset state (for testing)
       resetState: () => {
         set((state) => {
@@ -467,6 +534,8 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           state.lastFirstPuzzleDate = null;
           state.lastDailyLoginDate = null;
           state.streakFreezesCount = 0;
+          state.frozenDates = [];
+          state.streakLostInfo = null;
         });
         get().saveState();
       },

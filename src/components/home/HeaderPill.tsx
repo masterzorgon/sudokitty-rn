@@ -1,46 +1,52 @@
-// Compact currency pill for home header (cream/skeuomorphic): mochi icon + count; tap → store
+// Compact currency pill for home header (cream/skeuomorphic): icon + count; tap → store
 
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
 import { spacing } from '../../theme';
 import type { CustomSkeuColors } from '../ui/Skeuomorphic';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 
-const PILL_WIDTH_RATIO = 0.18; // was 0.2, reduced by 20%
-const PILL_HEIGHT = 34; // was 40, reduced by 15%
+const PILL_WIDTH_RATIO = 0.18;
+const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
 const ICON_CIRCLE_SIZE = 26;
 const FONT_SIZE = 14;
 const PILL_BORDER_RADIUS = 999;
 
-export type PointsHeaderPillType = 'mochis';
+export type HeaderPillType = 'mochis' | 'freezes';
 
-export interface PointsHeaderPillProps {
-  type: PointsHeaderPillType;
+export interface HeaderPillProps {
+  type: HeaderPillType;
   value: number;
   onPress: () => void;
 }
 
-export function PointsHeaderPill({ type, value, onPress }: PointsHeaderPillProps) {
+export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
   const c = useColors();
   const { width: screenWidth } = useWindowDimensions();
   const pillWidth = Math.max(52, screenWidth * PILL_WIDTH_RATIO);
+
+  const isFreeze = type === 'freezes';
+
+  const borderColor = isFreeze ? c.freezePillBorder : c.mochiPillBorder;
+  const textColor = isFreeze ? c.freezePillText : c.mochiPillText;
 
   const iconCircleStyle = {
     width: ICON_CIRCLE_SIZE,
     height: ICON_CIRCLE_SIZE,
     borderRadius: ICON_CIRCLE_SIZE / 2,
-    backgroundColor: c.mochiPillBorder + '50',
+    backgroundColor: borderColor + '50',
   };
 
   const skeuColors: CustomSkeuColors = {
     gradient: [c.cream, c.cream, c.cream] as readonly [string, string, string],
-    edge: c.mochiPillBorder + '99',
+    edge: borderColor + '99',
     borderLight: 'rgba(255, 255, 255, 0.4)',
-    borderDark: c.mochiPillBorder + '99',
-    textColor: c.mochiPillText,
+    borderDark: borderColor + '99',
+    textColor,
   };
 
   const faceStyle: ViewStyle = {
@@ -53,7 +59,7 @@ export function PointsHeaderPill({ type, value, onPress }: PointsHeaderPillProps
     width: pillWidth,
   };
 
-  const label = 'Mochis';
+  const label = isFreeze ? 'Streak Freezes' : 'Mochis';
 
   return (
     <SkeuButton
@@ -65,9 +71,13 @@ export function PointsHeaderPill({ type, value, onPress }: PointsHeaderPillProps
       accessibilityLabel={`${value} ${label}, open store`}
     >
       <View style={[styles.iconCircle, iconCircleStyle]}>
-        <MochiPointIcon width={ICON_SIZE} height={ICON_SIZE} />
+        {isFreeze ? (
+          <Ionicons name="snow" size={ICON_SIZE} color={textColor} />
+        ) : (
+          <MochiPointIcon width={ICON_SIZE} height={ICON_SIZE} />
+        )}
       </View>
-      <Text style={[styles.countText, { color: c.mochiPillText }]}>{value}</Text>
+      <Text style={[styles.countText, { color: textColor }]}>{value}</Text>
     </SkeuButton>
   );
 }

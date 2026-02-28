@@ -23,14 +23,17 @@ const DAY_LABEL_WIDTH = 16;
 interface ActivityCalendarProps {
   /** Array of YYYY-MM-DD date strings when the user completed a game */
   completedDates: string[];
+  /** Array of YYYY-MM-DD date strings where a streak freeze was consumed */
+  frozenDates?: string[];
 }
 
 // ============================================
 // Helpers
 // ============================================
 
-function buildActivityGrid(completedDates: string[]): ActivityDay[] {
+function buildActivityGrid(completedDates: string[], frozenDates: string[] = []): ActivityDay[] {
   const completedSet = new Set(completedDates);
+  const frozenSet = new Set(frozenDates);
 
   // Start from earliest completion, or 4 weeks ago if no completions yet
   const today = new Date();
@@ -42,7 +45,7 @@ function buildActivityGrid(completedDates: string[]): ActivityDay[] {
     firstDate = new Date(sorted[0] + 'T00:00:00');
   } else {
     firstDate = new Date(today);
-    firstDate.setDate(firstDate.getDate() - 27); // 4 weeks back
+    firstDate.setDate(firstDate.getDate() - 27);
   }
   today.setHours(0, 0, 0, 0);
 
@@ -58,6 +61,7 @@ function buildActivityGrid(completedDates: string[]): ActivityDay[] {
     days.push({
       date: dateString,
       completed: completedSet.has(dateString),
+      frozen: frozenSet.has(dateString),
     });
     current.setDate(current.getDate() + 1);
   }
@@ -74,7 +78,9 @@ function buildActivityGrid(completedDates: string[]): ActivityDay[] {
 // Component
 // ============================================
 
-export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps) => {
+const FROZEN_COLOR = '#5DADE2';
+
+export const ActivityCalendar = memo(({ completedDates, frozenDates = [] }: ActivityCalendarProps) => {
   const c = useColors();
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -82,8 +88,7 @@ export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps)
     setContainerWidth(e.nativeEvent.layout.width);
   };
 
-  // Build activity data from completedDates
-  const activityData = useMemo(() => buildActivityGrid(completedDates), [completedDates]);
+  const activityData = useMemo(() => buildActivityGrid(completedDates, frozenDates), [completedDates, frozenDates]);
 
   // Organize into columns (weeks)
   const columns = useMemo(() => {
@@ -142,7 +147,17 @@ export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps)
                 {Array.from({ length: numCols }, (_, colIndex) => {
                   const day = columns[colIndex]?.[rowIndex];
                   const isCompleted = day?.completed ?? false;
+                  const isFrozen = day?.frozen ?? false;
                   const isRecent = day?.date ? day.date >= thirtyDaysAgo : false;
+
+                  let bgColor: string;
+                  if (isFrozen) {
+                    bgColor = isRecent ? FROZEN_COLOR : FROZEN_COLOR + '66';
+                  } else if (isCompleted) {
+                    bgColor = isRecent ? c.accent : c.accent + '66';
+                  } else {
+                    bgColor = colors.gridLine;
+                  }
 
                   return (
                     <View
@@ -153,9 +168,7 @@ export const ActivityCalendar = memo(({ completedDates }: ActivityCalendarProps)
                         borderRadius: cellSize > 10 ? 3 : 2,
                         marginRight: CELL_GAP,
                         marginBottom: CELL_GAP,
-                        backgroundColor: isCompleted
-                          ? (isRecent ? c.accent : c.accent + '66')
-                          : colors.gridLine,
+                        backgroundColor: bgColor,
                       }}
                     />
                   );

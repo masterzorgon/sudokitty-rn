@@ -223,7 +223,7 @@ export default function StoreScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
 
-      <ScreenHeader title="store" left={<View />} showMochiPill />
+      <ScreenHeader title="store" showFreezePill showMochiPill />
 
       <ScrollView
         style={styles.scroll}

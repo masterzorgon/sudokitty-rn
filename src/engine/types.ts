@@ -259,12 +259,15 @@ export interface DailyChallengeState {
   lastFirstPuzzleDate: string | null; // YYYY-MM-DD, for first-puzzle-of-day Fishies bonus
   lastDailyLoginDate: string | null; // YYYY-MM-DD, for daily login Fishies bonus
   streakFreezesCount: number; // Consumable: use one to avoid losing streak on a missed day
+  frozenDates: string[]; // YYYY-MM-DD dates covered by streak freeze consumption
+  streakLostInfo: { previousStreak: number; reigniteCost: number } | null;
 }
 
 // Activity calendar day for display
 export interface ActivityDay {
   date: string; // YYYY-MM-DD
   completed: boolean;
+  frozen?: boolean;
 }
 
 // Mochi points awarded by difficulty (daily challenges)
@@ -351,6 +354,20 @@ export const getYesterdayDateString = (): string => {
   return yesterday.toISOString().split('T')[0];
 };
 
+/** Number of calendar days between two YYYY-MM-DD strings (a < b => positive). */
+export function daysBetweenDates(a: string, b: string): number {
+  const msA = new Date(a + 'T00:00:00').getTime();
+  const msB = new Date(b + 'T00:00:00').getTime();
+  return Math.round((msB - msA) / (1000 * 60 * 60 * 24));
+}
+
+/** Return YYYY-MM-DD that is `n` days after the given date string. */
+export function addDaysToDate(dateStr: string, n: number): string {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split('T')[0];
+}
+
 // Helper to generate deterministic seed from date string
 export const getDateSeed = (dateString: string): number => {
   let hash = 0;
@@ -373,6 +390,8 @@ export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
   lastFirstPuzzleDate: null,
   lastDailyLoginDate: null,
   streakFreezesCount: 0,
+  frozenDates: [],
+  streakLostInfo: null,
 });
 
 // ============================================
