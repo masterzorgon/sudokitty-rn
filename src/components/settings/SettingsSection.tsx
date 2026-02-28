@@ -1,10 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuCard } from '../ui/Skeuomorphic';
+import { SectionTitle } from '../ui/SectionTitle';
 
 interface SettingsSectionProps {
   title: string;
@@ -14,7 +13,7 @@ interface SettingsSectionProps {
 export function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <SectionTitle variant="caption">{title}</SectionTitle>
       <SkeuCard borderRadius={borderRadius.lg}>
         {children}
       </SkeuCard>
@@ -25,13 +24,5 @@ export function SettingsSection({ title, children }: SettingsSectionProps) {
 const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.lg,
-  },
-  title: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.sm,
-    marginLeft: spacing.xs,
   },
 });

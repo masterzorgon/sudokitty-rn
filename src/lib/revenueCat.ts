@@ -119,8 +119,17 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
 /** Fetch mochi pack products from RevenueCat. Returns empty array on failure. */
 export async function getMochiPackProducts(): Promise<PurchasesStoreProduct[]> {
   try {
-    return await Purchases.getProducts([...MOCHI_PACK_PRODUCT_IDS]);
-  } catch {
+    const products = await Purchases.getProducts([...MOCHI_PACK_PRODUCT_IDS]);
+    if (__DEV__ && products.length === 0) {
+      console.warn(
+        '[RevenueCat] getMochiPackProducts: no products returned. Check: (1) EXPO_PUBLIC_RC_API_KEY is set, (2) products mochis_100, mochis_500, mochis_1200, mochis_3000 exist in App Store Connect as consumables, (3) RevenueCat dashboard has the app linked to App Store Connect.',
+      );
+    }
+    return products;
+  } catch (e) {
+    if (__DEV__) {
+      console.warn('[RevenueCat] getMochiPackProducts failed:', e);
+    }
     return [];
   }
 }

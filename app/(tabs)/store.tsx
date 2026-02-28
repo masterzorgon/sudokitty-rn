@@ -2,14 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   Alert,
   ActivityIndicator,
   Pressable,
-  Modal,
-  Animated,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -22,100 +20,24 @@ import { spacing, borderRadius } from '../../src/theme';
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuButton, SkeuCard } from '../../src/components/ui/Skeuomorphic';
-import type { CustomSkeuColors } from '../../src/components/ui/Skeuomorphic';
-import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
-import { MOCHIS_COST } from '../../src/constants/economy';
+import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../../src/constants/economy';
 import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
 import { playFeedback } from '../../src/utils/feedback';
 import { LinearGradient as ExpoGradient } from 'expo-linear-gradient';
+import { SectionTitle } from '../../src/components/ui/SectionTitle';
+import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
+import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
 import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
-import MochiWowSvg from '../../assets/images/mochi/mochi-wow.svg';
+const MochiStarsImg = require('../../assets/images/mochi/mochi-stars.png');
+const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
+const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
-// ============================================
-// Store Item Row (Duolingo-style)
-// ============================================
-
-interface StoreItemRowProps {
-  icon: React.ReactNode;
-  title: string;
-  subtitle?: string;
-  trailing: React.ReactNode;
-  onPress?: () => void;
-}
-
-function StoreItemRow({ icon, title, subtitle, trailing, onPress }: StoreItemRowProps) {
-  const c = useColors();
-
-  const content = (
-    <View style={itemStyles.row}>
-      <View style={itemStyles.iconArea}>{icon}</View>
-      <View style={itemStyles.body}>
-        <Text style={[itemStyles.title, { color: c.textPrimary }]}>{title}</Text>
-        {subtitle ? (
-          <Text style={[itemStyles.subtitle, { color: c.textSecondary }]}>{subtitle}</Text>
-        ) : null}
-      </View>
-      <View style={itemStyles.trailing}>{trailing}</View>
-    </View>
-  );
-
-  return (
-    <SkeuCard
-      borderRadius={borderRadius.lg}
-      contentStyle={itemStyles.card}
-      style={itemStyles.wrapper}
-      onPress={onPress}
-      accessibilityLabel={title}
-    >
-      {content}
-    </SkeuCard>
-  );
-}
-
-const itemStyles = StyleSheet.create({
-  wrapper: {
-    marginBottom: spacing.sm,
-  },
-  card: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconArea: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  body: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  title: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 16,
-  },
-  subtitle: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 13,
-    marginTop: 2,
-  },
-  trailing: {
-    alignItems: 'flex-end',
-  },
-});
 
 // ============================================
 // Mochi Price Pill
@@ -125,7 +47,7 @@ function MochiPricePill({ price }: { price: number }) {
   const c = useColors();
   return (
     <View style={priceStyles.pill}>
-      <MochiPointIcon width={14} height={14} />
+      <MochiPointIcon width={21} height={21} />
       <Text style={[priceStyles.text, { color: c.textPrimary }]}>{price}</Text>
     </View>
   );
@@ -135,179 +57,14 @@ const priceStyles = StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   text: {
     fontFamily: fontFamilies.semibold,
-    fontSize: 15,
+    fontSize: 18,
   },
 });
 
-// ============================================
-// Purchase Confirmation Sheet
-// ============================================
-
-interface PurchaseSheetConfig {
-  image: React.ReactNode;
-  title: string;
-  price: number | string;
-  currency: 'mochis' | 'iap';
-  buttonLabel: string;
-  onConfirm: () => void | Promise<void>;
-}
-
-interface PurchaseSheetProps {
-  config: PurchaseSheetConfig | null;
-  onDismiss: () => void;
-  loading?: boolean;
-}
-
-function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps) {
-  const c = useColors();
-  const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
-  const visible = config !== null;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
-    } else {
-      slideAnim.setValue(SCREEN_HEIGHT);
-    }
-  }, [visible, slideAnim]);
-
-  const animateDismiss = useCallback((cb?: () => void) => {
-    Animated.timing(slideAnim, {
-      toValue: SCREEN_HEIGHT,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      onDismiss();
-      cb?.();
-    });
-  }, [slideAnim, onDismiss]);
-
-  if (!config) return null;
-
-  const canAfford = config.currency === 'iap' || totalMochis >= (config.price as number);
-  const insufficientFunds = config.currency === 'mochis' && !canAfford;
-
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={() => animateDismiss()}>
-      <View style={sheetStyles.overlay}>
-        <Pressable style={sheetStyles.dismissArea} onPress={() => animateDismiss()} />
-        <Animated.View style={[sheetStyles.container, { backgroundColor: c.cream, transform: [{ translateY: slideAnim }] }]}>
-          <View style={[sheetStyles.dragIndicator, { backgroundColor: c.gridLine }]} />
-
-          <View style={sheetStyles.balancePill}>
-            <RewardsPill mochis={totalMochis} variant="balance" size="small" />
-          </View>
-
-          <View style={sheetStyles.imageContainer}>{config.image}</View>
-
-          <Text style={[sheetStyles.ctaText, { color: c.textPrimary }]}>
-            {insufficientFunds ? "You don't have enough mochis" : config.title}
-          </Text>
-
-          <SkeuButton
-            onPress={() => {
-              if (insufficientFunds) return;
-              animateDismiss(() => config.onConfirm());
-            }}
-            variant="primary"
-            borderRadius={borderRadius.lg}
-            disabled={insufficientFunds || loading}
-            style={sheetStyles.buyButton}
-            contentStyle={sheetStyles.buyButtonContent}
-            accessibilityLabel={config.buttonLabel}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
-              <Text style={sheetStyles.buyButtonText}>{config.buttonLabel}</Text>
-            )}
-          </SkeuButton>
-
-          <Pressable onPress={() => animateDismiss()} style={sheetStyles.noThanks}>
-            <Text style={[sheetStyles.noThanksText, { color: c.textSecondary }]}>NO THANKS</Text>
-          </Pressable>
-        </Animated.View>
-      </View>
-    </Modal>
-  );
-}
-
-const sheetStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  dismissArea: {
-    flex: 1,
-  },
-  container: {
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl + 20,
-    alignItems: 'center',
-  },
-  dragIndicator: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: spacing.lg,
-  },
-  balancePill: {
-    marginBottom: spacing.lg,
-  },
-  imageContainer: {
-    width: 120,
-    height: 120,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-  },
-  ctaText: {
-    ...typography.headline,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-    paddingHorizontal: spacing.lg,
-  },
-  buyButton: {
-    width: '100%',
-  },
-  buyButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  buyButtonText: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 16,
-    color: '#FFFFFF',
-  },
-  noThanks: {
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  noThanksText: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 14,
-    letterSpacing: 0.5,
-  },
-});
 
 // ============================================
 // Store Screen
@@ -402,30 +159,49 @@ export default function StoreScreen() {
     }
   }, [purchaseInProgress]);
 
+  const handleInsufficientFunds = useCallback(async (itemPrice: number) => {
+    const deficit = itemPrice - totalMochis;
+    const sortedAmounts = Object.entries(MOCHI_PACK_AMOUNTS)
+      .sort(([, a], [, b]) => a - b);
+
+    const targetPack = sortedAmounts.find(([, amount]) => amount >= deficit);
+    const packId = targetPack ? targetPack[0] : sortedAmounts[sortedAmounts.length - 1][0];
+
+    const packProducts = await getMochiPackProducts();
+    const product = packProducts.find((p) => p.identifier === packId);
+    if (!product) {
+      Alert.alert('Unavailable', 'Mochi packs are currently unavailable. Please try again later.');
+      return;
+    }
+    await handlePurchasePack(product);
+  }, [totalMochis, handlePurchasePack]);
+
   // Sheet openers
   const openStreakFreezeSheet = useCallback(() => {
     playFeedback('tap');
     setSheetConfig({
-      image: <Ionicons name="snow" size={80} color={c.accent} />,
+      image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} resizeMode="contain" />,
       title: `Protect your streak with 1 Streak Freeze!`,
       price: MOCHIS_COST.streak_freeze,
       currency: 'mochis',
       buttonLabel: `BUY FOR ${MOCHIS_COST.streak_freeze}`,
       onConfirm: handleBuyStreakFreeze,
+      onInsufficientFunds: () => handleInsufficientFunds(MOCHIS_COST.streak_freeze),
     });
-  }, [c.accent, handleBuyStreakFreeze]);
+  }, [handleBuyStreakFreeze, handleInsufficientFunds]);
 
   const openTrackSheet = useCallback((track: BackingTrackDef) => {
     playFeedback('tap');
     setSheetConfig({
-      image: <Ionicons name="musical-notes" size={80} color={c.accent} />,
+      image: <Image source={MochiMusicImg} style={{ width: 120, height: 120 }} resizeMode="contain" />,
       title: `Unlock ${track.name}?`,
       price: track.cost,
       currency: 'mochis',
       buttonLabel: `BUY FOR ${track.cost}`,
       onConfirm: () => handleBuyTrack(track.id),
+      onInsufficientFunds: () => handleInsufficientFunds(track.cost),
     });
-  }, [c.accent, handleBuyTrack]);
+  }, [handleBuyTrack, handleInsufficientFunds]);
 
   const openMochiPackSheet = useCallback((product: PurchasesStoreProduct, amount: number) => {
     playFeedback('tap');
@@ -454,20 +230,17 @@ export default function StoreScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {/* Section 1: Techniques CTA Banner */}
         <SkeuCard
           borderRadius={borderRadius.lg}
           contentStyle={bannerStyles.card}
           style={bannerStyles.wrapper}
           accessibilityLabel="Unlock sudoku techniques"
         >
-          {/* Theme gradient glow from bottom */}
           <ExpoGradient
             colors={[c.boardBackground, c.accentLight + '10', c.buttonPrimary + '40']}
             locations={[1, 0.55, 0]}
             style={bannerStyles.gradientOverlay}
             pointerEvents="none"
-            // borderRadius={borderRadius.lg}
           />
 
           <View style={bannerStyles.row}>
@@ -480,7 +253,7 @@ export default function StoreScreen() {
               </Text>
             </View>
             <View style={bannerStyles.imageArea}>
-              <MochiWowSvg width={60} height={60} />
+              <Image source={MochiStarsImg} style={bannerStyles.mochiImage} />
             </View>
           </View>
           <SkeuButton
@@ -496,8 +269,7 @@ export default function StoreScreen() {
           </SkeuButton>
         </SkeuCard>
 
-        {/* Section 2: Subscriptions */}
-        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Subscriptions</Text>
+        <SectionTitle>Subscriptions</SectionTitle>
 
         <StoreItemRow
           icon={
@@ -517,8 +289,7 @@ export default function StoreScreen() {
           onPress={isPremium ? undefined : async () => { playFeedback('tap'); await presentPaywallAlways(); }}
         />
 
-        {/* Section 3: Streak Freeze */}
-        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Streak Freeze</Text>
+        <SectionTitle>Streak Freeze</SectionTitle>
 
         <StoreItemRow
           icon={
@@ -536,8 +307,7 @@ export default function StoreScreen() {
           onPress={openStreakFreezeSheet}
         />
 
-        {/* Section 4: Sound Tracks */}
-        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Sound Tracks</Text>
+        <SectionTitle>Sound Tracks</SectionTitle>
 
         {BACKING_TRACKS.map((track) => {
           const isOwned = ownedTrackIds.includes(track.id);
@@ -590,8 +360,7 @@ export default function StoreScreen() {
           );
         })}
 
-        {/* Section 5: Get More Mochis (IAP) */}
-        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Get More Mochis</Text>
+        <SectionTitle>Get More Mochis</SectionTitle>
 
         {productsLoading ? (
           <SkeuCard borderRadius={borderRadius.lg} contentStyle={styles.loadingCard}>
@@ -633,7 +402,6 @@ export default function StoreScreen() {
           })
         )}
 
-        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       <PurchaseSheet
@@ -700,13 +468,20 @@ const bannerStyles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   imageArea: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
+  },
+  mochiImage: {
+    width: 120,
+    height: 120,
+    marginRight: spacing.xl + spacing.sm,
+    resizeMode: 'contain',
+    marginBottom: -spacing.md -spacing.sm,
   },
   unlockBtn: {
-    marginTop: spacing.md,
+    marginTop: 0,
   },
   unlockBtnContent: {
     paddingVertical: spacing.sm,
@@ -734,13 +509,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
-  },
-  sectionTitle: {
-    ...typography.headline,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
+    paddingTop: 0,
+    paddingBottom: 160,
   },
 
   iconCircle: {
@@ -750,7 +520,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   smallBtn: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -769,7 +538,4 @@ const styles = StyleSheet.create({
     ...typography.caption,
   },
 
-  bottomSpacer: {
-    height: spacing.xxl,
-  },
 });
