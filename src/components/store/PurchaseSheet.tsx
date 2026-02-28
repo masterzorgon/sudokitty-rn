@@ -91,7 +91,15 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
 
           <View style={[sheetStyles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
             <MochiPointIcon width={21} height={21} />
-            <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>{totalMochis}</Text>
+            <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>
+              {totalMochis} / {config.price}
+              {' · '}
+              {insufficientFunds && (
+                <Text style={{ color: c.accent }}>
+                  {'need '}{(config.price as number) - totalMochis}{' more'}
+                </Text>
+              )}
+            </Text>
           </View>
 
           <View style={sheetStyles.imageContainer}>{config.image}</View>
@@ -157,7 +165,7 @@ const sheetStyles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     alignSelf: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
   },
   balancePill: {
     flexDirection: 'row',
@@ -167,7 +175,7 @@ const sheetStyles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: 999,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
   },
   balanceText: {
     fontFamily: fontFamilies.bold,
@@ -178,12 +186,12 @@ const sheetStyles = StyleSheet.create({
     height: 120,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl,
   },
   ctaText: {
     ...typography.headline,
     textAlign: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.xxl,
     paddingHorizontal: spacing.lg,
   },
   buyButton: {
@@ -207,7 +215,7 @@ const sheetStyles = StyleSheet.create({
     color: '#FFFFFF',
   },
   noThanks: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     paddingVertical: spacing.sm,
   },
   noThanksText: {
