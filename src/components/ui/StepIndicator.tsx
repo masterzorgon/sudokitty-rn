@@ -4,18 +4,10 @@ import { View, StyleSheet } from 'react-native';
 import { spacing } from '../../theme';
 import { AnimatedStepDot } from './AnimatedStepDot';
 
-// ============================================
-// Types
-// ============================================
-
 interface StepIndicatorProps {
   stepCount: number;
   currentStep: number;
 }
-
-// ============================================
-// Component
-// ============================================
 
 export function StepIndicator({ stepCount, currentStep }: StepIndicatorProps) {
   return (
@@ -29,10 +21,6 @@ export function StepIndicator({ stepCount, currentStep }: StepIndicatorProps) {
     </View>
   );
 }
-
-// ============================================
-// Styles
-// ============================================
 
 const styles = StyleSheet.create({
   stepIndicator: {

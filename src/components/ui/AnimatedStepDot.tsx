@@ -9,23 +9,11 @@ import Animated, {
 
 import { colors, useColors } from '../../theme/colors';
 
-// ============================================
-// Constants
-// ============================================
-
 const STEP_DOT_TIMING = { duration: 250, easing: Easing.inOut(Easing.ease) };
 const STEP_DOT_SIZE = 8;
 const STEP_DOT_ACTIVE_WIDTH = 20;
 
-// ============================================
-// Types
-// ============================================
-
 export type StepDotState = 'pending' | 'active' | 'completed';
-
-// ============================================
-// Component
-// ============================================
 
 export function AnimatedStepDot({ state }: { state: StepDotState }) {
   const c = useColors();

@@ -12,11 +12,9 @@ import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import { GAME_LAYOUT } from '../../src/constants/layout';
 import { useTechniquePractice } from '../../src/hooks/useTechniquePractice';
-import {
-  TechniqueHeader,
-  TechniqueDemoView,
-  TechniqueFindItView,
-} from '../../src/components/technique';
+import { TechniqueFindItView } from '../../src/components/technique';
+import { SequenceHeader } from '../../src/components/ui/SequenceHeader';
+import { BoardSlideView } from '../../src/components/ui/BoardSlideView';
 import { ShowcasePage } from '../../src/components/ui/ShowcasePage';
 import { AppButton } from '../../src/components/ui/AppButton';
 import { presentPaywall } from '../../src/lib/revenueCat';
@@ -46,8 +44,7 @@ export default function TechniquePracticeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
-      <TechniqueHeader
-        metadata={metadata}
+      <SequenceHeader
         onBack={state.handleBack}
         stepCount={state.puzzleState && phase !== 'loading' && phase !== 'error' && phase !== 'coming-soon' && phase !== 'locked' ? sequence.totalSteps : undefined}
         currentStep={state.puzzleState && phase !== 'loading' && phase !== 'error' && phase !== 'coming-soon' && phase !== 'locked' ? sequence.currentStep : undefined}
@@ -133,11 +130,10 @@ export default function TechniquePracticeScreen() {
 
       {/* Demo (steps 1..N) */}
       {phase === 'demo' && state.puzzleState && (
-        <TechniqueDemoView
-          puzzleState={state.puzzleState}
-          currentStep={state.demoStepIndex}
-          mochiMessage={state.mochiMessage}
-          boardHighlightSet={state.boardHighlightSet}
+        <BoardSlideView
+          puzzle={state.puzzleState.puzzle}
+          highlightCells={state.boardHighlightSet}
+          mascotMessage={state.mochiMessage}
           onNext={state.handleSequenceNext}
           onPrevious={state.handleSequencePrevious}
         />

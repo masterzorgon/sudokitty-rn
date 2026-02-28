@@ -89,18 +89,27 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
         <Animated.View style={[sheetStyles.container, { backgroundColor: c.cream, transform: [{ translateY: slideAnim }] }]}>
           <View style={[sheetStyles.dragIndicator, { backgroundColor: c.gridLine }]} />
 
-          <View style={[sheetStyles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
-            <MochiPointIcon width={21} height={21} />
-            <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>
-              {totalMochis} / {config.price}
-              {' · '}
-              {insufficientFunds && (
-                <Text style={{ color: c.accent }}>
-                  {'need '}{(config.price as number) - totalMochis}{' more'}
-                </Text>
-              )}
-            </Text>
-          </View>
+          {config.currency === 'mochis' && (
+            <View style={[sheetStyles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
+              <MochiPointIcon width={21} height={21} />
+              <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>
+                {totalMochis} / {config.price}
+                {insufficientFunds && (
+                  <Text style={{ color: c.accent }}>
+                    {' \u00B7 need '}{(config.price as number) - totalMochis}{' more'}
+                  </Text>
+                )}
+              </Text>
+            </View>
+          )}
+
+          {config.currency === 'iap' && (
+            <View style={[sheetStyles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
+              <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>
+                {config.price}
+              </Text>
+            </View>
+          )}
 
           <View style={sheetStyles.imageContainer}>{config.image}</View>
 
@@ -182,8 +191,8 @@ const sheetStyles = StyleSheet.create({
     fontSize: 18,
   },
   imageContainer: {
-    width: 120,
-    height: 120,
+    width: 140,
+    height: 140,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xl,

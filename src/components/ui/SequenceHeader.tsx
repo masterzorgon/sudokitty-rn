@@ -3,18 +3,16 @@ import { View, StyleSheet } from 'react-native';
 
 import { spacing } from '../../theme';
 import { GAME_LAYOUT } from '../../constants/layout';
-import { BackButton } from '../ui/BackButton';
+import { BackButton } from './BackButton';
 import { StepIndicator } from './StepIndicator';
-import type { TechniqueMetadata } from '../../data/techniqueMetadata';
 
-interface TechniqueHeaderProps {
-  metadata: TechniqueMetadata;
+interface SequenceHeaderProps {
   onBack: () => void;
   stepCount?: number;
   currentStep?: number;
 }
 
-export function TechniqueHeader({ metadata, onBack, stepCount, currentStep }: TechniqueHeaderProps) {
+export function SequenceHeader({ onBack, stepCount, currentStep }: SequenceHeaderProps) {
   const showSteps = stepCount != null && currentStep != null;
 
   return (

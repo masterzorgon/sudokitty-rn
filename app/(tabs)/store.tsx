@@ -24,7 +24,7 @@ import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
-import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../../src/constants/economy';
+import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, MOCHI_PACK_PRODUCT_IDS, type MochiPackProductId } from '../../src/constants/economy';
 import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
 import { playFeedback } from '../../src/utils/feedback';
@@ -36,6 +36,7 @@ import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 const MochiStarsImg = require('../../assets/images/mochi/mochi-stars.png');
 const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
 const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
+const MochiMochisImg = require('../../assets/images/mochi/mochi-mochis.png');
 
 
 
@@ -85,7 +86,6 @@ export default function StoreScreen() {
 
   const [products, setProducts] = useState<PurchasesStoreProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [productsError, setProductsError] = useState(false);
   const [purchaseInProgress, setPurchaseInProgress] = useState<string | null>(null);
   const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
   const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
@@ -103,10 +103,8 @@ export default function StoreScreen() {
 
   const loadProducts = useCallback(async () => {
     setProductsLoading(true);
-    setProductsError(false);
     const result = await getMochiPackProducts();
     if (!mountedRef.current) return;
-    if (result.length === 0) setProductsError(true);
     setProducts(result);
     setProductsLoading(false);
   }, []);
@@ -203,17 +201,19 @@ export default function StoreScreen() {
     });
   }, [handleBuyTrack, handleInsufficientFunds]);
 
-  const openMochiPackSheet = useCallback((product: PurchasesStoreProduct, amount: number) => {
+  const openMochiPackSheet = useCallback((packId: MochiPackProductId, amount: number) => {
     playFeedback('tap');
+    const product = products.find((p) => p.identifier === packId);
+    const priceLabel = product?.priceString ?? '---';
     setSheetConfig({
-      image: <MochiPointIcon width={80} height={80} />,
+      image: <Image source={MochiMochisImg} style={{ width: 200, height: 200 }} resizeMode="contain" />,
       title: `Get ${amount.toLocaleString()} Mochis!`,
-      price: product.priceString,
+      price: priceLabel,
       currency: 'iap',
-      buttonLabel: `BUY FOR ${product.priceString}`,
-      onConfirm: () => handlePurchasePack(product),
+      buttonLabel: product ? `BUY FOR ${priceLabel}` : 'UNAVAILABLE',
+      onConfirm: product ? () => handlePurchasePack(product) : () => {},
     });
-  }, [handlePurchasePack]);
+  }, [products, handlePurchasePack]);
 
   // ============================================
   // Render
@@ -362,45 +362,28 @@ export default function StoreScreen() {
 
         <SectionTitle>Get More Mochis</SectionTitle>
 
-        {productsLoading ? (
-          <SkeuCard borderRadius={borderRadius.lg} contentStyle={styles.loadingCard}>
-            <ActivityIndicator size="small" color={c.textSecondary} />
-            <Text style={[styles.loadingText, { color: c.textSecondary }]}>Loading prices...</Text>
-          </SkeuCard>
-        ) : productsError ? (
-          <SkeuCard borderRadius={borderRadius.lg} contentStyle={styles.loadingCard}>
-            <Text style={[styles.loadingText, { color: c.textSecondary }]}>Unable to load prices.</Text>
-            <SkeuButton
-              onPress={loadProducts}
-              variant="secondary"
-              borderRadius={borderRadius.sm}
-              contentStyle={styles.smallBtn}
-            >
-              <Text style={[styles.smallBtnText, { color: c.textPrimary }]}>Retry</Text>
-            </SkeuButton>
-          </SkeuCard>
-        ) : (
-          products.map((product) => {
-            const amount = getPackAmount(product.identifier);
-            if (!amount) return null;
-            return (
-              <StoreItemRow
-                key={product.identifier}
-                icon={
-                  <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '40' }]}>
-                    <MochiPointIcon width={22} height={22} />
-                  </View>
-                }
-                title={`${amount.toLocaleString()} Mochis`}
-                subtitle={product.priceString}
-                trailing={
-                  <Feather name="chevron-right" size={20} color={c.textSecondary} />
-                }
-                onPress={() => openMochiPackSheet(product, amount)}
-              />
-            );
-          })
-        )}
+        {MOCHI_PACK_PRODUCT_IDS.map((packId) => {
+          const amount = MOCHI_PACK_AMOUNTS[packId];
+          const product = products.find((p) => p.identifier === packId);
+          const priceLabel = productsLoading ? 'Loading...' : product?.priceString;
+
+          return (
+            <StoreItemRow
+              key={packId}
+              icon={
+                <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '40' }]}>
+                  <MochiPointIcon width={22} height={22} />
+                </View>
+              }
+              title={`${amount.toLocaleString()} Mochis`}
+              subtitle={priceLabel}
+              trailing={
+                <Feather name="chevron-right" size={20} color={c.textSecondary} />
+              }
+              onPress={() => openMochiPackSheet(packId, amount)}
+            />
+          );
+        })}
 
       </ScrollView>
 
@@ -413,19 +396,6 @@ export default function StoreScreen() {
   );
 }
 
-// ============================================
-// Helpers
-// ============================================
-
-function getPackAmount(productId: string): number | undefined {
-  const amounts: Record<string, number> = {
-    mochis_100: 100,
-    mochis_500: 500,
-    mochis_1200: 1200,
-    mochis_3000: 3000,
-  };
-  return amounts[productId];
-}
 
 // ============================================
 // Banner Styles
@@ -510,7 +480,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.lg,
     paddingTop: 0,
-    paddingBottom: 160,
+    paddingBottom: 140,
   },
 
   iconCircle: {
@@ -529,13 +499,5 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
 
-  loadingCard: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
-    gap: spacing.md,
-  },
-  loadingText: {
-    ...typography.caption,
-  },
 
 });

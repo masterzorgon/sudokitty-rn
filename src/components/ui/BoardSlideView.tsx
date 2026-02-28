@@ -6,25 +6,27 @@ import { spacing } from '../../theme';
 import { GAME_LAYOUT } from '../../constants/layout';
 import { SudokuBoard, puzzleToCellData } from '../board';
 import { GameMascot } from '../game';
-import { AppButton } from '../ui/AppButton';
+import { AppButton } from './AppButton';
 
-interface TutorialSlideViewProps {
+interface BoardSlideViewProps {
   puzzle: number[][];
   highlightCells: Set<string>;
-  mascotMessage: string;
-  isFirst: boolean;
+  mascotMessage: string | null;
   onNext: () => void;
   onPrevious: () => void;
+  isFirst?: boolean;
+  showBoxTinting?: boolean;
 }
 
-export function TutorialSlideView({
+export function BoardSlideView({
   puzzle,
   highlightCells,
   mascotMessage,
-  isFirst,
   onNext,
   onPrevious,
-}: TutorialSlideViewProps) {
+  isFirst = false,
+  showBoxTinting = true,
+}: BoardSlideViewProps) {
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
       <View style={styles.mascotZone}>
@@ -37,7 +39,7 @@ export function TutorialSlideView({
           highlightedCells={highlightCells}
           interactive={false}
           animateValues={false}
-          showBoxTinting
+          showBoxTinting={showBoxTinting}
         />
       </View>
 

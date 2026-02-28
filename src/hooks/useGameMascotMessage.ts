@@ -16,27 +16,25 @@ interface GameStateSnapshot {
 
 interface EventConfig {
   messages: readonly string[];
-  probability: number; // 0-1, where 1 = always respond
+  probability: number;
   persist?: boolean;
-  duration?: number; // ms, defaults to MESSAGE_DURATION_MS
+  duration?: number;
 }
 
 // MARK: - Event Configuration
 
-// Default message duration (ms)
-const MESSAGE_DURATION_MS = 3000;
+const MESSAGE_DURATION_MS = 4500;
 
-// Configurable event responses
 const EVENT_CONFIG = {
   gameStart: {
     messages: ["Good luck!", "Let's do this!", "You've got this!"],
     probability: 1.0,
-    duration: 3000,
+    duration: 4500,
   },
   hint: {
     messages: ["Smart move!", "Good thinking!", "Nice strategy!"],
     probability: 1.0,
-    duration: 3000,
+    duration: 4500,
   },
   win: {
     messages: ["Purrfect! You did it!", "Amazing work!", "You're a star!"],
@@ -51,12 +49,12 @@ const EVENT_CONFIG = {
   mistake: {
     messages: ["No worries!", "Keep trying!", "You've got this!"],
     probability: 0.3,
-    duration: 2500,
+    duration: 4500,
   },
   correct: {
     messages: ["Nice!", "Great!", "Perfect!", "Awesome!"],
     probability: 0.25,
-    duration: 2500,
+    duration: 4500,
   },
 } as const satisfies Record<string, EventConfig>;
 
