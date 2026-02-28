@@ -13,14 +13,12 @@ import { fontFamilies } from '../../src/theme/typography';
 import { spacing } from '../../src/theme';
 import {
   useDailyChallengeStore,
-  useTotalMochiPoints,
   useCurrentStreak,
 } from '../../src/stores/dailyChallengeStore';
 import {
   MochiCat,
   TechniquesCTA,
   StreakPill,
-  PointsHeaderPill,
 } from '../../src/components/home';
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
@@ -45,7 +43,6 @@ export default function HomeScreen() {
   // Store hooks
   const loadState = useDailyChallengeStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
-  const totalMochis = useTotalMochiPoints();
 
   // Welcome message for speech bubble
   const [welcomeMessage, setWelcomeMessage] = useState('');
@@ -71,11 +68,6 @@ export default function HomeScreen() {
   const handleStreakPress = () => {
     playFeedback('tap');
     router.push('/profile');
-  };
-
-  const handleStorePress = () => {
-    playFeedback('tap');
-    router.push('/store');
   };
 
   const handleDailyChallengePress = () => {
@@ -105,7 +97,7 @@ export default function HomeScreen() {
         <ScreenHeader
           title="sudokitty"
           left={<View />}
-          right={<PointsHeaderPill type="mochis" value={totalMochis} onPress={handleStorePress} />}
+          showMochiPill
         />
       </Animated.View>
 

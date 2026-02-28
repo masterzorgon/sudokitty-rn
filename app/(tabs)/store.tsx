@@ -6,9 +6,14 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Pressable,
+  Modal,
+  Animated,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import type { PurchasesStoreProduct } from 'react-native-purchases';
 
 import { useColors } from '../../src/theme/colors';
@@ -17,158 +22,292 @@ import { spacing, borderRadius } from '../../src/theme';
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuButton, SkeuCard } from '../../src/components/ui/Skeuomorphic';
+import type { CustomSkeuColors } from '../../src/components/ui/Skeuomorphic';
+import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
+import { useIsPremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
 import { MOCHIS_COST } from '../../src/constants/economy';
-import { getMochiPackProducts, purchaseMochiPack } from '../../src/lib/revenueCat';
+import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
+import { playFeedback } from '../../src/utils/feedback';
+import { LinearGradient as ExpoGradient } from 'expo-linear-gradient';
 import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
+import MochiWowSvg from '../../assets/images/mochi/mochi-wow.svg';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 // ============================================
-// Track Row
+// Store Item Row (Duolingo-style)
 // ============================================
 
-interface TrackRowProps {
-  track: BackingTrackDef;
-  isOwned: boolean;
-  isActive: boolean;
-  isDemoPlaying: boolean;
-  canAfford: boolean;
-  onBuy: () => void;
-  onSetActive: () => void;
-  onToggleDemo: () => void;
+interface StoreItemRowProps {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  trailing: React.ReactNode;
+  onPress?: () => void;
 }
 
-function TrackRow({
-  track,
-  isOwned,
-  isActive,
-  isDemoPlaying,
-  canAfford,
-  onBuy,
-  onSetActive,
-  onToggleDemo,
-}: TrackRowProps) {
+function StoreItemRow({ icon, title, subtitle, trailing, onPress }: StoreItemRowProps) {
   const c = useColors();
 
+  const content = (
+    <View style={itemStyles.row}>
+      <View style={itemStyles.iconArea}>{icon}</View>
+      <View style={itemStyles.body}>
+        <Text style={[itemStyles.title, { color: c.textPrimary }]}>{title}</Text>
+        {subtitle ? (
+          <Text style={[itemStyles.subtitle, { color: c.textSecondary }]}>{subtitle}</Text>
+        ) : null}
+      </View>
+      <View style={itemStyles.trailing}>{trailing}</View>
+    </View>
+  );
+
   return (
-    <View style={styles.trackRow}>
-      <View style={styles.trackInfo}>
-        <Text style={[styles.trackName, { color: c.textPrimary }]}>
-          {track.name}
-        </Text>
-        {isOwned ? (
-          <Text style={[styles.trackStatus, { color: c.accent }]}>
-            {isActive ? 'Playing' : 'Owned'}
-          </Text>
-        ) : (
-          <View style={styles.trackCostRow}>
-            <MochiPointIcon width={14} height={14} />
-            <Text style={[styles.trackCost, { color: c.textSecondary }]}>
-              {track.cost}
-            </Text>
+    <SkeuCard
+      borderRadius={borderRadius.lg}
+      contentStyle={itemStyles.card}
+      style={itemStyles.wrapper}
+      onPress={onPress}
+      accessibilityLabel={title}
+    >
+      {content}
+    </SkeuCard>
+  );
+}
+
+const itemStyles = StyleSheet.create({
+  wrapper: {
+    marginBottom: spacing.sm,
+  },
+  card: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconArea: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  body: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  title: {
+    fontFamily: fontFamilies.semibold,
+    fontSize: 16,
+  },
+  subtitle: {
+    fontFamily: fontFamilies.regular,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  trailing: {
+    alignItems: 'flex-end',
+  },
+});
+
+// ============================================
+// Mochi Price Pill
+// ============================================
+
+function MochiPricePill({ price }: { price: number }) {
+  const c = useColors();
+  return (
+    <View style={priceStyles.pill}>
+      <MochiPointIcon width={14} height={14} />
+      <Text style={[priceStyles.text, { color: c.textPrimary }]}>{price}</Text>
+    </View>
+  );
+}
+
+const priceStyles = StyleSheet.create({
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  text: {
+    fontFamily: fontFamilies.semibold,
+    fontSize: 15,
+  },
+});
+
+// ============================================
+// Purchase Confirmation Sheet
+// ============================================
+
+interface PurchaseSheetConfig {
+  image: React.ReactNode;
+  title: string;
+  price: number | string;
+  currency: 'mochis' | 'iap';
+  buttonLabel: string;
+  onConfirm: () => void | Promise<void>;
+}
+
+interface PurchaseSheetProps {
+  config: PurchaseSheetConfig | null;
+  onDismiss: () => void;
+  loading?: boolean;
+}
+
+function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps) {
+  const c = useColors();
+  const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
+  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+  const visible = config !== null;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 65,
+        friction: 11,
+      }).start();
+    } else {
+      slideAnim.setValue(SCREEN_HEIGHT);
+    }
+  }, [visible, slideAnim]);
+
+  const animateDismiss = useCallback((cb?: () => void) => {
+    Animated.timing(slideAnim, {
+      toValue: SCREEN_HEIGHT,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      onDismiss();
+      cb?.();
+    });
+  }, [slideAnim, onDismiss]);
+
+  if (!config) return null;
+
+  const canAfford = config.currency === 'iap' || totalMochis >= (config.price as number);
+  const insufficientFunds = config.currency === 'mochis' && !canAfford;
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={() => animateDismiss()}>
+      <View style={sheetStyles.overlay}>
+        <Pressable style={sheetStyles.dismissArea} onPress={() => animateDismiss()} />
+        <Animated.View style={[sheetStyles.container, { backgroundColor: c.cream, transform: [{ translateY: slideAnim }] }]}>
+          <View style={[sheetStyles.dragIndicator, { backgroundColor: c.gridLine }]} />
+
+          <View style={sheetStyles.balancePill}>
+            <RewardsPill mochis={totalMochis} variant="balance" size="small" />
           </View>
-        )}
-      </View>
 
-      <View style={styles.trackActions}>
-        <SkeuButton
-          onPress={onToggleDemo}
-          variant="secondary"
-          borderRadius={borderRadius.sm}
-          contentStyle={styles.smallBtn}
-          accessibilityLabel={isDemoPlaying ? 'Stop preview' : 'Play preview'}
-        >
-          <Ionicons
-            name={isDemoPlaying ? 'pause' : 'play'}
-            size={16}
-            color={c.textPrimary}
-          />
-        </SkeuButton>
+          <View style={sheetStyles.imageContainer}>{config.image}</View>
 
-        {isOwned ? (
-          isActive ? (
-            <View style={[styles.activeBadge, { backgroundColor: c.accentLight }]}>
-              <Ionicons name="checkmark" size={16} color={c.accent} />
-            </View>
-          ) : (
-            <SkeuButton
-              onPress={onSetActive}
-              variant="secondary"
-              borderRadius={borderRadius.sm}
-              contentStyle={styles.smallBtn}
-              accessibilityLabel="Set as active track"
-            >
-              <Text style={[styles.smallBtnText, { color: c.textPrimary }]}>
-                Use
-              </Text>
-            </SkeuButton>
-          )
-        ) : (
-          <SkeuButton
-            onPress={onBuy}
-            variant="primary"
-            borderRadius={borderRadius.sm}
-            disabled={!canAfford}
-            contentStyle={styles.smallBtn}
-            accessibilityLabel={`Buy ${track.name} for ${track.cost} mochis`}
-          >
-            <Text style={[styles.smallBtnText, { color: '#FFFFFF' }]}>
-              Buy
-            </Text>
-          </SkeuButton>
-        )}
-      </View>
-    </View>
-  );
-}
-
-// ============================================
-// Mochi Pack Row
-// ============================================
-
-interface MochiPackRowProps {
-  product: PurchasesStoreProduct;
-  amount: number;
-  purchasing: boolean;
-  disabled: boolean;
-  onBuy: () => void;
-}
-
-function MochiPackRow({ product, amount, purchasing, disabled, onBuy }: MochiPackRowProps) {
-  const c = useColors();
-
-  return (
-    <View style={styles.packRow}>
-      <View style={styles.packInfo}>
-        <View style={styles.packAmountRow}>
-          <MochiPointIcon width={18} height={18} />
-          <Text style={[styles.packAmount, { color: c.textPrimary }]}>
-            {amount.toLocaleString()}
+          <Text style={[sheetStyles.ctaText, { color: c.textPrimary }]}>
+            {insufficientFunds ? "You don't have enough mochis" : config.title}
           </Text>
-        </View>
-        <Text style={[styles.packPrice, { color: c.textSecondary }]}>
-          {product.priceString}
-        </Text>
+
+          <SkeuButton
+            onPress={() => {
+              if (insufficientFunds) return;
+              animateDismiss(() => config.onConfirm());
+            }}
+            variant="primary"
+            borderRadius={borderRadius.lg}
+            disabled={insufficientFunds || loading}
+            style={sheetStyles.buyButton}
+            contentStyle={sheetStyles.buyButtonContent}
+            accessibilityLabel={config.buttonLabel}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={sheetStyles.buyButtonText}>{config.buttonLabel}</Text>
+            )}
+          </SkeuButton>
+
+          <Pressable onPress={() => animateDismiss()} style={sheetStyles.noThanks}>
+            <Text style={[sheetStyles.noThanksText, { color: c.textSecondary }]}>NO THANKS</Text>
+          </Pressable>
+        </Animated.View>
       </View>
-      <SkeuButton
-        onPress={onBuy}
-        variant="primary"
-        borderRadius={borderRadius.sm}
-        disabled={disabled || purchasing}
-        contentStyle={styles.buyBtn}
-        accessibilityLabel={`Buy ${amount} mochis for ${product.priceString}`}
-      >
-        {purchasing ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <Text style={[styles.buyBtnText, { color: '#FFFFFF' }]}>Buy</Text>
-        )}
-      </SkeuButton>
-    </View>
+    </Modal>
   );
 }
+
+const sheetStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  dismissArea: {
+    flex: 1,
+  },
+  container: {
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    paddingTop: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl + 20,
+    alignItems: 'center',
+  },
+  dragIndicator: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: spacing.lg,
+  },
+  balancePill: {
+    marginBottom: spacing.lg,
+  },
+  imageContainer: {
+    width: 120,
+    height: 120,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  ctaText: {
+    ...typography.headline,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  buyButton: {
+    width: '100%',
+  },
+  buyButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  buyButtonText: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 16,
+    color: '#FFFFFF',
+  },
+  noThanks: {
+    marginTop: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  noThanksText: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 14,
+    letterSpacing: 0.5,
+  },
+});
 
 // ============================================
 // Store Screen
@@ -176,6 +315,8 @@ function MochiPackRow({ product, amount, purchasing, disabled, onBuy }: MochiPac
 
 export default function StoreScreen() {
   const c = useColors();
+  const router = useRouter();
+  const isPremium = useIsPremium();
   const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
   const streakFreezesCount = useDailyChallengeStore((s) => s.streakFreezesCount);
   const buyStreakFreeze = useDailyChallengeStore((s) => s.buyStreakFreeze);
@@ -190,10 +331,10 @@ export default function StoreScreen() {
   const [productsError, setProductsError] = useState(false);
   const [purchaseInProgress, setPurchaseInProgress] = useState<string | null>(null);
   const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
+  const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
 
   const mountedRef = useRef(true);
 
-  // Load IAP products on mount
   useEffect(() => {
     mountedRef.current = true;
     loadProducts();
@@ -208,9 +349,7 @@ export default function StoreScreen() {
     setProductsError(false);
     const result = await getMochiPackProducts();
     if (!mountedRef.current) return;
-    if (result.length === 0) {
-      setProductsError(true);
-    }
+    if (result.length === 0) setProductsError(true);
     setProducts(result);
     setProductsLoading(false);
   }, []);
@@ -220,28 +359,20 @@ export default function StoreScreen() {
   // ============================================
 
   const handleBuyStreakFreeze = useCallback(() => {
-    if (totalMochis < MOCHIS_COST.streak_freeze) {
-      Alert.alert('Not enough Mochis', `You need ${MOCHIS_COST.streak_freeze} Mochis to buy a Streak Freeze.`);
-      return;
-    }
     const success = buyStreakFreeze();
     if (success) {
       Alert.alert('Streak Freeze Purchased!', 'Your streak is protected for one missed day.');
     }
-  }, [totalMochis, buyStreakFreeze]);
+  }, [buyStreakFreeze]);
 
   const handleBuyTrack = useCallback((trackId: string) => {
     const track = BACKING_TRACKS.find((t) => t.id === trackId);
     if (!track) return;
-    if (totalMochis < track.cost) {
-      Alert.alert('Not enough Mochis', `You need ${track.cost} Mochis to buy this track.`);
-      return;
-    }
     const success = buyTrack(trackId);
     if (success) {
       Alert.alert('Track Purchased!', `${track.name} is now your active backing track.`);
     }
-  }, [totalMochis, buyTrack]);
+  }, [buyTrack]);
 
   const handleToggleDemo = useCallback(async (track: BackingTrackDef) => {
     if (demoPlayingTrackId === track.id) {
@@ -250,9 +381,7 @@ export default function StoreScreen() {
     } else {
       setDemoPlayingTrackId(track.id);
       await playDemo(track.asset, track.demoDurationMs);
-      if (mountedRef.current) {
-        setDemoPlayingTrackId(null);
-      }
+      if (mountedRef.current) setDemoPlayingTrackId(null);
     }
   }, [demoPlayingTrackId]);
 
@@ -269,168 +398,249 @@ export default function StoreScreen() {
         Alert.alert('Purchase Failed', 'Something went wrong. Please try again.');
       }
     } finally {
-      if (mountedRef.current) {
-        setPurchaseInProgress(null);
-      }
+      if (mountedRef.current) setPurchaseInProgress(null);
     }
   }, [purchaseInProgress]);
+
+  // Sheet openers
+  const openStreakFreezeSheet = useCallback(() => {
+    playFeedback('tap');
+    setSheetConfig({
+      image: <Ionicons name="snow" size={80} color={c.accent} />,
+      title: `Protect your streak with 1 Streak Freeze!`,
+      price: MOCHIS_COST.streak_freeze,
+      currency: 'mochis',
+      buttonLabel: `BUY FOR ${MOCHIS_COST.streak_freeze}`,
+      onConfirm: handleBuyStreakFreeze,
+    });
+  }, [c.accent, handleBuyStreakFreeze]);
+
+  const openTrackSheet = useCallback((track: BackingTrackDef) => {
+    playFeedback('tap');
+    setSheetConfig({
+      image: <Ionicons name="musical-notes" size={80} color={c.accent} />,
+      title: `Unlock ${track.name}?`,
+      price: track.cost,
+      currency: 'mochis',
+      buttonLabel: `BUY FOR ${track.cost}`,
+      onConfirm: () => handleBuyTrack(track.id),
+    });
+  }, [c.accent, handleBuyTrack]);
+
+  const openMochiPackSheet = useCallback((product: PurchasesStoreProduct, amount: number) => {
+    playFeedback('tap');
+    setSheetConfig({
+      image: <MochiPointIcon width={80} height={80} />,
+      title: `Get ${amount.toLocaleString()} Mochis!`,
+      price: product.priceString,
+      currency: 'iap',
+      buttonLabel: `BUY FOR ${product.priceString}`,
+      onConfirm: () => handlePurchasePack(product),
+    });
+  }, [handlePurchasePack]);
 
   // ============================================
   // Render
   // ============================================
 
-  const canAffordFreeze = totalMochis >= MOCHIS_COST.streak_freeze;
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
 
-      <ScreenHeader title="store" />
+      <ScreenHeader title="store" left={<View />} showMochiPill />
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-
-        {/* Balance */}
-        <View style={styles.balanceRow}>
-          <MochiPointIcon width={24} height={24} />
-          <Text style={[styles.balanceText, { color: c.textPrimary }]}>
-            {totalMochis.toLocaleString()} Mochis
-          </Text>
-        </View>
-
-        {/* Spend Section */}
-        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>
-          Spend Mochis
-        </Text>
-
-        {/* Streak Freeze */}
+        {/* Section 1: Techniques CTA Banner */}
         <SkeuCard
           borderRadius={borderRadius.lg}
-          contentStyle={styles.card}
-          style={styles.cardWrapper}
+          contentStyle={bannerStyles.card}
+          style={bannerStyles.wrapper}
+          accessibilityLabel="Unlock sudoku techniques"
         >
-          <View style={styles.streakFreezeRow}>
-            <View style={styles.streakFreezeInfo}>
-              <View style={styles.streakFreezeHeader}>
-                <Ionicons name="snow-outline" size={20} color={c.accent} />
-                <Text style={[styles.itemTitle, { color: c.textPrimary }]}>
-                  Streak Freeze
-                </Text>
-              </View>
-              <Text style={[styles.itemDesc, { color: c.textSecondary }]}>
-                Protect your streak if you miss a day
+          {/* Theme gradient glow from bottom */}
+          <ExpoGradient
+            colors={[c.boardBackground, c.accentLight + '10', c.buttonPrimary + '40']}
+            locations={[1, 0.55, 0]}
+            style={bannerStyles.gradientOverlay}
+            pointerEvents="none"
+            // borderRadius={borderRadius.lg}
+          />
+
+          <View style={bannerStyles.row}>
+            <View style={bannerStyles.textArea}>
+              <Text style={[bannerStyles.badge, { color: c.mochiPillText, backgroundColor: c.mochiPillBorder + '40' }]}>
+                SUDOKU TECHNIQUES
               </Text>
-              {(streakFreezesCount ?? 0) > 0 && (
-                <Text style={[styles.ownedCount, { color: c.accent }]}>
-                  You have {streakFreezesCount}
-                </Text>
-              )}
+              <Text style={[bannerStyles.title, { color: c.textPrimary }]}>
+                level up your solving skills
+              </Text>
             </View>
-            <View style={styles.streakFreezeAction}>
-              <View style={styles.costBadge}>
-                <MochiPointIcon width={14} height={14} />
-                <Text style={[styles.costText, { color: c.textSecondary }]}>
-                  {MOCHIS_COST.streak_freeze}
-                </Text>
-              </View>
-              <SkeuButton
-                onPress={handleBuyStreakFreeze}
-                variant="primary"
-                borderRadius={borderRadius.sm}
-                disabled={!canAffordFreeze}
-                contentStyle={styles.buyBtn}
-                accessibilityLabel="Buy streak freeze"
-              >
-                <Text style={[styles.buyBtnText, { color: '#FFFFFF' }]}>Buy</Text>
-              </SkeuButton>
+            <View style={bannerStyles.imageArea}>
+              <MochiWowSvg width={60} height={60} />
             </View>
           </View>
+          <SkeuButton
+            onPress={async () => { playFeedback('tap'); await presentPaywallAlways(); }}
+            variant="primary"
+            sheen
+            borderRadius={borderRadius.md}
+            contentStyle={bannerStyles.unlockBtnContent}
+            style={bannerStyles.unlockBtn}
+            accessibilityLabel="Unlock all sudoku techniques"
+          >
+            <Text style={bannerStyles.learnMoreText}>UNLOCK TECHNIQUES</Text>
+          </SkeuButton>
         </SkeuCard>
 
-        {/* Backing Tracks */}
-        <Text style={[styles.subsectionTitle, { color: c.textPrimary }]}>
-          Music Tracks
-        </Text>
+        {/* Section 2: Subscriptions */}
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Subscriptions</Text>
 
-        <SkeuCard
-          borderRadius={borderRadius.lg}
-          contentStyle={styles.card}
-          style={styles.cardWrapper}
-        >
-          {BACKING_TRACKS.map((track, index) => (
-            <React.Fragment key={track.id}>
-              {index > 0 && <View style={[styles.divider, { backgroundColor: c.cardBorder }]} />}
-              <TrackRow
-                track={track}
-                isOwned={ownedTrackIds.includes(track.id)}
-                isActive={activeTrackId === track.id}
-                isDemoPlaying={demoPlayingTrackId === track.id}
-                canAfford={totalMochis >= track.cost}
-                onBuy={() => handleBuyTrack(track.id)}
-                onSetActive={() => setActiveTrack(track.id)}
-                onToggleDemo={() => handleToggleDemo(track)}
-              />
-            </React.Fragment>
-          ))}
-        </SkeuCard>
-
-        {/* IAP Section */}
-        <Text style={[styles.sectionTitle, { color: c.textPrimary, marginTop: spacing.xl }]}>
-          Get More Mochis
-        </Text>
-
-        <SkeuCard
-          borderRadius={borderRadius.lg}
-          contentStyle={styles.card}
-          style={styles.cardWrapper}
-        >
-          {productsLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color={c.textSecondary} />
-              <Text style={[styles.loadingText, { color: c.textSecondary }]}>
-                Loading prices...
-              </Text>
+        <StoreItemRow
+          icon={
+            <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '60' }]}>
+              <Ionicons name="star" size={22} color={c.accent} />
             </View>
-          ) : productsError ? (
-            <View style={styles.loadingContainer}>
-              <Text style={[styles.errorText, { color: c.textSecondary }]}>
-                Unable to load prices.
-              </Text>
-              <SkeuButton
-                onPress={loadProducts}
-                variant="secondary"
-                borderRadius={borderRadius.sm}
-                contentStyle={styles.retryBtn}
-              >
-                <Text style={[styles.retryBtnText, { color: c.textPrimary }]}>
-                  Retry
-                </Text>
-              </SkeuButton>
+          }
+          title="Remove Ads"
+          subtitle={isPremium ? 'Premium active' : 'Upgrade to premium'}
+          trailing={
+            isPremium ? (
+              <Ionicons name="checkmark-circle" size={24} color={c.accent} />
+            ) : (
+              <Feather name="chevron-right" size={20} color={c.textSecondary} />
+            )
+          }
+          onPress={isPremium ? undefined : async () => { playFeedback('tap'); await presentPaywallAlways(); }}
+        />
+
+        {/* Section 3: Streak Freeze */}
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Streak Freeze</Text>
+
+        <StoreItemRow
+          icon={
+            <View style={[styles.iconCircle, { backgroundColor: '#E3F2FD' }]}>
+              <Ionicons name="snow" size={22} color="#42A5F5" />
             </View>
-          ) : (
-            products.map((product, index) => {
-              const amount = getPackAmount(product.identifier);
-              if (!amount) return null;
-              return (
-                <React.Fragment key={product.identifier}>
-                  {index > 0 && <View style={[styles.divider, { backgroundColor: c.cardBorder }]} />}
-                  <MochiPackRow
-                    product={product}
-                    amount={amount}
-                    purchasing={purchaseInProgress === product.identifier}
-                    disabled={purchaseInProgress !== null}
-                    onBuy={() => handlePurchasePack(product)}
+          }
+          title="Streak Freeze"
+          subtitle={
+            (streakFreezesCount ?? 0) > 0
+              ? `Protect your streak \u00B7 You have ${streakFreezesCount}`
+              : 'Protect your streak for 1 missed day'
+          }
+          trailing={<MochiPricePill price={MOCHIS_COST.streak_freeze} />}
+          onPress={openStreakFreezeSheet}
+        />
+
+        {/* Section 4: Sound Tracks */}
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Sound Tracks</Text>
+
+        {BACKING_TRACKS.map((track) => {
+          const isOwned = ownedTrackIds.includes(track.id);
+          const isActive = activeTrackId === track.id;
+          const isDemoPlaying = demoPlayingTrackId === track.id;
+
+          return (
+            <StoreItemRow
+              key={track.id}
+              icon={
+                <Pressable
+                  onPress={() => handleToggleDemo(track)}
+                  style={[styles.iconCircle, { backgroundColor: c.accentLight + '40' }]}
+                  accessibilityLabel={isDemoPlaying ? 'Stop preview' : 'Play preview'}
+                >
+                  <Ionicons
+                    name={isDemoPlaying ? 'pause' : 'play'}
+                    size={20}
+                    color={c.accent}
                   />
-                </React.Fragment>
-              );
-            })
-          )}
-        </SkeuCard>
+                </Pressable>
+              }
+              title={track.name}
+              subtitle={
+                isOwned
+                  ? isActive ? 'Playing' : 'Owned'
+                  : undefined
+              }
+              trailing={
+                isOwned ? (
+                  isActive ? (
+                    <Ionicons name="checkmark-circle" size={24} color={c.accent} />
+                  ) : (
+                    <SkeuButton
+                      onPress={() => { playFeedback('tap'); setActiveTrack(track.id); }}
+                      variant="secondary"
+                      borderRadius={borderRadius.sm}
+                      contentStyle={styles.smallBtn}
+                      accessibilityLabel="Set as active track"
+                    >
+                      <Text style={[styles.smallBtnText, { color: c.textPrimary }]}>Use</Text>
+                    </SkeuButton>
+                  )
+                ) : (
+                  <MochiPricePill price={track.cost} />
+                )
+              }
+              onPress={!isOwned && track.cost > 0 ? () => openTrackSheet(track) : undefined}
+            />
+          );
+        })}
+
+        {/* Section 5: Get More Mochis (IAP) */}
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Get More Mochis</Text>
+
+        {productsLoading ? (
+          <SkeuCard borderRadius={borderRadius.lg} contentStyle={styles.loadingCard}>
+            <ActivityIndicator size="small" color={c.textSecondary} />
+            <Text style={[styles.loadingText, { color: c.textSecondary }]}>Loading prices...</Text>
+          </SkeuCard>
+        ) : productsError ? (
+          <SkeuCard borderRadius={borderRadius.lg} contentStyle={styles.loadingCard}>
+            <Text style={[styles.loadingText, { color: c.textSecondary }]}>Unable to load prices.</Text>
+            <SkeuButton
+              onPress={loadProducts}
+              variant="secondary"
+              borderRadius={borderRadius.sm}
+              contentStyle={styles.smallBtn}
+            >
+              <Text style={[styles.smallBtnText, { color: c.textPrimary }]}>Retry</Text>
+            </SkeuButton>
+          </SkeuCard>
+        ) : (
+          products.map((product) => {
+            const amount = getPackAmount(product.identifier);
+            if (!amount) return null;
+            return (
+              <StoreItemRow
+                key={product.identifier}
+                icon={
+                  <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '40' }]}>
+                    <MochiPointIcon width={22} height={22} />
+                  </View>
+                }
+                title={`${amount.toLocaleString()} Mochis`}
+                subtitle={product.priceString}
+                trailing={
+                  <Feather name="chevron-right" size={20} color={c.textSecondary} />
+                }
+                onPress={() => openMochiPackSheet(product, amount)}
+              />
+            );
+          })
+        )}
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      <PurchaseSheet
+        config={sheetConfig}
+        onDismiss={() => setSheetConfig(null)}
+        loading={purchaseInProgress !== null}
+      />
     </SafeAreaView>
   );
 }
@@ -450,6 +660,68 @@ function getPackAmount(productId: string): number | undefined {
 }
 
 // ============================================
+// Banner Styles
+// ============================================
+
+const bannerStyles = StyleSheet.create({
+  wrapper: {
+    marginBottom: spacing.lg,
+  },
+  card: {
+    padding: spacing.lg,
+    overflow: 'hidden',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.lg,
+    margin: -spacing.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textArea: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  badge: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 12,
+    letterSpacing: 1,
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.xs,
+    overflow: 'hidden',
+    marginBottom: spacing.sm,
+  },
+  title: {
+    ...typography.headline,
+    marginBottom: spacing.xs,
+  },
+  imageArea: {
+    width: 60,
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  unlockBtn: {
+    marginTop: spacing.md,
+  },
+  unlockBtnContent: {
+    paddingVertical: spacing.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  learnMoreText: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 13,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+});
+
+// ============================================
 // Styles
 // ============================================
 
@@ -462,113 +734,23 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.lg,
-    paddingTop: 0,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
-  },
-  balanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xl,
-  },
-  balanceText: {
-    ...typography.title,
   },
   sectionTitle: {
     ...typography.headline,
-    marginBottom: spacing.md,
-  },
-  subsectionTitle: {
-    ...typography.headline,
-    fontSize: 16,
     marginTop: spacing.lg,
     marginBottom: spacing.md,
   },
 
-  // Cards
-  cardWrapper: {
-    marginBottom: spacing.md,
-  },
-  card: {
-    padding: spacing.lg,
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
-  // Streak Freeze
-  streakFreezeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  streakFreezeInfo: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  streakFreezeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  streakFreezeAction: {
-    alignItems: 'flex-end',
-    gap: spacing.xs,
-  },
-  itemTitle: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 16,
-  },
-  itemDesc: {
-    ...typography.caption,
-    marginTop: 2,
-  },
-  ownedCount: {
-    ...typography.caption,
-    marginTop: spacing.xs,
-  },
-  costBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  costText: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 14,
-  },
-
-  // Track rows
-  trackRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-  },
-  trackInfo: {
-    flex: 1,
-  },
-  trackName: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 15,
-  },
-  trackStatus: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  trackCostRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    marginTop: 2,
-  },
-  trackCost: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 12,
-  },
-  trackActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   smallBtn: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -577,49 +759,8 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.semibold,
     fontSize: 13,
   },
-  activeBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 
-  // Mochi pack rows
-  packRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
-  },
-  packInfo: {
-    flex: 1,
-  },
-  packAmountRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  packAmount: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 16,
-  },
-  packPrice: {
-    fontFamily: fontFamilies.regular,
-    fontSize: 13,
-    marginTop: 2,
-  },
-  buyBtn: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  buyBtnText: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 14,
-  },
-
-  // Loading / Error
-  loadingContainer: {
+  loadingCard: {
     alignItems: 'center',
     paddingVertical: spacing.lg,
     gap: spacing.md,
@@ -627,24 +768,7 @@ const styles = StyleSheet.create({
   loadingText: {
     ...typography.caption,
   },
-  errorText: {
-    ...typography.caption,
-    textAlign: 'center',
-  },
-  retryBtn: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  retryBtnText: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 13,
-  },
 
-  // Misc
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: spacing.xs,
-  },
   bottomSpacer: {
     height: spacing.xxl,
   },
