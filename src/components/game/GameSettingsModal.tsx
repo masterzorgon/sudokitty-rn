@@ -3,9 +3,7 @@ import {
   View,
   StyleSheet,
   Text,
-  Modal,
   Pressable,
-  Animated,
   Dimensions,
   ScrollView,
   FlatList,
@@ -33,6 +31,7 @@ import { spacing, borderRadius } from '../../theme';
 import { SkeuToggle } from '../ui/Skeuomorphic';
 import { SkeuCard } from '../ui/Skeuomorphic';
 import { AppButton } from '../ui/AppButton';
+import { SheetWrapper, type SheetWrapperRef } from '../ui/SheetWrapper';
 import { playFeedback } from '../../utils/feedback';
 
 // MARK: - Types
@@ -244,46 +243,21 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
     setActiveTrack(trackId);
   }, [setActiveTrack]);
 
-  // Animation
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
-    } else {
-      slideAnim.setValue(SCREEN_HEIGHT);
-    }
-  }, [visible, slideAnim]);
+  const sheetRef = useRef<SheetWrapperRef>(null);
 
   const handleClose = useCallback(() => {
     stopDemo();
     setDemoPlayingTrackId(null);
-    Animated.timing(slideAnim, {
-      toValue: SCREEN_HEIGHT,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      onClose();
-    });
-  }, [slideAnim, onClose]);
+    sheetRef.current?.close();
+  }, []);
 
   const handleNavigateToStore = useCallback(() => {
     stopDemo();
     setDemoPlayingTrackId(null);
-    Animated.timing(slideAnim, {
-      toValue: SCREEN_HEIGHT,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      onClose();
+    sheetRef.current?.close(() => {
       onNavigateToStore?.();
     });
-  }, [slideAnim, onClose, onNavigateToStore]);
+  }, [onNavigateToStore]);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -300,20 +274,12 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
   const hintsRemaining = unlimitedHints ? '\u221E' : String(MAX_HINTS - hintsUsed);
 
   return (
-    <Modal
+    <SheetWrapper
+      ref={sheetRef}
       visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleClose}
+      onDismiss={onClose}
+      containerStyle={{ backgroundColor: c.cream, maxHeight: SCREEN_HEIGHT * 0.85 }}
     >
-      <View style={styles.overlay}>
-        <Pressable style={styles.dismissArea} onPress={handleClose} />
-
-        <Animated.View
-          style={[styles.container, { backgroundColor: c.cream, transform: [{ translateY: slideAnim }] }]}
-        >
-          <View style={[styles.dragIndicator, { backgroundColor: colors.gridLine }]} />
-
           <ScrollView
             showsVerticalScrollIndicator={false}
             bounces={false}
@@ -445,38 +411,13 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
               variant="primary"
             />
           </View>
-        </Animated.View>
-      </View>
-    </Modal>
+    </SheetWrapper>
   );
 }
 
 // MARK: - Styles
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlayBackground,
-    justifyContent: 'flex-end',
-  },
-  dismissArea: {
-    flex: 1,
-  },
-  container: {
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 20,
-    maxHeight: SCREEN_HEIGHT * 0.85,
-  },
-  dragIndicator: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: spacing.lg,
-  },
   scrollContent: {
     paddingBottom: spacing.md,
   },

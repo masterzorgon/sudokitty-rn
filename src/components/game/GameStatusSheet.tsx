@@ -1,28 +1,18 @@
 // GameStatusSheet - Bottom sheet shown when game ends (won or lost)
-// Uses SkeuButton for primary/secondary actions and a text "return home" link
 
-import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  Modal,
-  Pressable,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import React, { useRef } from 'react';
+import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useGameStore } from '../../stores/gameStore';
 import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
 import { showRewardedAd } from '../../lib/rewardedAds';
 import { SkeuButton, SKEU_VARIANTS } from '../ui/Skeuomorphic';
+import { SheetWrapper, type SheetWrapperRef } from '../ui/SheetWrapper';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { Difficulty, calculateMochiReward, calculateMochiRewardBreakdown } from '../../engine/types';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export interface GameStatusSheetProps {
   onPlayAgain: (difficulty: Difficulty) => void;
@@ -43,38 +33,12 @@ export function GameStatusSheet({
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const canContinue = useGameStore((s) => s.canContinue);
 
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const sheetRef = useRef<SheetWrapperRef>(null);
   const visible = gameStatus === 'won' || gameStatus === 'lost';
 
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
-    } else {
-      slideAnim.setValue(SCREEN_HEIGHT);
-    }
-  }, [visible, slideAnim]);
-
-  const handleClose = (callback: () => void) => {
-    Animated.timing(slideAnim, {
-      toValue: SCREEN_HEIGHT,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      callback();
-    });
-  };
-
-  if (!visible) {
-    return null;
-  }
+  if (!visible) return null;
 
   const isWon = gameStatus === 'won';
-  // Daily challenges have flat reward; regular games have time-based reward
   const mochisEarned = isWon
     ? isDaily
       ? useDailyChallengeStore.getState().getTodayChallenge().mochiPoints
@@ -87,135 +51,101 @@ export function GameStatusSheet({
 
   const handlePrimaryPress = async () => {
     const earned = await showRewardedAd();
-    if (earned) handleClose(onContinue);
+    if (earned) sheetRef.current?.close(onContinue);
   };
 
   return (
-    <Modal
+    <SheetWrapper
+      ref={sheetRef}
       visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={() => handleClose(onGoHome)}
+      onDismiss={onGoHome}
     >
-      <View style={styles.overlay}>
-        <Pressable style={styles.dismissArea} onPress={() => handleClose(onGoHome)} />
-
-        <Animated.View
-          style={[styles.container, { transform: [{ translateY: slideAnim }] }]}
-        >
-          <View style={styles.dragIndicator} />
-          <Text style={styles.title}>
-            {isWon ? 'purrfect!' : 'game over'}
+      <Text style={styles.title}>
+        {isWon ? 'purrfect!' : 'game over'}
+      </Text>
+      {isWon && rewardBreakdown ? (
+        <View style={styles.rewardBreakdown}>
+          <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
+            Base: {rewardBreakdown.base} mochis
           </Text>
-          {isWon && rewardBreakdown ? (
-            <View style={styles.rewardBreakdown}>
-              <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
-                Base: {rewardBreakdown.base} mochis
-              </Text>
-              <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
-                Time bonus: {rewardBreakdown.timeBonus} mochis
-              </Text>
-              <Text style={[styles.rewardBreakdownTotal, { color: c.textPrimary }]}>
-                Total: {rewardBreakdown.total} mochis
-              </Text>
-            </View>
-          ) : isWon ? (
-            <Text style={styles.message}>
-              you earned {mochisEarned} mochis!
-            </Text>
-          ) : null}
+          <Text style={[styles.rewardBreakdownLine, { color: c.textSecondary }]}>
+            Time bonus: {rewardBreakdown.timeBonus} mochis
+          </Text>
+          <Text style={[styles.rewardBreakdownTotal, { color: c.textPrimary }]}>
+            Total: {rewardBreakdown.total} mochis
+          </Text>
+        </View>
+      ) : isWon ? (
+        <Text style={styles.message}>
+          you earned {mochisEarned} mochis!
+        </Text>
+      ) : null}
 
-          {showContinue && (
-            <View style={styles.continueSection}>
-              <SkeuButton
-                onPress={handlePrimaryPress}
-                variant="primary"
-                borderRadius={borderRadius.lg}
-                showHighlight={false}
-                style={styles.primaryButton}
-                contentStyle={styles.primaryButtonContent}
-              >
-                <Text style={[styles.primaryButtonText, { color: SKEU_VARIANTS.primary.textColor }]}>
-                  watch ad to continue
-                </Text>
-              </SkeuButton>
-            </View>
-          )}
-
-          <View style={styles.secondaryRow}>
-            {isDaily && isWon ? (
-              <SkeuButton
-                onPress={() => handleClose(onGoHome)}
-                variant="secondary"
-                borderRadius={borderRadius.lg}
-                style={styles.secondaryButton}
-                contentStyle={styles.secondaryButtonContent}
-              >
-                <Text style={[styles.secondaryButtonText, { color: SKEU_VARIANTS.secondary.textColor }]}>
-                  back to daily
-                </Text>
-              </SkeuButton>
-            ) : (
-              <SkeuButton
-                onPress={() => handleClose(() => onPlayAgain(difficulty))}
-                variant="secondary"
-                borderRadius={borderRadius.lg}
-                style={styles.secondaryButton}
-                contentStyle={styles.secondaryButtonContent}
-              >
-                <Text style={[styles.secondaryButtonText, { color: SKEU_VARIANTS.secondary.textColor }]}>
-                  play new game
-                </Text>
-              </SkeuButton>
-            )}
-          </View>
-
-          <Pressable
-            style={styles.returnHomeRow}
-            onPress={() => handleClose(onGoHome)}
-            hitSlop={12}
+      {showContinue && (
+        <View style={styles.continueSection}>
+          <SkeuButton
+            onPress={handlePrimaryPress}
+            variant="primary"
+            borderRadius={borderRadius.lg}
+            showHighlight={false}
+            style={styles.fullWidthBtn}
+            contentStyle={styles.btnContent}
           >
-            <Ionicons name="arrow-back" size={20} color={c.textSecondary} />
-            <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
-              return home
+            <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
+              watch ad to continue
             </Text>
-          </Pressable>
-        </Animated.View>
+          </SkeuButton>
+        </View>
+      )}
+
+      <View style={styles.secondaryRow}>
+        {isDaily && isWon ? (
+          <SkeuButton
+            onPress={() => sheetRef.current?.close(onGoHome)}
+            variant="secondary"
+            borderRadius={borderRadius.lg}
+            style={styles.fullWidthBtn}
+            contentStyle={styles.btnContent}
+          >
+            <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
+              back to daily
+            </Text>
+          </SkeuButton>
+        ) : (
+          <SkeuButton
+            onPress={() => sheetRef.current?.close(() => onPlayAgain(difficulty))}
+            variant="secondary"
+            borderRadius={borderRadius.lg}
+            style={styles.fullWidthBtn}
+            contentStyle={styles.btnContent}
+          >
+            <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
+              play new game
+            </Text>
+          </SkeuButton>
+        )}
       </View>
-    </Modal>
+
+      <Pressable
+        style={styles.returnHomeRow}
+        onPress={() => sheetRef.current?.close(onGoHome)}
+        hitSlop={12}
+      >
+        <Ionicons name="arrow-back" size={20} color={c.textSecondary} />
+        <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
+          return home
+        </Text>
+      </Pressable>
+    </SheetWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.overlayBackground,
-    justifyContent: 'flex-end',
-  },
-  dismissArea: {
-    flex: 1,
-  },
-  container: {
-    backgroundColor: colors.cardBackground,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 20,
-  },
-  dragIndicator: {
-    width: 36,
-    height: 4,
-    backgroundColor: colors.gridLine,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: spacing.lg,
-  },
   title: {
     ...typography.largeTitle,
     color: colors.textPrimary,
     marginBottom: spacing.sm,
-    marginHorizontal: "auto",
+    marginHorizontal: 'auto',
   },
   message: {
     ...typography.body,
@@ -242,35 +172,22 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     gap: spacing.sm,
   },
-  primaryButton: {
+  fullWidthBtn: {
     alignSelf: 'stretch',
     width: '100%',
   },
-  primaryButtonContent: {
+  btnContent: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  primaryButtonText: {
+  btnText: {
     ...typography.button,
   },
   secondaryRow: {
     width: '100%',
     marginBottom: spacing.lg,
-  },
-  secondaryButton: {
-    alignSelf: 'stretch',
-    width: '100%',
-  },
-  secondaryButtonContent: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondaryButtonText: {
-    ...typography.button,
   },
   returnHomeRow: {
     flexDirection: 'row',

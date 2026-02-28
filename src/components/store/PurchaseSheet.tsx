@@ -1,11 +1,8 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   View,
   Text,
   Pressable,
-  Modal,
-  Animated,
-  Dimensions,
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
@@ -15,10 +12,9 @@ import { typography } from '../../theme/typography';
 import { fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuButton } from '../ui/Skeuomorphic';
+import { SheetWrapper, type SheetWrapperRef } from '../ui/SheetWrapper';
 import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 export interface PurchaseSheetConfig {
   image: React.ReactNode;
@@ -27,7 +23,6 @@ export interface PurchaseSheetConfig {
   currency: 'mochis' | 'iap';
   buttonLabel: string;
   onConfirm: () => void | Promise<void>;
-  /** Called when the user taps the buy button but can't afford the item. */
   onInsufficientFunds?: () => void | Promise<void>;
 }
 
@@ -40,142 +35,97 @@ export interface PurchaseSheetProps {
 export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps) {
   const c = useColors();
   const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const sheetRef = useRef<SheetWrapperRef>(null);
 
   const visible = config !== null;
 
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }).start();
-    } else {
-      slideAnim.setValue(SCREEN_HEIGHT);
-    }
-  }, [visible, slideAnim]);
+  const handlePress = useCallback(() => {
+    if (!config) return;
+    const canAfford = config.currency === 'iap' || totalMochis >= (config.price as number);
+    const insufficientFunds = config.currency === 'mochis' && !canAfford;
 
-  const animateDismiss = useCallback((cb?: () => void) => {
-    Animated.timing(slideAnim, {
-      toValue: SCREEN_HEIGHT,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      onDismiss();
-      cb?.();
-    });
-  }, [slideAnim, onDismiss]);
+    if (insufficientFunds && config.onInsufficientFunds) {
+      sheetRef.current?.close(() => config.onInsufficientFunds!());
+      return;
+    }
+    if (insufficientFunds) return;
+    sheetRef.current?.close(() => config.onConfirm());
+  }, [config, totalMochis]);
 
   if (!config) return null;
 
   const canAfford = config.currency === 'iap' || totalMochis >= (config.price as number);
   const insufficientFunds = config.currency === 'mochis' && !canAfford;
 
-  const handlePress = () => {
-    if (insufficientFunds && config.onInsufficientFunds) {
-      animateDismiss(() => config.onInsufficientFunds!());
-      return;
-    }
-    if (insufficientFunds) return;
-    animateDismiss(() => config.onConfirm());
-  };
-
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={() => animateDismiss()}>
-      <View style={sheetStyles.overlay}>
-        <Pressable style={sheetStyles.dismissArea} onPress={() => animateDismiss()} />
-        <Animated.View style={[sheetStyles.container, { backgroundColor: c.cream, transform: [{ translateY: slideAnim }] }]}>
-          <View style={[sheetStyles.dragIndicator, { backgroundColor: c.gridLine }]} />
-
-          {config.currency === 'mochis' && (
-            <View style={[sheetStyles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
-              <MochiPointIcon width={21} height={21} />
-              <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>
-                {totalMochis} / {config.price}
-                {insufficientFunds && (
-                  <Text style={{ color: c.accent }}>
-                    {' \u00B7 need '}{(config.price as number) - totalMochis}{' more'}
-                  </Text>
-                )}
+    <SheetWrapper
+      ref={sheetRef}
+      visible={visible}
+      onDismiss={onDismiss}
+      containerStyle={{ backgroundColor: c.cream, alignItems: 'center' }}
+    >
+      {config.currency === 'mochis' && (
+        <View style={[styles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
+          <MochiPointIcon width={21} height={21} />
+          <Text style={[styles.balanceText, { color: c.textPrimary }]}>
+            {totalMochis} / {config.price}
+            {insufficientFunds && (
+              <Text style={{ color: c.accent }}>
+                {' \u00B7 need '}{(config.price as number) - totalMochis}{' more'}
               </Text>
-            </View>
-          )}
-
-          {config.currency === 'iap' && (
-            <View style={[sheetStyles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
-              <Text style={[sheetStyles.balanceText, { color: c.textPrimary }]}>
-                {config.price}
-              </Text>
-            </View>
-          )}
-
-          <View style={sheetStyles.imageContainer}>{config.image}</View>
-
-          <Text style={[sheetStyles.ctaText, { color: c.textPrimary }]}>
-            {config.title}
-          </Text>
-
-          <SkeuButton
-            onPress={handlePress}
-            variant="primary"
-            borderRadius={borderRadius.lg}
-            disabled={loading}
-            style={sheetStyles.buyButton}
-            contentStyle={sheetStyles.buyButtonContent}
-            accessibilityLabel={insufficientFunds ? 'Get more mochis' : config.buttonLabel}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : insufficientFunds ? (
-              <View style={sheetStyles.buttonRow}>
-                <MochiPointIcon width={20} height={20} />
-                <Text style={sheetStyles.buyButtonText}>GET MOCHIS</Text>
-              </View>
-            ) : config.currency === 'mochis' ? (
-              <View style={sheetStyles.buttonRow}>
-                <MochiPointIcon width={20} height={20} />
-                <Text style={sheetStyles.buyButtonText}>GET FOR {config.price}</Text>
-              </View>
-            ) : (
-              <Text style={sheetStyles.buyButtonText}>{config.buttonLabel}</Text>
             )}
-          </SkeuButton>
+          </Text>
+        </View>
+      )}
 
-          <Pressable onPress={() => animateDismiss()} style={sheetStyles.noThanks}>
-            <Text style={[sheetStyles.noThanksText, { color: c.textSecondary }]}>NO THANKS</Text>
-          </Pressable>
-        </Animated.View>
-      </View>
-    </Modal>
+      {config.currency === 'iap' && (
+        <View style={[styles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
+          <Text style={[styles.balanceText, { color: c.textPrimary }]}>
+            {config.price}
+          </Text>
+        </View>
+      )}
+
+      <View style={styles.imageContainer}>{config.image}</View>
+
+      <Text style={[styles.ctaText, { color: c.textPrimary }]}>
+        {config.title}
+      </Text>
+
+      <SkeuButton
+        onPress={handlePress}
+        variant="primary"
+        borderRadius={borderRadius.lg}
+        disabled={loading}
+        style={styles.buyButton}
+        contentStyle={styles.buyButtonContent}
+        accessibilityLabel={insufficientFunds ? 'Get more mochis' : config.buttonLabel}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : insufficientFunds ? (
+          <View style={styles.buttonRow}>
+            <MochiPointIcon width={20} height={20} />
+            <Text style={styles.buyButtonText}>GET MOCHIS</Text>
+          </View>
+        ) : config.currency === 'mochis' ? (
+          <View style={styles.buttonRow}>
+            <MochiPointIcon width={20} height={20} />
+            <Text style={styles.buyButtonText}>GET FOR {config.price}</Text>
+          </View>
+        ) : (
+          <Text style={styles.buyButtonText}>{config.buttonLabel}</Text>
+        )}
+      </SkeuButton>
+
+      <Pressable onPress={() => sheetRef.current?.close()} style={styles.noThanks}>
+        <Text style={[styles.noThanksText, { color: c.textSecondary }]}>NO THANKS</Text>
+      </Pressable>
+    </SheetWrapper>
   );
 }
 
-const sheetStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  dismissArea: {
-    flex: 1,
-  },
-  container: {
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl + 20,
-    alignItems: 'center',
-  },
-  dragIndicator: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: spacing.xl,
-  },
+const styles = StyleSheet.create({
   balancePill: {
     flexDirection: 'row',
     alignItems: 'center',
