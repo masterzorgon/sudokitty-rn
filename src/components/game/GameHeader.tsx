@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderLeftWidth: 1,
     borderColor: colors.gridLineBold,
-    marginHorizontal: 2,
   },
   section: {
     width: BOX_WIDTH,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.xs,
+    marginLeft: 1.42,
   },
   separator: {
     width: 2,

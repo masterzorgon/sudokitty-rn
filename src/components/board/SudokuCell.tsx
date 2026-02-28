@@ -18,8 +18,7 @@ import type { CellAnimationState } from '../../engine/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Grid spans full screen width (edge-to-edge) for the main game
-const BOARD_SIZE_PX = SCREEN_WIDTH;
-export const CELL_SIZE = Math.floor((BOARD_SIZE_PX - 4) / 9);
+export const CELL_SIZE = SCREEN_WIDTH / 9;
 export const COMPACT_CELL_SIZE = 36;
 
 // ============================================
