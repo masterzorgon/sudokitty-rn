@@ -20,6 +20,7 @@ import { spacing, borderRadius } from '../../src/theme';
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuButton, SkeuCard } from '../../src/components/ui/Skeuomorphic';
+import { TechniquesBanner } from '../../src/components/ui/TechniquesBanner';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
@@ -29,12 +30,10 @@ import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '.
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
 import { DemoPlayButton } from '../../src/components/ui/DemoPlayButton';
 import { playFeedback } from '../../src/utils/feedback';
-import { LinearGradient as ExpoGradient } from 'expo-linear-gradient';
 import { SectionTitle } from '../../src/components/ui/SectionTitle';
 import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
 import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
 import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
-const MochiStarsImg = require('../../assets/images/mochi/mochi-stars.png');
 const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
 const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 const MochiMochisImg = require('../../assets/images/mochi/mochi-mochis.png');
@@ -244,44 +243,7 @@ export default function StoreScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <SkeuCard
-          borderRadius={borderRadius.lg}
-          contentStyle={bannerStyles.card}
-          style={bannerStyles.wrapper}
-          accessibilityLabel="Unlock sudoku techniques"
-        >
-          <ExpoGradient
-            colors={[c.boardBackground, c.accentLight + '10', c.buttonPrimary + '40']}
-            locations={[1, 0.55, 0]}
-            style={bannerStyles.gradientOverlay}
-            pointerEvents="none"
-          />
-
-          <View style={bannerStyles.row}>
-            <View style={bannerStyles.textArea}>
-              <Text style={[bannerStyles.badge, { color: c.mochiPillText, backgroundColor: c.mochiPillBorder + '40' }]}>
-                SUDOKU TECHNIQUES
-              </Text>
-              <Text style={[bannerStyles.title, { color: c.textPrimary }]}>
-                level up your solving skills
-              </Text>
-            </View>
-            <View style={bannerStyles.imageArea}>
-              <Image source={MochiStarsImg} style={bannerStyles.mochiImage} />
-            </View>
-          </View>
-          <SkeuButton
-            onPress={async () => { playFeedback('tap'); await presentPaywallAlways(); }}
-            variant="primary"
-            sheen
-            borderRadius={borderRadius.md}
-            contentStyle={bannerStyles.unlockBtnContent}
-            style={bannerStyles.unlockBtn}
-            accessibilityLabel="Unlock all sudoku techniques"
-          >
-            <Text style={bannerStyles.learnMoreText}>UNLOCK TECHNIQUES</Text>
-          </SkeuButton>
-        </SkeuCard>
+        <TechniquesBanner />
 
         <SectionTitle>Subscriptions</SectionTitle>
 
@@ -350,21 +312,19 @@ export default function StoreScreen() {
                   isActive ? (
                     <Ionicons name="checkmark-circle" size={24} color={c.accent} />
                   ) : (
-                    <SkeuButton
-                      onPress={() => { playFeedback('tap'); setActiveTrack(track.id); }}
-                      variant="secondary"
-                      borderRadius={borderRadius.sm}
-                      contentStyle={styles.smallBtn}
-                      accessibilityLabel="Set as active track"
-                    >
-                      <Text style={[styles.smallBtnText, { color: c.textPrimary }]}>Use</Text>
-                    </SkeuButton>
+                    <Ionicons name="ellipse-outline" size={24} color={c.boxBorder} />
                   )
                 ) : (
                   <MochiPricePill price={track.cost} />
                 )
               }
-              onPress={!isOwned && track.cost > 0 ? () => openTrackSheet(track) : undefined}
+              onPress={
+                !isOwned && track.cost > 0
+                  ? () => openTrackSheet(track)
+                  : isOwned && !isActive
+                    ? () => { playFeedback('tap'); setActiveTrack(track.id); }
+                    : () => {}
+              }
             />
           );
         })}
@@ -410,70 +370,6 @@ export default function StoreScreen() {
 // Banner Styles
 // ============================================
 
-const bannerStyles = StyleSheet.create({
-  wrapper: {
-    marginBottom: spacing.lg,
-  },
-  card: {
-    padding: spacing.lg,
-    overflow: 'hidden',
-  },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: borderRadius.lg,
-    margin: -spacing.sm,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  textArea: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  badge: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 12,
-    letterSpacing: 1,
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.xs,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-  },
-  title: {
-    ...typography.headline,
-    marginBottom: spacing.xs,
-  },
-  imageArea: {
-    width: 80,
-    height: 80,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  mochiImage: {
-    width: 120,
-    height: 120,
-    marginRight: spacing.xl + spacing.sm,
-    resizeMode: 'contain',
-    marginBottom: -spacing.md -spacing.sm,
-  },
-  unlockBtn: {
-    marginTop: 0,
-  },
-  unlockBtnContent: {
-    paddingVertical: spacing.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  learnMoreText: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 13,
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-  },
-});
 
 // ============================================
 // Styles

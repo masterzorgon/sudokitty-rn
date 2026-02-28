@@ -34,6 +34,7 @@ import { useIsPremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
 import { getTechniqueReward } from '../../src/constants/techniqueRewards';
+import { TechniquesBanner } from '../../src/components/ui/TechniquesBanner';
 import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 
 // ============================================
@@ -187,7 +188,7 @@ function TypeSection({
               key={technique.id}
               technique={technique}
               index={sectionIndex * 4 + index}
-              isLocked={!isPremium && technique.level >= 3}
+              isLocked={!isPremium && technique.level >= 2}
               onPress={() => onSelectTechnique(technique.id)}
             />
           ))}
@@ -224,7 +225,7 @@ export default function TechniquesListScreen() {
   const handleSelectTechnique = async (techniqueId: string) => {
     const meta = getTechniqueMetadata(techniqueId);
     // Gate level 3-4 techniques behind premium
-    if (!isPremium && meta && meta.level >= 3) {
+    if (!isPremium && meta && meta.level >= 2) {
       playFeedback('tap');
       trackPaywallOpened('technique_card');
       await presentPaywall();
@@ -257,6 +258,8 @@ export default function TechniquesListScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {!isPremium && <TechniquesBanner />}
+
         {groups.map((group, sectionIndex) => (
           <TypeSection
             key={group.type}
