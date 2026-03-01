@@ -4,7 +4,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
-import { spacing } from '../../theme';
+import { fontFamilies } from '../../theme/typography';
+import { spacing, borderRadius } from '../../theme';
 import type { CustomSkeuColors } from '../ui/Skeuomorphic';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
@@ -14,7 +15,6 @@ const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
 const ICON_CIRCLE_SIZE = 26;
 const FONT_SIZE = 14;
-const PILL_BORDER_RADIUS = 999;
 
 export type HeaderPillType = 'mochis' | 'freezes';
 
@@ -65,8 +65,8 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
     <SkeuButton
       onPress={onPress}
       customColors={skeuColors}
-      borderRadius={PILL_BORDER_RADIUS}
-      style={StyleSheet.flatten([styles.container, { width: pillWidth, borderRadius: PILL_BORDER_RADIUS }])}
+      borderRadius={borderRadius.full}
+      style={StyleSheet.flatten([styles.container, { width: pillWidth, borderRadius: borderRadius.full }])}
       contentStyle={faceStyle}
       accessibilityLabel={`${value} ${label}, open store`}
     >
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   countText: {
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
     fontSize: FONT_SIZE,
     marginRight: spacing.sm,
   },

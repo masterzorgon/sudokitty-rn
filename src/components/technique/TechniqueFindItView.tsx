@@ -53,7 +53,7 @@ export function TechniqueFindItView({
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.gameLayout}>
       <View style={styles.mascotZone}>
-        <GameMascot message={mochiMessage} maxLines={0} flexibleHeight />
+        <GameMascot message={mochiMessage} flexibleHeight />
       </View>
 
       <View style={styles.boardContainer}>
@@ -94,6 +94,49 @@ export function TechniqueFindItView({
   );
 }
 
+interface ButtonConfig {
+  label: string;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary' | 'neutral';
+  icon?: string;
+  iconPosition?: 'left' | 'right';
+  disabled?: boolean;
+}
+
+interface FindItControlsConfig {
+  primary: ButtonConfig;
+  secondary: ButtonConfig;
+}
+
+function getControlsConfig(
+  isElimination: boolean,
+  findPhase: FindPhase,
+  patternCellCount: number,
+  eliminationCellCount: number,
+  selectedCellCount: number,
+  onConfirmPattern: () => void,
+  onBackToPattern: () => void,
+  onSubmitSelection: () => void,
+  onBack: () => void,
+): FindItControlsConfig {
+  if (isElimination && findPhase === 'pattern') {
+    return {
+      secondary: { label: 'back', onPress: onBack, variant: 'neutral', icon: 'chevron-left', iconPosition: 'left' },
+      primary: { label: 'submit', onPress: onConfirmPattern, icon: 'chevron-right', disabled: patternCellCount === 0 },
+    };
+  }
+  if (isElimination && findPhase === 'elimination') {
+    return {
+      secondary: { label: 'back', onPress: onBackToPattern, variant: 'neutral' },
+      primary: { label: 'submit', onPress: onSubmitSelection, disabled: eliminationCellCount === 0 },
+    };
+  }
+  return {
+    secondary: { label: 'back', onPress: onBack, variant: 'neutral' },
+    primary: { label: 'submit', onPress: onSubmitSelection, disabled: selectedCellCount === 0 },
+  };
+}
+
 interface FindItControlsProps {
   isElimination: boolean;
   findPhase: FindPhase;
@@ -117,39 +160,38 @@ function FindItControls({
   onSubmitSelection,
   onBack,
 }: FindItControlsProps) {
-  if (isElimination && findPhase === 'pattern') {
-    return (
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonWrapper}>
-          <AppButton onPress={onBack} label="back" variant="neutral" icon="chevron-left" iconPosition="left" />
-        </View>
-        <View style={styles.buttonWrapper}>
-          <AppButton onPress={onConfirmPattern} label="submit" icon="chevron-right" disabled={patternCellCount === 0} />
-        </View>
-      </View>
-    );
-  }
-
-  if (isElimination && findPhase === 'elimination') {
-    return (
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonWrapper}>
-          <AppButton onPress={onBackToPattern} label="back" variant="neutral" />
-        </View>
-        <View style={styles.buttonWrapper}>
-          <AppButton onPress={onSubmitSelection} label="submit" disabled={eliminationCellCount === 0} />
-        </View>
-      </View>
-    );
-  }
+  const config = getControlsConfig(
+    isElimination,
+    findPhase,
+    patternCellCount,
+    eliminationCellCount,
+    selectedCellCount,
+    onConfirmPattern,
+    onBackToPattern,
+    onSubmitSelection,
+    onBack,
+  );
 
   return (
     <View style={styles.buttonRow}>
       <View style={styles.buttonWrapper}>
-        <AppButton onPress={onBack} label="back" variant="neutral" />
+        <AppButton
+          onPress={config.secondary.onPress}
+          label={config.secondary.label}
+          variant={config.secondary.variant ?? 'neutral'}
+          icon={config.secondary.icon}
+          iconPosition={config.secondary.iconPosition}
+          disabled={config.secondary.disabled}
+        />
       </View>
       <View style={styles.buttonWrapper}>
-        <AppButton onPress={onSubmitSelection} label="submit" disabled={selectedCellCount === 0} />
+        <AppButton
+          onPress={config.primary.onPress}
+          label={config.primary.label}
+          icon={config.primary.icon}
+          iconPosition={config.primary.iconPosition}
+          disabled={config.primary.disabled}
+        />
       </View>
     </View>
   );

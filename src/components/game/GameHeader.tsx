@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
 import { useTimerEnabled, useUnlimitedMistakes } from '../../stores/settingsStore';
-import { colors, useColors } from '../../theme/colors';
+import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
@@ -14,34 +14,29 @@ const BOX_WIDTH = 130;
 interface IconIndicatorProps {
   used: number;
   total: number;
+  filledIcon: keyof typeof Ionicons.glyphMap;
+  emptyIcon: keyof typeof Ionicons.glyphMap;
+  filledColor: string;
+  emptyColor?: string;
 }
 
-const LivesIndicator = ({ used, total }: IconIndicatorProps) => (
+const IconIndicator = ({
+  used,
+  total,
+  filledIcon,
+  emptyIcon,
+  filledColor,
+  emptyColor = colors.gridLine,
+}: IconIndicatorProps) => (
   <View style={styles.iconRow}>
     {Array.from({ length: total }, (_, i) => {
       const isRemaining = i < (total - used);
       return (
         <Ionicons
           key={i}
-          name={isRemaining ? 'heart' : 'heart-outline'}
+          name={isRemaining ? filledIcon : emptyIcon}
           size={16}
-          color={isRemaining ? colors.errorText : colors.gridLine}
-        />
-      );
-    })}
-  </View>
-);
-
-const HintsIndicator = ({ used, total, accentColor }: IconIndicatorProps & { accentColor: string }) => (
-  <View style={styles.iconRow}>
-    {Array.from({ length: total }, (_, i) => {
-      const isRemaining = i < (total - used);
-      return (
-        <Ionicons
-          key={i}
-          name={isRemaining ? 'bulb' : 'bulb-outline'}
-          size={16}
-          color={isRemaining ? accentColor : colors.gridLine}
+          color={isRemaining ? filledColor : emptyColor}
         />
       );
     })}
@@ -49,7 +44,6 @@ const HintsIndicator = ({ used, total, accentColor }: IconIndicatorProps & { acc
 );
 
 export const GameHeader = () => {
-  const c = useColors();
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
@@ -78,7 +72,13 @@ export const GameHeader = () => {
       {/* Section 2: Lives (Mistakes) */}
       <View style={styles.section}>
         {!unlimitedMistakes && (
-          <LivesIndicator used={mistakeCount} total={MAX_MISTAKES} />
+          <IconIndicator
+            used={mistakeCount}
+            total={MAX_MISTAKES}
+            filledIcon="heart"
+            emptyIcon="heart-outline"
+            filledColor={colors.errorText}
+          />
         )}
       </View>
 
@@ -87,7 +87,13 @@ export const GameHeader = () => {
 
       {/* Section 3: Hints */}
       <View style={styles.section}>
-        <HintsIndicator used={hintsUsed} total={MAX_HINTS} accentColor="#F5C542" />
+        <IconIndicator
+          used={hintsUsed}
+          total={MAX_HINTS}
+          filledIcon="bulb"
+          emptyIcon="bulb-outline"
+          filledColor={colors.hintGold}
+        />
       </View>
     </View>
   );
@@ -97,11 +103,9 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'stretch',
-    backgroundColor: 'white',
+    backgroundColor: colors.white,
     height: 30,
     borderWidth: 1,
-    borderRightWidth: 1,
-    borderLeftWidth: 1,
     borderColor: colors.gridLineBold,
   },
   section: {
@@ -109,7 +113,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.xs,
-    marginLeft: 1.42,
   },
   separator: {
     width: 2,

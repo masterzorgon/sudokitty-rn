@@ -3,8 +3,7 @@
 
 import React from 'react';
 
-import { useLastHint } from '../../stores/gameStore';
-import { useGameStore } from '../../stores/gameStore';
+import { useLastHint, useGameStore } from '../../stores/gameStore';
 import { BottomSheet } from '../ui/Sheet/BottomSheet';
 
 export function HintModal() {
@@ -18,6 +17,7 @@ export function HintModal() {
       title={lastHint?.techniqueName ?? ''}
       description={lastHint?.explanation ?? ''}
       action={{ label: 'apply hint', onPress: dismissHintModal }}
+      blurBackground={false}
     />
   );
 }

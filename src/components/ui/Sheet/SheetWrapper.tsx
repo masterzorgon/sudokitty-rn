@@ -27,13 +27,14 @@ export interface SheetWrapperProps {
   visible: boolean;
   onDismiss: () => void;
   dismissOnTapOutside?: boolean;
+  blurBackground?: boolean;
   containerStyle?: ViewStyle;
   children: React.ReactNode;
 }
 
 export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
   function SheetWrapper(
-    { visible, onDismiss, dismissOnTapOutside = true, containerStyle, children },
+    { visible, onDismiss, dismissOnTapOutside = true, blurBackground = true, containerStyle, children },
     ref,
   ) {
     const { height: screenHeight } = useWindowDimensions();
@@ -72,14 +73,23 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
         animationType="fade"
         onRequestClose={() => animateOut()}
       >
-        <BlurView intensity={60} tint="dark" style={styles.overlay}>
-          <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
-
-          <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
-            <View style={styles.dragIndicator} />
-            {children}
-          </Animated.View>
-        </BlurView>
+        {blurBackground ? (
+          <BlurView intensity={60} tint="dark" style={styles.overlay}>
+            <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+            <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
+              <View style={styles.dragIndicator} />
+              {children}
+            </Animated.View>
+          </BlurView>
+        ) : (
+          <View style={[styles.overlay, styles.dimOverlay]}>
+            <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+            <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
+              <View style={styles.dragIndicator} />
+              {children}
+            </Animated.View>
+          </View>
+        )}
       </Modal>
     );
   },
@@ -89,6 +99,9 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
+  },
+  dimOverlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
   dismissArea: {
     flex: 1,

@@ -7,11 +7,19 @@ import { PALETTES, type ColorPalette } from './palettes';
 
 // Neutral colors that stay constant across all themes
 export const colors = {
+  // Pure white (shared reference for '#FFFFFF' throughout the codebase)
+  white: '#FFFFFF',
+
   // Accent colors (non-theme, always available)
   coral: '#FF5C50',
   mint: '#7CC9A8',
   butter: '#FFD84D',
   lavender: '#E8D5E8',
+
+  // Feature-specific accent colors
+  hintGold: '#F5C542',   // Hint bulb icon fill
+  freezeBlue: '#5DADE2', // Streak freeze activity calendar cells
+  progressBarBg: '#e8e5e9', // Progress bar empty track background
 
   // Text colors
   textPrimary: '#5D4E4E',

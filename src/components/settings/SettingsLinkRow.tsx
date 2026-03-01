@@ -14,6 +14,7 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { playFeedback } from '../../utils/feedback';
+import { ROW_HEIGHT } from './constants';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -113,7 +114,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 56,
+    height: ROW_HEIGHT,
     paddingHorizontal: spacing.md,
   },
   borderBottom: {

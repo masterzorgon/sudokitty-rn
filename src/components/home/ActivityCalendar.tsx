@@ -5,6 +5,7 @@ import React, { memo, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, type LayoutChangeEvent } from 'react-native';
 
 import { colors, useColors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 import { ActivityDay } from '../../engine/types';
 
 // ============================================
@@ -15,6 +16,7 @@ const CELL_GAP = 3;
 const ROWS = 7; // Sun-Sat
 const DAY_LABELS = ['', 'M', '', 'W', '', 'F', ''];
 const DAY_LABEL_WIDTH = 16;
+const TARGET_CELL_SIZE = 14;
 
 // ============================================
 // Types
@@ -47,7 +49,6 @@ function buildActivityGrid(completedDates: string[], frozenDates: string[] = [])
     firstDate = new Date(today);
     firstDate.setDate(firstDate.getDate() - 27);
   }
-  today.setHours(0, 0, 0, 0);
 
   // Align start to the beginning of the week (Sunday)
   const startDate = new Date(firstDate);
@@ -78,7 +79,7 @@ function buildActivityGrid(completedDates: string[], frozenDates: string[] = [])
 // Component
 // ============================================
 
-const FROZEN_COLOR = '#5DADE2';
+const FROZEN_COLOR = colors.freezeBlue;
 
 export const ActivityCalendar = memo(({ completedDates, frozenDates = [] }: ActivityCalendarProps) => {
   const c = useColors();
@@ -113,7 +114,6 @@ export const ActivityCalendar = memo(({ completedDates, frozenDates = [] }: Acti
   }, [activityData]);
 
   // Calculate how many columns fit the screen at the target cell size
-  const TARGET_CELL_SIZE = 14;
   const gridWidth = containerWidth - DAY_LABEL_WIDTH - CELL_GAP;
   const maxCols = Math.floor((gridWidth + CELL_GAP) / (TARGET_CELL_SIZE + CELL_GAP));
   // Use all available columns, or pad to fill the screen
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   dayLabelText: {
     fontSize: 9,
     color: colors.textLight,
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
   },
   grid: {
     flex: 1,

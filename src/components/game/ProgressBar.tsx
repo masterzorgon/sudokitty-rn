@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   },
   barBackground: {
     height: GAME_LAYOUT.PROGRESS_BAR_HEIGHT,
-    backgroundColor: '#e8e5e9',
+    backgroundColor: colors.progressBarBg,
     borderRadius: borderRadius.full,
     overflow: 'hidden', // Clip the fill bar
   },

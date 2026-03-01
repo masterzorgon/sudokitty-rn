@@ -6,7 +6,7 @@ import { StyleSheet, View, Text } from 'react-native';
 
 import { fontFamilies } from '../../theme/typography';
 import { spacing } from '../../theme';
-import { useColors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import FlameIcon from '../../../assets/images/icons/flame.svg';
 
@@ -22,6 +22,7 @@ interface StreakPillProps {
 const PILL_HEIGHT = 56;
 const PILL_RADIUS = PILL_HEIGHT / 2;
 const ICON_SIZE = 32;
+const ICON_GLOW_SIZE = 36;
 
 // MARK: - Component
 
@@ -40,7 +41,7 @@ export function StreakPill({ streakCount, onPress }: StreakPillProps) {
       {/* Flame icon */}
       <View style={styles.iconContainer}>
         <View style={[styles.iconGlow, { backgroundColor: c.accentLight + '66' }]} />
-        <FlameIcon width={ICON_SIZE} height={ICON_SIZE} fill="#FFFFFF" />
+        <FlameIcon width={ICON_SIZE} height={ICON_SIZE} fill={colors.white} />
       </View>
 
       {/* Streak count and label - horizontal layout */}
@@ -73,10 +74,9 @@ const styles = StyleSheet.create({
   },
   iconGlow: {
     position: 'absolute',
-    width: 36,
-    height: 36,
-    
-    borderRadius: 18,
+    width: ICON_GLOW_SIZE,
+    height: ICON_GLOW_SIZE,
+    borderRadius: ICON_GLOW_SIZE / 2,
   },
   textContainer: {
     flexDirection: 'row',
@@ -92,6 +92,6 @@ const styles = StyleSheet.create({
   countText: {
     fontFamily: fontFamilies.bold,
     fontSize: 32,
-    color: '#FFFFFF',
+    color: colors.white,
   },
 });

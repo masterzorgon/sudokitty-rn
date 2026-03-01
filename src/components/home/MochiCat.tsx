@@ -4,13 +4,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-// SVG imports - requires react-native-svg-transformer
 import MochiCatSvg from '../../../assets/images/mochi/mochi-cat.svg';
 import MochiGameViewSvg from '../../../assets/images/mochi/mochi-game-view.svg';
 import MochiWelcomeSvg from '../../../assets/images/mochi/mochi-welcome.svg';
-import { spacing } from '../../theme';
-
-// MARK: - Types
 
 interface MochiCatProps {
   size?: number;
@@ -23,8 +19,6 @@ const SVG_MAP = {
   welcome: MochiWelcomeSvg,
 } as const;
 
-// MARK: - Component
-
 export function MochiCat({
   size = 180,
   variant = 'default',
@@ -33,19 +27,14 @@ export function MochiCat({
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      <View style={styles.imageWrapper}>
-        <SvgComponent width={size} height={size} />
-      </View>
+      <SvgComponent width={size} height={size} />
     </View>
   );
 }
-
-// MARK: - Styles
 
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageWrapper: {},
 });

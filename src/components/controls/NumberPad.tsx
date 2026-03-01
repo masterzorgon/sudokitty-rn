@@ -6,21 +6,12 @@ import { View, StyleSheet, Text } from 'react-native';
 
 import { useGameStore, useRemainingCounts } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 import { playFeedback } from '../../utils/feedback';
 import { SkeuButton } from '../ui/Skeuomorphic';
+import { BUTTON_HEIGHT, BUTTON_GAP, BUTTON_RADIUS, whiteSkeuColorsPrimary } from './constants';
 
-const BUTTON_HEIGHT = 56;
-const BUTTON_GAP = 4; // Reduced from 8 to make buttons ~5% wider
-const BUTTON_RADIUS = 12;
-
-// White custom colors for non-highlighted buttons
-const whiteColors = {
-  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-  edge: '#E0E0E0',
-  borderLight: 'rgba(255, 255, 255, 0.5)',
-  borderDark: 'rgba(0, 0, 0, 0.1)',
-  textColor: colors.textPrimary,
-};
+const whiteColors = whiteSkeuColorsPrimary;
 
 interface NumberButtonProps {
   number: number;
@@ -152,11 +143,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 24,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
     color: colors.textPrimary,
   },
   buttonTextHighlighted: {
-    color: '#FFFFFF',
+    color: colors.white,
   },
   dotsContainer: {
     alignItems: 'center',

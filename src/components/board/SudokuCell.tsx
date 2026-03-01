@@ -12,7 +12,7 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 import { colors, useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { typography, fontFamilies } from '../../theme/typography';
 import { springConfigs, timingConfigs, scales } from '../../theme/animations';
 import type { CellAnimationState } from '../../engine/types';
 
@@ -20,10 +20,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Grid spans full screen width (edge-to-edge) for the main game
 export const CELL_SIZE = SCREEN_WIDTH / 9;
 export const COMPACT_CELL_SIZE = 36;
-
-// ============================================
-// Types
-// ============================================
 
 export interface SudokuCellProps {
   row: number;
@@ -45,10 +41,6 @@ export interface SudokuCellProps {
   completionAnimations?: CellAnimationState[];
 }
 
-// ============================================
-// Subcomponents
-// ============================================
-
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const NotesGrid = memo(({ notes, cellSize }: { notes: Set<number>; cellSize: number }) => (
@@ -67,10 +59,6 @@ const NotesGrid = memo(({ notes, cellSize }: { notes: Set<number>; cellSize: num
     ))}
   </View>
 ));
-
-// ============================================
-// Main Component
-// ============================================
 
 export const SudokuCell = memo(({
   row,
@@ -195,9 +183,8 @@ export const SudokuCell = memo(({
     ],
   }));
 
-  // Use higher-contrast highlights in technique mode (animateValues=false)
   const highlightColor = animateValues ? c.cellHighlighted : c.techniqueHighlight;
-  const secondaryColor = animateValues ? 'rgba(255, 92, 80, 0.15)' : c.techniqueHighlightSecondary;
+  const secondaryColor = animateValues ? `${colors.coral}26` : c.techniqueHighlightSecondary;
 
   const animatedBackgroundStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -238,9 +225,6 @@ export const SudokuCell = memo(({
       {/* Background layer */}
       <Animated.View style={[staticStyles.background, animatedBackgroundStyle]} />
 
-      {/* Selection glow effect - soft peach glow */}
-      {isSelected && <View style={staticStyles.selectionGlow} />}
-
       {/* Glow effect layer for correct answers */}
       {animateValues && <Animated.View style={[staticStyles.glow, animatedGlowStyle]} />}
 
@@ -270,19 +254,12 @@ export const SudokuCell = memo(({
   );
 });
 
-// ============================================
-// Styles
-// ============================================
-
 const staticStyles = StyleSheet.create({
   cell: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   background: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  selectionGlow: {
     ...StyleSheet.absoluteFillObject,
   },
   glow: {
@@ -300,15 +277,15 @@ const staticStyles = StyleSheet.create({
   },
   compactValue: {
     fontSize: 14,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
   },
   givenValue: {
     color: colors.givenText,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
   },
   userValue: {
     color: colors.userEntryText,
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
   },
   errorValue: {
     color: colors.errorText,

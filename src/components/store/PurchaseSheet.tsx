@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,8 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import { useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { fontFamilies } from '../../theme/typography';
+import { colors, useColors } from '../../theme/colors';
+import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
@@ -39,23 +38,23 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
 
   const visible = config !== null;
 
+  const { canAfford, insufficientFunds } = useMemo(() => {
+    if (!config) return { canAfford: true, insufficientFunds: false };
+    const afford = config.currency === 'iap' || totalMochis >= (config.price as number);
+    return { canAfford: afford, insufficientFunds: config.currency === 'mochis' && !afford };
+  }, [config, totalMochis]);
+
   const handlePress = useCallback(() => {
     if (!config) return;
-    const canAfford = config.currency === 'iap' || totalMochis >= (config.price as number);
-    const insufficientFunds = config.currency === 'mochis' && !canAfford;
-
     if (insufficientFunds && config.onInsufficientFunds) {
       sheetRef.current?.close(() => config.onInsufficientFunds!());
       return;
     }
     if (insufficientFunds) return;
     sheetRef.current?.close(() => config.onConfirm());
-  }, [config, totalMochis]);
+  }, [config, insufficientFunds]);
 
   if (!config) return null;
-
-  const canAfford = config.currency === 'iap' || totalMochis >= (config.price as number);
-  const insufficientFunds = config.currency === 'mochis' && !canAfford;
 
   return (
     <SheetWrapper
@@ -102,7 +101,7 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
         accessibilityLabel={insufficientFunds ? 'Get more mochis' : config.buttonLabel}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
+          <ActivityIndicator size="small" color={colors.white} />
         ) : insufficientFunds ? (
           <View style={styles.buttonRow}>
             <MochiPointIcon width={20} height={20} />
@@ -134,7 +133,7 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: borderRadius.full,
     marginBottom: spacing.xl,
   },
   balanceText: {
@@ -172,7 +171,7 @@ const styles = StyleSheet.create({
   buyButtonText: {
     fontFamily: fontFamilies.bold,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: colors.white,
   },
   noThanks: {
     marginTop: spacing.xl,

@@ -158,13 +158,15 @@ function CTABannerCard({
         )}
       </SkeuButton>
 
-      <Animated.View style={[StyleSheet.absoluteFill, blurStyle]} pointerEvents="none">
-        <BlurView
-          intensity={12}
-          tint="regular"
-          style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255, 255, 255, 0.23)' }]}
-        />
-      </Animated.View>
+      {blurStyle !== undefined && (
+        <Animated.View style={[StyleSheet.absoluteFill, blurStyle]} pointerEvents="none">
+          <BlurView
+            intensity={12}
+            tint="regular"
+            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255, 255, 255, 0.23)' }]}
+          />
+        </Animated.View>
+      )}
     </SkeuCard>
   );
 }

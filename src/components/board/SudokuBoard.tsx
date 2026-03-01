@@ -11,11 +11,7 @@ import { colors } from '../../theme/colors';
 import { startGameAnimations } from '../../theme/animations';
 import { BOARD_SIZE, Position, positionKey, CellAnimationState } from '../../engine/types';
 
-// ============================================
-// Types
-// ============================================
 
-/** Lightweight cell data that both game and technique screens can provide. */
 export interface SudokuCellData {
   value: number | null;
   isGiven: boolean;
@@ -52,10 +48,6 @@ export interface SudokuBoardProps {
   activeAnimations?: Map<string, CellAnimationState[]>;
 }
 
-// ============================================
-// Helpers
-// ============================================
-
 /** Boxes 1, 3, 5, 7 get alt background (checkerboard pattern) */
 const isAltBox = (boxIndex: number): boolean => boxIndex % 2 === 1;
 
@@ -63,10 +55,6 @@ const clamp = (min: number, max: number, v: number) =>
   Math.max(min, Math.min(max, v));
 
 const DRAG_THRESHOLD = 3;
-
-// ============================================
-// Component
-// ============================================
 
 export const SudokuBoard = memo(({
   cells,
@@ -254,10 +242,6 @@ export const SudokuBoard = memo(({
   );
 });
 
-// ============================================
-// Styles
-// ============================================
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'stretch',
@@ -269,7 +253,6 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.boardBackground,
   },
-  cardOuterCompact: {},
   cardCompact: {
     backgroundColor: colors.boardBackground,
     borderWidth: 2,

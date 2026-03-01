@@ -7,20 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useGameStore, useCanUseHint } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { SkeuButton } from '../ui/Skeuomorphic';
+import { BUTTON_HEIGHT, BUTTON_RADIUS, whiteSkeuColorsSecondary } from './constants';
 
-const BUTTON_HEIGHT = 56;
-const BUTTON_RADIUS = 12;
-
-// White custom colors for inactive buttons
-const whiteColors = {
-  gradient: ['#FFFFFF', '#FFFFFF', '#FFFFFF'] as const,
-  edge: '#E0E0E0',
-  borderLight: 'rgba(255, 255, 255, 0.5)',
-  borderDark: 'rgba(0, 0, 0, 0.1)',
-  textColor: colors.textSecondary,
-};
+const whiteColors = whiteSkeuColorsSecondary;
 
 interface ActionButtonProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -42,7 +34,7 @@ const ActionButton = memo(({
   const iconColor = disabled
     ? colors.textLight
     : isActive
-    ? '#FFFFFF'
+    ? colors.white
     : colors.textSecondary;
 
   return (
@@ -146,11 +138,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 11,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
     color: colors.textSecondary,
     marginTop: 2,
   },
   labelActive: {
-    color: '#FFFFFF',
+    color: colors.white,
   },
 });

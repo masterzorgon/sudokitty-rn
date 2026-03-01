@@ -11,7 +11,6 @@ import { spacing, borderRadius } from '../../theme';
 interface StatCardProps {
   label: string;
   value: string | number;
-  valueColor?: string;
 }
 
 export const StatCard = memo(({
@@ -20,7 +19,7 @@ export const StatCard = memo(({
 }: StatCardProps) => {
   return (
     <View style={styles.container}>
-      <Text style={[styles.value]}>
+      <Text style={styles.value}>
         {value}
       </Text>
       <Text style={styles.label}>{label}</Text>
@@ -37,10 +36,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     alignItems: 'center',
-  },
-  icon: {
-    fontSize: 24,
-    marginBottom: spacing.xs,
   },
   value: {
     ...typography.title,

@@ -7,7 +7,7 @@ import { useGameStore } from '../../stores/gameStore';
 import { SkeuButton, SKEU_VARIANTS } from '../ui/Skeuomorphic';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { colors, useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 
 interface HintAdSheetProps {
@@ -38,6 +38,7 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
       ref={sheetRef}
       visible={visible}
       onDismiss={onClose}
+      blurBackground={false}
       containerStyle={{ alignItems: 'center' }}
     >
       <Ionicons
@@ -112,6 +113,6 @@ const styles = StyleSheet.create({
   },
   dismissText: {
     ...typography.body,
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
   },
 });

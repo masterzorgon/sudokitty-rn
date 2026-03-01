@@ -28,10 +28,10 @@ import { playDemo, stopDemo } from '../../services/trackDemoService';
 import { colors, useColors } from '../../theme/colors';
 import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
-import { SkeuToggle } from '../ui/Skeuomorphic';
 import { SkeuCard } from '../ui/Skeuomorphic';
 import { AppButton } from '../ui/AppButton';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
+import { SettingsToggleRow } from '../settings/SettingsToggleRow';
 import { playFeedback } from '../../utils/feedback';
 
 // MARK: - Types
@@ -42,19 +42,11 @@ interface GameSettingsModalProps {
   onNavigateToStore?: () => void;
 }
 
-interface SettingRowProps {
-  label: string;
-  description?: string;
-  value: boolean;
-  onValueChange: (value: boolean) => void;
-  accessibilityHint?: string;
-  backgroundColor?: string;
-}
-
 // MARK: - Constants
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const DEMO_BUTTON_SIZE = 36;
 const CARD_CONTENT_WIDTH = SCREEN_WIDTH - spacing.lg * 2 - spacing.md * 2;
 
 // MARK: - Helpers
@@ -63,32 +55,6 @@ function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
-
-// MARK: - SettingRow Component
-
-function SettingRow({
-  label,
-  description,
-  value,
-  onValueChange,
-  backgroundColor,
-}: SettingRowProps) {
-  return (
-    <View style={[styles.settingRow, backgroundColor && { backgroundColor }]}>
-      <View style={styles.settingInfo}>
-        <Text style={styles.settingLabel}>{label}</Text>
-        {description && (
-          <Text style={styles.settingDescription}>{description}</Text>
-        )}
-      </View>
-      <SkeuToggle
-        value={value}
-        onValueChange={onValueChange}
-        accessibilityLabel={label}
-      />
-    </View>
-  );
 }
 
 // MARK: - StatPill Component
@@ -278,6 +244,7 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
       ref={sheetRef}
       visible={visible}
       onDismiss={onClose}
+      blurBackground={false}
       containerStyle={{ backgroundColor: c.cream, maxHeight: SCREEN_HEIGHT * 0.85 }}
     >
           <ScrollView
@@ -365,40 +332,40 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
 
             {/* Section 3: Toggles */}
             <View style={styles.settingsList}>
-              <SettingRow
+              <SettingsToggleRow
                 label="sounds"
                 description="game audio effects"
                 value={soundsEnabled}
                 onValueChange={setSoundsEnabled}
-                accessibilityHint="Toggle game sounds on or off"
-                backgroundColor={c.cream}
+                isLast
+                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
               />
 
-              <SettingRow
+              <SettingsToggleRow
                 label="haptics"
                 description="vibration feedback"
                 value={hapticsEnabled}
                 onValueChange={setHapticsEnabled}
-                accessibilityHint="Toggle haptic feedback on or off"
-                backgroundColor={c.cream}
+                isLast
+                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
               />
 
-              <SettingRow
+              <SettingsToggleRow
                 label="unlimited mistakes"
                 description="no penalty for wrong answers"
                 value={unlimitedMistakes}
                 onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
-                accessibilityHint="Toggle unlimited mistakes (premium feature)"
-                backgroundColor={c.cream}
+                isLast
+                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
               />
 
-              <SettingRow
+              <SettingsToggleRow
                 label="unlimited hints"
                 description="no limit on hints per game"
                 value={unlimitedHints}
                 onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
-                accessibilityHint="Toggle unlimited hints (premium feature)"
-                backgroundColor={c.cream}
+                isLast
+                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
               />
             </View>
           </ScrollView>
@@ -475,9 +442,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   demoButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: DEMO_BUTTON_SIZE,
+    height: DEMO_BUTTON_SIZE,
+    borderRadius: DEMO_BUTTON_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -489,7 +456,7 @@ const styles = StyleSheet.create({
   selectButtonText: {
     fontFamily: fontFamilies.bold,
     fontSize: 13,
-    color: '#FFFFFF',
+    color: colors.white,
   },
   activeIndicator: {
     flexDirection: 'row',
@@ -528,27 +495,8 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginBottom: spacing.md,
   },
-  settingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
+  settingsRow: {
     borderRadius: borderRadius.md,
-  },
-  settingInfo: {
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  settingLabel: {
-    ...typography.body,
-    fontFamily: fontFamilies.bold,
-    color: colors.textPrimary,
-  },
-  settingDescription: {
-    ...typography.small,
-    color: colors.textSecondary,
-    marginTop: 2,
   },
 
   // Close button

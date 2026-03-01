@@ -20,6 +20,7 @@ export interface BottomSheetProps {
   description: string;
   action: BottomSheetAction;
   dismissOnTapOutside?: boolean;
+  blurBackground?: boolean;
 }
 
 export function BottomSheet({
@@ -29,6 +30,7 @@ export function BottomSheet({
   description,
   action,
   dismissOnTapOutside = true,
+  blurBackground = true,
 }: BottomSheetProps) {
   const c = useColors();
   const sheetRef = useRef<SheetWrapperRef>(null);
@@ -43,6 +45,7 @@ export function BottomSheet({
       visible={visible}
       onDismiss={onDismiss}
       dismissOnTapOutside={dismissOnTapOutside}
+      blurBackground={blurBackground}
     >
       <Text style={[styles.title, { color: c.textPrimary }]}>{title}</Text>
       <Text style={[styles.description, { color: c.textSecondary }]}>{description}</Text>
