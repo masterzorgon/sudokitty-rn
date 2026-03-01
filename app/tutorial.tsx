@@ -50,7 +50,7 @@ export default function TutorialScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.heading}>how to play</Text>
+        <Text style={styles.heading}>How to Play</Text>
 
         <View style={styles.mascotContainer}>
           <Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />

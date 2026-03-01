@@ -179,7 +179,7 @@ function TypeSection({
       {/* Technique cards or empty state */}
       {isEmpty ? (
         <View style={styles.emptySection}>
-          <Text style={styles.emptySectionText}>coming soon</Text>
+          <Text style={styles.emptySectionText}>Coming soon</Text>
         </View>
       ) : (
         <View style={styles.sectionCards}>
@@ -244,7 +244,7 @@ export default function TechniquesListScreen() {
       <View style={styles.header}>
         <BackButton />
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>techniques</Text>
+          <Text style={styles.headerTitle}>Techniques</Text>
           <Text style={styles.headerSubtitle}>
             {completionCount}/{totalTechniques} mastered
           </Text>

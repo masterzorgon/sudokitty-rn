@@ -35,7 +35,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
-      <ScreenHeader title="stats" />
+      <ScreenHeader title="Stats" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -54,21 +54,21 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <View style={styles.statsRow}>
             <StatCard
-              label="current streak"
+              label="Current streak"
               value={currentStreak}
             />
             <StatCard
-              label="longest streak"
+              label="Longest streak"
               value={longestStreak}
             />
           </View>
           <View style={styles.statsRow}>
             <StatCard
-              label="games won"
+              label="Games won"
               value={totalGamesWon}
             />
             <StatCard
-              label="techniques"
+              label="Techniques"
               value={techniquesMastered}
             />
           </View>

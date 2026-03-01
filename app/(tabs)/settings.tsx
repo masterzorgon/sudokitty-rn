@@ -77,7 +77,7 @@ export default function SettingsScreen() {
           trackExternalLinkOpened(dest.trackKey);
           await Linking.openURL(dest.url);
         } catch {
-          Alert.alert('error', 'unable to open the link.');
+          Alert.alert('Error', 'Unable to open the link.');
         }
       }
     },
@@ -110,10 +110,10 @@ export default function SettingsScreen() {
   const handleRestorePurchases = useCallback(async () => {
     const restored = await restorePurchases();
     Alert.alert(
-      restored ? 'restored!' : 'nothing to restore',
+      restored ? 'Restored!' : 'Nothing to Restore',
       restored
-        ? 'your premium access has been restored.'
-        : 'no previous purchases found.',
+        ? 'Your premium access has been restored.'
+        : 'No previous purchases found.',
     );
   }, []);
 
@@ -123,18 +123,18 @@ export default function SettingsScreen() {
 
   const handleResetProgress = useCallback(() => {
     Alert.alert(
-      'reset progress',
-      'this will permanently delete all your game progress, stats, and streaks. this cannot be undone.',
+      'Reset Progress',
+      'This will permanently delete all your game progress, stats, and streaks. This cannot be undone.',
       [
-        { text: 'cancel', style: 'cancel' },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: 'reset',
+          text: 'Reset',
           style: 'destructive',
           onPress: () => {
             resetGame();
             resetDailyChallenge();
             trackProgressReset();
-            Alert.alert('done', 'your progress has been reset.');
+            Alert.alert('Done', 'Your progress has been reset.');
           },
         },
       ]
@@ -144,7 +144,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
-      <ScreenHeader title="settings" />
+      <ScreenHeader title="Settings" />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -154,7 +154,7 @@ export default function SettingsScreen() {
         <CTABannerCarousel promos={['rate']} />
 
         {/* Appearance - Theme Color Picker */}
-        <SettingsSection title="appearance">
+        <SettingsSection title="Appearance">
           <View style={styles.themePickerRow}>
             {THEME_NAMES.map((name) => {
               const isActive = name === colorTheme;
@@ -181,37 +181,37 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Game Preferences */}
-        <SettingsSection title="game">
+        <SettingsSection title="Game">
           <SettingsToggleRow
-            label="sounds"
+            label="Sounds"
             value={soundsEnabled}
             onValueChange={setSoundsEnabled}
             icon="volume-2"
             accessibilityHint="Toggle game sounds on or off"
           />
           <SettingsToggleRow
-            label="haptics"
+            label="Haptics"
             value={hapticsEnabled}
             onValueChange={setHapticsEnabled}
             icon="smartphone"
             accessibilityHint="Toggle haptic feedback on or off"
           />
           <SettingsToggleRow
-            label="timer"
+            label="Timer"
             value={timerEnabled}
             onValueChange={setTimerEnabled}
             icon="clock"
             accessibilityHint="Show or hide the game timer"
           />
           <SettingsToggleRow
-            label="unlimited mistakes"
+            label="Unlimited mistakes"
             value={unlimitedMistakes}
             onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
             icon="alert-circle"
             accessibilityHint="Toggle unlimited mistakes (premium feature)"
           />
           <SettingsToggleRow
-            label="unlimited hints"
+            label="Unlimited hints"
             value={unlimitedHints}
             onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
             icon="zap"
@@ -221,20 +221,20 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Learn */}
-        <SettingsSection title="learn">
+        <SettingsSection title="Learn">
           <SettingsLinkRow
-            label="how to play"
+            label="How to play"
             onPress={() => navigate('/tutorial')}
             icon="help-circle"
             accessibilityHint="Open the interactive tutorial"
           />
           <SettingsLinkRow
-            label="advanced techniques"
+            label="Advanced techniques"
             onPress={() => navigate('/techniques')}
             icon="award"
           />
           <SettingsLinkRow
-            label="sudoku rules"
+            label="Sudoku rules"
             onPress={() => navigate({ url: RULES_URL, trackKey: 'rules' })}
             icon="book"
             isExternal
@@ -243,23 +243,23 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Premium */}
-        <SettingsSection title="premium">
+        <SettingsSection title="Premium">
           {!isPremium && (
             <SettingsLinkRow
-              label="remove ads"
+              label="Remove ads"
               onPress={handleUpgradePremium}
               icon="star"
               accessibilityHint="Upgrade to unlock all premium features"
             />
           )}
           <SettingsLinkRow
-            label="restore purchases"
+            label="Restore purchases"
             onPress={handleRestorePurchases}
             icon="refresh-cw"
             accessibilityHint="Restore previously purchased premium access"
           />
           <SettingsLinkRow
-            label="manage subscription"
+            label="Manage subscription"
             onPress={handleManageSubscription}
             icon="credit-card"
             accessibilityHint="Manage your subscription or request a refund"
@@ -268,21 +268,21 @@ export default function SettingsScreen() {
         </SettingsSection>
 
         {/* Support */}
-        <SettingsSection title="support">
+        <SettingsSection title="Support">
           <SettingsLinkRow
-            label="send feedback"
+            label="Send feedback"
             onPress={() => navigate('/feedback')}
             icon="message-circle"
             accessibilityHint="Send feedback to the developers"
           />
           <SettingsLinkRow
-            label="privacy preferences"
+            label="Privacy preferences"
             onPress={() => navigate({ url: PRIVACY_URL, trackKey: 'privacy' })}
             icon="shield"
             isExternal
           />
           <SettingsLinkRow
-            label="app info"
+            label="App info"
             onPress={() => navigate('/info')}
             icon="info"
             accessibilityHint="View app information"
@@ -293,7 +293,7 @@ export default function SettingsScreen() {
         {/* Reset Progress */}
         <SkeuCard borderRadius={borderRadius.lg} style={styles.resetContainer}>
           <SettingsLinkRow
-            label="reset progress"
+            label="Reset progress"
             onPress={handleResetProgress}
             icon="trash-2"
             isDestructive

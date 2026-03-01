@@ -90,20 +90,20 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
     <View style={styles.container}>
       <ActionButton
         icon="arrow-undo"
-        label="undo"
+        label="Undo"
         onPress={undo}
         disabled={!isPlaying || !canUndo()}
       />
       <ActionButton
         icon="trash-outline"
-        label="erase"
+        label="Erase"
         onPress={eraseCell}
         disabled={!isPlaying}
         feedbackId="erase"
       />
       <ActionButton
         icon={isNotesMode ? 'pencil' : 'pencil-outline'}
-        label="notes"
+        label="Notes"
         onPress={toggleNotesMode}
         isActive={isNotesMode}
         disabled={!isPlaying}
@@ -111,7 +111,7 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
       />
       <ActionButton
         icon="bulb-outline"
-        label="hint"
+        label="Hint"
         onPress={handleHintPress}
         disabled={hintDisabled}
         feedbackId="hint"

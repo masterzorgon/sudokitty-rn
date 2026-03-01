@@ -16,8 +16,8 @@ export const TechniquesCTA = memo(({ onPress }: TechniquesCTAProps) => {
 
   return (
     <HomeCTACard
-      title="sudoku techniques"
-      subtitle="learn advanced solving strategies"
+      title="Sudoku Techniques"
+      subtitle="Learn advanced solving strategies"
       icon={<Feather name="award" size={20} color={c.mochiPillText} />}
       onPress={onPress}
       accessibilityLabel="Sudoku techniques, learn advanced solving strategies"

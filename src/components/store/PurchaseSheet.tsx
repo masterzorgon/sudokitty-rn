@@ -70,7 +70,7 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
             {totalMochis} / {config.price}
             {insufficientFunds && (
               <Text style={{ color: c.accent }}>
-                {' \u00B7 need '}{(config.price as number) - totalMochis}{' more'}
+                {' · Need '}{(config.price as number) - totalMochis}{' more'}
               </Text>
             )}
           </Text>
@@ -105,11 +105,11 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
         ) : insufficientFunds ? (
           <View style={styles.buttonRow}>
             <MochiPointIcon width={20} height={20} />
-            <Text style={styles.buyButtonText}>GET MOCHIS</Text>
+            <Text style={styles.buyButtonText}>Get Mochis</Text>
           </View>
         ) : config.currency === 'mochis' ? (
           <View style={styles.buttonRow}>
-            <Text style={styles.buyButtonText}>GET FOR</Text>
+            <Text style={styles.buyButtonText}>Get for</Text>
             <MochiPointIcon width={20} height={20} />
             <Text style={styles.buyButtonText}>{config.price}</Text>
           </View>
@@ -119,7 +119,7 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
       </SkeuButton>
 
       <Pressable onPress={() => sheetRef.current?.close()} style={styles.noThanks}>
-        <Text style={[styles.noThanksText, { color: c.textSecondary }]}>NO THANKS</Text>
+        <Text style={[styles.noThanksText, { color: c.textSecondary }]}>No Thanks</Text>
       </Pressable>
     </SheetWrapper>
   );

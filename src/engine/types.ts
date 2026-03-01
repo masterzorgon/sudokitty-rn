@@ -34,25 +34,25 @@ export interface DifficultyConfig {
 
 export const DIFFICULTY_CONFIG: Record<Difficulty, DifficultyConfig> = {
   easy: {
-    name: 'easy',
+    name: 'Easy',
     clueRange: [36, 50],
     maxTechniqueLevel: 1,
     minTechniqueLevel: 1,
   },
   medium: {
-    name: 'medium',
+    name: 'Medium',
     clueRange: [30, 40],
     maxTechniqueLevel: 2,
     minTechniqueLevel: 2,
   },
   hard: {
-    name: 'hard',
+    name: 'Hard',
     clueRange: [25, 32],
     maxTechniqueLevel: 3,
     minTechniqueLevel: 2,
   },
   expert: {
-    name: 'expert',
+    name: 'Expert',
     clueRange: [22, 28],
     maxTechniqueLevel: 4,
     minTechniqueLevel: 3,

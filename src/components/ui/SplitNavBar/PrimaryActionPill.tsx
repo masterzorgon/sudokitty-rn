@@ -14,7 +14,7 @@ import { useVisibilityAnimation } from '@/src/hooks/useVisibilityAnimation';
 export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryActionPillProps) {
   const visibilityStyle = useVisibilityAnimation(!isHidden);
 
-  const label = state === 'resume' ? 'resume game' : 'new game';
+  const label = state === 'resume' ? 'Resume Game' : 'New Game';
   const accessibilityLabel = state === 'resume' ? 'Resume Game' : 'Start New Game';
 
   return (

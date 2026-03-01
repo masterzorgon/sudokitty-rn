@@ -11,9 +11,9 @@ import { SkeuCard } from '../src/components/ui/Skeuomorphic';
 import { MochiCat } from '../src/components/home';
 
 const INFO_ROWS: { label: string; getValue: (version: string) => string }[] = [
-  { label: 'app name', getValue: () => 'sudokitty' },
-  { label: 'version', getValue: (v) => v },
-  { label: 'developer', getValue: () => "Bridgeful, LLC" },
+  { label: 'App name', getValue: () => 'Sudokitty' },
+  { label: 'Version', getValue: (v) => v },
+  { label: 'Developer', getValue: () => 'Bridgeful, LLC' },
 ];
 
 export default function InfoScreen() {
@@ -30,8 +30,8 @@ export default function InfoScreen() {
       <View style={styles.content}>
         <View style={styles.heroSection}>
           <MochiCat size={120} />
-          <Text style={styles.appName}>sudokitty</Text>
-          <Text style={styles.versionSubtitle}>version {appVersion}</Text>
+          <Text style={styles.appName}>Sudokitty</Text>
+          <Text style={styles.versionSubtitle}>Version {appVersion}</Text>
         </View>
 
         <SkeuCard borderRadius={borderRadius.lg}>

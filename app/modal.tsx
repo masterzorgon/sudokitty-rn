@@ -29,7 +29,7 @@ const DifficultyButton = ({ difficulty, onPress }: DifficultyButtonProps) => {
       onPress={() => onPress(difficulty)}
     >
       <Text style={styles.difficultyName}>{config.name}</Text>
-      <Text style={styles.difficultyComment}>earn {getMochisRangeLabel(difficulty)} mochis</Text>
+      <Text style={styles.difficultyComment}>Earn {getMochisRangeLabel(difficulty)} mochis</Text>
     </Pressable>
   );
 };

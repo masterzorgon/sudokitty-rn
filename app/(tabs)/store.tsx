@@ -154,7 +154,7 @@ export default function StoreScreen() {
     try {
       const result = await purchaseMochiPack(product);
       if (mountedRef.current && result.success && result.amount) {
-        Alert.alert('Purchase Complete!', `You received ${result.amount.toLocaleString()} Mochis!`);
+        Alert.alert('Purchase Complete!', `You received ${result.amount.toLocaleString()} mochis!`);
       }
     } catch {
       if (mountedRef.current) {
@@ -187,10 +187,10 @@ export default function StoreScreen() {
     playFeedback('tap');
     setSheetConfig({
       image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} contentFit="contain" />,
-      title: `Each streak freeze protects your streak for 1 missed day!`,
+      title: 'Each streak freeze protects your streak for 1 missed day!',
       price: MOCHIS_COST.streak_freeze,
       currency: 'mochis',
-      buttonLabel: `BUY FOR ${MOCHIS_COST.streak_freeze}`,
+      buttonLabel: `Buy for ${MOCHIS_COST.streak_freeze}`,
       onConfirm: handleBuyStreakFreeze,
       onInsufficientFunds: () => handleInsufficientFunds(MOCHIS_COST.streak_freeze),
     });
@@ -203,7 +203,7 @@ export default function StoreScreen() {
       title: `Unlock ${track.name}?`,
       price: track.cost,
       currency: 'mochis',
-      buttonLabel: `BUY FOR ${track.cost}`,
+      buttonLabel: `Buy for ${track.cost}`,
       onConfirm: () => handleBuyTrack(track.id),
       onInsufficientFunds: () => handleInsufficientFunds(track.cost),
     });
@@ -218,7 +218,7 @@ export default function StoreScreen() {
       title: `Get ${amount.toLocaleString()} Mochis!`,
       price: priceLabel,
       currency: 'iap',
-      buttonLabel: product ? `BUY FOR ${priceLabel}` : 'UNAVAILABLE',
+      buttonLabel: product ? `Buy for ${priceLabel}` : 'Unavailable',
       onConfirm: product ? () => handlePurchasePack(product) : () => {},
     });
   }, [products, handlePurchasePack]);
@@ -231,7 +231,7 @@ export default function StoreScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
 
-      <ScreenHeader title="store" showFreezePill showMochiPill />
+      <ScreenHeader title="Store" showFreezePill showMochiPill />
 
       <ScrollView
         style={styles.scroll}
@@ -271,7 +271,7 @@ export default function StoreScreen() {
           title="Streak Freeze"
           subtitle={
             (streakFreezesCount ?? 0) > 0
-              ? `Protect your streak \u00B7 You have ${streakFreezesCount}`
+              ? `Protect your streak · You have ${streakFreezesCount}`
               : 'Protect your streak for 1 missed day'
           }
           trailing={<MochiPricePill price={MOCHIS_COST.streak_freeze} />}
@@ -329,7 +329,7 @@ export default function StoreScreen() {
         {MOCHI_PACK_PRODUCT_IDS.map((packId) => {
           const amount = MOCHI_PACK_AMOUNTS[packId];
           const product = products.find((p) => p.identifier === packId);
-          const priceLabel = productsLoading ? 'Loading...' : product?.priceString;
+          const priceLabel = productsLoading ? 'Loading…' : product?.priceString;
 
           return (
             <StoreItemRow

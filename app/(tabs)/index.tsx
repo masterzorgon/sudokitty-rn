@@ -100,7 +100,7 @@ export default function HomeScreen() {
         title: `Reignite your ${streakLostInfo.previousStreak}-day streak?`,
         price: streakLostInfo.reigniteCost,
         currency: 'mochis',
-        buttonLabel: `REIGNITE FOR ${streakLostInfo.reigniteCost}`,
+        buttonLabel: `Reignite for ${streakLostInfo.reigniteCost}`,
         onConfirm: () => {
           reigniteStreak();
         },
@@ -128,7 +128,7 @@ export default function HomeScreen() {
     const dailyStore = useDailyChallengeStore.getState();
     if (dailyStore.isTodayCompleted()) {
       Alert.alert(
-        'Daily challenge',
+        'Daily Challenge',
         "You've already completed today's puzzle. Come back tomorrow!",
       );
       return;
@@ -148,7 +148,7 @@ export default function HomeScreen() {
 
       <Animated.View entering={FadeIn.duration(400)}>
         <ScreenHeader
-          title="sudokitty"
+          title="Sudokitty"
           showFreezePill
           showMochiPill
         />

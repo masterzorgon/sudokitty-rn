@@ -90,13 +90,13 @@ export const LAYOUT = {
 // Menu configurations for each primary action state
 export const MENU_CONFIGS: Record<PrimaryActionState, MenuItem[]> = {
   new_game: [
-    { id: 'expert', label: 'expert', icon: 'zap', action: 'select_difficulty', difficulty: 'expert' },
-    { id: 'hard', label: 'hard', icon: 'frown', action: 'select_difficulty', difficulty: 'hard' },
-    { id: 'medium', label: 'medium', icon: 'meh', action: 'select_difficulty', difficulty: 'medium' },
-    { id: 'easy', label: 'easy', icon: 'smile', action: 'select_difficulty', difficulty: 'easy' },
+    { id: 'expert', label: 'Expert', icon: 'zap', action: 'select_difficulty', difficulty: 'expert' },
+    { id: 'hard', label: 'Hard', icon: 'frown', action: 'select_difficulty', difficulty: 'hard' },
+    { id: 'medium', label: 'Medium', icon: 'meh', action: 'select_difficulty', difficulty: 'medium' },
+    { id: 'easy', label: 'Easy', icon: 'smile', action: 'select_difficulty', difficulty: 'easy' },
   ],
   resume: [
-    { id: 'quit', label: 'quit game', icon: 'x-circle', action: 'quit_game' },
-    { id: 'continue', label: 'continue playing', icon: 'play', action: 'continue_game' },
+    { id: 'quit', label: 'Quit Game', icon: 'x-circle', action: 'quit_game' },
+    { id: 'continue', label: 'Continue Playing', icon: 'play', action: 'continue_game' },
   ],
 };

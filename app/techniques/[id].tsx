@@ -81,7 +81,7 @@ export default function TechniquePracticeScreen() {
           <Feather name="alert-circle" size={48} color={colors.textLight} />
           <Text style={styles.errorText}>{state.generationError}</Text>
           <View style={styles.bottomActions}>
-            <AppButton onPress={state.generatePuzzle} label="try again" />
+            <AppButton onPress={state.generatePuzzle} label="Try Again" />
           </View>
         </View>
       )}
@@ -93,7 +93,7 @@ export default function TechniquePracticeScreen() {
           badge={{ label: metadata.category, color: metadata.color }}
           mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
-          action={{ label: 'back to techniques', onPress: state.handleBack, icon: 'arrow-left', iconPosition: 'left' }}
+          action={{ label: 'Back to Techniques', onPress: state.handleBack, icon: 'arrow-left', iconPosition: 'left' }}
           rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
         />
       )}
@@ -106,7 +106,7 @@ export default function TechniquePracticeScreen() {
           mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
           action={{
-            label: 'unlock',
+            label: 'Unlock',
             onPress: async () => {
               trackPaywallOpened('technique_detail');
               await presentPaywall();
@@ -125,7 +125,7 @@ export default function TechniquePracticeScreen() {
           badge={{ label: metadata.category, color: metadata.color }}
           mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
-          action={{ label: 'next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
+          action={{ label: 'Next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
           rewardPill={<RewardsPill mochis={mochiReward} size="medium" />}
         />
       )}
@@ -166,11 +166,11 @@ export default function TechniquePracticeScreen() {
       {/* Complete (step N+2) */}
       {phase === 'complete' && (
         <ShowcasePage
-          heading="congratulations!"
+          heading="Congratulations!"
           mascotImage={<Image source={MochiCelebrationImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
-          action={{ label: 'done', onPress: state.handleBack, icon: 'check' }}
-          rewardPill={<RewardsPill mochis={mochiReward} label="earned" size="medium" />}
+          action={{ label: 'Done', onPress: state.handleBack, icon: 'check' }}
+          rewardPill={<RewardsPill mochis={mochiReward} label="Earned" size="medium" />}
         />
       )}
     </SafeAreaView>

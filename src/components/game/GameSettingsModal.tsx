@@ -90,7 +90,7 @@ function MusicPage({
   return (
     <View style={[styles.musicPage, { width }]}>
       <Text style={[styles.musicNowPlaying, { color: c.textSecondary }]}>
-        {isActive ? 'now playing' : 'tap to select'}
+        {isActive ? 'Now Playing' : 'Tap to Select'}
       </Text>
       <Text style={[styles.musicTrackName, { color: c.textPrimary }]} numberOfLines={1}>
         {track.name}
@@ -113,13 +113,13 @@ function MusicPage({
             style={[styles.selectButton, { backgroundColor: c.accent }]}
             accessibilityLabel={`Select ${track.name}`}
           >
-            <Text style={styles.selectButtonText}>use this</Text>
+            <Text style={styles.selectButtonText}>Use This</Text>
           </Pressable>
         )}
         {isActive && (
           <View style={styles.activeIndicator}>
             <Ionicons name="checkmark-circle" size={22} color={c.accent} />
-            <Text style={[styles.activeText, { color: c.accent }]}>selected</Text>
+            <Text style={[styles.activeText, { color: c.accent }]}>Selected</Text>
           </View>
         )}
       </View>
@@ -323,7 +323,7 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
 
                 <Pressable onPress={handleNavigateToStore} style={styles.getMoreLink}>
                   <Text style={[styles.getMoreText, { color: c.accent }]}>
-                    get more in store
+                    Get More in Store
                   </Text>
                   <Ionicons name="chevron-forward" size={14} color={c.accent} />
                 </Pressable>
@@ -333,8 +333,8 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
             {/* Section 3: Toggles */}
             <View style={styles.settingsList}>
               <SettingsToggleRow
-                label="sounds"
-                description="game audio effects"
+                label="Sounds"
+                description="Game audio effects"
                 value={soundsEnabled}
                 onValueChange={setSoundsEnabled}
                 isLast
@@ -342,8 +342,8 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
               />
 
               <SettingsToggleRow
-                label="haptics"
-                description="vibration feedback"
+                label="Haptics"
+                description="Vibration feedback"
                 value={hapticsEnabled}
                 onValueChange={setHapticsEnabled}
                 isLast
@@ -351,8 +351,8 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
               />
 
               <SettingsToggleRow
-                label="unlimited mistakes"
-                description="no penalty for wrong answers"
+                label="Unlimited mistakes"
+                description="No penalty for wrong answers"
                 value={unlimitedMistakes}
                 onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
                 isLast
@@ -360,8 +360,8 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
               />
 
               <SettingsToggleRow
-                label="unlimited hints"
-                description="no limit on hints per game"
+                label="Unlimited hints"
+                description="No limit on hints per game"
                 value={unlimitedHints}
                 onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
                 isLast
@@ -374,7 +374,7 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
           <View style={styles.closeButtonWrapper}>
             <AppButton
               onPress={handleClose}
-              label="resume game"
+              label="Resume Game"
               variant="primary"
             />
           </View>

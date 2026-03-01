@@ -62,7 +62,7 @@ export function GameStatusSheet({
       blurBackground={false}
     >
       <Text style={styles.title}>
-        {isWon ? 'purrfect!' : 'game over'}
+        {isWon ? 'Purrfect!' : 'Game Over'}
       </Text>
       {isWon && rewardBreakdown ? (
         <View style={styles.rewardBreakdown}>
@@ -78,7 +78,7 @@ export function GameStatusSheet({
         </View>
       ) : isWon ? (
         <Text style={styles.message}>
-          you earned {mochisEarned} mochis!
+          You earned {mochisEarned} mochis!
         </Text>
       ) : null}
 
@@ -93,7 +93,7 @@ export function GameStatusSheet({
             contentStyle={styles.btnContent}
           >
             <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
-              watch ad to continue
+              Watch Ad to Continue
             </Text>
           </SkeuButton>
         </View>
@@ -109,7 +109,7 @@ export function GameStatusSheet({
             contentStyle={styles.btnContent}
           >
             <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
-              back to daily
+              Back to Daily
             </Text>
           </SkeuButton>
         ) : (
@@ -121,7 +121,7 @@ export function GameStatusSheet({
             contentStyle={styles.btnContent}
           >
             <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
-              play new game
+              Play New Game
             </Text>
           </SkeuButton>
         )}
@@ -134,7 +134,7 @@ export function GameStatusSheet({
       >
         <Ionicons name="arrow-back" size={20} color={c.textSecondary} />
         <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
-          return home
+          Return Home
         </Text>
       </Pressable>
     </SheetWrapper>

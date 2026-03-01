@@ -55,8 +55,8 @@ interface PromoCopyEntry {
 const PROMO_COPY: Record<PromoKey, PromoCopyEntry> = {
   techniques: {
     badge: 'SUDOKU TECHNIQUES',
-    title: 'level up your solving skills',
-    buttonLabel: 'UNLOCK ALL TECHNIQUES',
+    title: 'Level up your solving skills',
+    buttonLabel: 'Unlock All Techniques',
     accessibilityLabel: 'Unlock all sudoku techniques',
     image: MochiTechniquesImg,
     imageStyle: {
@@ -71,8 +71,8 @@ const PROMO_COPY: Record<PromoKey, PromoCopyEntry> = {
   },
   invite: {
     badge: 'INVITE FRIENDS',
-    title: 'give sudokitty to friends',
-    buttonLabel: 'SHARE THE LOVE',
+    title: 'Give Sudokitty to friends',
+    buttonLabel: 'Share the Love',
     accessibilityLabel: 'Invite friends and earn 100 mochis',
     image: MochiShareImg,
     imageStyle: {
@@ -87,8 +87,8 @@ const PROMO_COPY: Record<PromoKey, PromoCopyEntry> = {
   },
   rate: {
     badge: 'RATE SUDOKITTY',
-    title: 'help other sudokitty fans',
-    buttonLabel: 'RATE THE APP',
+    title: 'Help other Sudokitty fans',
+    buttonLabel: 'Rate the App',
     accessibilityLabel: 'Rate SudoKitty on the App Store',
     image: MochiStarsImg,
   },
@@ -104,7 +104,7 @@ function usePromoActions(): Record<PromoKey, () => void> {
       const result = await Share.share({ message: SHARE_MESSAGE });
       if (result.action === Share.sharedAction) {
         useDailyChallengeStore.getState().addMochiHistoryEntry(100, 'bonus');
-        Alert.alert('You earned 100 Mochis!', 'Thanks for sharing SudoKitty with your friends.');
+        Alert.alert('You earned 100 mochis!', 'Thanks for sharing SudoKitty with your friends.');
       }
     } catch { /* user cancelled */ }
   }, []);

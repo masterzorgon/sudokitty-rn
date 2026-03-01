@@ -48,10 +48,10 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
         style={styles.icon}
       />
 
-      <Text style={styles.title}>out of hints!</Text>
+      <Text style={styles.title}>Out of Hints!</Text>
 
       <Text style={[styles.message, { color: c.textSecondary }]}>
-        watch a short ad to get a free hint
+        Watch a short ad to get a free hint.
       </Text>
 
       <SkeuButton
@@ -63,7 +63,7 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
         contentStyle={styles.adButtonContent}
       >
         <Text style={[styles.adButtonText, { color: SKEU_VARIANTS.primary.textColor }]}>
-          watch ad for a free hint
+          Watch Ad for a Free Hint
         </Text>
       </SkeuButton>
 
@@ -73,7 +73,7 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
         hitSlop={12}
       >
         <Text style={[styles.dismissText, { color: c.textSecondary }]}>
-          no thanks
+          No Thanks
         </Text>
       </Pressable>
     </SheetWrapper>
