@@ -8,8 +8,8 @@ import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
 import { RollingTime } from '../ui';
+import { CELL_SIZE } from '../board/SudokuCell';
 
-const BOX_WIDTH = 130;
 
 interface IconIndicatorProps {
   used: number;
@@ -55,7 +55,7 @@ export const GameHeader = () => {
   return (
     <View style={styles.container}>
       {/* Section 1: Time */}
-      <View style={styles.section}>
+      <View style={[styles.section, styles.sectionDivider]}>
         {timerEnabled && (
           <RollingTime
             seconds={timeElapsed}
@@ -66,11 +66,8 @@ export const GameHeader = () => {
         )}
       </View>
 
-      {/* Separator */}
-      <View style={styles.separator} />
-
       {/* Section 2: Lives (Mistakes) */}
-      <View style={styles.section}>
+      <View style={[styles.section, styles.sectionDivider]}>
         {!unlimitedMistakes && (
           <IconIndicator
             used={mistakeCount}
@@ -81,9 +78,6 @@ export const GameHeader = () => {
           />
         )}
       </View>
-
-      {/* Separator */}
-      <View style={styles.separator} />
 
       {/* Section 3: Hints */}
       <View style={styles.section}>
@@ -103,20 +97,21 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'stretch',
+    alignSelf: 'center',
     backgroundColor: colors.white,
     height: 30,
     borderWidth: 1,
     borderColor: colors.gridLineBold,
   },
   section: {
-    width: BOX_WIDTH,
+    width: CELL_SIZE * 3,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.xs,
   },
-  separator: {
-    width: 2,
-    backgroundColor: colors.gridLineBold,
+  sectionDivider: {
+    borderRightWidth: 2,
+    borderRightColor: colors.gridLineBold,
   },
   iconRow: {
     flexDirection: 'row',
