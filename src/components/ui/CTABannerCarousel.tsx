@@ -13,12 +13,15 @@ import {
   type PanResponderGestureState,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   Easing,
   runOnJS,
+  interpolate,
+  Extrapolation,
   type SharedValue,
 } from 'react-native-reanimated';
 import { useColors } from '../../theme/colors';
@@ -97,6 +100,7 @@ interface CTABannerCardProps {
   image?: ImageSourcePropType;
   accessibilityLabel?: string;
   style?: ViewStyle;
+  blurStyle?: object;
 }
 
 function CTABannerCard({
@@ -107,6 +111,7 @@ function CTABannerCard({
   image = MochiStarsImg,
   accessibilityLabel,
   style,
+  blurStyle,
 }: CTABannerCardProps) {
   const c = useColors();
 
@@ -152,6 +157,14 @@ function CTABannerCard({
           buttonLabel
         )}
       </SkeuButton>
+
+      <Animated.View style={[StyleSheet.absoluteFill, blurStyle]} pointerEvents="none">
+        <BlurView
+          intensity={12}
+          tint="regular"
+          style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255, 255, 255, 0.23)' }]}
+        />
+      </Animated.View>
     </SkeuCard>
   );
 }
@@ -220,10 +233,11 @@ const cardStyles = StyleSheet.create({
 
 const PEEK_OFFSET = 8;
 const SCALE_STEP = 0.03;
-const SWIPE_THRESHOLD = 100;
-const VELOCITY_THRESHOLD = 800;
+const SWIPE_THRESHOLD = 180;
+const VELOCITY_THRESHOLD = 1500;
 const OFFSCREEN_X = 500;
-const DRAG_DAMPING = 0.85;
+const FRICTION_POWER = 0.65;
+const FRICTION_SCALE = 3.5;
 const RANK_ANIM_DURATION = 250;
 
 interface PromoConfig {
@@ -294,6 +308,14 @@ function StackedCard({
     };
   });
 
+  const blurStyle = useAnimatedStyle(() => {
+    const isCurrentFront = isFront && rotationSV.value === currentRotation;
+    const opacity = isCurrentFront
+      ? interpolate(Math.abs(dragX.value), [0, OFFSCREEN_X * 0.3], [0, 1], Extrapolation.CLAMP)
+      : 0;
+    return { opacity };
+  });
+
   return (
     <Animated.View style={[isFront ? styles.frontCard : styles.stackedCard, animStyle]}>
       <CTABannerCard
@@ -302,6 +324,7 @@ function StackedCard({
         buttonLabel={copy.buttonLabel}
         onPress={promo.onPress}
         accessibilityLabel={copy.accessibilityLabel}
+        blurStyle={blurStyle}
       />
     </Animated.View>
   );
@@ -341,7 +364,8 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
         gs: PanResponderGestureState,
       ) => Math.abs(gs.dx) > 10 && Math.abs(gs.dx) > Math.abs(gs.dy),
       onPanResponderMove: (_e, gs) => {
-        dragX.value = gs.dx * DRAG_DAMPING;
+        const sign = gs.dx >= 0 ? 1 : -1;
+        dragX.value = sign * Math.pow(Math.abs(gs.dx), FRICTION_POWER) * FRICTION_SCALE;
       },
       onPanResponderRelease: (_e, gs) => {
         if (swiping.current) return;
