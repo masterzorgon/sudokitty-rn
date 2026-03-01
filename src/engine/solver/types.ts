@@ -130,6 +130,9 @@ export interface Hint {
   explanation: string;
   highlightCells: Position[];
   mochiHint: string; // Cat-themed hint text
+  category?: string;
+  categoryColor?: string;
+  techniqueDescription?: string;
 }
 
 /**

@@ -1,11 +1,12 @@
 // Individual Sudoku cell component with optional animations
 // Props-driven: works for both the main game (full animations) and technique practice (static)
 
-import React, { useEffect, useRef, memo } from 'react';
+import React, { useEffect, memo } from 'react';
 import { Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSpring,
   withSequence,
   withTiming,
@@ -85,9 +86,8 @@ export const SudokuCell = memo(({
   const glowOpacity = useSharedValue(0);
   const backgroundProgress = useSharedValue(0);
 
-  // Wave completion animation shared values
+  // Wave completion animation shared value
   const waveGlow = useSharedValue(0);
-  const waveTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // Single-edge border strategy: each cell only draws right + bottom borders.
   // The board container provides the outer frame (top, left, right, bottom).
@@ -130,28 +130,19 @@ export const SudokuCell = memo(({
     }
   }, [displayValue, isValid, animateValues]);
 
-  // Trigger completion wave animations (staggered per cell)
+  // Trigger completion wave animation entirely on the UI thread via withDelay.
+  // When overlapping units complete (e.g. row + column), use the earliest delay.
   useEffect(() => {
-    // Clear previous wave timers
-    waveTimersRef.current.forEach(clearTimeout);
-    waveTimersRef.current = [];
-
     if (!completionAnimations?.length || !animateValues) return;
 
-    for (const anim of completionAnimations) {
-      const timer = setTimeout(() => {
-        waveGlow.value = withSequence(
-          withTiming(1, timingConfigs.wave),
-          withTiming(0, timingConfigs.waveFade),
-        );
-      }, anim.delay);
-      waveTimersRef.current.push(timer);
-    }
-
-    return () => {
-      waveTimersRef.current.forEach(clearTimeout);
-      waveTimersRef.current = [];
-    };
+    const minDelay = Math.min(...completionAnimations.map((a) => a.delay));
+    waveGlow.value = withDelay(
+      minDelay,
+      withSequence(
+        withTiming(1, timingConfigs.wave),
+        withTiming(0, timingConfigs.waveFade),
+      ),
+    );
   }, [completionAnimations, animateValues]);
 
 

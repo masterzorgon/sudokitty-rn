@@ -12,6 +12,7 @@ import {
   getMochiHint,
 } from './types';
 import { getTechniquesUpToLevel, ALL_TECHNIQUES } from './techniques';
+import { getTechniqueMetadataByName } from '../../data/techniqueMetadata';
 
 const DEFAULT_CONFIG: Required<SolverConfig> = {
   maxTechniqueLevel: 4,
@@ -131,6 +132,8 @@ export class SudokuSolver {
       return null;
     }
 
+    const meta = getTechniqueMetadataByName(step.techniqueName);
+
     return {
       techniqueName: step.techniqueName,
       level: step.level,
@@ -139,6 +142,9 @@ export class SudokuSolver {
       explanation: step.explanation,
       highlightCells: step.highlightCells,
       mochiHint: getMochiHint(step.techniqueName),
+      category: meta?.category,
+      categoryColor: meta?.color,
+      techniqueDescription: meta?.longDescription,
     };
   }
 

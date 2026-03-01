@@ -714,6 +714,11 @@ export function getTechniqueMetadata(id: string): TechniqueMetadata | undefined 
   return TECHNIQUE_METADATA.find((t) => t.id === id);
 }
 
+/** Get metadata by display name (e.g. "Naked Single") */
+export function getTechniqueMetadataByName(name: string): TechniqueMetadata | undefined {
+  return TECHNIQUE_METADATA.find((t) => t.name === name);
+}
+
 /** Get all techniques for a given category */
 export function getTechniquesByCategory(category: TechniqueCategory): TechniqueMetadata[] {
   return TECHNIQUE_METADATA.filter((t) => t.category === category);
