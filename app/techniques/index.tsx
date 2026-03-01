@@ -34,7 +34,7 @@ import { useIsPremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
 import { getTechniqueReward } from '../../src/constants/techniqueRewards';
-import { CTABannerPromoCard } from '../../src/components/ui/CTABannerPromoCard';
+import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 
 // ============================================
@@ -258,7 +258,7 @@ export default function TechniquesListScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <CTABannerPromoCard promoKey="techniques" style={{ marginBottom: spacing.lg }} />
+        <CTABannerCarousel promos={['techniques']} />
 
         {groups.map((group, sectionIndex) => (
           <TypeSection

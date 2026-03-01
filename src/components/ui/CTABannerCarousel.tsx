@@ -1,11 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
+  Text,
+  Image,
   StyleSheet,
+  Share,
+  Alert,
   PanResponder,
+  type ImageSourcePropType,
+  type ViewStyle,
   type GestureResponderEvent,
   type PanResponderGestureState,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,10 +21,202 @@ import Animated, {
   runOnJS,
   type SharedValue,
 } from 'react-native-reanimated';
-import { spacing } from '../../theme';
+import { useColors } from '../../theme/colors';
+import { typography, fontFamilies } from '../../theme/typography';
+import { spacing, borderRadius } from '../../theme';
+import { SkeuCard, SkeuButton } from './Skeuomorphic';
+import { playFeedback } from '../../utils/feedback';
 import { useIsPremium } from '../../stores/premiumStore';
-import { CTABannerCard } from './CTABannerCard';
-import { PROMO_COPY, usePromoActions, type PromoKey } from './promoConfig';
+import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
+import { presentPaywallAlways } from '../../lib/revenueCat';
+
+const MochiStarsImg = require('../../../assets/images/mochi/mochi-stars.png');
+
+// ── Promo config ─────────────────────────────────────────────────────────────
+
+type PromoKey = 'techniques' | 'invite' | 'rate';
+
+const SHARE_MESSAGE = 'Check out SudoKitty — a cute way to master sudoku! 🐱🧩';
+
+const PROMO_COPY: Record<
+  PromoKey,
+  { badge: string; title: string; buttonLabel: string | React.ReactNode; accessibilityLabel: string }
+> = {
+  techniques: {
+    badge: 'SUDOKU TECHNIQUES',
+    title: 'level up your solving skills',
+    buttonLabel: 'UNLOCK ALL TECHNIQUES',
+    accessibilityLabel: 'Unlock all sudoku techniques',
+  },
+  invite: {
+    badge: 'INVITE FRIENDS',
+    title: 'give sudokitty to friends',
+    buttonLabel: 'SHARE THE LOVE',
+    accessibilityLabel: 'Invite friends and earn 100 mochis',
+  },
+  rate: {
+    badge: 'RATE SUDOKITTY',
+    title: 'help other sudokitty fans',
+    buttonLabel: 'RATE THE APP',
+    accessibilityLabel: 'Rate SudoKitty on the App Store',
+  },
+};
+
+function usePromoActions(): Record<PromoKey, () => void> {
+  const handleTechniques = useCallback(async () => {
+    await presentPaywallAlways();
+  }, []);
+
+  const handleInvite = useCallback(async () => {
+    try {
+      const result = await Share.share({ message: SHARE_MESSAGE });
+      if (result.action === Share.sharedAction) {
+        useDailyChallengeStore.getState().addMochiHistoryEntry(100, 'bonus');
+        Alert.alert('You earned 100 Mochis!', 'Thanks for sharing SudoKitty with your friends.');
+      }
+    } catch { /* user cancelled */ }
+  }, []);
+
+  const handleRate = useCallback(async () => {
+    try {
+      const StoreReview = await import('expo-store-review');
+      await StoreReview.requestReview();
+    } catch {
+      Alert.alert('Thanks!', 'Please rate us on the App Store.');
+    }
+  }, []);
+
+  return { techniques: handleTechniques, invite: handleInvite, rate: handleRate };
+}
+
+interface CTABannerCardProps {
+  badge: string;
+  title: string;
+  buttonLabel: string | React.ReactNode;
+  onPress: () => void;
+  image?: ImageSourcePropType;
+  accessibilityLabel?: string;
+  style?: ViewStyle;
+}
+
+function CTABannerCard({
+  badge,
+  title,
+  buttonLabel,
+  onPress,
+  image = MochiStarsImg,
+  accessibilityLabel,
+  style,
+}: CTABannerCardProps) {
+  const c = useColors();
+
+  return (
+    <SkeuCard
+      borderRadius={borderRadius.lg}
+      contentStyle={cardStyles.card}
+      style={style}
+      accessibilityLabel={accessibilityLabel ?? badge}
+    >
+      <LinearGradient
+        colors={[c.boardBackground, c.accentLight + '10', c.buttonPrimary + '40']}
+        locations={[1, 0.55, 0]}
+        style={cardStyles.gradientOverlay}
+        pointerEvents="none"
+      />
+
+      <View style={cardStyles.row}>
+        <View style={cardStyles.textArea}>
+          <Text style={[cardStyles.badge, { color: c.mochiPillText, backgroundColor: c.mochiPillBorder + '40' }]}>
+            {badge}
+          </Text>
+          <Text style={[cardStyles.title, { color: c.textPrimary }]}>
+            {title}
+          </Text>
+        </View>
+        <View style={cardStyles.imageArea}>
+          <Image source={image} style={cardStyles.mochiImage} />
+        </View>
+      </View>
+      <SkeuButton
+        onPress={() => { playFeedback('tap'); onPress(); }}
+        variant="primary"
+        sheen
+        borderRadius={borderRadius.md}
+        contentStyle={cardStyles.btnContent}
+        style={cardStyles.btn}
+        accessibilityLabel={typeof buttonLabel === 'string' ? buttonLabel : undefined}
+      >
+        {typeof buttonLabel === 'string' ? (
+          <Text style={cardStyles.btnText}>{buttonLabel}</Text>
+        ) : (
+          buttonLabel
+        )}
+      </SkeuButton>
+    </SkeuCard>
+  );
+}
+
+const cardStyles = StyleSheet.create({
+  card: {
+    padding: spacing.lg,
+    overflow: 'hidden',
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.lg,
+    margin: -spacing.sm,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textArea: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  badge: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 12,
+    letterSpacing: 1,
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.xs,
+    overflow: 'hidden',
+    marginBottom: spacing.sm,
+  },
+  title: {
+    ...typography.headline,
+    marginBottom: spacing.xs,
+  },
+  imageArea: {
+    width: 80,
+    height: 80,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  mochiImage: {
+    width: 120,
+    height: 120,
+    marginRight: spacing.xl + spacing.sm,
+    resizeMode: 'contain',
+    marginBottom: -spacing.md - spacing.sm,
+  },
+  btn: {
+    marginTop: 0,
+  },
+  btnContent: {
+    paddingVertical: spacing.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  btnText: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 13,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+});
 
 const PEEK_OFFSET = 8;
 const SCALE_STEP = 0.03;
@@ -32,7 +231,7 @@ interface PromoConfig {
   onPress: () => void;
 }
 
-function usePromos(): PromoConfig[] {
+function usePromos(filter?: PromoKey[]): PromoConfig[] {
   const isPremium = useIsPremium();
   const actions = usePromoActions();
 
@@ -40,8 +239,10 @@ function usePromos(): PromoConfig[] {
     const keys: PromoKey[] = [];
     if (!isPremium) keys.push('techniques');
     keys.push('invite', 'rate');
-    return keys.map((key) => ({ key, onPress: actions[key] }));
-  }, [isPremium, actions]);
+
+    const visible = filter ? keys.filter((k) => filter.includes(k)) : keys;
+    return visible.map((key) => ({ key, onPress: actions[key] }));
+  }, [isPremium, actions, filter]);
 }
 
 function StackedCard({
@@ -106,8 +307,8 @@ function StackedCard({
   );
 }
 
-export function CTABannerCarousel() {
-  const promos = usePromos();
+export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = {}) {
+  const promos = usePromos(filter);
   const [rotation, setRotation] = useState(0);
   const dragX = useSharedValue(0);
   const rotationSV = useSharedValue(0);
@@ -172,6 +373,8 @@ export function CTABannerCarousel() {
     }),
   ).current;
 
+  if (promos.length === 0) return null;
+
   if (promos.length === 1) {
     const copy = PROMO_COPY[promos[0].key];
     return (
@@ -190,7 +393,7 @@ export function CTABannerCarousel() {
   const peekHeight = Math.min(promos.length - 1, 2) * PEEK_OFFSET;
 
   return (
-    <View style={[styles.wrapper, { marginBottom: spacing.lg + peekHeight }]}>
+    <View style={[styles.wrapper, { marginBottom: peekHeight }]}>
       <View {...panResponder.panHandlers}>
         {rotatedPromos
           .map((promo, i) => (

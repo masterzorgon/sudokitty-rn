@@ -15,7 +15,7 @@ import {
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
-import { CTABannerPromoCard } from '../../src/components/ui/CTABannerPromoCard';
+import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import {
   useSettingsStore,
   useSoundsEnabled,
@@ -151,7 +151,7 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
 
-        <CTABannerPromoCard promoKey="rate" style={{ marginBottom: spacing.lg }} />
+        <CTABannerCarousel promos={['rate']} />
 
         {/* Appearance - Theme Color Picker */}
         <SettingsSection title="appearance">
