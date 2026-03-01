@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore } from '../../stores/gameStore';
-import { useTimerEnabled, useUnlimitedMistakes } from '../../stores/settingsStore';
+import { useTimerEnabled, useUnlimitedMistakes, useUnlimitedHints } from '../../stores/settingsStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
@@ -51,6 +51,7 @@ export const GameHeader = () => {
   // Settings
   const timerEnabled = useTimerEnabled();
   const unlimitedMistakes = useUnlimitedMistakes();
+  const unlimitedHints = useUnlimitedHints();
 
   return (
     <View style={styles.container}>
@@ -68,7 +69,9 @@ export const GameHeader = () => {
 
       {/* Section 2: Lives (Mistakes) */}
       <View style={[styles.section, styles.sectionDivider]}>
-        {!unlimitedMistakes && (
+        {unlimitedMistakes ? (
+          <Text style={[styles.infinityIcon, { color: colors.errorText }]}>∞</Text>
+        ) : (
           <IconIndicator
             used={mistakeCount}
             total={MAX_MISTAKES}
@@ -81,13 +84,17 @@ export const GameHeader = () => {
 
       {/* Section 3: Hints */}
       <View style={styles.section}>
-        <IconIndicator
-          used={hintsUsed}
-          total={MAX_HINTS}
-          filledIcon="bulb"
-          emptyIcon="bulb-outline"
-          filledColor={colors.hintGold}
-        />
+        {unlimitedHints ? (
+          <Text style={[styles.infinityIcon, { color: colors.hintGold }]}>∞</Text>
+        ) : (
+          <IconIndicator
+            used={hintsUsed}
+            total={MAX_HINTS}
+            filledIcon="bulb"
+            emptyIcon="bulb-outline"
+            filledColor={colors.hintGold}
+          />
+        )}
       </View>
     </View>
   );
@@ -117,5 +124,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  infinityIcon: {
+    fontFamily: typography.caption.fontFamily,
+    fontSize: 18,
+    lineHeight: 20,
   },
 });

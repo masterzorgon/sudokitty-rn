@@ -302,7 +302,7 @@ export const CONTINUE_COST: Record<Difficulty, number> = {
   expert: 150,
 };
 
-export const MAX_CONTINUES = 1;
+export const MAX_CONTINUES = Infinity;
 
 export function calculateMochiReward(difficulty: Difficulty, timeSeconds: number): number {
   const base = GAME_BASE_MOCHIS[difficulty];

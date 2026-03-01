@@ -51,8 +51,11 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
     const animateOut = useCallback(
       (cb?: () => void) => {
         translateY.value = withTiming(screenHeight, { duration: 250 }, () => {
-          runOnJS(onDismiss)();
-          if (cb) runOnJS(cb)();
+          if (cb) {
+            runOnJS(cb)();
+          } else {
+            runOnJS(onDismiss)();
+          }
         });
       },
       [translateY, screenHeight, onDismiss],
