@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, type ImageSourcePropType, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColors } from '../../theme/colors';
@@ -7,19 +7,36 @@ import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuCard, SkeuButton } from './Skeuomorphic';
 import { playFeedback } from '../../utils/feedback';
-import { presentPaywallAlways } from '../../lib/revenueCat';
 
 const MochiStarsImg = require('../../../assets/images/mochi/mochi-stars.png');
 
-export function TechniquesBanner() {
+interface CTABannerCardProps {
+  badge: string;
+  title: string;
+  buttonLabel: string | React.ReactNode;
+  onPress: () => void;
+  image?: ImageSourcePropType;
+  accessibilityLabel?: string;
+  style?: ViewStyle;
+}
+
+export function CTABannerCard({
+  badge,
+  title,
+  buttonLabel,
+  onPress,
+  image = MochiStarsImg,
+  accessibilityLabel,
+  style,
+}: CTABannerCardProps) {
   const c = useColors();
 
   return (
     <SkeuCard
       borderRadius={borderRadius.lg}
       contentStyle={styles.card}
-      style={styles.wrapper}
-      accessibilityLabel="Unlock sudoku techniques"
+      style={style}
+      accessibilityLabel={accessibilityLabel ?? badge}
     >
       <LinearGradient
         colors={[c.boardBackground, c.accentLight + '10', c.buttonPrimary + '40']}
@@ -31,35 +48,36 @@ export function TechniquesBanner() {
       <View style={styles.row}>
         <View style={styles.textArea}>
           <Text style={[styles.badge, { color: c.mochiPillText, backgroundColor: c.mochiPillBorder + '40' }]}>
-            SUDOKU TECHNIQUES
+            {badge}
           </Text>
           <Text style={[styles.title, { color: c.textPrimary }]}>
-            level up your solving skills
+            {title}
           </Text>
         </View>
         <View style={styles.imageArea}>
-          <Image source={MochiStarsImg} style={styles.mochiImage} />
+          <Image source={image} style={styles.mochiImage} />
         </View>
       </View>
       <SkeuButton
-        onPress={async () => { playFeedback('tap'); await presentPaywallAlways(); }}
+        onPress={() => { playFeedback('tap'); onPress(); }}
         variant="primary"
         sheen
         borderRadius={borderRadius.md}
-        contentStyle={styles.unlockBtnContent}
-        style={styles.unlockBtn}
-        accessibilityLabel="Unlock all sudoku techniques"
+        contentStyle={styles.btnContent}
+        style={styles.btn}
+        accessibilityLabel={typeof buttonLabel === 'string' ? buttonLabel : undefined}
       >
-        <Text style={styles.learnMoreText}>UNLOCK ALL TECHNIQUES</Text>
+        {typeof buttonLabel === 'string' ? (
+          <Text style={styles.btnText}>{buttonLabel}</Text>
+        ) : (
+          buttonLabel
+        )}
       </SkeuButton>
     </SkeuCard>
   );
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    marginBottom: spacing.lg,
-  },
   card: {
     padding: spacing.lg,
     overflow: 'hidden',
@@ -105,15 +123,15 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginBottom: -spacing.md - spacing.sm,
   },
-  unlockBtn: {
+  btn: {
     marginTop: 0,
   },
-  unlockBtnContent: {
+  btnContent: {
     paddingVertical: spacing.sm,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  learnMoreText: {
+  btnText: {
     fontFamily: fontFamilies.bold,
     fontSize: 13,
     color: '#FFFFFF',

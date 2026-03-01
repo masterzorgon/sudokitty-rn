@@ -6,8 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
-  ActivityIndicator,
-  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,12 +13,11 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 import type { PurchasesStoreProduct } from 'react-native-purchases';
 
 import { useColors } from '../../src/theme/colors';
-import { typography, fontFamilies } from '../../src/theme/typography';
+import { fontFamilies } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
-import { SkeuButton, SkeuCard } from '../../src/components/ui/Skeuomorphic';
-import { TechniquesBanner } from '../../src/components/ui/TechniquesBanner';
+import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
@@ -37,8 +34,6 @@ import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
 const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 const MochiMochisImg = require('../../assets/images/mochi/mochi-mochis.png');
-
-
 
 // ============================================
 // Mochi Price Pill
@@ -243,7 +238,7 @@ export default function StoreScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <TechniquesBanner />
+        <CTABannerCarousel />
 
         <SectionTitle>Subscriptions</SectionTitle>
 

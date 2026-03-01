@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
-
 import { useColors } from '../../src/theme/colors';
 import { PALETTES, THEME_NAMES } from '../../src/theme/palettes';
 import { spacing, borderRadius } from '../../src/theme';
@@ -16,6 +15,7 @@ import {
 import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
 import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
+import { CTABannerPromoCard } from '../../src/components/ui/CTABannerPromoCard';
 import {
   useSettingsStore,
   useSoundsEnabled,
@@ -150,6 +150,8 @@ export default function SettingsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+
+        <CTABannerPromoCard promoKey="rate" style={{ marginBottom: spacing.lg }} />
 
         {/* Appearance - Theme Color Picker */}
         <SettingsSection title="appearance">
