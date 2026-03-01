@@ -3,7 +3,7 @@
 
 import React, { useCallback } from 'react';
 import { StyleSheet, Text, Pressable, View } from 'react-native';
-import { SvgProps } from 'react-native-svg';
+import { Image, type ImageSource } from 'expo-image';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,27 +16,16 @@ import { Difficulty, GAME_BASE_MOCHIS } from '@/src/engine/types';
 import { MenuRowProps } from './types';
 import MochiPointIcon from '../../../../assets/images/icons/mochi-point.svg';
 
-// Import mochi SVG characters for difficulty levels
-import MochiEasy from '../../../../assets/images/mochi/mochi-easy.svg';
-import MochiMedium from '../../../../assets/images/mochi/mochi-medium.svg';
-import MochiHard from '../../../../assets/images/mochi/mochi-hard.svg';
-import MochiExpert from '../../../../assets/images/mochi/mochi-expert.svg';
-// Import mochi SVG characters for resume menu actions
-import MochiQuit from '../../../../assets/images/mochi/mochi-quit.svg';
-import MochiResume from '../../../../assets/images/mochi/mochi-resume.svg';
-
-// Mapping from difficulty to mochi SVG component
-const MOCHI_ICONS: Record<Difficulty, React.FC<SvgProps>> = {
-  easy: MochiEasy,
-  medium: MochiMedium,
-  hard: MochiHard,
-  expert: MochiExpert,
+const MOCHI_ICONS: Record<Difficulty, ImageSource> = {
+  easy:   require('../../../../assets/images/mochi/mochi-easy.png'),
+  medium: require('../../../../assets/images/mochi/mochi-medium.png'),
+  hard:   require('../../../../assets/images/mochi/mochi-hard.png'),
+  expert: require('../../../../assets/images/mochi/mochi-expert.png'),
 };
 
-// Mapping from menu action to mochi SVG component
-const ACTION_MOCHI_ICONS: Record<string, React.FC<SvgProps>> = {
-  quit_game: MochiQuit,
-  continue_game: MochiResume,
+const ACTION_MOCHI_ICONS: Record<string, ImageSource> = {
+  quit_game:     require('../../../../assets/images/mochi/mochi-quit.png'),
+  continue_game: require('../../../../assets/images/mochi/mochi-happy.png'),
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -80,14 +69,14 @@ export function MenuRow({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      {/* menu item icon - mochi SVG for all items */}
       <View style={styles.iconContainer}>
         {(() => {
-          // Use difficulty mochi icon if available, otherwise use action mochi icon
-          const MochiIcon = item.difficulty
+          const mochiSource = item.difficulty
             ? MOCHI_ICONS[item.difficulty]
             : ACTION_MOCHI_ICONS[item.action];
-          return MochiIcon ? <MochiIcon width={55} height={55} /> : null;
+          return mochiSource
+            ? <Image source={mochiSource} style={{ width: 55, height: 55 }} contentFit="contain" />
+            : null;
         })()}
       </View>
       {/* menu item label + mochis reward */}

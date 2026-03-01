@@ -222,7 +222,7 @@ export const SudokuBoard = memo(({
       }
       style={styles.container}
     >
-      <View style={compact ? styles.cardOuterCompact : styles.cardOuter}>
+      <View style={styles.cardOuter}>
         <View style={compact ? styles.cardCompact : styles.card}>
           {dragEnabled ? (
             <View

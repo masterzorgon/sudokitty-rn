@@ -22,8 +22,10 @@ import { trackPaywallOpened } from '../../src/utils/analytics';
 import { RewardsPill } from '../../src/components/ui/RewardsPill';
 import { getTechniqueReward } from '../../src/constants/techniqueRewards';
 
-import MochiTeacherSvg from '../../assets/images/mochi/mochi-teacher.svg';
-import MochiCelebrationSvg from '../../assets/images/mochi/mochi-celebration.svg';
+import { Image } from 'expo-image';
+
+const MochiTeacherImg = require('../../assets/images/mochi/mochi-teacher.png');
+const MochiCelebrationImg = require('../../assets/images/mochi/mochi-stars.png');
 
 const MASCOT_SIZE = 180;
 
@@ -89,7 +91,7 @@ export default function TechniquePracticeScreen() {
         <ShowcasePage
           heading={metadata.name}
           badge={{ label: metadata.category, color: metadata.color }}
-          mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
           action={{ label: 'back to techniques', onPress: state.handleBack, icon: 'arrow-left', iconPosition: 'left' }}
           rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
@@ -101,7 +103,7 @@ export default function TechniquePracticeScreen() {
         <ShowcasePage
           heading={metadata.name}
           badge={{ label: metadata.category, color: metadata.color }}
-          mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
           action={{
             label: 'unlock',
@@ -121,7 +123,7 @@ export default function TechniquePracticeScreen() {
         <ShowcasePage
           heading={metadata.name}
           badge={{ label: metadata.category, color: metadata.color }}
-          mascotImage={<MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
           action={{ label: 'next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
           rewardPill={<RewardsPill mochis={mochiReward} size="medium" />}
@@ -165,7 +167,7 @@ export default function TechniquePracticeScreen() {
       {phase === 'complete' && (
         <ShowcasePage
           heading="congratulations!"
-          mascotImage={<MochiCelebrationSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />}
+          mascotImage={<Image source={MochiCelebrationImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
           action={{ label: 'done', onPress: state.handleBack, icon: 'check' }}
           rewardPill={<RewardsPill mochis={mochiReward} label="earned" size="medium" />}

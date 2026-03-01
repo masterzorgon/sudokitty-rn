@@ -2,11 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ScrollView,
   Alert,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
@@ -186,7 +186,7 @@ export default function StoreScreen() {
   const openStreakFreezeSheet = useCallback(() => {
     playFeedback('tap');
     setSheetConfig({
-      image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} resizeMode="contain" />,
+      image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} contentFit="contain" />,
       title: `Each streak freeze protects your streak for 1 missed day!`,
       price: MOCHIS_COST.streak_freeze,
       currency: 'mochis',
@@ -199,7 +199,7 @@ export default function StoreScreen() {
   const openTrackSheet = useCallback((track: BackingTrackDef) => {
     playFeedback('tap');
     setSheetConfig({
-      image: <Image source={MochiMusicImg} style={{ width: 120, height: 120 }} resizeMode="contain" />,
+      image: <Image source={MochiMusicImg} style={{ width: 120, height: 120 }} contentFit="contain" />,
       title: `Unlock ${track.name}?`,
       price: track.cost,
       currency: 'mochis',
@@ -214,7 +214,7 @@ export default function StoreScreen() {
     const product = products.find((p) => p.identifier === packId);
     const priceLabel = product?.priceString ?? '---';
     setSheetConfig({
-      image: <Image source={MochiMochisImg} style={{ width: 200, height: 200 }} resizeMode="contain" />,
+      image: <Image source={MochiMochisImg} style={{ width: 200, height: 200 }} contentFit="contain" />,
       title: `Get ${amount.toLocaleString()} Mochis!`,
       price: priceLabel,
       currency: 'iap',

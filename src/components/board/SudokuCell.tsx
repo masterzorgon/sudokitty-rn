@@ -159,9 +159,12 @@ export const SudokuCell = memo(({
 
     if (!completionAnimations?.length || !animateValues) return;
 
+    // Cancel any in-flight pop/shake so only the glow runs during a completion wave
+    scale.value = 1;
+    errorShake.value = 0;
+
     for (const anim of completionAnimations) {
       const timer = setTimeout(() => {
-        // Brief orange glow overlay (no scale — avoids displacing cells and border artifacts)
         waveGlow.value = withSequence(
           withTiming(1, timingConfigs.wave),
           withTiming(0, timingConfigs.waveFade),

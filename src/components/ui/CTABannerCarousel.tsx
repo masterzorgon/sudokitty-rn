@@ -2,17 +2,16 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   Share,
   Alert,
   PanResponder,
-  type ImageSourcePropType,
   type ImageStyle,
   type ViewStyle,
   type GestureResponderEvent,
   type PanResponderGestureState,
 } from 'react-native';
+import { Image, type ImageSource } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import Animated, {
@@ -127,7 +126,7 @@ interface CTABannerCardProps {
   title: string;
   buttonLabel: string | React.ReactNode;
   onPress: () => void;
-  image?: ImageSourcePropType;
+  image?: ImageSource | number;
   imageComponent?: React.ReactNode;
   imageStyle?: ImageStyle;
   imageContainerStyle?: ViewStyle;
@@ -175,7 +174,7 @@ function CTABannerCard({
           </Text>
         </View>
         <View style={[cardStyles.imageArea, imageContainerStyle]}>
-          {imageComponent ?? <Image source={image} style={[cardStyles.mochiImage, imageStyle]} />}
+          {imageComponent ?? <Image source={image} style={[cardStyles.mochiImage, imageStyle]} contentFit="contain" />}
         </View>
       </View>
       <SkeuButton
@@ -250,7 +249,6 @@ const cardStyles = StyleSheet.create({
     width: 120,
     height: 120,
     marginRight: spacing.xl + spacing.sm,
-    resizeMode: 'contain',
     marginBottom: -spacing.md - spacing.sm,
   },
   btn: {

@@ -3,31 +3,26 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-
-import MochiCatSvg from '../../../assets/images/mochi/mochi-cat.svg';
-import MochiGameViewSvg from '../../../assets/images/mochi/mochi-game-view.svg';
-import MochiWelcomeSvg from '../../../assets/images/mochi/mochi-welcome.svg';
+import { Image } from 'expo-image';
 
 interface MochiCatProps {
   size?: number;
   variant?: 'default' | 'game' | 'welcome';
 }
 
-const SVG_MAP = {
-  default: MochiCatSvg,
-  game: MochiGameViewSvg,
-  welcome: MochiWelcomeSvg,
+const IMG_MAP = {
+  default: require('../../../assets/images/mochi/mochi-hello.png'),
+  game: require('../../../assets/images/mochi/mochi-happy.png'),
+  welcome: require('../../../assets/images/mochi/mochi-hello.png'),
 } as const;
 
 export function MochiCat({
   size = 180,
   variant = 'default',
 }: MochiCatProps) {
-  const SvgComponent = SVG_MAP[variant];
-
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      <SvgComponent width={size} height={size} />
+      <Image source={IMG_MAP[variant]} style={{ width: size, height: size }} contentFit="contain" />
     </View>
   );
 }

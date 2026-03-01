@@ -9,7 +9,9 @@ import { spacing } from '../src/theme';
 import { BackButton } from '../src/components/ui/BackButton';
 import { ScreenBackground } from '../src/components/ui/Layout/ScreenBackground';
 
-import MochiTeacherSvg from '../assets/images/mochi/mochi-teacher.svg';
+import { Image } from 'expo-image';
+
+const MochiTeacherImg = require('../assets/images/mochi/mochi-teacher.png');
 
 const MASCOT_SIZE = 180;
 
@@ -51,7 +53,7 @@ export default function TutorialScreen() {
         <Text style={styles.heading}>how to play</Text>
 
         <View style={styles.mascotContainer}>
-          <MochiTeacherSvg width={MASCOT_SIZE} height={MASCOT_SIZE} />
+          <Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />
         </View>
 
         {SECTIONS.map((section) => (

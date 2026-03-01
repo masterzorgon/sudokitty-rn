@@ -8,7 +8,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useGameStore, useCanUseHint } from '../../stores/gameStore';
 import { colors } from '../../theme/colors';
 import { fontFamilies } from '../../theme/typography';
-import { spacing } from '../../theme';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import { BUTTON_HEIGHT, BUTTON_RADIUS, whiteSkeuColorsSecondary } from './constants';
 
