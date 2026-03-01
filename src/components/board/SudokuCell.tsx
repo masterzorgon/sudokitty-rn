@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors, useColors } from '../../theme/colors';
 import { typography, fontFamilies } from '../../theme/typography';
-import { springConfigs, timingConfigs, scales } from '../../theme/animations';
+import { springConfigs, timingConfigs } from '../../theme/animations';
 import type { CellAnimationState } from '../../engine/types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -82,10 +82,8 @@ export const SudokuCell = memo(({
   const displayValue = value === 0 ? null : value;
 
   // Animation shared values (always created for hook consistency, but only driven when enabled)
-  const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
   const backgroundProgress = useSharedValue(0);
-  const errorShake = useSharedValue(0);
 
   // Wave completion animation shared values
   const waveGlow = useSharedValue(0);
@@ -129,27 +127,8 @@ export const SudokuCell = memo(({
         withTiming(1, timingConfigs.glowIn),
         withTiming(0, timingConfigs.glowOut),
       );
-      scale.value = withSequence(
-        withSpring(scales.popShrink, springConfigs.popShrink),
-        withSpring(scales.popOvershoot, springConfigs.bouncy),
-        withSpring(1, springConfigs.gentle),
-      );
     }
   }, [displayValue, isValid, animateValues]);
-
-  // Trigger shake on incorrect input (game mode only)
-  useEffect(() => {
-    if (!animateValues) return;
-    if (displayValue && !isGiven && !isValid) {
-      errorShake.value = withSequence(
-        withTiming(-2, { duration: 40 }),
-        withTiming(2, { duration: 40 }),
-        withTiming(-2, { duration: 40 }),
-        withTiming(2, { duration: 40 }),
-        withTiming(0, { duration: 40 }),
-      );
-    }
-  }, [isValid, animateValues]);
 
   // Trigger completion wave animations (staggered per cell)
   useEffect(() => {
@@ -158,10 +137,6 @@ export const SudokuCell = memo(({
     waveTimersRef.current = [];
 
     if (!completionAnimations?.length || !animateValues) return;
-
-    // Cancel any in-flight pop/shake so only the glow runs during a completion wave
-    scale.value = 1;
-    errorShake.value = 0;
 
     for (const anim of completionAnimations) {
       const timer = setTimeout(() => {
@@ -179,12 +154,6 @@ export const SudokuCell = memo(({
     };
   }, [completionAnimations, animateValues]);
 
-  const animatedContainerStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { translateX: errorShake.value },
-    ],
-  }));
 
   const highlightColor = animateValues ? c.cellHighlighted : c.techniqueHighlight;
   const secondaryColor = animateValues ? `${colors.coral}26` : c.techniqueHighlightSecondary;
@@ -222,7 +191,6 @@ export const SudokuCell = memo(({
         staticStyles.cell,
         { width: cellSize, height: cellSize },
         borderStyle,
-        animatedContainerStyle,
       ]}
     >
       {/* Background layer */}
