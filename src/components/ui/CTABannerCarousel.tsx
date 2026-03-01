@@ -8,6 +8,7 @@ import {
   Alert,
   PanResponder,
   type ImageSourcePropType,
+  type ImageStyle,
   type ViewStyle,
   type GestureResponderEvent,
   type PanResponderGestureState,
@@ -34,34 +35,63 @@ import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
 import { presentPaywallAlways } from '../../lib/revenueCat';
 
 const MochiStarsImg = require('../../../assets/images/mochi/mochi-stars.png');
-
-// ── Promo config ─────────────────────────────────────────────────────────────
+const MochiShareImg = require('../../../assets/images/mochi/mochi-share.png');
+const MochiTechniquesImg = require('../../../assets/images/mochi/mochi-techniques.png');
 
 type PromoKey = 'techniques' | 'invite' | 'rate';
 
 const SHARE_MESSAGE = 'Check out SudoKitty — a cute way to master sudoku! 🐱🧩';
 
-const PROMO_COPY: Record<
-  PromoKey,
-  { badge: string; title: string; buttonLabel: string | React.ReactNode; accessibilityLabel: string }
-> = {
+interface PromoCopyEntry {
+  badge: string;
+  title: string;
+  buttonLabel: string | React.ReactNode;
+  accessibilityLabel: string;
+  image?: number;
+  imageComponent?: React.ReactNode;
+  imageStyle?: ImageStyle;
+  imageContainerStyle?: ViewStyle;
+}
+
+const PROMO_COPY: Record<PromoKey, PromoCopyEntry> = {
   techniques: {
     badge: 'SUDOKU TECHNIQUES',
     title: 'level up your solving skills',
     buttonLabel: 'UNLOCK ALL TECHNIQUES',
     accessibilityLabel: 'Unlock all sudoku techniques',
+    image: MochiTechniquesImg,
+    imageStyle: {
+      width: 100,
+      height: 100,
+    },
+    imageContainerStyle: {
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      marginRight: spacing.sm,
+    },
   },
   invite: {
     badge: 'INVITE FRIENDS',
     title: 'give sudokitty to friends',
     buttonLabel: 'SHARE THE LOVE',
     accessibilityLabel: 'Invite friends and earn 100 mochis',
+    image: MochiShareImg,
+    imageStyle: {
+      width: 105,
+      height: 105,
+    },
+    imageContainerStyle: {
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      marginRight: spacing.sm,
+    },
   },
   rate: {
     badge: 'RATE SUDOKITTY',
     title: 'help other sudokitty fans',
     buttonLabel: 'RATE THE APP',
     accessibilityLabel: 'Rate SudoKitty on the App Store',
+    image: MochiStarsImg,
   },
 };
 
@@ -98,6 +128,9 @@ interface CTABannerCardProps {
   buttonLabel: string | React.ReactNode;
   onPress: () => void;
   image?: ImageSourcePropType;
+  imageComponent?: React.ReactNode;
+  imageStyle?: ImageStyle;
+  imageContainerStyle?: ViewStyle;
   accessibilityLabel?: string;
   style?: ViewStyle;
   blurStyle?: object;
@@ -109,6 +142,9 @@ function CTABannerCard({
   buttonLabel,
   onPress,
   image = MochiStarsImg,
+  imageComponent,
+  imageStyle,
+  imageContainerStyle,
   accessibilityLabel,
   style,
   blurStyle,
@@ -138,8 +174,8 @@ function CTABannerCard({
             {title}
           </Text>
         </View>
-        <View style={cardStyles.imageArea}>
-          <Image source={image} style={cardStyles.mochiImage} />
+        <View style={[cardStyles.imageArea, imageContainerStyle]}>
+          {imageComponent ?? <Image source={image} style={[cardStyles.mochiImage, imageStyle]} />}
         </View>
       </View>
       <SkeuButton
@@ -326,6 +362,10 @@ function StackedCard({
         buttonLabel={copy.buttonLabel}
         onPress={promo.onPress}
         accessibilityLabel={copy.accessibilityLabel}
+        image={copy.image}
+        imageComponent={copy.imageComponent}
+        imageStyle={copy.imageStyle}
+        imageContainerStyle={copy.imageContainerStyle}
         blurStyle={blurStyle}
       />
     </Animated.View>
@@ -411,6 +451,10 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
           buttonLabel={copy.buttonLabel}
           onPress={promos[0].onPress}
           accessibilityLabel={copy.accessibilityLabel}
+          image={copy.image}
+          imageComponent={copy.imageComponent}
+          imageStyle={copy.imageStyle}
+          imageContainerStyle={copy.imageContainerStyle}
         />
       </View>
     );
