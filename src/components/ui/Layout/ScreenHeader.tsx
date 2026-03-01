@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, type ViewStyle } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, type ViewStyle, type LayoutChangeEvent } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { spacing } from '../../../theme';
@@ -21,6 +21,17 @@ export function ScreenHeader({ title, left, right, showMochiPill, showFreezePill
   const router = useRouter();
   const totalMochis = useTotalMochiPoints();
   const freezeCount = useDailyChallengeStore((s) => s.streakFreezesCount);
+
+  const [leftPillWidth, setLeftPillWidth] = useState(0);
+  const [rightPillWidth, setRightPillWidth] = useState(0);
+  const syncedWidth = Math.max(leftPillWidth, rightPillWidth) || undefined;
+
+  const onLeftLayout = useCallback((e: LayoutChangeEvent) => {
+    setLeftPillWidth(e.nativeEvent.layout.width);
+  }, []);
+  const onRightLayout = useCallback((e: LayoutChangeEvent) => {
+    setRightPillWidth(e.nativeEvent.layout.width);
+  }, []);
 
   const mochiPill = showMochiPill ? (
     <HeaderPill
@@ -44,12 +55,22 @@ export function ScreenHeader({ title, left, right, showMochiPill, showFreezePill
 
   return (
     <View style={[styles.container, hasSlots && styles.row, style]}>
-      {hasSlots && <View style={styles.side}>{resolvedLeft}</View>}
+      {hasSlots && (
+        <View style={styles.side}>
+          <View onLayout={onLeftLayout} style={syncedWidth ? { width: syncedWidth } : undefined}>
+            {resolvedLeft}
+          </View>
+        </View>
+      )}
       <ScreenTitle style={hasSlots ? styles.titleWithSlots : styles.titleNoSlots}>
         {title}
       </ScreenTitle>
       {hasSlots && (
-        <View style={[styles.side, styles.rightSide]}>{resolvedRight}</View>
+        <View style={[styles.side, styles.rightSide]}>
+          <View onLayout={onRightLayout} style={syncedWidth ? { width: syncedWidth } : undefined}>
+            {resolvedRight}
+          </View>
+        </View>
       )}
     </View>
   );
@@ -67,6 +88,7 @@ const styles = StyleSheet.create({
   },
   side: {
     flex: 1,
+    alignItems: 'flex-start',
   },
   rightSide: {
     alignItems: 'flex-end',

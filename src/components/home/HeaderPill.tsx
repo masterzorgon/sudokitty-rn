@@ -1,7 +1,7 @@
 // Compact currency pill for home header (cream/skeuomorphic): icon + count; tap → store
 
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
 import { fontFamilies } from '../../theme/typography';
@@ -10,7 +10,7 @@ import type { CustomSkeuColors } from '../ui/Skeuomorphic';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 
-const PILL_WIDTH_RATIO = 0.18;
+const PILL_MIN_WIDTH = 64;
 const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
 const ICON_CIRCLE_SIZE = 26;
@@ -26,8 +26,6 @@ export interface HeaderPillProps {
 
 export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
   const c = useColors();
-  const { width: screenWidth } = useWindowDimensions();
-  const pillWidth = Math.max(52, screenWidth * PILL_WIDTH_RATIO);
 
   const isFreeze = type === 'freezes';
 
@@ -53,10 +51,11 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: spacing.sm,
     paddingVertical: 4,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: spacing.sm,
     height: PILL_HEIGHT,
-    width: pillWidth,
+    minWidth: PILL_MIN_WIDTH,
   };
 
   const label = isFreeze ? 'Streak Freezes' : 'Mochis';
@@ -66,7 +65,7 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
       onPress={onPress}
       customColors={skeuColors}
       borderRadius={borderRadius.full}
-      style={StyleSheet.flatten([styles.container, { width: pillWidth, borderRadius: borderRadius.full }])}
+      style={StyleSheet.flatten([styles.container, { minWidth: PILL_MIN_WIDTH, borderRadius: borderRadius.full, width: '100%' }])}
       contentStyle={faceStyle}
       accessibilityLabel={`${value} ${label}, open store`}
     >
