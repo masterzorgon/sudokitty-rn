@@ -31,7 +31,7 @@ import { spacing, borderRadius } from '../../theme';
 import { SkeuToggle } from '../ui/Skeuomorphic';
 import { SkeuCard } from '../ui/Skeuomorphic';
 import { AppButton } from '../ui/AppButton';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/SheetWrapper';
+import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { playFeedback } from '../../utils/feedback';
 
 // MARK: - Types

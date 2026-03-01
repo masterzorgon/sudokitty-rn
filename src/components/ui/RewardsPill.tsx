@@ -5,8 +5,10 @@ import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { spacing } from '../../theme';
+import { fontFamilies } from '../../theme/typography';
+import { SKEU_VARIANTS } from '../../theme/skeuomorphic';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
-import { SkeuButton } from './Skeuomorphic';
+import { SkeuButton, Skeu3D } from './Skeuomorphic';
 
 export interface RewardsPillProps {
   mochis: number;
@@ -102,34 +104,40 @@ export function RewardsPill({
 
   const isPressable = variant === 'balance' && typeof onPress === 'function';
 
-  const button = (
-    <SkeuButton
-      onPress={isPressable ? onPress : () => {}}
-      variant="primary"
-      sheen
+  if (isPressable) {
+    return (
+      <SkeuButton
+        onPress={onPress}
+        variant="primary"
+        sheen
+        borderRadius={999}
+        style={styles.container}
+        contentStyle={faceStyle}
+      >
+        {content}
+      </SkeuButton>
+    );
+  }
+
+  return (
+    <Skeu3D
+      customColors={SKEU_VARIANTS.primary}
       borderRadius={999}
+      showHighlight={false}
       style={styles.container}
-      contentStyle={faceStyle}
+      faceStyle={faceStyle}
     >
       {content}
-    </SkeuButton>
+    </Skeu3D>
   );
-
-  if (!isPressable) {
-    return <View pointerEvents="none" style={styles.nonPressableWrap}>{button}</View>;
-  }
-  return button;
 }
 
 const styles = StyleSheet.create({
   container: {
     alignSelf: 'center',
   },
-  nonPressableWrap: {
-    alignSelf: 'center',
-  },
   text: {
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
   },
   primaryText: {
     color: 'rgba(255, 255, 255, 0.95)',

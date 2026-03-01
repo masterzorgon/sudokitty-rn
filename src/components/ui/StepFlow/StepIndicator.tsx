@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { spacing } from '../../theme';
+import { spacing } from '../../../theme';
 import { AnimatedStepDot } from './AnimatedStepDot';
 
 interface StepIndicatorProps {

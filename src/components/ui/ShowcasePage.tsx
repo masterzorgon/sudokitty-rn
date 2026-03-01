@@ -6,11 +6,11 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-import { colors, useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { useColors } from '../../theme/colors';
+import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { AppButton } from './AppButton';
-import { SpeechBubble } from './SpeechBubble';
+import { SpeechBubble } from './Typography/SpeechBubble';
 
 export interface ShowcasePageBadge {
   label: string;
@@ -62,7 +62,7 @@ export function ShowcasePage({
             style={styles.gradientBar}
           />
           <View style={styles.headingArea}>
-            <Text style={styles.heading}>{heading}</Text>
+            <Text style={[styles.heading, { color: c.textPrimary }]}>{heading}</Text>
             {badge && (
               <View style={[styles.badge, { backgroundColor: badge.color + '20' }]}>
                 <Text style={[styles.badgeText, { color: badge.color }]}>
@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
   },
   heading: {
     ...typography.largeTitle,
-    color: colors.textPrimary,
     textAlign: 'center',
   },
   badge: {
@@ -140,7 +139,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 13,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
   },
   mascotCharacter: {
     zIndex: 1,

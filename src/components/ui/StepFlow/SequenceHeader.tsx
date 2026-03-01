@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-import { spacing } from '../../theme';
-import { GAME_LAYOUT } from '../../constants/layout';
-import { BackButton } from './BackButton';
+import { spacing } from '../../../theme';
+import { GAME_LAYOUT } from '../../../constants/layout';
+import { BackButton } from '../BackButton';
 import { StepIndicator } from './StepIndicator';
 
 interface SequenceHeaderProps {

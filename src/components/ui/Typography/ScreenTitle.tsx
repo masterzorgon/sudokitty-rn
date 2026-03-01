@@ -1,9 +1,9 @@
 import React from 'react';
 import { Text, StyleSheet, type TextStyle } from 'react-native';
 
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { spacing } from '../../theme';
+import { useColors } from '../../../theme/colors';
+import { typography } from '../../../theme/typography';
+import { spacing } from '../../../theme';
 
 interface ScreenTitleProps {
   children: string;
@@ -11,13 +11,13 @@ interface ScreenTitleProps {
 }
 
 export function ScreenTitle({ children, style }: ScreenTitleProps) {
-  return <Text style={[styles.title, style]}>{children}</Text>;
+  const c = useColors();
+  return <Text style={[styles.title, { color: c.textPrimary }, style]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({
   title: {
     ...typography.largeTitle,
-    color: colors.textPrimary,
     textAlign: 'center',
     marginBottom: spacing.xl,
   },

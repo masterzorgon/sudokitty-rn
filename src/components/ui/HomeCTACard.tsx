@@ -6,7 +6,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 import { useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuButton } from './Skeuomorphic';
 import type { CustomSkeuColors } from './Skeuomorphic';
@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
+    fontFamily: fontFamilies.regular,
   },
   rightContent: {
     flexDirection: 'row',

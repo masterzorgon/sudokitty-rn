@@ -8,7 +8,7 @@ import { useGameStore } from '../../stores/gameStore';
 import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
 import { showRewardedAd } from '../../lib/rewardedAds';
 import { SkeuButton, SKEU_VARIANTS } from '../ui/Skeuomorphic';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/SheetWrapper';
+import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';

@@ -12,7 +12,7 @@ import { typography } from '../../theme/typography';
 import { fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuButton } from '../ui/Skeuomorphic';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/SheetWrapper';
+import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 

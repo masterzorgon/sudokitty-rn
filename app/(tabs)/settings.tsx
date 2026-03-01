@@ -12,8 +12,8 @@ import {
   SettingsToggleRow,
   SettingsLinkRow,
 } from '../../src/components/settings';
-import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
-import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
+import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackground';
+import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import {

@@ -87,14 +87,6 @@ export const LAYOUT = {
   pillWidth: 3 * 24 + 2 * 32 + 2 * 20, // 176
 } as const;
 
-// Mochi icon mapping for difficulties (using Feather icons)
-export const DIFFICULTY_ICONS: Record<Difficulty, string> = {
-  easy: 'smile',
-  medium: 'meh',
-  hard: 'frown',
-  expert: 'zap',
-};
-
 // Menu configurations for each primary action state
 export const MENU_CONFIGS: Record<PrimaryActionState, MenuItem[]> = {
   new_game: [

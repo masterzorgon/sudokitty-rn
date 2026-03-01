@@ -5,8 +5,8 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, ViewStyle, TextStyle, LayoutChangeEvent } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { colors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
+import { colors } from '../../../theme/colors';
+import { typography, fontFamilies } from '../../../theme/typography';
 
 type PointerDirection = 'up' | 'down' | 'left' | 'right';
 
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: fontFamilies.semibold,
     fontSize: 15,
-    color: '#8b7878',
+    color: colors.textSecondary,
     lineHeight: 20,
     textAlign: 'center',
   },

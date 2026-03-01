@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { spacing, borderRadius } from '../../theme';
 import { SkeuCard } from '../ui/Skeuomorphic';
-import { SectionTitle } from '../ui/SectionTitle';
+import { SectionTitle } from '../ui/Typography/SectionTitle';
 
 interface SettingsSectionProps {
   title: string;

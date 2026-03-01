@@ -13,6 +13,7 @@ import Animated, {
 
 import type { TextStyle, StyleProp } from 'react-native';
 import { springConfigs } from '../../theme/animations';
+import { fontFamilies } from '../../theme/typography';
 
 // Use the rolling spring config from theme for consistency
 const ROLLING_SPRING_CONFIG = springConfigs.rolling;
@@ -180,7 +181,7 @@ export const RollingNumber = memo(({
 
   // Build text style (without fontSize - passed separately for precise control)
   const combinedTextStyle: TextStyle = useMemo(() => ({
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
     ...(color ? { color } : {}),
     ...StyleSheet.flatten(textStyle),
   }), [color, textStyle]);
@@ -234,7 +235,7 @@ export const RollingTime = memo(({
 
   // Build text style (without fontSize - passed separately)
   const combinedTextStyle: TextStyle = useMemo(() => ({
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
     ...(color ? { color } : {}),
     ...StyleSheet.flatten(textStyle),
   }), [color, textStyle]);

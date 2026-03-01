@@ -1,7 +1,7 @@
 // Shared context for skeuomorphic components
 // Allows Skeu3D to pass variant/colors to children without prop drilling
 
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import type { SkeuVariantColors } from '../../../theme/skeuomorphic';
 
 // Corner radii type for individual corner control
@@ -42,8 +42,3 @@ export interface SkeuContextValue {
 }
 
 export const SkeuContext = createContext<SkeuContextValue | null>(null);
-
-// Hook to consume context (optional - components can also accept direct props)
-export function useSkeuContext(): SkeuContextValue | null {
-  return useContext(SkeuContext);
-}

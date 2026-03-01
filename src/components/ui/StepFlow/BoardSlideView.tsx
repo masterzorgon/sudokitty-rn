@@ -2,11 +2,11 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { spacing } from '../../theme';
-import { GAME_LAYOUT } from '../../constants/layout';
-import { SudokuBoard, puzzleToCellData } from '../board';
-import { GameMascot } from '../game';
-import { AppButton } from './AppButton';
+import { spacing } from '../../../theme';
+import { GAME_LAYOUT } from '../../../constants/layout';
+import { SudokuBoard, puzzleToCellData } from '../../board';
+import { GameMascot } from '../../game';
+import { AppButton } from '../AppButton';
 
 interface BoardSlideViewProps {
   puzzle: number[][];
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomZone: {
-    paddingTop: spacing.xxl + spacing.xxl,
+    paddingTop: spacing.xxl + spacing.xxl, // 64pt — pushes nav buttons below the sudoku board
     paddingBottom: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },

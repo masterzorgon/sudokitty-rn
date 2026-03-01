@@ -7,7 +7,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 
-import { colors, useColors } from '../../theme/colors';
+import { useColors } from '../../../theme/colors';
 
 const STEP_DOT_TIMING = { duration: 250, easing: Easing.inOut(Easing.ease) };
 const STEP_DOT_SIZE = 8;
@@ -33,7 +33,7 @@ export function AnimatedStepDot({ state }: { state: StepDotState }) {
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1, 2],
-      [colors.gridLine, c.accent, c.accent],
+      [c.gridLine, c.accent, c.accent],
     );
 
     return { width, backgroundColor };

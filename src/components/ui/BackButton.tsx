@@ -3,7 +3,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 
-import { colors } from '../../theme/colors';
+import { useColors } from '../../theme/colors';
 import { playFeedback } from '../../utils/feedback';
 
 interface BackButtonProps {
@@ -11,7 +11,8 @@ interface BackButtonProps {
   color?: string;
 }
 
-export function BackButton({ onPress, color = colors.textPrimary }: BackButtonProps) {
+export function BackButton({ onPress, color }: BackButtonProps) {
+  const c = useColors();
   const router = useRouter();
 
   const handlePress = useCallback(() => {
@@ -25,7 +26,7 @@ export function BackButton({ onPress, color = colors.textPrimary }: BackButtonPr
 
   return (
     <Pressable onPress={handlePress} hitSlop={12} style={styles.container}>
-      <Feather name="arrow-left" size={22} color={color} />
+      <Feather name="arrow-left" size={22} color={color ?? c.textPrimary} />
     </Pressable>
   );
 }

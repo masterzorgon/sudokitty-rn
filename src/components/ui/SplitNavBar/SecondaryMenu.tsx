@@ -5,14 +5,10 @@ import React, { useRef, useMemo } from 'react';
 import { StyleSheet, View, Pressable, Modal, PanResponder } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
-import { SecondaryMenuProps, MENU_CONFIGS, LAYOUT, MenuItem } from './types';
+import Animated, { Easing } from 'react-native-reanimated';
+import { SecondaryMenuProps, MENU_CONFIGS, LAYOUT } from './types';
 import { MenuRow } from './MenuRow';
+import { useVisibilityAnimation } from '@/src/hooks/useVisibilityAnimation';
 
 const SWIPE_THRESHOLD = 50; // Minimum distance to trigger dismiss
 const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity to trigger dismiss
@@ -24,9 +20,14 @@ export function SecondaryMenu({
   onDismiss,
 }: SecondaryMenuProps) {
   const insets = useSafeAreaInsets();
-  const menuScale = useSharedValue(0);
-  const menuOpacity = useSharedValue(0);
   const isDismissing = useRef(false);
+
+  const animatedMenuStyle = useVisibilityAnimation(isOpen, {
+    durationIn: 120,
+    durationOut: 80,
+    easingIn: Easing.out(Easing.back(1.1)),
+    easingOut: Easing.in(Easing.cubic),
+  });
 
   const menuItems = MENU_CONFIGS[menuType];
 
@@ -61,33 +62,6 @@ export function SecondaryMenu({
     [onDismiss]
   );
 
-  React.useEffect(() => {
-    if (isOpen) {
-      // Scale up from 0 → 1 with subtle overshoot
-      menuScale.value = withTiming(1, {
-        duration: 120,
-        easing: Easing.out(Easing.back(1.1)),
-      });
-      menuOpacity.value = withTiming(1, { duration: 120 });
-    } else {
-      // Fast collapse
-      menuScale.value = withTiming(0, {
-        duration: 80,
-        easing: Easing.in(Easing.cubic),
-      });
-      menuOpacity.value = withTiming(0, { duration: 80 });
-    }
-  }, [isOpen, menuScale, menuOpacity]);
-
-  const animatedMenuStyle = useAnimatedStyle(() => ({
-    opacity: menuOpacity.value,
-    transform: [{ scale: menuScale.value }],
-  }));
-
-  const handleItemSelect = (item: MenuItem) => {
-    onSelect(item);
-  };
-
   return (
     <Modal
       visible={isOpen}
@@ -121,7 +95,7 @@ export function SecondaryMenu({
                 index={index}
                 isVisible={isOpen}
                 isLast={index === menuItems.length - 1}
-                onPress={() => handleItemSelect(item)}
+                onPress={() => onSelect(item)}
               />
             ))}
           </View>
@@ -148,7 +122,6 @@ const styles = StyleSheet.create({
   },
   menuWrapper: {
     // Transform origin: scales from bottom-right corner
-    // borderWidth: 1,
   },
   menu: {
     gap: LAYOUT.rowGap,

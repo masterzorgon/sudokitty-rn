@@ -1,40 +1,24 @@
 // Primary action 3D pill button (New Game / Resume)
 // Uses SkeuButton with visibility animations
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, Text } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { borderRadius } from '@/src/theme';
+import { fontFamilies } from '@/src/theme/typography';
 
 import { PrimaryActionPillProps, LAYOUT } from './types';
-import { SkeuButton, SKEU_VARIANTS } from '../Skeuomorphic';
+import { SkeuButton, SKEU_VARIANTS } from '@/src/components/ui/Skeuomorphic';
+import { useVisibilityAnimation } from '@/src/hooks/useVisibilityAnimation';
 
 export function PrimaryActionPill({ state, onPress, isHidden = false }: PrimaryActionPillProps) {
-  const visibilityScale = useSharedValue(1);
-  const visibilityOpacity = useSharedValue(1);
-
-  // Animate scale when hidden state changes
-  useEffect(() => {
-    const config = { duration: 100, easing: Easing.out(Easing.cubic) };
-    visibilityScale.value = withTiming(isHidden ? 0 : 1, config);
-    visibilityOpacity.value = withTiming(isHidden ? 0 : 1, { duration: 100 });
-  }, [isHidden, visibilityScale, visibilityOpacity]);
-
-  const visibilityAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: visibilityScale.value }],
-    opacity: visibilityOpacity.value,
-  }));
+  const visibilityStyle = useVisibilityAnimation(!isHidden);
 
   const label = state === 'resume' ? 'resume game' : 'new game';
   const accessibilityLabel = state === 'resume' ? 'Resume Game' : 'Start New Game';
 
   return (
-    <Animated.View style={visibilityAnimatedStyle}>
+    <Animated.View style={visibilityStyle}>
       <SkeuButton
         onPress={onPress}
         variant="primary"
@@ -63,6 +47,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 20,
-    fontFamily: 'Pally-Bold',
+    fontFamily: fontFamilies.bold,
   },
 });

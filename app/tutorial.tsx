@@ -7,7 +7,7 @@ import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing } from '../src/theme';
 import { BackButton } from '../src/components/ui/BackButton';
-import { ScreenBackground } from '../src/components/ui/ScreenBackground';
+import { ScreenBackground } from '../src/components/ui/Layout/ScreenBackground';
 
 import MochiTeacherSvg from '../assets/images/mochi/mochi-teacher.svg';
 

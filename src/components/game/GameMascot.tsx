@@ -11,7 +11,7 @@ import Animated, {
 
 import { MochiCat } from '../home/MochiCat';
 import { GAME_LAYOUT } from '../../constants/layout';
-import { SpeechBubble } from '../ui/SpeechBubble';
+import { SpeechBubble } from '../ui/Typography/SpeechBubble';
 
 const BubbleEntering = () => {
   'worklet';

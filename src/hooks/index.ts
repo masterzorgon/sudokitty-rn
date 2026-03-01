@@ -9,3 +9,4 @@ export { useTechniquePractice } from './useTechniquePractice';
 export type { TechniquePhase, FindPhase, PuzzleState } from './useTechniquePractice';
 
 export { useBackgroundMusic } from './useBackgroundMusic';
+export { useVisibilityAnimation } from './useVisibilityAnimation';

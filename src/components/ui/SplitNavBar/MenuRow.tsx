@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { colors } from '@/src/theme/colors';
+import { fontFamilies } from '@/src/theme/typography';
 import { playFeedback } from '@/src/utils/feedback';
 import { Difficulty, GAME_BASE_MOCHIS } from '@/src/engine/types';
 import { MenuRowProps } from './types';
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 29,
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
     color: colors.textPrimary,
   },
   rewardRow: {
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
   },
   rewardText: {
     fontSize: 16,
-    fontFamily: 'Pally-Medium',
+    fontFamily: fontFamilies.medium,
     color: colors.textSecondary,
   },
   iconContainer: {

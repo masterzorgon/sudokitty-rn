@@ -3,8 +3,8 @@ import { StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Canvas, Circle, RadialGradient, vec } from '@shopify/react-native-skia';
 
-import { useColors } from '../../theme/colors';
-import { useColorTheme } from '../../stores/settingsStore';
+import { useColors } from '../../../theme/colors';
+import { useColorTheme } from '../../../stores/settingsStore';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const DEFAULT_GRADIENT_HEIGHT = SCREEN_HEIGHT * 0.45;

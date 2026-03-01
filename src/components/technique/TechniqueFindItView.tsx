@@ -7,7 +7,7 @@ import { GAME_LAYOUT } from '../../constants/layout';
 import { SudokuBoard, puzzleToCellData } from '../board';
 import { GameMascot } from '../game';
 import { AppButton } from '../ui/AppButton';
-import { BottomSheet } from '../ui/BottomSheet';
+import { BottomSheet } from '../ui/Sheet/BottomSheet';
 import type { ValidationResult } from '../../engine/validation';
 import type { FindPhase, PuzzleState } from '../../hooks/useTechniquePractice';
 

@@ -19,9 +19,9 @@ import {
   TechniquesCTA,
   StreakPill,
 } from '../../src/components/home';
-import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
-import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
-import { SpeechBubble } from '../../src/components/ui/SpeechBubble';
+import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackground';
+import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
+import { SpeechBubble } from '../../src/components/ui/Typography/SpeechBubble';
 import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
 import { getRandomWelcomeMessage } from '../../src/constants/welcomeMessages';
 import { runEconomyV2Migration } from '../../src/services/economyMigration';

@@ -1,10 +1,10 @@
 import React, { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { spacing } from '../../theme';
-import { AppButton } from './AppButton';
+import { useColors } from '../../../theme/colors';
+import { typography } from '../../../theme/typography';
+import { spacing } from '../../../theme';
+import { AppButton } from '../AppButton';
 import { SheetWrapper, type SheetWrapperRef } from './SheetWrapper';
 
 export interface BottomSheetAction {
@@ -30,6 +30,7 @@ export function BottomSheet({
   action,
   dismissOnTapOutside = true,
 }: BottomSheetProps) {
+  const c = useColors();
   const sheetRef = useRef<SheetWrapperRef>(null);
 
   const handleAction = () => {
@@ -43,8 +44,8 @@ export function BottomSheet({
       onDismiss={onDismiss}
       dismissOnTapOutside={dismissOnTapOutside}
     >
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
+      <Text style={[styles.title, { color: c.textPrimary }]}>{title}</Text>
+      <Text style={[styles.description, { color: c.textSecondary }]}>{description}</Text>
       <View style={styles.actionContainer}>
         <AppButton
           onPress={handleAction}
@@ -59,12 +60,10 @@ export function BottomSheet({
 const styles = StyleSheet.create({
   title: {
     ...typography.title,
-    color: colors.textPrimary,
     marginBottom: spacing.sm,
   },
   description: {
     ...typography.body,
-    color: colors.textSecondary,
     lineHeight: 22,
     marginBottom: spacing.xl,
   },

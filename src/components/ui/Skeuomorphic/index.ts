@@ -24,7 +24,7 @@ export { Skeu3DFace } from './Skeu3DFace';
 export type { Skeu3DFaceProps } from './Skeu3DFace';
 
 // Shared types and utilities
-export { SkeuContext, useSkeuContext, resolveCornerRadii } from './SkeuContext';
+export { SkeuContext, resolveCornerRadii } from './SkeuContext';
 export type { CornerRadii, SkeuContextValue } from './SkeuContext';
 
 // Re-export theme constants for convenience

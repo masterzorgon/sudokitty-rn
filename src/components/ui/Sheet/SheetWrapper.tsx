@@ -1,19 +1,23 @@
-import React, { useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
 import {
   View,
   StyleSheet,
   Modal,
   Pressable,
-  Animated,
-  Dimensions,
+  useWindowDimensions,
   ViewStyle,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
 
-import { colors } from '../../theme/colors';
-import { spacing, borderRadius } from '../../theme';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
+import { colors } from '../../../theme/colors';
+import { spacing, borderRadius } from '../../../theme';
 
 export interface SheetWrapperRef {
   close: (callback?: () => void) => void;
@@ -32,37 +36,32 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
     { visible, onDismiss, dismissOnTapOutside = true, containerStyle, children },
     ref,
   ) {
-    const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-    const callbackRef = useRef<(() => void) | null>(null);
+    const { height: screenHeight } = useWindowDimensions();
+    const translateY = useSharedValue(screenHeight);
 
     useEffect(() => {
       if (visible) {
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 65,
-          friction: 11,
-        }).start();
+        translateY.value = withSpring(0, { tension: 65, friction: 11 });
       } else {
-        slideAnim.setValue(SCREEN_HEIGHT);
+        translateY.value = screenHeight;
       }
-    }, [visible, slideAnim]);
+    }, [visible, translateY, screenHeight]);
 
     const animateOut = useCallback(
       (cb?: () => void) => {
-        Animated.timing(slideAnim, {
-          toValue: SCREEN_HEIGHT,
-          duration: 250,
-          useNativeDriver: true,
-        }).start(() => {
-          onDismiss();
-          cb?.();
+        translateY.value = withTiming(screenHeight, { duration: 250 }, () => {
+          runOnJS(onDismiss)();
+          if (cb) runOnJS(cb)();
         });
       },
-      [slideAnim, onDismiss],
+      [translateY, screenHeight, onDismiss],
     );
 
     useImperativeHandle(ref, () => ({ close: animateOut }), [animateOut]);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ translateY: translateY.value }],
+    }));
 
     const handleTapOutside = dismissOnTapOutside ? () => animateOut() : undefined;
 
@@ -76,13 +75,7 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
         <BlurView intensity={60} tint="dark" style={styles.overlay}>
           <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
 
-          <Animated.View
-            style={[
-              styles.container,
-              containerStyle,
-              { transform: [{ translateY: slideAnim }] },
-            ]}
-          >
+          <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
             <View style={styles.dragIndicator} />
             {children}
           </Animated.View>
@@ -106,7 +99,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: borderRadius.xl,
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 20,
+    paddingBottom: spacing.xl + 20, // clears iOS home indicator (~34pt) plus standard spacing
   },
   dragIndicator: {
     width: 36,

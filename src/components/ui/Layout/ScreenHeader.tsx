@@ -2,11 +2,11 @@ import React from 'react';
 import { View, StyleSheet, type ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { spacing } from '../../theme';
-import { useTotalMochiPoints, useDailyChallengeStore } from '../../stores/dailyChallengeStore';
-import { HeaderPill } from '../home/HeaderPill';
-import { ScreenTitle } from './ScreenTitle';
-import { playFeedback } from '../../utils/feedback';
+import { spacing } from '../../../theme';
+import { useTotalMochiPoints, useDailyChallengeStore } from '../../../stores/dailyChallengeStore';
+import { HeaderPill } from '../../home/HeaderPill';
+import { ScreenTitle } from '../Typography/ScreenTitle';
+import { playFeedback } from '../../../utils/feedback';
 
 interface ScreenHeaderProps {
   title: string;
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl + 10,
+    paddingBottom: spacing.xl + 10, // extra visual breathing room below header text
   },
   row: {
     flexDirection: 'row',

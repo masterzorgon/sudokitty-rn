@@ -1,9 +1,9 @@
 import React from 'react';
 import { Text, StyleSheet, type TextStyle } from 'react-native';
 
-import { colors, useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { spacing } from '../../theme';
+import { useColors } from '../../../theme/colors';
+import { typography } from '../../../theme/typography';
+import { spacing } from '../../../theme';
 
 interface SectionTitleProps {
   children: string;
@@ -15,7 +15,7 @@ export function SectionTitle({ children, variant = 'default', style }: SectionTi
   const c = useColors();
 
   const variantStyle = variant === 'caption' ? captionStyle : defaultStyle;
-  const variantColor = variant === 'caption' ? colors.textSecondary : c.textPrimary;
+  const variantColor = variant === 'caption' ? c.textSecondary : c.textPrimary;
 
   return (
     <Text style={[variantStyle, { color: variantColor }, style]}>

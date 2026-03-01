@@ -5,7 +5,7 @@ import React from 'react';
 
 import { useLastHint } from '../../stores/gameStore';
 import { useGameStore } from '../../stores/gameStore';
-import { BottomSheet } from '../ui/BottomSheet';
+import { BottomSheet } from '../ui/Sheet/BottomSheet';
 
 export function HintModal() {
   const lastHint = useLastHint();

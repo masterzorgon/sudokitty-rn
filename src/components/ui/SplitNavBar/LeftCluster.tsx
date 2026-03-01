@@ -11,8 +11,8 @@ import { useColors } from '@/src/theme/colors';
 import { playFeedback } from '@/src/utils/feedback';
 import { springConfigs } from '@/src/theme/animations';
 import { LeftClusterProps, TabConfig, LAYOUT } from './types';
-import { Skeu3D } from '../Skeuomorphic';
-import type { CustomSkeuColors } from '../Skeuomorphic';
+import { Skeu3D } from '@/src/components/ui/Skeuomorphic';
+import type { CustomSkeuColors } from '@/src/components/ui/Skeuomorphic';
 import { borderRadius } from '@/src/theme';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -79,7 +79,6 @@ export function LeftCluster({ activeTab, onTabPress }: LeftClusterProps) {
   return (
     <Skeu3D
       customColors={skeuColors}
-      // borderRadius={LAYOUT.rightPillRadius}
       borderRadius={borderRadius.xl}
       showHighlight={false}
       faceStyle={styles.container}

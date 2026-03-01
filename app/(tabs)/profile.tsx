@@ -17,8 +17,8 @@ import {
   StatCard,
   ActivityCalendar,
 } from '../../src/components/home';
-import { ScreenBackground } from '../../src/components/ui/ScreenBackground';
-import { ScreenHeader } from '../../src/components/ui/ScreenHeader';
+import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackground';
+import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
 
 export default function ProfileScreen() {
   const c = useColors();
