@@ -110,8 +110,9 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
           </View>
         ) : config.currency === 'mochis' ? (
           <View style={styles.buttonRow}>
+            <Text style={styles.buyButtonText}>GET FOR</Text>
             <MochiPointIcon width={20} height={20} />
-            <Text style={styles.buyButtonText}>GET FOR {config.price}</Text>
+            <Text style={styles.buyButtonText}>{config.price}</Text>
           </View>
         ) : (
           <Text style={styles.buyButtonText}>{config.buttonLabel}</Text>
