@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { useColors } from '../../theme/colors';
@@ -7,12 +7,28 @@ import { spacing, borderRadius } from '../../theme';
 import { useLastHint, useGameStore } from '../../stores/gameStore';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { SkeuButton } from '../ui/Skeuomorphic';
+import { MiniBoard, sliceBox } from '../board';
+import type { SudokuCellData } from '../board';
 
 export function HintModal() {
   const lastHint = useLastHint();
   const dismissHintModal = useGameStore((s) => s.dismissHintModal);
+  const rawBoard = useGameStore((s) => s.board);
   const c = useColors();
   const sheetRef = useRef<SheetWrapperRef>(null);
+
+  const miniGrid = useMemo(() => {
+    if (!lastHint || !rawBoard) return null;
+    const cellData: SudokuCellData[][] = rawBoard.map((row) =>
+      row.map((cell) => ({
+        value: cell.value,
+        isGiven: cell.isGiven,
+        isValid: cell.isValid,
+        notes: cell.notes,
+      })),
+    );
+    return sliceBox(cellData, lastHint.targetCell.row, lastHint.targetCell.col);
+  }, [lastHint, rawBoard]);
 
   const handleApply = () => {
     sheetRef.current?.close(dismissHintModal);
@@ -27,11 +43,8 @@ export function HintModal() {
       onDismiss={dismissHintModal}
       blurBackground={false}
     >
-      {/* Header: technique name + category badge */}
-      <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: c.textPrimary }]}>
-          {lastHint.techniqueName}
-        </Text>
+      {/* Centered header: badge → technique name → mochi hint */}
+      <View style={styles.header}>
         {lastHint.category && (
           <View style={[styles.badge, { backgroundColor: (lastHint.categoryColor ?? c.accent) + '20' }]}>
             <Text style={[styles.badgeText, { color: lastHint.categoryColor ?? c.accent }]}>
@@ -39,12 +52,23 @@ export function HintModal() {
             </Text>
           </View>
         )}
+        <Text style={[styles.title, { color: c.textPrimary }]}>
+          {lastHint.techniqueName}
+        </Text>
+        <Text style={[styles.mochiHint, { color: c.textSecondary }]}>
+          "{lastHint.mochiHint}"
+        </Text>
       </View>
 
-      {/* Mochi hint */}
-      <Text style={[styles.mochiHint, { color: c.textSecondary }]}>
-        "{lastHint.mochiHint}"
-      </Text>
+      {/* Mini 3x3 grid preview */}
+      {miniGrid && (
+        <View style={styles.miniGridContainer}>
+          <MiniBoard
+            cells={miniGrid.box}
+            highlightCell={{ row: miniGrid.localRow, col: miniGrid.localCol }}
+          />
+        </View>
+      )}
 
       {/* How it works */}
       {lastHint.techniqueDescription && (
@@ -82,15 +106,18 @@ export function HintModal() {
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
+  header: {
     alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+  },
+  miniGridContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
   },
   title: {
     ...typography.title,
-    flex: 1,
+    textAlign: 'center',
   },
   badge: {
     paddingHorizontal: spacing.sm + 2,
@@ -107,14 +134,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontStyle: 'italic',
     lineHeight: 20,
-    marginBottom: spacing.lg,
+    textAlign: 'center',
   },
   section: {
     marginBottom: spacing.lg,
   },
   sectionLabel: {
     fontFamily: fontFamilies.bold,
-    fontSize: 11,
+    fontSize: 14,
     letterSpacing: 1,
     marginBottom: spacing.xs,
   },

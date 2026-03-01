@@ -23,3 +23,24 @@ export function puzzleToCellData(puzzle: number[][]): SudokuCellData[][] {
     })),
   );
 }
+
+/**
+ * Slice the 3x3 box containing a target cell out of a full 9x9 SudokuCellData grid.
+ * Returns the 3x3 slice and the target cell's local coordinates within it.
+ */
+export function sliceBox(
+  cells: SudokuCellData[][],
+  targetRow: number,
+  targetCol: number,
+): { box: SudokuCellData[][]; localRow: number; localCol: number } {
+  const startRow = Math.floor(targetRow / 3) * 3;
+  const startCol = Math.floor(targetCol / 3) * 3;
+  const box = Array.from({ length: 3 }, (_, r) =>
+    cells[startRow + r].slice(startCol, startCol + 3),
+  );
+  return {
+    box,
+    localRow: targetRow - startRow,
+    localCol: targetCol - startCol,
+  };
+}
