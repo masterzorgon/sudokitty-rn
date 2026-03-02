@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Image, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { playFeedback } from '../../src/utils/feedback';
 
 import { useColors } from '../../src/theme/colors';
@@ -44,6 +44,7 @@ export default function HomeScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const [headerHeight, setHeaderHeight] = useState(0);
 
   // Store hooks
   const loadState = usePlayerStreakStore((s) => s.loadState);
@@ -149,11 +150,7 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
 
-      <Animated.View entering={FadeIn.duration(400)}>
-        <ScreenHeader />
-      </Animated.View>
-
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingTop: headerHeight }]}>
 
         {/* Mochi Cat Hero Section */}
         <View style={styles.heroSection}>
@@ -201,6 +198,8 @@ export default function HomeScreen() {
           <TechniquesCTA onPress={handleTechniquesPress} />
         </View>
       </Animated.View>
+
+      <ScreenHeader onHeightChange={setHeaderHeight} />
 
       <PurchaseSheet
         config={sheetConfig}

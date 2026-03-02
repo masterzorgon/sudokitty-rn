@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View, Linking, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -150,11 +150,13 @@ export default function SettingsScreen() {
     );
   }, [resetGame, resetDailyChallenge, resetStats]);
 
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const contentStyle = useMemo(() => ({ ...styles.scrollContent, paddingTop: 70 }), [headerHeight]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
-      <ScreenHeader />
-      <ScreenContent contentStyle={styles.scrollContent}>
+      <ScreenContent contentStyle={contentStyle}>
 
         <CTABannerCarousel promos={['rate']} />
 
@@ -312,6 +314,7 @@ export default function SettingsScreen() {
         </SkeuCard>
 
       </ScreenContent>
+      <ScreenHeader onHeightChange={setHeaderHeight} />
     </SafeAreaView>
   );
 }

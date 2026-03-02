@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -225,13 +225,14 @@ export default function StoreScreen() {
   // Render
   // ============================================
 
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const contentStyle = useMemo(() => ({ ...styles.content, paddingTop: 70 }), [headerHeight]);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
 
-      <ScreenHeader />
-
-      <ScreenContent contentStyle={styles.content}>
+      <ScreenContent contentStyle={contentStyle}>
         <CTABannerCarousel />
 
         <SectionTitle>Subscriptions</SectionTitle>
@@ -344,6 +345,8 @@ export default function StoreScreen() {
         })}
 
       </ScreenContent>
+
+      <ScreenHeader onHeightChange={setHeaderHeight} />
 
       <PurchaseSheet
         config={sheetConfig}

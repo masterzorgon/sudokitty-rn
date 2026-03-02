@@ -1,6 +1,6 @@
 // Stats screen — Analytics dashboard with activity calendar and game stats
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,12 +15,13 @@ export default function StatsScreen() {
   const c = useColors();
   const completedDates = usePlayerStreakStore((s) => s.completedDates);
   const frozenDates = usePlayerStreakStore((s) => s.frozenDates);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const contentStyle = useMemo(() => ({ ...styles.scrollContent, paddingTop: headerHeight }), [headerHeight]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
-      <ScreenHeader />
-      <ScreenContent contentStyle={styles.scrollContent}>
+      <ScreenContent contentStyle={contentStyle}>
 
         {/* Activity Calendar */}
         <View style={styles.section}>
@@ -34,6 +35,7 @@ export default function StatsScreen() {
         {/* Bottom spacing */}
         <View style={{ height: 40 }} />
       </ScreenContent>
+      <ScreenHeader onHeightChange={setHeaderHeight} />
     </SafeAreaView>
   );
 }
