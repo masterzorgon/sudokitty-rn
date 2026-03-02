@@ -26,8 +26,10 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
     const earned = await showRewardedAd();
     if (earned) {
       addPaidHints(1);
-      useHint();
-      sheetRef.current?.close();
+      sheetRef.current?.close(() => {
+        onClose();
+        useHint();
+      });
     }
   };
 

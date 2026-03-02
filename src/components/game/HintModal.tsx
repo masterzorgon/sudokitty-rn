@@ -7,8 +7,9 @@ import { spacing, borderRadius } from '../../theme';
 import { useLastHint, useGameStore } from '../../stores/gameStore';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { SkeuButton } from '../ui/Skeuomorphic';
-import { MiniBoard, sliceBox } from '../board';
+import { MiniBoard, sliceBox, sliceColumn, sliceRow } from '../board';
 import type { SudokuCellData } from '../board';
+import { positionKey } from '../../engine/types';
 
 export function HintModal() {
   const lastHint = useLastHint();
@@ -17,8 +18,9 @@ export function HintModal() {
   const c = useColors();
   const sheetRef = useRef<SheetWrapperRef>(null);
 
-  const miniGrid = useMemo(() => {
+  const contextData = useMemo(() => {
     if (!lastHint || !rawBoard) return null;
+
     const cellData: SudokuCellData[][] = rawBoard.map((row) =>
       row.map((cell) => ({
         value: cell.value,
@@ -27,7 +29,25 @@ export function HintModal() {
         notes: cell.notes,
       })),
     );
-    return sliceBox(cellData, lastHint.targetCell.row, lastHint.targetCell.col);
+
+    const { box, localRow, localCol, startRow, startCol } = sliceBox(
+      cellData,
+      lastHint.targetCell.row,
+      lastHint.targetCell.col,
+    );
+    const columnBands = sliceColumn(
+      cellData,
+      lastHint.targetCell.row,
+      lastHint.targetCell.col,
+    );
+    const rowBands = sliceRow(
+      cellData,
+      lastHint.targetCell.row,
+      lastHint.targetCell.col,
+    );
+    const highlightSet = new Set(lastHint.highlightCells.map(positionKey));
+
+    return { box, localRow, localCol, startRow, startCol, columnBands, rowBands, highlightSet };
   }, [lastHint, rawBoard]);
 
   const handleApply = () => {
@@ -60,13 +80,42 @@ export function HintModal() {
         </Text>
       </View>
 
-      {/* Mini 3x3 grid preview */}
-      {miniGrid && (
-        <View style={styles.miniGridContainer}>
-          <MiniBoard
-            cells={miniGrid.box}
-            highlightCell={{ row: miniGrid.localRow, col: miniGrid.localCol }}
-          />
+      {/* Labeled context: Box, Row, Column */}
+      {contextData && (
+        <View style={styles.contextSection}>
+          <Text style={[styles.contextLabel, { color: c.accent }]}>BOX</Text>
+          <View style={styles.contextRow}>
+            <MiniBoard
+              cells={contextData.box}
+              highlightCell={{ row: contextData.localRow, col: contextData.localCol }}
+              highlightSet={contextData.highlightSet}
+              offset={{ row: contextData.startRow, col: contextData.startCol }}
+            />
+          </View>
+
+          <Text style={[styles.contextLabel, { color: c.accent }]}>ROW</Text>
+          <View style={styles.contextRow}>
+            {contextData.rowBands.map((band, i) => (
+              <MiniBoard
+                key={i}
+                cells={band.cells}
+                highlightSet={contextData.highlightSet}
+                offset={{ row: lastHint!.targetCell.row, col: band.startCol }}
+              />
+            ))}
+          </View>
+
+          <Text style={[styles.contextLabel, { color: c.accent }]}>COLUMN</Text>
+          <View style={styles.contextRow}>
+            {contextData.columnBands.map((band, i) => (
+              <MiniBoard
+                key={i}
+                cells={band.cells}
+                highlightSet={contextData.highlightSet}
+                offset={{ row: band.startRow, col: lastHint!.targetCell.col }}
+              />
+            ))}
+          </View>
         </View>
       )}
 
@@ -111,9 +160,22 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginBottom: spacing.lg,
   },
-  miniGridContainer: {
-    alignItems: 'center',
+  contextSection: {
     marginBottom: spacing.lg,
+  },
+  contextLabel: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 12,
+    letterSpacing: 1,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  contextRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.md,
   },
   title: {
     ...typography.title,

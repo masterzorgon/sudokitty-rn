@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import type { EasingFunction } from 'react-native-reanimated';
 import {
   useSharedValue,
   useAnimatedStyle,
@@ -9,8 +10,8 @@ import {
 interface VisibilityAnimationConfig {
   durationIn?: number;
   durationOut?: number;
-  easingIn?: typeof Easing.out;
-  easingOut?: typeof Easing.out;
+  easingIn?: EasingFunction;
+  easingOut?: EasingFunction;
 }
 
 /**

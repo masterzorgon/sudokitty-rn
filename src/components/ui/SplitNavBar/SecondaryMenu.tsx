@@ -128,6 +128,6 @@ const styles = StyleSheet.create({
     minWidth: 228,
   },
   menuWide: {
-    minWidth: 290,
+    minWidth: 300,
   },
 });
