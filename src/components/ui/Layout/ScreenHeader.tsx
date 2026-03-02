@@ -5,7 +5,9 @@ import { useRouter } from 'expo-router';
 import { spacing, SCREEN_PADDING } from '../../../theme';
 import { useTotalMochiPoints, useDailyChallengeStore } from '../../../stores/dailyChallengeStore';
 import { useTotalXP, usePlayerLevel } from '../../../stores/playerProgressStore';
+import { xpForLevel, xpProgressFraction } from '../../../constants/xp';
 import { HeaderPill } from '../../home/HeaderPill';
+import { LevelProgressPill } from '../../home/LevelProgressPill';
 import { playFeedback } from '../../../utils/feedback';
 
 interface ScreenHeaderProps {
@@ -28,11 +30,14 @@ export function ScreenHeader({ style }: ScreenHeaderProps) {
         <View style={styles.pillSlot}>
           <HeaderPill type="freezes" value={freezeCount ?? 0} onPress={goToStore} />
         </View>
-        <View style={styles.pillSlot}>
-          <HeaderPill type="xp" value={totalXP} onPress={goToProfile} />
-        </View>
-        <View style={styles.pillSlot}>
-          <HeaderPill type="level" value={level} onPress={goToProfile} />
+        <View style={styles.doublePillSlot}>
+          <LevelProgressPill
+            level={level}
+            currentXP={totalXP}
+            xpThreshold={xpForLevel(level + 1)}
+            progressFraction={xpProgressFraction(totalXP, level)}
+            onPress={goToProfile}
+          />
         </View>
         <View style={styles.pillSlot}>
           <HeaderPill type="mochis" value={totalMochis} onPress={goToStore} />
@@ -54,5 +59,8 @@ const styles = StyleSheet.create({
   },
   pillSlot: {
     flex: 1,
+  },
+  doublePillSlot: {
+    flex: 1.1,
   },
 });
