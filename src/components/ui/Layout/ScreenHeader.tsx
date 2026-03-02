@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   doublePillSlot: {
-    flex: 1.1,
+    flex: 1,
   },
 });
