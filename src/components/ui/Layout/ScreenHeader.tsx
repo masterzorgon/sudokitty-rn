@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, StyleSheet, type ViewStyle, type LayoutChangeEvent } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,6 +13,8 @@ import { xpForLevel, xpProgressFraction } from '../../../constants/xp';
 import { HeaderPill } from '../../home/HeaderPill';
 import { LevelProgressPill } from '../../home/LevelProgressPill';
 import { playFeedback } from '../../../utils/feedback';
+import { MochiPurchaseSheet } from '../../store/MochiPurchaseSheet';
+import { StreakFreezePurchaseSheet } from '../../store/StreakFreezePurchaseSheet';
 
 const FADE_ZONE_HEIGHT = 40;
 
@@ -29,8 +31,13 @@ export function ScreenHeader({ style, onHeightChange }: ScreenHeaderProps) {
   const totalXP = useTotalXP();
   const level = usePlayerLevel();
 
+  const [mochiSheetVisible, setMochiSheetVisible] = useState(false);
+  const [freezeSheetVisible, setFreezeSheetVisible] = useState(false);
+
   const goToStore = () => { playFeedback('tap'); router.push('/store'); };
   const goToStats = () => { playFeedback('tap'); router.push('/(tabs)/stats'); };
+  const openMochiSheet = () => { playFeedback('tap'); setMochiSheetVisible(true); };
+  const openFreezeSheet = () => { playFeedback('tap'); setFreezeSheetVisible(true); };
 
   const handleContentLayout = useCallback(
     (e: LayoutChangeEvent) => {
@@ -62,7 +69,7 @@ export function ScreenHeader({ style, onHeightChange }: ScreenHeaderProps) {
       >
         <View style={styles.pillRow}>
           <View style={styles.pillSlot}>
-            <HeaderPill type="freezes" value={freezeCount ?? 0} onPress={goToStore} />
+            <HeaderPill type="freezes" value={freezeCount ?? 0} onPress={openFreezeSheet} />
           </View>
           <View style={styles.doublePillSlot}>
             <LevelProgressPill
@@ -74,10 +81,19 @@ export function ScreenHeader({ style, onHeightChange }: ScreenHeaderProps) {
             />
           </View>
           <View style={styles.pillSlot}>
-            <HeaderPill type="mochis" value={totalMochis} onPress={goToStore} />
+            <HeaderPill type="mochis" value={totalMochis} onPress={openMochiSheet} />
           </View>
         </View>
       </View>
+
+      <MochiPurchaseSheet
+        visible={mochiSheetVisible}
+        onDismiss={() => setMochiSheetVisible(false)}
+      />
+      <StreakFreezePurchaseSheet
+        visible={freezeSheetVisible}
+        onDismiss={() => setFreezeSheetVisible(false)}
+      />
     </View>
   );
 }
