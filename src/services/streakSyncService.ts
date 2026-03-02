@@ -16,6 +16,7 @@ export interface StreakState {
   lastCompletedDate: string | null;
   totalGamesWon: number;
   totalMochiPoints: number;
+  totalXP: number;
 }
 
 interface UserStreaksRow {
@@ -25,6 +26,7 @@ interface UserStreaksRow {
   last_completed_date_local: string | null;
   total_games: number;
   total_mochi_points: number;
+  total_xp: number;
   updated_at: string;
 }
 
@@ -57,6 +59,7 @@ export async function syncStreakToSupabase(state: StreakState): Promise<void> {
         last_completed_date_local: state.lastCompletedDate,
         total_games: state.totalGamesWon,
         total_mochi_points: state.totalMochiPoints,
+        total_xp: state.totalXP,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' },
@@ -70,6 +73,7 @@ export async function syncStreakToSupabase(state: StreakState): Promise<void> {
         longest: state.longestStreak,
         totalGames: state.totalGamesWon,
         mochis: state.totalMochiPoints,
+        totalXP: state.totalXP,
       });
     }
   } catch (err) {
@@ -107,6 +111,7 @@ export async function pullStreakFromSupabase(): Promise<StreakState | null> {
       longest: row.longest_streak,
       totalGames: row.total_games,
       mochis: row.total_mochi_points,
+      totalXP: row.total_xp,
     });
 
     return {
@@ -115,6 +120,7 @@ export async function pullStreakFromSupabase(): Promise<StreakState | null> {
       lastCompletedDate: row.last_completed_date_local,
       totalGamesWon: row.total_games ?? 0,
       totalMochiPoints: row.total_mochi_points ?? 0,
+      totalXP: row.total_xp ?? 0,
     };
   } catch (err) {
     log('Pull failed:', err);

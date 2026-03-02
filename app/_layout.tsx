@@ -9,7 +9,7 @@ import 'react-native-reanimated';
 import { useColors } from '../src/theme/colors';
 import { TECHNIQUE_IDS } from '../src/engine/techniqueGenerator';
 import { prefetchPuzzles, prefetchGamePuzzles } from '../src/services/puzzleCacheService';
-import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../src/stores/playerStreakStore';
 import { initRevenueCat } from '../src/lib/revenueCat';
 import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStore';
 import { configureAudioSession } from '../src/services/audioService';
@@ -66,7 +66,7 @@ function RootLayoutNav() {
     prefetchGamePuzzles(['easy', 'medium', 'hard', 'expert']);
     prefetchPuzzles(Object.keys(TECHNIQUE_IDS));
     // Pull remote streak data (background, best-effort)
-    useDailyChallengeStore.getState().syncFromRemote();
+    usePlayerStreakStore.getState().syncFromRemote();
     // Configure audio session for background music
     configureAudioSession();
     // RevenueCat: init -> sync entitlements -> start real-time listener

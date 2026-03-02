@@ -8,10 +8,10 @@ import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import {
-  useDailyChallengeStore,
+  usePlayerStreakStore,
   useCurrentStreak,
   useLongestStreak,
-} from '../../src/stores/dailyChallengeStore';
+} from '../../src/stores/playerStreakStore';
 import { useCompletionCount } from '../../src/stores/techniqueProgressStore';
 import {
   StatCard,
@@ -24,12 +24,12 @@ export default function ProfileScreen() {
   // Store selectors (reactive)
   const currentStreak = useCurrentStreak();
   const longestStreak = useLongestStreak();
-  const totalGamesWon = useDailyChallengeStore((s) => s.totalGamesWon);
+  const totalGamesWon = usePlayerStreakStore((s) => s.totalGamesWon);
   const techniquesMastered = useCompletionCount();
 
   // Activity data: from first completion to today
-  const completedDates = useDailyChallengeStore((s) => s.completedDates);
-  const frozenDates = useDailyChallengeStore((s) => s.frozenDates);
+  const completedDates = usePlayerStreakStore((s) => s.completedDates);
+  const frozenDates = usePlayerStreakStore((s) => s.frozenDates);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>

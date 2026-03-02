@@ -1,4 +1,4 @@
-// Daily challenge state management with Zustand
+// Player streak state management with Zustand
 // Handles streaks, completions, and activity tracking
 
 import { create } from 'zustand';
@@ -6,28 +6,24 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 import {
-  Difficulty,
-  DailyChallenge,
   DailyChallengeState,
   ActivityDay,
   MochiHistoryEntry,
   ChartTimePeriod,
-  DAILY_MOCHI_POINTS,
-  DAILY_DIFFICULTY_SCHEDULE,
   PERIOD_MS,
   getTodayDateString,
   getYesterdayDateString,
-  getDateSeed,
   daysBetweenDates,
   addDaysToDate,
   createEmptyDailyChallengeState,
 } from '../engine/types';
 import { storage, STORAGE_KEYS } from '../utils/storage';
 import { syncStreakToSupabase, pullStreakFromSupabase } from '../services/streakSyncService';
+import { usePlayerProgressStore } from './playerProgressStore';
 import { syncEconomyToSupabase } from '../services/economySyncService';
 import { MOCHIS_COST } from '../constants/economy';
 
-interface DailyChallengeStore extends DailyChallengeState {
+interface PlayerStreakStore extends DailyChallengeState {
   // Loading state
   isLoaded: boolean;
 
@@ -37,18 +33,14 @@ interface DailyChallengeStore extends DailyChallengeState {
   // Actions
   loadState: () => Promise<void>;
   saveState: () => Promise<void>;
-  completeChallenge: () => void;
   recordGameWin: () => void; // Called on ANY game win (regular or daily)
   syncFromRemote: () => Promise<void>; // Pull remote streak on launch
-  getTodayChallenge: () => DailyChallenge;
   getActivityData: (weeks?: number) => ActivityDay[];
-  isTodayCompleted: () => boolean;
-  getSimulatedParticipants: () => number;
 
   // Mochi history methods
   getMochiHistory: (period: ChartTimePeriod) => MochiHistoryEntry[];
   getMochiEarnedToday: () => number;
-  addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus' | 'conversion') => void;
+  addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus' | 'conversion' | 'iap') => void;
   spendMochis: (amount: number, reason: string) => boolean;
   recordFirstPuzzleOfDayIfNeeded: () => boolean;
   applyDailyLoginBonusIfNeeded: () => void;
@@ -61,17 +53,19 @@ interface DailyChallengeStore extends DailyChallengeState {
   resetState: () => void;
 }
 
-function syncMochiBalance(state: DailyChallengeStore) {
+function syncMochiBalance(state: PlayerStreakStore) {
+  const totalXP = usePlayerProgressStore.getState().totalXP;
   syncStreakToSupabase({
     currentStreak: state.currentStreak,
     longestStreak: state.longestStreak,
     lastCompletedDate: state.lastCompletedDate,
     totalGamesWon: state.totalGamesWon,
     totalMochiPoints: state.totalMochiPoints,
+    totalXP,
   });
 }
 
-export const useDailyChallengeStore = create<DailyChallengeStore>()(
+export const usePlayerStreakStore = create<PlayerStreakStore>()(
   subscribeWithSelector(
     immer((set, get) => ({
       // Initial state
@@ -170,49 +164,6 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         await storage.set<MochiHistoryEntry[]>(STORAGE_KEYS.MOCHI_HISTORY, mochiHistory);
       },
 
-      // Complete today's challenge
-      completeChallenge: () => {
-        const today = getTodayDateString();
-        const yesterday = getYesterdayDateString();
-        const { lastCompletedDate, currentStreak, longestStreak, completedDates, totalMochiPoints, mochiHistory } = get();
-
-        // Already completed today
-        if (lastCompletedDate === today) {
-          return;
-        }
-
-        const challenge = get().getTodayChallenge();
-        let newStreak: number;
-
-        if (lastCompletedDate === yesterday) {
-          // Continuing streak
-          newStreak = currentStreak + 1;
-        } else {
-          // Starting new streak (first completion or missed a day)
-          newStreak = 1;
-        }
-
-        // Create mochi history entry
-        const historyEntry: MochiHistoryEntry = {
-          date: today,
-          timestamp: Date.now(),
-          amount: challenge.mochiPoints,
-          cumulativeTotal: totalMochiPoints + challenge.mochiPoints,
-          source: 'daily',
-        };
-
-        set((state) => {
-          state.currentStreak = newStreak;
-          state.longestStreak = Math.max(longestStreak, newStreak);
-          state.lastCompletedDate = today;
-          state.completedDates = [...completedDates, today];
-          state.totalMochiPoints += challenge.mochiPoints;
-          state.mochiHistory = [...mochiHistory, historyEntry];
-        });
-
-        get().saveState();
-      },
-
       // Record any game win (regular or daily) — updates streak + syncs to Supabase
       recordGameWin: () => {
         const today = getTodayDateString();
@@ -255,6 +206,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
           lastCompletedDate: newLastCompleted,
           totalGamesWon: newTotalGames,
           totalMochiPoints: get().totalMochiPoints,
+          totalXP: usePlayerProgressStore.getState().totalXP,
         });
       },
 
@@ -303,22 +255,6 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         }
       },
 
-      // Get today's challenge configuration
-      getTodayChallenge: (): DailyChallenge => {
-        const today = getTodayDateString();
-        const dayOfWeek = new Date().getDay(); // 0 = Sunday
-        const difficulty = DAILY_DIFFICULTY_SCHEDULE[dayOfWeek];
-        const seed = getDateSeed(today);
-        const mochiPoints = DAILY_MOCHI_POINTS[difficulty];
-
-        return {
-          date: today,
-          difficulty,
-          seed,
-          mochiPoints,
-        };
-      },
-
       // Get activity data for calendar (default 52 weeks)
       getActivityData: (weeks = 52): ActivityDay[] => {
         const { completedDates, frozenDates } = get();
@@ -347,29 +283,6 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
         return days;
       },
 
-      // Check if today is already completed
-      isTodayCompleted: (): boolean => {
-        const today = getTodayDateString();
-        return get().lastCompletedDate === today;
-      },
-
-      // Get simulated participant count (grows throughout the day)
-      getSimulatedParticipants: (): number => {
-        const today = getTodayDateString();
-        const seed = getDateSeed(today);
-        const now = new Date();
-        const hoursElapsed = now.getHours() + now.getMinutes() / 60;
-
-        // Base count varies by day (seeded random)
-        const baseCount = 150 + (seed % 200);
-        // Grows by 8-15 per hour based on seed
-        const growthRate = 8 + (seed % 7);
-        // Add some noise based on minutes
-        const noise = (now.getMinutes() % 10) - 5;
-
-        return Math.floor(baseCount + hoursElapsed * growthRate + noise);
-      },
-
       // Get mochi history filtered by time period
       getMochiHistory: (period: ChartTimePeriod): MochiHistoryEntry[] => {
         const { mochiHistory } = get();
@@ -388,7 +301,7 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
       },
 
       // Add a mochi history entry (for regular games or bonuses)
-      addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus' | 'conversion') => {
+      addMochiHistoryEntry: (amount: number, source: 'daily' | 'game' | 'bonus' | 'conversion' | 'iap') => {
         const today = getTodayDateString();
         const { totalMochiPoints, mochiHistory } = get();
 
@@ -545,14 +458,13 @@ export const useDailyChallengeStore = create<DailyChallengeStore>()(
 
 // Selectors for optimized subscriptions
 export const useCurrentStreak = () =>
-  useDailyChallengeStore((state) => state.currentStreak);
+  usePlayerStreakStore((state) => state.currentStreak);
 
 export const useLongestStreak = () =>
-  useDailyChallengeStore((state) => state.longestStreak);
+  usePlayerStreakStore((state) => state.longestStreak);
 
 export const useTotalMochiPoints = () =>
-  useDailyChallengeStore((state) => state.totalMochiPoints);
+  usePlayerStreakStore((state) => state.totalMochiPoints);
 
 export const useIsLoaded = () =>
-  useDailyChallengeStore((state) => state.isLoaded);
-
+  usePlayerStreakStore((state) => state.isLoaded);

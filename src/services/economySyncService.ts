@@ -4,7 +4,7 @@
 
 import { supabase } from '../lib/supabase';
 import { getDeviceId } from '../utils/deviceId';
-import { useDailyChallengeStore } from '../stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../stores/playerStreakStore';
 
 // ============================================
 // Types
@@ -43,7 +43,7 @@ function log(msg: string, ...args: unknown[]) {
  * Build current economy state from daily challenge store.
  */
 export function getEconomyState(): EconomyState {
-  const daily = useDailyChallengeStore.getState();
+  const daily = usePlayerStreakStore.getState();
   return {
     totalMochiPoints: daily.totalMochiPoints,
     streakFreezesCount: daily.streakFreezesCount ?? 0,

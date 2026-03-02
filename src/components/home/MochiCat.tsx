@@ -13,7 +13,7 @@ interface MochiCatProps {
 const IMG_MAP = {
   default: require('../../../assets/images/mochi/mochi-hello.png'),
   game: require('../../../assets/images/mochi/mochi-happy.png'),
-  welcome: require('../../../assets/images/mochi/mochi-hello.png'),
+  welcome: require('../../../assets/images/mochi/mochi-home.png'),
 } as const;
 
 export function MochiCat({

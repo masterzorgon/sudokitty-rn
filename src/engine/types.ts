@@ -26,7 +26,7 @@ export interface Cell {
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
 export interface DifficultyConfig {
-  name: Difficulty;
+  name: string; // Display label (e.g. "Easy")
   clueRange: [number, number]; // [min, max] clues
   maxTechniqueLevel: number; // 1-4
   minTechniqueLevel: number; // Puzzle must require AT LEAST this level
@@ -239,14 +239,6 @@ export const positionKey = (pos: Position): string => `${pos.row}-${pos.col}`;
 // ============================================
 // Daily Challenge Types
 // ============================================
-
-// Daily challenge configuration
-export interface DailyChallenge {
-  date: string; // YYYY-MM-DD format
-  difficulty: Difficulty;
-  seed: number; // Deterministic seed for puzzle generation
-  mochiPoints: number; // Reward for completion
-}
 
 // User's daily challenge state (persisted)
 export interface DailyChallengeState {

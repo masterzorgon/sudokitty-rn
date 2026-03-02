@@ -12,7 +12,7 @@ import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
-import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../../stores/playerStreakStore';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 
 export interface PurchaseSheetConfig {
@@ -33,7 +33,7 @@ export interface PurchaseSheetProps {
 
 export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps) {
   const c = useColors();
-  const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
+  const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
   const sheetRef = useRef<SheetWrapperRef>(null);
 
   const visible = config !== null;

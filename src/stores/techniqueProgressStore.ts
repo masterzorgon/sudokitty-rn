@@ -14,7 +14,7 @@ import { immer } from 'zustand/middleware/immer';
 import { storage, STORAGE_KEYS } from '../utils/storage';
 import { TECHNIQUE_METADATA, getTechniqueMetadata } from '../data/techniqueMetadata';
 import { getTechniqueReward } from '../constants/techniqueRewards';
-import { useDailyChallengeStore } from './dailyChallengeStore';
+import { usePlayerStreakStore } from './playerStreakStore';
 
 // ============================================
 // Types
@@ -209,7 +209,7 @@ export const useTechniqueProgressStore = create<
               const metadata = getTechniqueMetadata(techniqueId);
               if (metadata) {
                 const reward = getTechniqueReward(metadata.category);
-                useDailyChallengeStore.getState().addMochiHistoryEntry(reward, 'game');
+                usePlayerStreakStore.getState().addMochiHistoryEntry(reward, 'game');
               }
             }
           } else {

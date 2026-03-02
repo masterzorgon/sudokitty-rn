@@ -19,13 +19,12 @@ import {
 } from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
-import { useDailyChallengeStore } from '../src/stores/dailyChallengeStore';
 import { useGameMascotMessage, useBackgroundMusic } from '../src/hooks';
 import { colors, useColors } from '../src/theme/colors';
 import { spacing, borderRadius } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
-import { Difficulty } from '../src/engine/types';
+import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../src/engine/types';
 import { playFeedback } from '../src/utils/feedback';
 import { showInterstitialIfReady } from '../src/services/adService';
 import { loadSfx, unloadSfx } from '../src/services/sfxService';
@@ -55,11 +54,6 @@ export default function GameScreen() {
   const continueGame = useGameStore((s) => s.continueGame);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Daily challenge store
-  const completeChallenge = useDailyChallengeStore((s) => s.completeChallenge);
-  const isTodayCompleted = useDailyChallengeStore((s) => s.isTodayCompleted);
-  const dailyCompletedRef = useRef(false);
-
   // Settings modal state
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
@@ -85,8 +79,10 @@ export default function GameScreen() {
   useEffect(() => {
     if (difficulty) {
       if (isDaily) {
-        const challenge = useDailyChallengeStore.getState().getTodayChallenge();
-        newDailyGame(challenge.date, challenge.difficulty);
+        const today = getTodayDateString();
+        const dayOfWeek = new Date().getDay();
+        const dailyDifficulty = DAILY_DIFFICULTY_SCHEDULE[dayOfWeek];
+        newDailyGame(today, dailyDifficulty);
       } else {
         newGame(difficulty);
       }
@@ -95,14 +91,6 @@ export default function GameScreen() {
       }, startGameAnimations.controlsDelay);
     }
   }, []);
-
-  // Handle daily challenge completion
-  useEffect(() => {
-    if (isDaily && gameStatus === 'won' && !dailyCompletedRef.current && !isTodayCompleted()) {
-      dailyCompletedRef.current = true;
-      completeChallenge();
-    }
-  }, [gameStatus, isDaily, completeChallenge, isTodayCompleted]);
 
   // Timer effect
   useEffect(() => {

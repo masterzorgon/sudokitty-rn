@@ -11,9 +11,10 @@ import { useColors } from '../../src/theme/colors';
 import { fontFamilies } from '../../src/theme/typography';
 import { spacing, SCREEN_PADDING } from '../../src/theme';
 import {
-  useDailyChallengeStore,
+  usePlayerStreakStore,
   useCurrentStreak,
-} from '../../src/stores/dailyChallengeStore';
+} from '../../src/stores/playerStreakStore';
+import { getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../../src/engine/types';
 import {
   MochiCat,
   TechniquesCTA,
@@ -45,12 +46,12 @@ export default function HomeScreen() {
   const router = useRouter();
 
   // Store hooks
-  const loadState = useDailyChallengeStore((s) => s.loadState);
+  const loadState = usePlayerStreakStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
-  const streakLostInfo = useDailyChallengeStore((s) => s.streakLostInfo);
-  const reigniteStreak = useDailyChallengeStore((s) => s.reigniteStreak);
-  const clearStreakLostInfo = useDailyChallengeStore((s) => s.clearStreakLostInfo);
-  const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
+  const streakLostInfo = usePlayerStreakStore((s) => s.streakLostInfo);
+  const reigniteStreak = usePlayerStreakStore((s) => s.reigniteStreak);
+  const clearStreakLostInfo = usePlayerStreakStore((s) => s.clearStreakLostInfo);
+  const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
 
   // Purchase sheet for reigniting streak
   const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
@@ -61,7 +62,7 @@ export default function HomeScreen() {
   // DEV ONLY: Credit 500 mochis for testing — remove after use
   useEffect(() => {
     if (__DEV__) {
-      useDailyChallengeStore.getState().addMochiHistoryEntry(500, 'bonus');
+      usePlayerStreakStore.getState().addMochiHistoryEntry(500, 'bonus');
     }
   }, []);
 
@@ -70,7 +71,7 @@ export default function HomeScreen() {
     (async () => {
       await runEconomyV2Migration();
       loadState();
-      useDailyChallengeStore.getState().applyDailyLoginBonusIfNeeded();
+      usePlayerStreakStore.getState().applyDailyLoginBonusIfNeeded();
     })();
   }, [loadState]);
 
@@ -125,18 +126,20 @@ export default function HomeScreen() {
 
   const handleDailyChallengePress = () => {
     playFeedback('tap');
-    const dailyStore = useDailyChallengeStore.getState();
-    if (dailyStore.isTodayCompleted()) {
+    const store = usePlayerStreakStore.getState();
+    const today = getTodayDateString();
+    if (store.lastCompletedDate === today) {
       Alert.alert(
         'Daily Challenge',
         "You've already completed today's puzzle. Come back tomorrow!",
       );
       return;
     }
-    const challenge = dailyStore.getTodayChallenge();
+    const dayOfWeek = new Date().getDay();
+    const dailyDifficulty = DAILY_DIFFICULTY_SCHEDULE[dayOfWeek];
     router.push({
       pathname: '/game',
-      params: { difficulty: challenge.difficulty, isDaily: 'true' },
+      params: { difficulty: dailyDifficulty, isDaily: 'true' },
     });
   };
 

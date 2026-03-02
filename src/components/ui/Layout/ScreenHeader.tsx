@@ -3,7 +3,7 @@ import { View, StyleSheet, type ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { spacing, SCREEN_PADDING } from '../../../theme';
-import { useTotalMochiPoints, useDailyChallengeStore } from '../../../stores/dailyChallengeStore';
+import { useTotalMochiPoints, usePlayerStreakStore } from '../../../stores/playerStreakStore';
 import { useTotalXP, usePlayerLevel } from '../../../stores/playerProgressStore';
 import { xpForLevel, xpProgressFraction } from '../../../constants/xp';
 import { HeaderPill } from '../../home/HeaderPill';
@@ -17,7 +17,7 @@ interface ScreenHeaderProps {
 export function ScreenHeader({ style }: ScreenHeaderProps) {
   const router = useRouter();
   const totalMochis = useTotalMochiPoints();
-  const freezeCount = useDailyChallengeStore((s) => s.streakFreezesCount);
+  const freezeCount = usePlayerStreakStore((s) => s.streakFreezesCount);
   const totalXP = useTotalXP();
   const level = usePlayerLevel();
 
@@ -33,8 +33,8 @@ export function ScreenHeader({ style }: ScreenHeaderProps) {
         <View style={styles.doublePillSlot}>
           <LevelProgressPill
             level={level}
-            currentXP={totalXP}
-            xpThreshold={xpForLevel(level + 1)}
+            currentXP={totalXP - xpForLevel(level)}
+            xpThreshold={xpForLevel(level + 1) - xpForLevel(level)}
             progressFraction={xpProgressFraction(totalXP, level)}
             onPress={goToProfile}
           />
@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   doublePillSlot: {
-    flex: 1,
+    flex: 2,
   },
 });

@@ -33,6 +33,7 @@ import { AppButton } from '../ui/AppButton';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { SettingsToggleRow } from '../settings/SettingsToggleRow';
 import { playFeedback } from '../../utils/feedback';
+import { formatTime } from '../../utils/formatTime';
 
 // MARK: - Types
 
@@ -48,14 +49,6 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DEMO_BUTTON_SIZE = 36;
 const CARD_CONTENT_WIDTH = SCREEN_WIDTH - spacing.lg * 2 - spacing.md * 2;
-
-// MARK: - Helpers
-
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
 
 // MARK: - StatPill Component
 

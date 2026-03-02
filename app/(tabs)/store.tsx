@@ -16,7 +16,7 @@ import { fontFamilies } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
-import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../../src/stores/playerStreakStore';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
@@ -68,9 +68,9 @@ export default function StoreScreen() {
   const c = useColors();
   const router = useRouter();
   const isPremium = useIsPremium();
-  const totalMochis = useDailyChallengeStore((s) => s.totalMochiPoints);
-  const streakFreezesCount = useDailyChallengeStore((s) => s.streakFreezesCount);
-  const buyStreakFreeze = useDailyChallengeStore((s) => s.buyStreakFreeze);
+  const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
+  const streakFreezesCount = usePlayerStreakStore((s) => s.streakFreezesCount);
+  const buyStreakFreeze = usePlayerStreakStore((s) => s.buyStreakFreeze);
 
   const ownedTrackIds = useOwnedTracksStore((s) => s.ownedTrackIds);
   const activeTrackId = useOwnedTracksStore((s) => s.activeTrackId);

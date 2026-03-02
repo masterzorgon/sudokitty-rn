@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { xpForLevel } from '../constants/xp';
-import { useDailyChallengeStore } from './dailyChallengeStore';
+import { usePlayerStreakStore } from './playerStreakStore';
 
 interface PlayerProgressState {
   totalXP: number;
@@ -26,7 +26,7 @@ export const usePlayerProgressStore = create<PlayerProgressState & PlayerProgres
         while (totalXP >= xpForLevel(level + 1)) {
           level += 1;
           const mochiReward = 10 + level * 5;
-          useDailyChallengeStore.getState().addMochiHistoryEntry(mochiReward, 'bonus');
+          usePlayerStreakStore.getState().addMochiHistoryEntry(mochiReward, 'bonus');
         }
 
         set({ totalXP, level });

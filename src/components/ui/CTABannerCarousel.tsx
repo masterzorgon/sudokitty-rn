@@ -30,7 +30,7 @@ import { spacing, borderRadius } from '../../theme';
 import { SkeuCard, SkeuButton } from './Skeuomorphic';
 import { playFeedback } from '../../utils/feedback';
 import { useIsPremium } from '../../stores/premiumStore';
-import { useDailyChallengeStore } from '../../stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../../stores/playerStreakStore';
 import { presentPaywallAlways } from '../../lib/revenueCat';
 
 const MochiStarsImg = require('../../../assets/images/mochi/mochi-stars.png');
@@ -103,7 +103,7 @@ function usePromoActions(): Record<PromoKey, () => void> {
     try {
       const result = await Share.share({ message: SHARE_MESSAGE });
       if (result.action === Share.sharedAction) {
-        useDailyChallengeStore.getState().addMochiHistoryEntry(100, 'bonus');
+        usePlayerStreakStore.getState().addMochiHistoryEntry(100, 'bonus');
         Alert.alert('You earned 100 mochis!', 'Thanks for sharing SudoKitty with your friends.');
       }
     } catch { /* user cancelled */ }

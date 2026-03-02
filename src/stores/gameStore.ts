@@ -25,10 +25,7 @@ import {
   getBoxIndex,
   getRelatedPositions,
   positionKey,
-  calculateMochiReward,
 } from '../engine/types';
-import { calculateXPReward } from '../constants/xp';
-import { usePlayerProgressStore } from './playerProgressStore';
 import { generatePuzzle, generateDailyPuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
 import { useSettingsStore } from './settingsStore';
@@ -36,7 +33,7 @@ import {
   getCachedGamePuzzle,
   consumeAndRefillGamePuzzle,
 } from '../services/puzzleCacheService';
-import { useDailyChallengeStore } from './dailyChallengeStore';
+import { handleGameWon, handleGameLost } from '../services/gameOutcomeHandler';
 import { recordGameCompletion } from '../services/gameCompletionService';
 
 // Create empty cell
@@ -905,29 +902,12 @@ export const useGameStore = create<GameState & GameActions>()(
   )
 );
 
-// Record game win for streak tracking and award Mochis (win only)
+// Handle game outcome side effects (streaks, mochi, XP, stats)
 useGameStore.subscribe(
   (s) => s.gameStatus,
   (gameStatus) => {
-    if (gameStatus === 'won') {
-      useDailyChallengeStore.getState().recordGameWin();
-
-      const { difficulty, timeElapsed, isDaily } = useGameStore.getState();
-      // Regular games: award mochis. Daily challenges get mochis from completeChallenge.
-      if (!isDaily) {
-        const mochiReward = calculateMochiReward(difficulty, timeElapsed);
-        useDailyChallengeStore.getState().addMochiHistoryEntry(mochiReward, 'game');
-      }
-
-      // Award XP for all wins (regular + daily)
-      const xpReward = calculateXPReward(difficulty, timeElapsed);
-      usePlayerProgressStore.getState().addXP(xpReward);
-
-      const isFirstPuzzleOfDay = useDailyChallengeStore.getState().recordFirstPuzzleOfDayIfNeeded();
-      if (isFirstPuzzleOfDay) {
-        useDailyChallengeStore.getState().addMochiHistoryEntry(15, 'bonus');
-      }
-    }
+    if (gameStatus === 'won') handleGameWon();
+    if (gameStatus === 'lost') handleGameLost();
   },
 );
 

@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { getTrackById } from '../constants/backingTracks';
-import { useDailyChallengeStore } from './dailyChallengeStore';
+import { usePlayerStreakStore } from './playerStreakStore';
 
 interface OwnedTracksState {
   ownedTrackIds: string[];
@@ -44,7 +44,7 @@ export const useOwnedTracksStore = create<OwnedTracksState & OwnedTracksActions>
 
         if (track.cost === 0 || get().isOwned(trackId)) return false;
 
-        const spent = useDailyChallengeStore.getState().spendMochis(track.cost, 'backing_track');
+        const spent = usePlayerStreakStore.getState().spendMochis(track.cost, 'backing_track');
         if (!spent) return false;
 
         get().addOwnedTrack(trackId);

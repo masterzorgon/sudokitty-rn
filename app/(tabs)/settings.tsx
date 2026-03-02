@@ -11,6 +11,7 @@ import {
   SettingsSection,
   SettingsToggleRow,
   SettingsLinkRow,
+  StatsOverview,
 } from '../../src/components/settings';
 import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
@@ -25,7 +26,8 @@ import {
   useColorTheme,
 } from '../../src/stores/settingsStore';
 import { useGameStore } from '../../src/stores/gameStore';
-import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../../src/stores/playerStreakStore';
+import { useUserStatsStore } from '../../src/stores/userStatsStore';
 import {
   trackProgressReset,
   trackExternalLinkOpened,
@@ -64,7 +66,8 @@ export default function SettingsScreen() {
   const isPremium = useIsPremium();
 
   const resetGame = useGameStore((s) => s.resetGame);
-  const resetDailyChallenge = useDailyChallengeStore((s) => s.resetState);
+  const resetDailyChallenge = usePlayerStreakStore((s) => s.resetState);
+  const resetStats = useUserStatsStore((s) => s.resetStats);
 
   // Single navigation helper: string = internal route, object = external URL with analytics
   const navigate = useCallback(
@@ -132,13 +135,14 @@ export default function SettingsScreen() {
           onPress: () => {
             resetGame();
             resetDailyChallenge();
+            resetStats();
             trackProgressReset();
             Alert.alert('Done', 'Your progress has been reset.');
           },
         },
       ]
     );
-  }, [resetGame, resetDailyChallenge]);
+  }, [resetGame, resetDailyChallenge, resetStats]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
@@ -147,6 +151,8 @@ export default function SettingsScreen() {
       <ScreenContent contentStyle={styles.scrollContent}>
 
         <CTABannerCarousel promos={['rate']} />
+
+        <StatsOverview />
 
         {/* Appearance - Theme Color Picker */}
         <SettingsSection title="Appearance">

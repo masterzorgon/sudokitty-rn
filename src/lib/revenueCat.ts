@@ -5,7 +5,7 @@
 import Purchases, { LOG_LEVEL, CustomerInfo, PurchasesStoreProduct } from 'react-native-purchases';
 import RevenueCatUI from 'react-native-purchases-ui';
 import { MOCHI_PACK_PRODUCT_IDS, MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../constants/economy';
-import { useDailyChallengeStore } from '../stores/dailyChallengeStore';
+import { usePlayerStreakStore } from '../stores/playerStreakStore';
 
 const API_KEY = process.env.EXPO_PUBLIC_RC_API_KEY ?? '';
 const ENTITLEMENT_ID = 'Sudokitty Premium';
@@ -145,7 +145,7 @@ export async function purchaseMochiPack(
     const amount = MOCHI_PACK_AMOUNTS[productId];
     if (!amount) return { success: false };
 
-    useDailyChallengeStore.getState().addMochiHistoryEntry(amount, 'iap');
+    usePlayerStreakStore.getState().addMochiHistoryEntry(amount, 'iap');
 
     return { success: true, amount };
   } catch (error: any) {
