@@ -235,6 +235,23 @@ export default function StoreScreen() {
       <ScreenContent contentStyle={contentStyle}>
         <CTABannerCarousel />
 
+        <SectionTitle>Charitable Giving</SectionTitle>
+
+        <StoreItemRow
+          icon={
+            <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '60' }]}>
+              <Ionicons name="heart" size={22} color={c.accent} />
+            </View>
+          }
+          title="1% of Revenue Rescues Kittens"
+          subtitle="Learn more about our charity policy"
+          trailing={<Feather name="chevron-right" size={20} color={c.textSecondary} />}
+          onPress={() => {
+            playFeedback('tap');
+            router.push('/charity-policy');
+          }}
+        />
+
         <SectionTitle>Subscriptions</SectionTitle>
 
         <StoreItemRow
@@ -244,7 +261,7 @@ export default function StoreScreen() {
             </View>
           }
           title="Remove Ads"
-          subtitle={isPremium ? 'Premium active' : 'Upgrade to premium'}
+          subtitle={isPremium ? 'Premium active' : 'Upgrade to premium to remove ads'}
           trailing={
             isPremium ? (
               <Ionicons name="checkmark-circle" size={24} color={c.accent} />
@@ -267,7 +284,7 @@ export default function StoreScreen() {
           subtitle={
             (streakFreezesCount ?? 0) > 0
               ? `Protect your streak · You have ${streakFreezesCount}`
-              : 'Protect your streak for 1 missed day'
+              : 'Protect your streak for missed days'
           }
           trailing={<MochiPricePill price={MOCHIS_COST.streak_freeze} />}
           onPress={openStreakFreezeSheet}

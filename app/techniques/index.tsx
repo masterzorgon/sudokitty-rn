@@ -1,5 +1,5 @@
 // Techniques list screen - Browse and select techniques to learn
-// Grouped by technique type: Singles, Intersections, Subsets, Fish, etc.
+// Grouped by difficulty: Beginner, Intermediate, Advanced, Expert
 
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
@@ -14,9 +14,9 @@ import { spacing, borderRadius } from '../../src/theme';
 import { BackButton } from '../../src/components/ui/BackButton';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import {
-  getTechniquesGroupedByType,
+  getTechniquesGroupedByCategory,
   TechniqueMetadata,
-  TechniqueType,
+  TechniqueCategory,
   CATEGORY_COLORS,
   TECHNIQUE_METADATA,
 } from '../../src/data/techniqueMetadata';
@@ -62,14 +62,19 @@ function TechniqueCard({
           contentStyle={styles.cardContent}
           accessibilityLabel={`${technique.name}, ${technique.category}, Coming soon`}
         >
-          {/* Left: Name and difficulty badge */}
+          {/* Left: Name, badge, and description */}
           <View style={styles.cardText}>
-            <Text style={styles.cardTitle}>{technique.name}</Text>
-            <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
-              <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
-                {technique.category}
-              </Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.cardTitle}>{technique.name}</Text>
+              <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
+                <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
+                  {technique.category}
+                </Text>
+              </View>
             </View>
+            <Text style={styles.cardSubtext} numberOfLines={1} ellipsizeMode="tail">
+              {technique.shortDescription}
+            </Text>
           </View>
 
           {/* Right: Coming Soon pill and chevron */}
@@ -93,7 +98,7 @@ function TechniqueCard({
         contentStyle={styles.cardContent}
         accessibilityLabel={`${technique.name}, ${technique.category}`}
       >
-        {/* Left: Name and badge */}
+        {/* Left: Name, badge, and description */}
         <View style={styles.cardText}>
           <View style={styles.titleRow}>
             <Text style={styles.cardTitle}>{technique.name}</Text>
@@ -103,6 +108,9 @@ function TechniqueCard({
               </Text>
             </View>
           </View>
+          <Text style={styles.cardSubtext} numberOfLines={1} ellipsizeMode="tail">
+            {technique.shortDescription}
+          </Text>
         </View>
 
         {/* Right: 3-star progress or lock + chevron */}
@@ -130,18 +138,18 @@ function TechniqueCard({
 }
 
 // ============================================
-// Type Section Component
+// Category Section Component
 // ============================================
 
-function TypeSection({
-  type,
+function CategorySection({
+  category,
   color,
   techniques,
   sectionIndex,
   isPremium,
   onSelectTechnique,
 }: {
-  type: TechniqueType;
+  category: TechniqueCategory;
   color: string;
   techniques: TechniqueMetadata[];
   sectionIndex: number;
@@ -157,7 +165,7 @@ function TypeSection({
     >
       {/* Section header */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{type}</Text>
+        <Text style={styles.sectionTitle}>{category}</Text>
       </View>
 
       {/* Technique cards or empty state */}
@@ -190,7 +198,7 @@ export default function TechniquesListScreen() {
   const c = useColors();
   const router = useRouter();
   const completionCount = useCompletionCount();
-  const groups = getTechniquesGroupedByType();
+  const groups = getTechniquesGroupedByCategory();
   const totalTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
   const isPremium = useIsPremium();
 
@@ -233,9 +241,9 @@ export default function TechniquesListScreen() {
         <CTABannerCarousel promos={['techniques']} />
 
         {groups.map((group, sectionIndex) => (
-          <TypeSection
-            key={group.type}
-            type={group.type}
+          <CategorySection
+            key={group.category}
+            category={group.category}
             color={group.color}
             techniques={group.techniques}
             sectionIndex={sectionIndex}
@@ -331,6 +339,12 @@ const styles = StyleSheet.create({
   difficultyBadgeText: {
     fontSize: 10,
     fontFamily: 'Pally-Medium',
+  },
+  cardSubtext: {
+    fontSize: 11,
+    fontFamily: 'Pally-Regular',
+    color: colors.textSecondary,
+    marginTop: 2,
   },
   starsContainer: {
     flexDirection: 'row',

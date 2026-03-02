@@ -11,8 +11,8 @@ export const MOCHIS_COST = {
   rare_box: 40,
   legendary_box: 100,
   backing_track: 100,
-  streak_freeze: 100,
-  streak_reignite: 200,
+  streak_freeze: 300,
+  streak_reignite: 600,
 } as const;
 
 // ============================================

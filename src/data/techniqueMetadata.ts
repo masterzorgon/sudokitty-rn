@@ -724,7 +724,7 @@ export function getTechniquesByCategory(category: TechniqueCategory): TechniqueM
   return TECHNIQUE_METADATA.filter((t) => t.category === category);
 }
 
-/** Get all techniques grouped by category (in order) */
+/** Get all techniques grouped by category (in difficulty order), with techniques sorted by level then alphabetically */
 export function getTechniquesGroupedByCategory(): Array<{
   category: TechniqueCategory;
   color: string;
@@ -732,12 +732,18 @@ export function getTechniquesGroupedByCategory(): Array<{
   techniques: TechniqueMetadata[];
 }> {
   const categories: TechniqueCategory[] = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
-  return categories.map((category) => ({
-    category,
-    color: CATEGORY_COLORS[category],
-    icon: CATEGORY_ICONS[category],
-    techniques: getTechniquesByCategory(category),
-  }));
+  return categories.map((category) => {
+    const techniques = getTechniquesByCategory(category).sort((a, b) => {
+      if (a.level !== b.level) return a.level - b.level;
+      return a.name.localeCompare(b.name);
+    });
+    return {
+      category,
+      color: CATEGORY_COLORS[category],
+      icon: CATEGORY_ICONS[category],
+      techniques,
+    };
+  });
 }
 
 /** Get all techniques grouped by technique type (in HoDoKu reference order) */

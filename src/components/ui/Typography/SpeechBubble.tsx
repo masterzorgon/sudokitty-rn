@@ -2,7 +2,7 @@
 // Uses SVG path for a continuous border across the entire silhouette
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ViewStyle, TextStyle, LayoutChangeEvent } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ViewStyle, TextStyle, StyleProp, LayoutChangeEvent } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { colors } from '../../../theme/colors';
@@ -24,7 +24,7 @@ export interface SpeechBubbleProps {
   maxLines?: number;
   scrollable?: boolean;
   style?: ViewStyle;
-  textStyle?: TextStyle;
+  textStyle?: StyleProp<TextStyle>;
 }
 
 function buildPath(
