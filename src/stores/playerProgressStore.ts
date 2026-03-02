@@ -25,7 +25,7 @@ export const usePlayerProgressStore = create<PlayerProgressState & PlayerProgres
 
         while (totalXP >= xpForLevel(level + 1)) {
           level += 1;
-          const mochiReward = 10 + level * 5;
+          const mochiReward = 10 + Math.floor(level / 5) * 5;
           usePlayerStreakStore.getState().addMochiHistoryEntry(mochiReward, 'bonus');
         }
 

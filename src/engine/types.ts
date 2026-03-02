@@ -272,10 +272,10 @@ export const DAILY_MOCHI_POINTS: Record<Difficulty, number> = {
 
 // Mochi points for regular games (base reward before time bonus)
 export const GAME_BASE_MOCHIS: Record<Difficulty, number> = {
-  easy: 10,
-  medium: 25,
-  hard: 50,
-  expert: 100,
+  easy: 3,
+  medium: 8,
+  hard: 15,
+  expert: 25,
 };
 
 // Par times in seconds (completing under par earns up to 2x bonus)
@@ -288,10 +288,10 @@ export const GAME_PAR_TIMES: Record<Difficulty, number> = {
 
 // Cost to continue a lost game (scaled by difficulty)
 export const CONTINUE_COST: Record<Difficulty, number> = {
-  easy: 15,
-  medium: 35,
-  hard: 75,
-  expert: 150,
+  easy: 8,
+  medium: 20,
+  hard: 40,
+  expert: 60,
 };
 
 export const MAX_CONTINUES = Infinity;

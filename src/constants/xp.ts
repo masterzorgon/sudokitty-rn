@@ -14,9 +14,9 @@ export function calculateXPReward(difficulty: Difficulty, timeSeconds: number): 
   return Math.round(base * ratio);
 }
 
-/** Cumulative XP needed to reach a given level. Progressive: each level costs 50 more than the last. */
+/** Cumulative XP needed to reach a given level. */
 export function xpForLevel(level: number): number {
-  return 50 * level + 25 * level * (level + 1);
+  return 100 * level + 10 * level * level;
 }
 
 export function xpToNextLevel(totalXP: number, currentLevel: number): number {

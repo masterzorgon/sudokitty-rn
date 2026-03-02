@@ -13,9 +13,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 import { storage, STORAGE_KEYS } from '../utils/storage';
-import { TECHNIQUE_METADATA, getTechniqueMetadata } from '../data/techniqueMetadata';
-import { getTechniqueReward } from '../constants/techniqueRewards';
-import { usePlayerStreakStore } from './playerStreakStore';
+import { TECHNIQUE_METADATA } from '../data/techniqueMetadata';
 
 // ============================================
 // Types
@@ -204,14 +202,6 @@ export const useTechniqueProgressStore = create<
             progress.findSuccesses++;
             progress.findFailures = 0; // Reset consecutive failure counter
 
-            // Award mochis only when user earns 3rd star (mastery)
-            if (progress.findSuccesses === COMPLETION_THRESHOLD) {
-              const metadata = getTechniqueMetadata(techniqueId);
-              if (metadata) {
-                const reward = getTechniqueReward(metadata.category);
-                usePlayerStreakStore.getState().addMochiHistoryEntry(reward, 'game');
-              }
-            }
           } else {
             progress.findFailures++;
           }

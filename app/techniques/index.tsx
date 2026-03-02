@@ -30,9 +30,7 @@ import { trackPaywallOpened } from '../../src/utils/analytics';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
-import { getTechniqueReward } from '../../src/constants/techniqueRewards';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
-import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 
 // ============================================
 // Technique Card Component
@@ -86,8 +84,6 @@ function TechniqueCard({
     );
   }
 
-  const mochiReward = getTechniqueReward(technique.category);
-
   return (
       <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
       <SkeuCard
@@ -95,11 +91,10 @@ function TechniqueCard({
         borderRadius={borderRadius.lg}
         showHighlight={false}
         contentStyle={styles.cardContent}
-        accessibilityLabel={`${technique.name}, ${technique.category}, earn ${mochiReward} ${mochiReward === 1 ? 'mochi' : 'mochis'}`}
+        accessibilityLabel={`${technique.name}, ${technique.category}`}
       >
-        {/* Left: Name, badge, and reward */}
+        {/* Left: Name and badge */}
         <View style={styles.cardText}>
-          {/* Title row: name + badge */}
           <View style={styles.titleRow}>
             <Text style={styles.cardTitle}>{technique.name}</Text>
             <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
@@ -107,14 +102,6 @@ function TechniqueCard({
                 {technique.category}
               </Text>
             </View>
-          </View>
-          
-          {/* Reward row: earn X mochi(s) + icon */}
-          <View style={styles.rewardRow}>
-            <Text style={styles.rewardText}>
-              earn {mochiReward} {mochiReward === 1 ? 'mochi' : 'mochis'}
-            </Text>
-            <MochiPointIcon width={14} height={14} />
           </View>
         </View>
 
@@ -344,16 +331,6 @@ const styles = StyleSheet.create({
   difficultyBadgeText: {
     fontSize: 10,
     fontFamily: 'Pally-Medium',
-  },
-  rewardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  rewardText: {
-    fontSize: 11,
-    fontFamily: 'Pally-Medium',
-    color: colors.textSecondary,
   },
   starsContainer: {
     flexDirection: 'row',

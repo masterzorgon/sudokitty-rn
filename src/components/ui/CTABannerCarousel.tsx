@@ -31,7 +31,6 @@ import { SkeuCard, SkeuButton } from './Skeuomorphic';
 import { playFeedback } from '../../utils/feedback';
 import { useIsPremium } from '../../stores/premiumStore';
 import { useAppRatedStore, useHasRated } from '../../stores/appRatedStore';
-import { usePlayerStreakStore } from '../../stores/playerStreakStore';
 import { presentPaywallAlways } from '../../lib/revenueCat';
 
 const MochiStarsImg = require('../../../assets/images/mochi/mochi-stars.png');
@@ -102,11 +101,7 @@ function usePromoActions(): Record<PromoKey, () => void> {
 
   const handleInvite = useCallback(async () => {
     try {
-      const result = await Share.share({ message: SHARE_MESSAGE });
-      if (result.action === Share.sharedAction) {
-        usePlayerStreakStore.getState().addMochiHistoryEntry(100, 'bonus');
-        Alert.alert('You earned 100 mochis!', 'Thanks for sharing SudoKitty with your friends.');
-      }
+      await Share.share({ message: SHARE_MESSAGE });
     } catch { /* user cancelled */ }
   }, []);
 

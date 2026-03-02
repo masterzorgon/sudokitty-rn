@@ -19,8 +19,6 @@ import { ShowcasePage } from '../../src/components/ui/ShowcasePage';
 import { AppButton } from '../../src/components/ui/AppButton';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { trackPaywallOpened } from '../../src/utils/analytics';
-import { RewardsPill } from '../../src/components/ui/RewardsPill';
-import { getTechniqueReward } from '../../src/constants/techniqueRewards';
 
 import { Image } from 'expo-image';
 
@@ -42,7 +40,6 @@ export default function TechniquePracticeScreen() {
   }
 
   const { metadata, phase, sequence } = state;
-  const mochiReward = getTechniqueReward(metadata.category);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
@@ -94,7 +91,6 @@ export default function TechniquePracticeScreen() {
           mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
           action={{ label: 'Back to Techniques', onPress: state.handleBack, icon: 'arrow-left', iconPosition: 'left' }}
-          rewardPill={<RewardsPill mochis={mochiReward} size="large" />}
         />
       )}
 
@@ -114,7 +110,6 @@ export default function TechniquePracticeScreen() {
             icon: 'lock',
             iconPosition: 'left',
           }}
-          rewardPill={<RewardsPill mochis={mochiReward} size="medium" />}
         />
       )}
 
@@ -126,7 +121,6 @@ export default function TechniquePracticeScreen() {
           mascotImage={<Image source={MochiTeacherImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={metadata.longDescription}
           action={{ label: 'Next', onPress: state.handleSequenceNext, icon: 'chevron-right' }}
-          rewardPill={<RewardsPill mochis={mochiReward} size="medium" />}
         />
       )}
 
@@ -170,7 +164,6 @@ export default function TechniquePracticeScreen() {
           mascotImage={<Image source={MochiCelebrationImg} style={{ width: MASCOT_SIZE, height: MASCOT_SIZE }} contentFit="contain" />}
           bodyText={`You've mastered ${metadata.name}! ${metadata.shortDescription}`}
           action={{ label: 'Done', onPress: state.handleBack, icon: 'check' }}
-          rewardPill={<RewardsPill mochis={mochiReward} label="Earned" size="medium" />}
         />
       )}
     </SafeAreaView>
