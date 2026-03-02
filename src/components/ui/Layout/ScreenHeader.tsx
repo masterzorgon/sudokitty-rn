@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SCREEN_PADDING,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl + 10,
+    paddingBottom: spacing.xl,
   },
   pillRow: {
     flexDirection: 'row',

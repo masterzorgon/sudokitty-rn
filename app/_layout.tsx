@@ -2,13 +2,14 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View, StatusBar, AppState, AppStateStatus } from 'react-native';
 import 'react-native-reanimated';
 
 import { useColors } from '../src/theme/colors';
 import { TECHNIQUE_IDS } from '../src/engine/techniqueGenerator';
-import { prefetchPuzzles, prefetchGamePuzzles } from '../src/services/puzzleCacheService';
+import { prefetchPuzzles, prefetchGamePuzzles, warmCaches } from '../src/services/puzzleCacheService';
+import { useTechniqueProgressStore } from '../src/stores/techniqueProgressStore';
 import { usePlayerStreakStore } from '../src/stores/playerStreakStore';
 import { initRevenueCat } from '../src/lib/revenueCat';
 import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStore';
@@ -36,19 +37,28 @@ export default function RootLayout() {
     'Pally-Bold': require('../assets/fonts/Pally-Bold.otf'),
     ...FontAwesome.font,
   });
+  const [dataReady, setDataReady] = useState(false);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
+  // Warm caches and hydrate technique progress before hiding splash
   useEffect(() => {
-    if (loaded) {
+    Promise.all([
+      warmCaches(),
+      useTechniqueProgressStore.getState().loadState(),
+    ]).then(() => setDataReady(true));
+  }, []);
+
+  useEffect(() => {
+    if (loaded && dataReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, dataReady]);
 
-  if (!loaded) {
+  if (!loaded || !dataReady) {
     return null;
   }
 

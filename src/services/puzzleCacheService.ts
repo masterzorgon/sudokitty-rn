@@ -176,6 +176,37 @@ async function loadCache(): Promise<PuzzleCacheStore | null> {
 // ============================================
 
 /**
+ * Warm both technique and game caches from AsyncStorage into memory.
+ * No Supabase calls — use at app startup before hiding the splash screen.
+ */
+export async function warmCaches(): Promise<void> {
+  if (!memoryCache) {
+    const stored = await loadCache();
+    if (
+      stored &&
+      stored.schemaVersion === CACHE_SCHEMA_VERSION &&
+      Date.now() - stored.updatedAt <= CACHE_MAX_AGE_MS
+    ) {
+      memoryCache = stored;
+    } else {
+      memoryCache = createEmptyCache();
+    }
+  }
+  if (!gameMemoryCache) {
+    const stored = await loadGameCache();
+    if (
+      stored &&
+      stored.schemaVersion === CACHE_SCHEMA_VERSION &&
+      Date.now() - stored.updatedAt <= CACHE_MAX_AGE_MS
+    ) {
+      gameMemoryCache = stored;
+    } else {
+      gameMemoryCache = createEmptyGameCache();
+    }
+  }
+}
+
+/**
  * Prefetch puzzles from Supabase into the local cache.
  *
  * Called on technique list screen mount and on app foreground.

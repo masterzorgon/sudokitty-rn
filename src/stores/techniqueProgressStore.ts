@@ -7,6 +7,7 @@
 //   - Completion status (demo + 3 finds)
 //   - Timestamps (ISO strings for clean serialization)
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -122,7 +123,7 @@ export const useTechniqueProgressStore = create<
       // Load from AsyncStorage
       loadState: async () => {
         try {
-          const value = await (await import('@react-native-async-storage/async-storage')).default.getItem(TECHNIQUE_PROGRESS_KEY);
+          const value = await AsyncStorage.getItem(TECHNIQUE_PROGRESS_KEY);
           if (value) {
             const stored = JSON.parse(value) as Record<string, TechniqueProgress>;
             set((state) => {
@@ -146,7 +147,6 @@ export const useTechniqueProgressStore = create<
       saveState: async () => {
         try {
           const { techniques } = get();
-          const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
           await AsyncStorage.setItem(TECHNIQUE_PROGRESS_KEY, JSON.stringify(techniques));
         } catch (error) {
           console.error('[TechniqueProgress] Error saving state:', error);

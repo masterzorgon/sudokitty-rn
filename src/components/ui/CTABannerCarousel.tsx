@@ -30,6 +30,7 @@ import { spacing, borderRadius } from '../../theme';
 import { SkeuCard, SkeuButton } from './Skeuomorphic';
 import { playFeedback } from '../../utils/feedback';
 import { useIsPremium } from '../../stores/premiumStore';
+import { useAppRatedStore, useHasRated } from '../../stores/appRatedStore';
 import { usePlayerStreakStore } from '../../stores/playerStreakStore';
 import { presentPaywallAlways } from '../../lib/revenueCat';
 
@@ -115,6 +116,8 @@ function usePromoActions(): Record<PromoKey, () => void> {
       await StoreReview.requestReview();
     } catch {
       Alert.alert('Thanks!', 'Please rate us on the App Store.');
+    } finally {
+      useAppRatedStore.getState().setRated(true);
     }
   }, []);
 
@@ -283,16 +286,18 @@ interface PromoConfig {
 
 function usePromos(filter?: PromoKey[]): PromoConfig[] {
   const isPremium = useIsPremium();
+  const hasRated = useHasRated();
   const actions = usePromoActions();
 
   return useMemo(() => {
     const keys: PromoKey[] = [];
     if (!isPremium) keys.push('techniques');
-    keys.push('invite', 'rate');
+    keys.push('invite');
+    if (!hasRated) keys.push('rate');
 
     const visible = filter ? keys.filter((k) => filter.includes(k)) : keys;
     return visible.map((key) => ({ key, onPress: actions[key] }));
-  }, [isPremium, actions, filter]);
+  }, [isPremium, hasRated, actions, filter]);
 }
 
 function StackedCard({

@@ -1,7 +1,7 @@
 // Techniques list screen - Browse and select techniques to learn
 // Grouped by technique type: Singles, Intersections, Subsets, Fish, etc.
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -21,15 +21,12 @@ import {
   TECHNIQUE_METADATA,
 } from '../../src/data/techniqueMetadata';
 import {
-  useTechniqueProgressStore,
   useTechniqueProgress,
   useCompletionCount,
   COMPLETION_THRESHOLD,
 } from '../../src/stores/techniqueProgressStore';
 import { playFeedback } from '../../src/utils/feedback';
 import { trackPaywallOpened } from '../../src/utils/analytics';
-import { TECHNIQUE_IDS } from '../../src/engine/techniqueGenerator';
-import { prefetchPuzzles } from '../../src/services/puzzleCacheService';
 import { useIsPremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
@@ -205,22 +202,10 @@ function TypeSection({
 export default function TechniquesListScreen() {
   const c = useColors();
   const router = useRouter();
-  const loadState = useTechniqueProgressStore((s) => s.loadState);
   const completionCount = useCompletionCount();
   const groups = getTechniquesGroupedByType();
   const totalTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
   const isPremium = useIsPremium();
-
-  // Load progress on mount
-  useEffect(() => {
-    loadState();
-  }, [loadState]);
-
-  // Warm the puzzle cache while the user browses the technique list
-  useEffect(() => {
-    const ids = Object.keys(TECHNIQUE_IDS);
-    prefetchPuzzles(ids);
-  }, []);
 
   const handleSelectTechnique = async (techniqueId: string) => {
     const meta = getTechniqueMetadata(techniqueId);
