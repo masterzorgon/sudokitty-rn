@@ -2,7 +2,7 @@
 // Separate from tabs for clean navigation experience
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -198,6 +198,26 @@ export default function GameScreen() {
       <View style={styles.gridContainer}>
         <AnimatedGameView />
       </View>
+
+      {/* DEV ONLY: debug utility buttons */}
+      {__DEV__ && gameStatus === 'playing' && (
+        <View style={styles.debugBar}>
+          {[
+            { label: 'Drain Hints', action: 'debugDrainHints' as const },
+            { label: 'Lose', action: 'debugForceLose' as const },
+            { label: 'Win', action: 'debugForceWin' as const },
+            { label: 'Animate', action: 'debugTriggerAnimation' as const },
+          ].map(({ label, action }) => (
+            <TouchableOpacity
+              key={action}
+              style={styles.debugButton}
+              onPress={() => useGameStore.getState()[action]()}
+            >
+              <Text style={styles.debugText}>{label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       {/* BOTTOM ZONE - Controls */}
       <View style={styles.bottomZone}>

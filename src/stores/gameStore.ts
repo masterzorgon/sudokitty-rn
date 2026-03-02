@@ -261,6 +261,12 @@ interface GameActions {
 
   // Progress
   getProgress: () => number;
+
+  // Debug (DEV only)
+  debugDrainHints: () => void;
+  debugForceLose: () => void;
+  debugForceWin: () => void;
+  debugTriggerAnimation: () => void;
 }
 
 // Initial state
@@ -826,6 +832,53 @@ export const useGameStore = create<GameState & GameActions>()(
       canContinue: (): boolean => {
         const { continueCount, gameStatus } = get();
         return gameStatus === 'lost' && continueCount < MAX_CONTINUES;
+      },
+
+      debugDrainHints: () => {
+        set((draft) => {
+          draft.hintsUsed = MAX_HINTS;
+          draft.paidHintsRemaining = 0;
+        });
+      },
+
+      debugForceLose: () => {
+        set((draft) => {
+          draft.mistakeCount = MAX_MISTAKES;
+          draft.gameStatus = 'lost';
+          draft.isTimerRunning = false;
+        });
+      },
+
+      debugForceWin: () => {
+        set((draft) => {
+          for (let row = 0; row < BOARD_SIZE; row++) {
+            for (let col = 0; col < BOARD_SIZE; col++) {
+              const cell = draft.board[row][col];
+              if (cell.value !== cell.correctValue) {
+                cell.value = cell.correctValue;
+                cell.isValid = true;
+                cell.notes.clear();
+              }
+            }
+          }
+          draft.gameStatus = 'won';
+          draft.isTimerRunning = false;
+        });
+      },
+
+      debugTriggerAnimation: () => {
+        const { selectedCell } = get();
+        if (!selectedCell) return;
+        set((draft) => {
+          draft.lastCompletedUnits = [
+            {
+              type: 'row',
+              index: selectedCell.row,
+              epicenter: selectedCell,
+              timestamp: Date.now(),
+            },
+          ];
+        });
       },
 
       // Get progress percentage
