@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,7 +17,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 
-import { colors } from '../../../theme/colors';
+import { colors, useColors } from '../../../theme/colors';
 import { spacing, borderRadius } from '../../../theme';
 
 export interface SheetWrapperRef {
@@ -37,6 +38,7 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
     { visible, onDismiss, dismissOnTapOutside = true, blurBackground = true, containerStyle, children },
     ref,
   ) {
+    const c = useColors();
     const { height: screenHeight } = useWindowDimensions();
     const translateY = useSharedValue(screenHeight);
 
@@ -69,6 +71,20 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
 
     const handleTapOutside = dismissOnTapOutside ? () => animateOut() : undefined;
 
+    const sheetContent = (
+      <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
+        <LinearGradient
+          colors={c.homeGradient as any}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={styles.sheetGradient}
+          pointerEvents="none"
+        />
+        <View style={styles.dragIndicator} />
+        {children}
+      </Animated.View>
+    );
+
     return (
       <Modal
         visible={visible}
@@ -79,18 +95,12 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
         {blurBackground ? (
           <BlurView intensity={60} tint="dark" style={styles.overlay}>
             <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
-            <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
-              <View style={styles.dragIndicator} />
-              {children}
-            </Animated.View>
+            {sheetContent}
           </BlurView>
         ) : (
           <View style={[styles.overlay, styles.dimOverlay]}>
             <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
-            <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
-              <View style={styles.dragIndicator} />
-              {children}
-            </Animated.View>
+            {sheetContent}
           </View>
         )}
       </Modal>
@@ -116,6 +126,15 @@ const styles = StyleSheet.create({
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.xl + 20, // clears iOS home indicator (~34pt) plus standard spacing
+    overflow: 'hidden',
+  },
+  sheetGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+    opacity: 0.5,
   },
   dragIndicator: {
     width: 36,
