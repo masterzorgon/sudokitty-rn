@@ -2,7 +2,7 @@
 import { Difficulty } from '@/src/engine/types';
 
 // Tab types for left cluster (Home, Profile, Settings)
-export type SecondaryTab = 'index' | 'profile' | 'store' | 'settings';
+export type SecondaryTab = 'index' | 'stats' | 'store' | 'settings';
 
 // Primary action button states
 export type PrimaryActionState = 'new_game' | 'resume';

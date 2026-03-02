@@ -22,7 +22,7 @@ export function ScreenHeader({ style }: ScreenHeaderProps) {
   const level = usePlayerLevel();
 
   const goToStore = () => { playFeedback('tap'); router.push('/store'); };
-  const goToProfile = () => { playFeedback('tap'); router.push('/(tabs)/profile'); };
+  const goToStats = () => { playFeedback('tap'); router.push('/(tabs)/stats'); };
 
   return (
     <View style={[styles.container, style]}>
@@ -36,7 +36,7 @@ export function ScreenHeader({ style }: ScreenHeaderProps) {
             currentXP={totalXP - xpForLevel(level)}
             xpThreshold={xpForLevel(level + 1) - xpForLevel(level)}
             progressFraction={xpProgressFraction(totalXP, level)}
-            onPress={goToProfile}
+            onPress={goToStats}
           />
         </View>
         <View style={styles.pillSlot}>

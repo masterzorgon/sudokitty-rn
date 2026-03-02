@@ -11,11 +11,12 @@ import {
   SettingsSection,
   SettingsToggleRow,
   SettingsLinkRow,
-  StatsOverview,
 } from '../../src/components/settings';
 import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
+import { StatsCTA } from '../../src/components/home';
+import { playFeedback } from '../../src/utils/feedback';
 import {
   useSettingsStore,
   useSoundsEnabled,
@@ -123,6 +124,11 @@ export default function SettingsScreen() {
     await presentCustomerCenter();
   }, []);
 
+  const handleViewStats = useCallback(() => {
+    playFeedback('tap');
+    router.push('/(tabs)/stats');
+  }, [router]);
+
   const handleResetProgress = useCallback(() => {
     Alert.alert(
       'Reset Progress',
@@ -152,7 +158,9 @@ export default function SettingsScreen() {
 
         <CTABannerCarousel promos={['rate']} />
 
-        <StatsOverview />
+        <View style={styles.statsCTAContainer}>
+          <StatsCTA onPress={handleViewStats} />
+        </View>
 
         {/* Appearance - Theme Color Picker */}
         <SettingsSection title="Appearance">
@@ -311,6 +319,9 @@ export default function SettingsScreen() {
 const SWATCH_SIZE = 44;
 
 const styles = StyleSheet.create({
+  statsCTAContainer: {
+    marginBottom: spacing.xl,
+  },
   container: {
     flex: 1,
   },

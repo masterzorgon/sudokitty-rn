@@ -121,7 +121,7 @@ export default function HomeScreen() {
 
   const handleStreakPress = () => {
     playFeedback('tap');
-    router.push('/profile');
+    router.push('/(tabs)/stats');
   };
 
   const handleDailyChallengePress = () => {
