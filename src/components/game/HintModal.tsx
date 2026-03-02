@@ -80,41 +80,46 @@ export function HintModal() {
         </Text>
       </View>
 
-      {/* Labeled context: Box, Row, Column */}
+      {/* Labeled context: Rows (left, 3×1) | Box | Column (right) */}
       {contextData && (
         <View style={styles.contextSection}>
-          <Text style={[styles.contextLabel, { color: c.accent }]}>BOX</Text>
           <View style={styles.contextRow}>
-            <MiniBoard
-              cells={contextData.box}
-              highlightCell={{ row: contextData.localRow, col: contextData.localCol }}
-              highlightSet={contextData.highlightSet}
-              offset={{ row: contextData.startRow, col: contextData.startCol }}
-            />
-          </View>
-
-          <Text style={[styles.contextLabel, { color: c.accent }]}>ROW</Text>
-          <View style={styles.contextRow}>
-            {contextData.rowBands.map((band, i) => (
+            <View style={styles.contextGroup}>
+              <Text style={[styles.contextLabel, { color: c.accent }]}>ROWS</Text>
+              <View style={styles.stripsRow}>
+                {contextData.rowBands.map((band, i) => (
+                  <MiniBoard
+                    key={i}
+                    cells={band.cells}
+                    highlightSet={contextData.highlightSet}
+                    offset={{ row: lastHint!.targetCell.row, col: band.startCol }}
+                    transposeHighlight
+                  />
+                ))}
+              </View>
+            </View>
+            <View style={styles.contextGroup}>
+              <Text style={[styles.contextLabel, { color: c.accent }]}>BOX</Text>
               <MiniBoard
-                key={i}
-                cells={band.cells}
+                cells={contextData.box}
+                highlightCell={{ row: contextData.localRow, col: contextData.localCol }}
                 highlightSet={contextData.highlightSet}
-                offset={{ row: lastHint!.targetCell.row, col: band.startCol }}
+                offset={{ row: contextData.startRow, col: contextData.startCol }}
               />
-            ))}
-          </View>
-
-          <Text style={[styles.contextLabel, { color: c.accent }]}>COLUMN</Text>
-          <View style={styles.contextRow}>
-            {contextData.columnBands.map((band, i) => (
-              <MiniBoard
-                key={i}
-                cells={band.cells}
-                highlightSet={contextData.highlightSet}
-                offset={{ row: band.startRow, col: lastHint!.targetCell.col }}
-              />
-            ))}
+            </View>
+            <View style={styles.contextGroup}>
+              <Text style={[styles.contextLabel, { color: c.accent }]}>COLUMN</Text>
+              <View style={styles.stripsRow}>
+                {contextData.columnBands.map((band, i) => (
+                  <MiniBoard
+                    key={i}
+                    cells={band.cells}
+                    highlightSet={contextData.highlightSet}
+                    offset={{ row: band.startRow, col: lastHint!.targetCell.col }}
+                  />
+                ))}
+              </View>
+            </View>
           </View>
         </View>
       )}
@@ -173,9 +178,17 @@ const styles = StyleSheet.create({
   contextRow: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'flex-end',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  contextGroup: {
+    alignItems: 'center',
+  },
+  stripsRow: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    marginBottom: spacing.md,
   },
   title: {
     ...typography.title,

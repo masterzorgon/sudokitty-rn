@@ -13,6 +13,9 @@ export const spacing = {
   xxl: 32,
 } as const;
 
+/** Standard horizontal inset for screen-level content and headers. */
+export const SCREEN_PADDING = spacing.lg;
+
 // Border radius
 export const borderRadius = {
   xs: 4, // Cells

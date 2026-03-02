@@ -1,22 +1,48 @@
-// Compact currency pill for home header (cream/skeuomorphic): icon + count; tap → store
-
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useColors } from '../../theme/colors';
+import { useColors, type ColorPalette } from '../../theme/colors';
 import { fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import type { CustomSkeuColors } from '../ui/Skeuomorphic';
 import { SkeuButton } from '../ui/Skeuomorphic';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 
-const PILL_MIN_WIDTH = 64;
 const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
 const ICON_CIRCLE_SIZE = 26;
 const FONT_SIZE = 14;
 
-export type HeaderPillType = 'mochis' | 'freezes';
+export type HeaderPillType = 'mochis' | 'freezes' | 'xp' | 'level';
+
+interface PillConfig {
+  colorKeys: { border: keyof ColorPalette; text: keyof ColorPalette };
+  label: string;
+  renderIcon: (color: string, size: number) => React.ReactNode;
+}
+
+const PILL_CONFIGS: Record<HeaderPillType, PillConfig> = {
+  freezes: {
+    colorKeys: { border: 'freezePillBorder', text: 'freezePillText' },
+    label: 'Streak Freezes',
+    renderIcon: (color, size) => <Ionicons name="snow" size={size} color={color} />,
+  },
+  xp: {
+    colorKeys: { border: 'xpPillBorder', text: 'xpPillText' },
+    label: 'XP',
+    renderIcon: (color, size) => <Ionicons name="flash" size={size} color={color} />,
+  },
+  level: {
+    colorKeys: { border: 'levelPillBorder', text: 'levelPillText' },
+    label: 'Level',
+    renderIcon: (color, size) => <Ionicons name="trophy" size={size} color={color} />,
+  },
+  mochis: {
+    colorKeys: { border: 'mochiPillBorder', text: 'mochiPillText' },
+    label: 'Mochis',
+    renderIcon: (_, size) => <MochiPointIcon width={size} height={size} />,
+  },
+};
 
 export interface HeaderPillProps {
   type: HeaderPillType;
@@ -26,11 +52,9 @@ export interface HeaderPillProps {
 
 export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
   const c = useColors();
-
-  const isFreeze = type === 'freezes';
-
-  const borderColor = isFreeze ? c.freezePillBorder : c.mochiPillBorder;
-  const textColor = isFreeze ? c.freezePillText : c.mochiPillText;
+  const config = PILL_CONFIGS[type];
+  const borderColor = c[config.colorKeys.border] as string;
+  const textColor = c[config.colorKeys.text] as string;
 
   const iconCircleStyle = {
     width: ICON_CIRCLE_SIZE,
@@ -53,28 +77,22 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
     justifyContent: 'space-between',
     gap: spacing.sm,
     paddingVertical: 4,
-    paddingHorizontal: spacing.sm,
+    paddingLeft: 4,
+    paddingRight: spacing.sm,
     height: PILL_HEIGHT,
-    minWidth: PILL_MIN_WIDTH,
   };
-
-  const label = isFreeze ? 'Streak Freezes' : 'Mochis';
 
   return (
     <SkeuButton
       onPress={onPress}
       customColors={skeuColors}
       borderRadius={borderRadius.full}
-      style={StyleSheet.flatten([styles.container, { minWidth: PILL_MIN_WIDTH, borderRadius: borderRadius.full, width: '100%' }])}
+      style={styles.container}
       contentStyle={faceStyle}
-      accessibilityLabel={`${value} ${label}, open store`}
+      accessibilityLabel={`${value} ${config.label}`}
     >
       <View style={[styles.iconCircle, iconCircleStyle]}>
-        {isFreeze ? (
-          <Ionicons name="snow" size={ICON_SIZE} color={textColor} />
-        ) : (
-          <MochiPointIcon width={ICON_SIZE} height={ICON_SIZE} />
-        )}
+        {config.renderIcon(textColor, ICON_SIZE)}
       </View>
       <Text style={[styles.countText, { color: textColor }]}>{value}</Text>
     </SkeuButton>
@@ -84,6 +102,7 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
 const styles = StyleSheet.create({
   container: {
     overflow: 'visible',
+    borderRadius: borderRadius.full,
   },
   iconCircle: {
     alignItems: 'center',
@@ -92,6 +111,5 @@ const styles = StyleSheet.create({
   countText: {
     fontFamily: fontFamilies.bold,
     fontSize: FONT_SIZE,
-    marginRight: spacing.sm,
   },
 });

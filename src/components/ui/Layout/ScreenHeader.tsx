@@ -1,103 +1,58 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, type ViewStyle, type LayoutChangeEvent } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, type ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { spacing } from '../../../theme';
+import { spacing, SCREEN_PADDING } from '../../../theme';
 import { useTotalMochiPoints, useDailyChallengeStore } from '../../../stores/dailyChallengeStore';
+import { useTotalXP, usePlayerLevel } from '../../../stores/playerProgressStore';
 import { HeaderPill } from '../../home/HeaderPill';
-import { ScreenTitle } from '../Typography/ScreenTitle';
 import { playFeedback } from '../../../utils/feedback';
 
 interface ScreenHeaderProps {
-  title: string;
-  left?: React.ReactNode;
-  right?: React.ReactNode;
-  showMochiPill?: boolean;
-  showFreezePill?: boolean;
   style?: ViewStyle;
 }
 
-export function ScreenHeader({ title, left, right, showMochiPill, showFreezePill, style }: ScreenHeaderProps) {
+export function ScreenHeader({ style }: ScreenHeaderProps) {
   const router = useRouter();
   const totalMochis = useTotalMochiPoints();
   const freezeCount = useDailyChallengeStore((s) => s.streakFreezesCount);
+  const totalXP = useTotalXP();
+  const level = usePlayerLevel();
 
-  const [leftPillWidth, setLeftPillWidth] = useState(0);
-  const [rightPillWidth, setRightPillWidth] = useState(0);
-  const syncedWidth = Math.max(leftPillWidth, rightPillWidth) || undefined;
-
-  const onLeftLayout = useCallback((e: LayoutChangeEvent) => {
-    setLeftPillWidth(e.nativeEvent.layout.width);
-  }, []);
-  const onRightLayout = useCallback((e: LayoutChangeEvent) => {
-    setRightPillWidth(e.nativeEvent.layout.width);
-  }, []);
-
-  const mochiPill = showMochiPill ? (
-    <HeaderPill
-      type="mochis"
-      value={totalMochis}
-      onPress={() => { playFeedback('tap'); router.push('/store'); }}
-    />
-  ) : null;
-
-  const freezePill = showFreezePill ? (
-    <HeaderPill
-      type="freezes"
-      value={freezeCount ?? 0}
-      onPress={() => { playFeedback('tap'); router.push('/store'); }}
-    />
-  ) : null;
-
-  const resolvedLeft = left ?? freezePill;
-  const resolvedRight = right ?? mochiPill;
-  const hasSlots = resolvedLeft !== null || resolvedRight !== null;
+  const goToStore = () => { playFeedback('tap'); router.push('/store'); };
+  const goToProfile = () => { playFeedback('tap'); router.push('/(tabs)/profile'); };
 
   return (
-    <View style={[styles.container, hasSlots && styles.row, style]}>
-      {hasSlots && (
-        <View style={styles.side}>
-          <View onLayout={onLeftLayout} style={syncedWidth ? { width: syncedWidth } : undefined}>
-            {resolvedLeft}
-          </View>
+    <View style={[styles.container, style]}>
+      <View style={styles.pillRow}>
+        <View style={styles.pillSlot}>
+          <HeaderPill type="freezes" value={freezeCount ?? 0} onPress={goToStore} />
         </View>
-      )}
-      <ScreenTitle style={hasSlots ? styles.titleWithSlots : styles.titleNoSlots}>
-        {title}
-      </ScreenTitle>
-      {hasSlots && (
-        <View style={[styles.side, styles.rightSide]}>
-          <View onLayout={onRightLayout} style={syncedWidth ? { width: syncedWidth } : undefined}>
-            {resolvedRight}
-          </View>
+        <View style={styles.pillSlot}>
+          <HeaderPill type="xp" value={totalXP} onPress={goToProfile} />
         </View>
-      )}
+        <View style={styles.pillSlot}>
+          <HeaderPill type="level" value={level} onPress={goToProfile} />
+        </View>
+        <View style={styles.pillSlot}>
+          <HeaderPill type="mochis" value={totalMochis} onPress={goToStore} />
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: SCREEN_PADDING,
     paddingTop: spacing.sm,
-    paddingBottom: spacing.xl + 10, // extra visual breathing room below header text
+    paddingBottom: spacing.xl + 10,
   },
-  row: {
+  pillRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    gap: spacing.sm,
   },
-  side: {
+  pillSlot: {
     flex: 1,
-    alignItems: 'flex-start',
-  },
-  rightSide: {
-    alignItems: 'flex-end',
-  },
-  titleNoSlots: {
-    marginBottom: 0,
-  },
-  titleWithSlots: {
-    flex: 0,
-    marginBottom: 0,
   },
 });

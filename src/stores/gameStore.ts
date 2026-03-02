@@ -27,6 +27,8 @@ import {
   positionKey,
   calculateMochiReward,
 } from '../engine/types';
+import { calculateXPReward } from '../constants/xp';
+import { usePlayerProgressStore } from './playerProgressStore';
 import { generatePuzzle, generateDailyPuzzle } from '../engine/generator';
 import { SudokuSolver, Hint } from '../engine/solver';
 import { useSettingsStore } from './settingsStore';
@@ -863,6 +865,10 @@ useGameStore.subscribe(
         const mochiReward = calculateMochiReward(difficulty, timeElapsed);
         useDailyChallengeStore.getState().addMochiHistoryEntry(mochiReward, 'game');
       }
+
+      // Award XP for all wins (regular + daily)
+      const xpReward = calculateXPReward(difficulty, timeElapsed);
+      usePlayerProgressStore.getState().addXP(xpReward);
 
       const isFirstPuzzleOfDay = useDailyChallengeStore.getState().recordFirstPuzzleOfDayIfNeeded();
       if (isFirstPuzzleOfDay) {

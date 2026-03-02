@@ -73,6 +73,14 @@ export interface ColorPalette {
   freezePillBorder: string;
   freezePillEdge: string;
   freezePillText: string;
+
+  // XP pill
+  xpPillBorder: string;
+  xpPillText: string;
+
+  // Level pill
+  levelPillBorder: string;
+  levelPillText: string;
 }
 
 const pinkPalette: ColorPalette = {
@@ -132,6 +140,12 @@ const pinkPalette: ColorPalette = {
   freezePillBorder: '#A0C8E8',
   freezePillEdge: '#6898C0',
   freezePillText: '#264A6E',
+
+  xpPillBorder: '#E0B840',
+  xpPillText: '#6E5A10',
+
+  levelPillBorder: '#B090D0',
+  levelPillText: '#4A3068',
 };
 
 const orangePalette: ColorPalette = {
@@ -191,6 +205,12 @@ const orangePalette: ColorPalette = {
   freezePillBorder: '#A0C8E8',
   freezePillEdge: '#6898C0',
   freezePillText: '#264A6E',
+
+  xpPillBorder: '#E0B840',
+  xpPillText: '#6E5A10',
+
+  levelPillBorder: '#B090D0',
+  levelPillText: '#4A3068',
 };
 
 const greenPalette: ColorPalette = {
@@ -250,6 +270,12 @@ const greenPalette: ColorPalette = {
   freezePillBorder: '#A0C8E8',
   freezePillEdge: '#6898C0',
   freezePillText: '#264A6E',
+
+  xpPillBorder: '#E0B840',
+  xpPillText: '#6E5A10',
+
+  levelPillBorder: '#B090D0',
+  levelPillText: '#4A3068',
 };
 
 const bluePalette: ColorPalette = {
@@ -309,6 +335,12 @@ const bluePalette: ColorPalette = {
   freezePillBorder: '#A0C8E8',
   freezePillEdge: '#6898C0',
   freezePillText: '#264A6E',
+
+  xpPillBorder: '#E0B840',
+  xpPillText: '#6E5A10',
+
+  levelPillBorder: '#B090D0',
+  levelPillText: '#4A3068',
 };
 
 export const PALETTES: Record<ThemeName, ColorPalette> = {

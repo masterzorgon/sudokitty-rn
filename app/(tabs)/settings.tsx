@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { StyleSheet, View, ScrollView, Linking, Alert, Pressable } from 'react-native';
+import { StyleSheet, View, Linking, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Constants from 'expo-constants';
@@ -12,8 +12,7 @@ import {
   SettingsToggleRow,
   SettingsLinkRow,
 } from '../../src/components/settings';
-import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackground';
-import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
+import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import {
@@ -144,12 +143,8 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
-      <ScreenHeader title="Settings" />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScreenHeader />
+      <ScreenContent contentStyle={styles.scrollContent}>
 
         <CTABannerCarousel promos={['rate']} />
 
@@ -302,7 +297,7 @@ export default function SettingsScreen() {
           />
         </SkeuCard>
 
-      </ScrollView>
+      </ScreenContent>
     </SafeAreaView>
   );
 }
@@ -313,11 +308,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingHorizontal: spacing.lg,
     paddingTop: 0,
     paddingBottom: 120,
   },

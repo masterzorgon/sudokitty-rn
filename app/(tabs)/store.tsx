@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Alert,
 } from 'react-native';
 import { Image } from 'expo-image';
@@ -15,8 +14,7 @@ import type { PurchasesStoreProduct } from 'react-native-purchases';
 import { useColors } from '../../src/theme/colors';
 import { fontFamilies } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
-import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackground';
-import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
+import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import { useDailyChallengeStore } from '../../src/stores/dailyChallengeStore';
 import { useIsPremium } from '../../src/stores/premiumStore';
@@ -231,13 +229,9 @@ export default function StoreScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
 
-      <ScreenHeader title="Store" showFreezePill showMochiPill />
+      <ScreenHeader />
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScreenContent contentStyle={styles.content}>
         <CTABannerCarousel />
 
         <SectionTitle>Subscriptions</SectionTitle>
@@ -349,7 +343,7 @@ export default function StoreScreen() {
           );
         })}
 
-      </ScrollView>
+      </ScreenContent>
 
       <PurchaseSheet
         config={sheetConfig}
@@ -374,11 +368,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scroll: {
-    flex: 1,
-  },
   content: {
-    paddingHorizontal: spacing.lg,
     paddingTop: 0,
     paddingBottom: 140,
   },

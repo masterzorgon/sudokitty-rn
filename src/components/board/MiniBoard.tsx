@@ -16,9 +16,11 @@ export interface MiniBoardProps {
   highlightSet?: Set<string>;
   /** Absolute board position of cells[0][0]; required for highlightSet lookups */
   offset?: { row: number; col: number };
+  /** When true, use (offset.row + col, offset.col + row) for highlight lookup (row strips displayed as 3×1) */
+  transposeHighlight?: boolean;
 }
 
-export function MiniBoard({ cells, highlightCell, highlightSet, offset }: MiniBoardProps) {
+export function MiniBoard({ cells, highlightCell, highlightSet, offset, transposeHighlight }: MiniBoardProps) {
   const rows = cells.length;
   const cols = cells[0]?.length ?? 0;
   const boardWidth = COMPACT_CELL_SIZE * cols;
@@ -32,8 +34,12 @@ export function MiniBoard({ cells, highlightCell, highlightSet, offset }: MiniBo
             const cell = cells[row][col];
             const isHighlighted =
               highlightCell?.row === row && highlightCell?.col === col;
-            const absRow = (offset?.row ?? 0) + row;
-            const absCol = (offset?.col ?? 0) + col;
+            const absRow = transposeHighlight
+              ? (offset?.row ?? 0) + col
+              : (offset?.row ?? 0) + row;
+            const absCol = transposeHighlight
+              ? (offset?.col ?? 0) + row
+              : (offset?.col ?? 0) + col;
             const isSecondary = highlightSet
               ? highlightSet.has(`${absRow}-${absCol}`)
               : false;

@@ -9,7 +9,7 @@ import { playFeedback } from '../../src/utils/feedback';
 
 import { useColors } from '../../src/theme/colors';
 import { fontFamilies } from '../../src/theme/typography';
-import { spacing } from '../../src/theme';
+import { spacing, SCREEN_PADDING } from '../../src/theme';
 import {
   useDailyChallengeStore,
   useCurrentStreak,
@@ -147,11 +147,7 @@ export default function HomeScreen() {
       <ScreenBackground />
 
       <Animated.View entering={FadeIn.duration(400)}>
-        <ScreenHeader
-          title="Sudokitty"
-          showFreezePill
-          showMochiPill
-        />
+        <ScreenHeader />
       </Animated.View>
 
       <View style={styles.content}>
@@ -222,7 +218,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: SCREEN_PADDING,
   },
   heroSection: {
     alignItems: 'center',
@@ -235,8 +231,8 @@ const styles = StyleSheet.create({
   },
   ctaSection: {
     position: 'absolute',
-    left: spacing.lg,
-    right: spacing.lg,
+    left: SCREEN_PADDING,
+    right: SCREEN_PADDING,
   },
   ctaStack: {
     gap: spacing.md,

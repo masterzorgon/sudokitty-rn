@@ -1,7 +1,7 @@
 // Stats screen — Analytics dashboard with stat cards and activity calendar
 
 import React from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, useColors } from '../../src/theme/colors';
@@ -17,8 +17,7 @@ import {
   StatCard,
   ActivityCalendar,
 } from '../../src/components/home';
-import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackground';
-import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
+import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 
 export default function ProfileScreen() {
   const c = useColors();
@@ -35,13 +34,8 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground />
-      <ScreenHeader title="Stats" />
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        bounces
-      >
+      <ScreenHeader />
+      <ScreenContent contentStyle={styles.scrollContent}>
 
         {/* Activity Calendar */}
         <View style={styles.section}>
@@ -76,7 +70,7 @@ export default function ProfileScreen() {
 
         {/* Bottom spacing */}
         <View style={{ height: 40 }} />
-      </ScrollView>
+      </ScreenContent>
     </SafeAreaView>
   );
 }
@@ -89,11 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
   scrollContent: {
-    paddingHorizontal: spacing.lg,
     paddingTop: 0,
     paddingBottom: 120,
   },

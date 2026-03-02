@@ -68,8 +68,8 @@ export function sliceColumn(
 
 /**
  * Extract the two 3-cell row segments outside the target cell's box.
- * Returns two 1×3 SudokuCellData[][] grids (compatible with MiniBoard) and
- * their absolute startCol so callers can resolve highlight positions.
+ * Returns two 3×1 SudokuCellData[][] grids (displayed as vertical strips)
+ * and their absolute startCol for highlight lookups.
  */
 export function sliceRow(
   cells: SudokuCellData[][],
@@ -80,7 +80,7 @@ export function sliceRow(
   return [0, 1, 2]
     .filter((b) => b !== boxBand)
     .map((band) => ({
-      cells: [cells[targetRow].slice(band * 3, band * 3 + 3)],
+      cells: Array.from({ length: 3 }, (_, c) => [cells[targetRow][band * 3 + c]]),
       startCol: band * 3,
     }));
 }
