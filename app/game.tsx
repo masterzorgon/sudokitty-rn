@@ -13,7 +13,6 @@ import {
   ProgressBar,
   GameMascot,
   GameSettingsModal,
-  GameStatusSheet,
   HintModal,
   HintAdSheet,
 } from '../src/components/game';
@@ -21,12 +20,11 @@ import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
 import { useGameMascotMessage, useBackgroundMusic } from '../src/hooks';
 import { colors, useColors } from '../src/theme/colors';
-import { spacing, borderRadius } from '../src/theme';
+import { spacing } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../src/engine/types';
 import { playFeedback } from '../src/utils/feedback';
-import { showInterstitialIfReady } from '../src/services/adService';
 import { loadSfx, unloadSfx } from '../src/services/sfxService';
 import { usePremiumStore } from '../src/stores/premiumStore';
 
@@ -50,9 +48,9 @@ export default function GameScreen() {
   const startTimer = useGameStore((s) => s.startTimer);
   const pauseGame = useGameStore((s) => s.pauseGame);
   const resumeGame = useGameStore((s) => s.resumeGame);
-  const resetGame = useGameStore((s) => s.resetGame);
-  const continueGame = useGameStore((s) => s.continueGame);
+  const isPremium = usePremiumStore((s) => s.isPremium);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const navigatedToEndGame = useRef(false);
 
   // Settings modal state
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
@@ -112,6 +110,34 @@ export default function GameScreen() {
     };
   }, [isTimerRunning, tick]);
 
+  // Navigate to end-game screen when game ends
+  useEffect(() => {
+    if ((gameStatus === 'won' || gameStatus === 'lost') && !navigatedToEndGame.current) {
+      navigatedToEndGame.current = true;
+      const { difficulty: d, timeElapsed, mistakeCount, hintsUsed, continueCount, getProgress } =
+        useGameStore.getState();
+      const progress = getProgress();
+      const endGameParams = {
+        status: gameStatus,
+        difficulty: d,
+        timeElapsed: String(timeElapsed),
+        mistakeCount: String(mistakeCount),
+        hintsUsed: String(hintsUsed),
+        continueCount: String(continueCount),
+        isDaily: String(isDaily),
+        progress: String(Math.round(progress * 100)),
+      };
+
+      if (gameStatus === 'won') {
+        router.replace({ pathname: '/end-game', params: endGameParams });
+      } else {
+        router.push({ pathname: '/end-game', params: endGameParams });
+      }
+    } else if (gameStatus === 'playing') {
+      navigatedToEndGame.current = false;
+    }
+  }, [gameStatus, isDaily, router]);
+
   // Handle back button - pause game instead of resetting
   const handleGoBack = useCallback(() => {
     // Only pause if game is still in progress
@@ -120,31 +146,6 @@ export default function GameScreen() {
     }
     router.back();
   }, [gameStatus, pauseGame, router]);
-
-  // Handle going home after game over - reset game state
-  const handleGoHome = useCallback(() => {
-    resetGame();
-    router.back();
-  }, [resetGame, router]);
-
-  const isPremium = usePremiumStore((s) => s.isPremium);
-
-  const handlePlayAgain = useCallback(
-    async (difficulty: Difficulty) => {
-      if (!isPremium) {
-        await showInterstitialIfReady();
-      }
-      newGame(difficulty);
-      setTimeout(() => {
-        startTimer();
-      }, startGameAnimations.controlsDelay);
-    },
-    [newGame, startTimer, isPremium]
-  );
-
-  const handleContinue = useCallback(() => {
-    continueGame();
-  }, [continueGame]);
 
   // Settings modal handlers with pause state preservation
   const openSettingsModal = useCallback(() => {
@@ -221,14 +222,6 @@ export default function GameScreen() {
           </Animated.View>
         </View>
       </View>
-
-      {/* Game status bottom sheet */}
-      <GameStatusSheet
-        onPlayAgain={handlePlayAgain}
-        onGoHome={handleGoHome}
-        onContinue={handleContinue}
-        isDaily={isDaily}
-      />
 
       {/* Settings modal */}
       <GameSettingsModal

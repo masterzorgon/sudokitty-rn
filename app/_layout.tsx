@@ -180,6 +180,13 @@ function RootLayoutNav() {
             animation: 'slide_from_right',
           }}
         />
+        <Stack.Screen
+          name="end-game"
+          options={{
+            headerShown: false,
+            animation: 'fade',
+          }}
+        />
       </Stack>
     </View>
   );

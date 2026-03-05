@@ -1,0 +1,325 @@
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+
+import { useColors } from '../src/theme/colors';
+import { typography, fontFamilies } from '../src/theme/typography';
+import { spacing, borderRadius } from '../src/theme';
+import { SkeuButton, SkeuCard, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
+import { ScreenBackground } from '../src/components/ui/Layout';
+import { showRewardedAd } from '../src/services/adService';
+import { showInterstitialIfReady } from '../src/services/adService';
+import { useGameStore } from '../src/stores/gameStore';
+import { usePremiumStore } from '../src/stores/premiumStore';
+import { formatTime } from '../src/utils/formatTime';
+import { playFeedback } from '../src/utils/feedback';
+import {
+  Difficulty,
+  MAX_MISTAKES,
+  calculateMochiReward,
+  calculateMochiRewardBreakdown,
+  DAILY_MOCHI_POINTS,
+} from '../src/engine/types';
+import { calculateXPReward } from '../src/constants/xp';
+import MochiPointIcon from '../assets/images/icons/mochi-point.svg';
+
+const MochiWowImg = require('../assets/images/mochi/mochi-wow.png');
+const MochiQuitImg = require('../assets/images/mochi/mochi-quit.png');
+
+function StatRow({ label, value, icon, iconComponent, iconColor }: {
+  label: string;
+  value: string;
+  icon?: string;
+  iconComponent?: React.ReactNode;
+  iconColor?: string;
+}) {
+  const c = useColors();
+  return (
+    <View style={statStyles.row}>
+      <View style={statStyles.labelRow}>
+        {iconComponent ?? (icon && <Ionicons name={icon as any} size={16} color={iconColor ?? c.textSecondary} />)}
+        <Text style={[statStyles.label, { color: c.textSecondary }]}>{label}</Text>
+      </View>
+      <Text style={[statStyles.value, { color: c.textPrimary }]}>{value}</Text>
+    </View>
+  );
+}
+
+export default function EndGameScreen() {
+  const c = useColors();
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const s = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
+
+  const status = (s(params.status) || 'won') as 'won' | 'lost';
+  const difficulty = (s(params.difficulty) || 'easy') as Difficulty;
+  const timeElapsed = parseInt(s(params.timeElapsed), 10);
+  const mistakeCount = parseInt(s(params.mistakeCount), 10);
+  const hintsUsed = parseInt(s(params.hintsUsed), 10);
+  const isDaily = s(params.isDaily) === 'true';
+  const progress = parseInt(s(params.progress), 10);
+
+  const isWon = status === 'won';
+  const canContinue = useGameStore((s) => s.canContinue);
+  const continueGame = useGameStore((s) => s.continueGame);
+  const newGame = useGameStore((s) => s.newGame);
+  const resetGame = useGameStore((s) => s.resetGame);
+  const startTimer = useGameStore((s) => s.startTimer);
+  const isPremium = usePremiumStore((s) => s.isPremium);
+
+  const livesRemaining = MAX_MISTAKES - mistakeCount;
+  const xpEarned = isWon ? calculateXPReward(difficulty, timeElapsed) : 0;
+  const mochisEarned = isWon
+    ? isDaily
+      ? DAILY_MOCHI_POINTS[difficulty]
+      : calculateMochiReward(difficulty, timeElapsed)
+    : 0;
+  const rewardBreakdown = isWon && !isDaily
+    ? calculateMochiRewardBreakdown(difficulty, timeElapsed)
+    : null;
+
+  const showContinue = !isWon && canContinue();
+
+  const handleContinue = useCallback(async () => {
+    playFeedback('tap');
+    const earned = await showRewardedAd();
+    if (earned) {
+      continueGame();
+      router.back();
+    }
+  }, [continueGame, router]);
+
+  const handlePlayAgain = useCallback(async () => {
+    playFeedback('tap');
+    if (!isPremium) {
+      await showInterstitialIfReady();
+    }
+    newGame(difficulty);
+    router.replace({
+      pathname: '/game',
+      params: { difficulty, isDaily: String(isDaily) },
+    });
+  }, [difficulty, isDaily, isPremium, newGame, router]);
+
+  const handleGoHome = useCallback(() => {
+    playFeedback('tap');
+    resetGame();
+    router.replace('/');
+  }, [resetGame, router]);
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
+      <ScreenBackground showBottom={false} />
+
+      <View style={styles.content}>
+        {/* Title */}
+        <Text style={[styles.title, { color: c.textPrimary }]}>
+          {isWon ? 'Purrfect!' : 'Game Over'}
+        </Text>
+
+        {/* Mochi Cat Image */}
+        <Image
+          source={isWon ? MochiWowImg : MochiQuitImg}
+          style={styles.mochiImage}
+          contentFit="contain"
+        />
+
+        {/* Stats Card */}
+        <SkeuCard
+          borderRadius={borderRadius.lg}
+          contentStyle={styles.statsCard}
+          style={styles.statsCardOuter}
+        >
+          {isWon && (
+            <>
+              <StatRow label="XP Earned" value={`+${xpEarned}`} icon="sparkles-outline" iconColor={c.accent} />
+              <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+              {rewardBreakdown ? (
+                <>
+                  <StatRow
+                    label="Mochis Earned"
+                    value={`+${rewardBreakdown.total}`}
+                    iconComponent={<MochiPointIcon width={16} height={16} color={c.accent} />}
+                    iconColor={c.accent}
+                  />
+                  <Text style={[styles.breakdownNote, { color: c.textSecondary }]}>
+                    Base {rewardBreakdown.base} + Time bonus {rewardBreakdown.timeBonus}
+                  </Text>
+                </>
+              ) : (
+                <StatRow
+                  label="Mochis Earned"
+                  value={`+${mochisEarned}`}
+                  iconComponent={<MochiPointIcon width={16} height={16} color={c.accent} />}
+                  iconColor={c.accent}
+                />
+              )}
+              <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+            </>
+          )}
+          <StatRow label="Time" value={formatTime(timeElapsed)} icon="time-outline" />
+          <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+          <StatRow
+            label="Lives Remaining"
+            value={`${Math.max(0, livesRemaining)} / ${MAX_MISTAKES}`}
+            icon="heart-outline"
+            iconColor="#F87171"
+          />
+          <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+          <StatRow label="Hints Used" value={`${hintsUsed}`} icon="bulb-outline" />
+          <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+          <StatRow label="Progress" value={`${progress}%`} icon="pie-chart-outline" />
+        </SkeuCard>
+
+        {/* Spacer */}
+        <View style={{ flex: 1 }} />
+
+        {/* Action Buttons */}
+        <View style={styles.actions}>
+          {showContinue && (
+            <SkeuButton
+              onPress={handleContinue}
+              variant="primary"
+              borderRadius={borderRadius.lg}
+              showHighlight={false}
+              style={styles.fullWidthBtn}
+              contentStyle={styles.btnContent}
+            >
+              <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
+                Watch Ad to Continue Game
+              </Text>
+            </SkeuButton>
+          )}
+
+          {isDaily && isWon ? (
+            <SkeuButton
+              onPress={handleGoHome}
+              variant="secondary"
+              borderRadius={borderRadius.lg}
+              style={styles.fullWidthBtn}
+              contentStyle={styles.btnContent}
+            >
+              <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
+                Back to Daily
+              </Text>
+            </SkeuButton>
+          ) : (
+            <SkeuButton
+              onPress={handlePlayAgain}
+              variant="neutral"
+              borderRadius={borderRadius.lg}
+              style={styles.fullWidthBtn}
+              contentStyle={styles.btnContent}
+            >
+              <Text style={[styles.btnText, { color: SKEU_VARIANTS.neutral.textColor }]}>
+                New Game
+              </Text>
+            </SkeuButton>
+          )}
+
+          <Pressable
+            style={styles.returnHomeRow}
+            onPress={handleGoHome}
+            hitSlop={12}
+          >
+            <Ionicons name="arrow-back" size={20} color={c.textSecondary} />
+            <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
+              Return Home
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.lg,
+  },
+  title: {
+    ...typography.largeTitle,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  mochiImage: {
+    width: 140,
+    height: 140,
+    alignSelf: 'center',
+    marginBottom: spacing.xl,
+  },
+  statsCardOuter: {
+    width: '100%',
+  },
+  statsCard: {
+    padding: spacing.lg,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: spacing.sm,
+  },
+  breakdownNote: {
+    fontSize: 12,
+    fontFamily: fontFamilies.regular,
+    marginTop: spacing.xs,
+    marginLeft: spacing.xl + spacing.xs,
+  },
+  actions: {
+    gap: spacing.md,
+    paddingTop: spacing.lg,
+  },
+  fullWidthBtn: {
+    alignSelf: 'stretch',
+    width: '100%',
+  },
+  btnContent: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnText: {
+    ...typography.button,
+  },
+  returnHomeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+  },
+  returnHomeText: {
+    ...typography.body,
+    fontFamily: fontFamilies.medium,
+  },
+});
+
+const statStyles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  label: {
+    ...typography.body,
+    fontFamily: fontFamilies.medium,
+  },
+  value: {
+    ...typography.body,
+    fontFamily: fontFamilies.bold,
+  },
+});
