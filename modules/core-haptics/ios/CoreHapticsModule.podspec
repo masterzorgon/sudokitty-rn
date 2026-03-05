@@ -1,0 +1,23 @@
+Pod::Spec.new do |s|
+  s.name           = 'CoreHapticsModule'
+  s.version        = '1.0.0'
+  s.summary        = 'CoreHaptics Expo module for tuned haptic feedback'
+  s.description    = 'Wraps Apple CoreHaptics for precise haptic patterns'
+  s.author         = ''
+  s.homepage       = 'https://docs.expo.dev/modules/'
+  s.platforms      = {
+    :ios => '15.1',
+    :tvos => '15.1'
+  }
+  s.source         = { git: '' }
+  s.static_framework = true
+
+  s.dependency 'ExpoModulesCore'
+
+  s.swift_version = '5.4'
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+  }
+
+  s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
+end

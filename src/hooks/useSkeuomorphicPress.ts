@@ -8,7 +8,6 @@ import {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 
 import { SKEU_TIMINGS, SKEU_DIMENSIONS } from '../theme/skeuomorphic';
 import { useReducedMotion } from './useReducedMotion';
@@ -23,9 +22,7 @@ interface UseSkeuomorphicPressOptions {
   duration?: number;
   /** Whether to trigger haptic feedback (default: true) */
   haptic?: boolean;
-  /** Feedback: 'tap' (light) or 'tapHeavy' (default: tap). Ignored if feedbackId is set. */
-  hapticStyle?: Haptics.ImpactFeedbackStyle;
-  /** Override feedback with specific ID (e.g. 'erase', 'notesToggle', 'hint') */
+  /** Feedback ID (default: 'tap'). Use 'tapHeavy' for primary actions. */
   feedbackId?: FeedbackId;
   /** Callback when pressed */
   onPress?: () => void;
@@ -40,8 +37,7 @@ export function useSkeuomorphicPress(options: UseSkeuomorphicPressOptions = {}) 
     depth = SKEU_DIMENSIONS.pressDepth,
     duration = SKEU_TIMINGS.pressDuration,
     haptic = true,
-    hapticStyle = Haptics.ImpactFeedbackStyle.Light,
-    feedbackId,
+    feedbackId = 'tap',
     onPress,
     disabled = false,
   } = options;
@@ -64,19 +60,9 @@ export function useSkeuomorphicPress(options: UseSkeuomorphicPressOptions = {}) 
 
   const handlePress = useCallback(() => {
     if (disabled) return;
-    if (haptic) {
-      if (feedbackId) {
-        playFeedback(feedbackId);
-      } else {
-        playFeedback(
-          hapticStyle === Haptics.ImpactFeedbackStyle.Medium
-            ? 'tapHeavy'
-            : 'tap'
-        );
-      }
-    }
+    if (haptic) playFeedback(feedbackId);
     onPress?.();
-  }, [haptic, hapticStyle, feedbackId, onPress, disabled]);
+  }, [haptic, feedbackId, onPress, disabled]);
 
   const animatedStyle = useAnimatedStyle(() => {
     const currentScale = 1 - (1 - scale) * pressProgress.value;

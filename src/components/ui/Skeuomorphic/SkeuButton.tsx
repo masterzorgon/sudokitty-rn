@@ -5,7 +5,6 @@
 import React from 'react';
 import { Pressable, ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 
 import {
   SkeuVariant,
@@ -43,9 +42,7 @@ export interface SkeuButtonProps {
   sheen?: boolean;
 
   // Animation
-  /** Haptic feedback style (default: Light). Ignored if feedbackId is set. */
-  hapticStyle?: Haptics.ImpactFeedbackStyle;
-  /** Override with specific feedback (e.g. 'erase', 'notesToggle', 'hint') */
+  /** Feedback ID (default: 'tap'). Use 'tapHeavy' for primary actions, or 'erase'/'notesToggle'/'hint' for game controls. */
   feedbackId?: FeedbackId;
   /** Disable built-in animation for custom animation (default: false) */
   disableAnimation?: boolean;
@@ -81,8 +78,7 @@ export function SkeuButton({
   sheen = false,
 
   // Animation
-  hapticStyle = Haptics.ImpactFeedbackStyle.Light,
-  feedbackId,
+  feedbackId = 'tap',
   disableAnimation = false,
 
   // Layout
@@ -100,7 +96,6 @@ export function SkeuButton({
   const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
     onPress,
     disabled,
-    hapticStyle,
     feedbackId,
   });
 

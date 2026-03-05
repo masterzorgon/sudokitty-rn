@@ -7,21 +7,10 @@ jest.mock('react-native-reanimated', () => {
   return Reanimated;
 });
 
-// Mock expo-haptics
-jest.mock('expo-haptics', () => ({
-  impactAsync: jest.fn(() => Promise.resolve()),
-  notificationAsync: jest.fn(() => Promise.resolve()),
-  selectionAsync: jest.fn(() => Promise.resolve()),
-  ImpactFeedbackStyle: {
-    Light: 'light',
-    Medium: 'medium',
-    Heavy: 'heavy',
-  },
-  NotificationFeedbackType: {
-    Success: 'success',
-    Warning: 'warning',
-    Error: 'error',
-  },
+// Mock core-haptics module
+jest.mock('../../modules/core-haptics', () => ({
+  supportsHaptics: false,
+  play: jest.fn(),
 }));
 
 // Mock expo-linear-gradient

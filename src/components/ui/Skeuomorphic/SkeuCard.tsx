@@ -5,9 +5,9 @@
 import React from 'react';
 import { Pressable, ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
-import * as Haptics from 'expo-haptics';
 
 import { useCardSkeuColors } from '../../../theme/skeuomorphic';
+import type { FeedbackId } from '../../../utils/feedback';
 import { useSkeuomorphicPress } from '../../../hooks/useSkeuomorphicPress';
 import { CornerRadii } from './SkeuContext';
 import { Skeu3D } from './Skeu3D';
@@ -30,8 +30,8 @@ export interface SkeuCardProps {
   highlightInset?: number;
 
   // Animation
-  /** Haptic feedback style (default: Light) */
-  hapticStyle?: Haptics.ImpactFeedbackStyle;
+  /** Feedback ID (default: 'tap') */
+  feedbackId?: FeedbackId;
 
   // Layout
   /** Additional wrapper styles */
@@ -61,7 +61,7 @@ export function SkeuCard({
   highlightInset = 12, // Cards use larger inset
 
   // Animation
-  hapticStyle = Haptics.ImpactFeedbackStyle.Light,
+  feedbackId = 'tap',
 
   // Layout
   style,
@@ -80,7 +80,7 @@ export function SkeuCard({
   const { animatedStyle, pressHandlers } = useSkeuomorphicPress({
     onPress: onPress ?? (() => {}),
     disabled: disabled || !isInteractive,
-    hapticStyle,
+    feedbackId,
   });
 
   const content = (

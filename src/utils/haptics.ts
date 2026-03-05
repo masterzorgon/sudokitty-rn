@@ -1,7 +1,8 @@
 // Centralized haptics utility
 // Respects user settings for haptic feedback
+// Uses CoreHaptics module for tuned haptic patterns on iOS
 
-import * as Haptics from 'expo-haptics';
+import { play as playCoreHaptic, supportsHaptics } from '../../modules/core-haptics';
 import { useSettingsStore } from '../stores/settingsStore';
 
 // ============================================
@@ -26,6 +27,7 @@ const SELECTION_THROTTLE_MS = 80;
  */
 export function playHaptic(pattern: HapticPattern): void {
   if (!useSettingsStore.getState().hapticsEnabled) return;
+  if (!supportsHaptics) return;
 
   if (pattern === 'selection') {
     const now = Date.now();
@@ -33,31 +35,5 @@ export function playHaptic(pattern: HapticPattern): void {
     lastSelectionTime = now;
   }
 
-  switch (pattern) {
-    case 'selection':
-      Haptics.selectionAsync();
-      break;
-    case 'tap':
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      break;
-    case 'tapHeavy':
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      break;
-    case 'correct':
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      break;
-    case 'unitComplete':
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      break;
-    case 'mistake':
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      break;
-    case 'gameWon':
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      break;
-    case 'gameLost':
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      break;
-  }
+  playCoreHaptic(pattern);
 }
-
