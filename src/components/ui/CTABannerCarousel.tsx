@@ -111,9 +111,24 @@ function usePromoActions(): Record<PromoKey, () => void> {
       await StoreReview.requestReview();
     } catch {
       Alert.alert('Thanks!', 'Please rate us on the App Store.');
-    } finally {
-      useAppRatedStore.getState().setRated(true);
     }
+
+    setTimeout(() => {
+      Alert.alert(
+        'Did you leave a review?',
+        'Thanks for supporting SudoKitty! 🐱',
+        [
+          {
+            text: 'Not yet',
+            style: 'cancel',
+          },
+          {
+            text: 'Yes, I did!',
+            onPress: () => useAppRatedStore.getState().setRated(true),
+          },
+        ],
+      );
+    }, 2 * 60 * 1000);
   }, []);
 
   return { techniques: handleTechniques, invite: handleInvite, rate: handleRate };

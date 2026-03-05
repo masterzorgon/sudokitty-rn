@@ -15,6 +15,7 @@ import { initRevenueCat } from '../src/lib/revenueCat';
 import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStore';
 import { configureAudioSession } from '../src/services/audioService';
 import { preloadInterstitial, preloadRewarded } from '../src/services/adService';
+import { useAppRatedStore } from '../src/stores/appRatedStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -70,6 +71,11 @@ const PREFETCH_COOLDOWN_MS = 60_000; // 60-second debounce for foreground prefet
 function RootLayoutNav() {
   const c = useColors();
   const lastPrefetchRef = useRef<number>(0);
+
+  // TODO: remove — dev reset for the rate card
+  useEffect(() => {
+    useAppRatedStore.getState().setRated(false);
+  }, []);
 
   // Prefetch caches, sync streaks, init audio, and init RevenueCat on mount
   useEffect(() => {
