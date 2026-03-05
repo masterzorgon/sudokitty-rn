@@ -235,23 +235,6 @@ export default function StoreScreen() {
       <ScreenContent contentStyle={contentStyle}>
         <CTABannerCarousel />
 
-        <SectionTitle>Charitable Giving</SectionTitle>
-
-        <StoreItemRow
-          icon={
-            <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '60' }]}>
-              <Ionicons name="heart" size={22} color={c.accent} />
-            </View>
-          }
-          title="1% of Revenue Rescues Kittens"
-          subtitle="Learn more about our charity policy"
-          trailing={<Feather name="chevron-right" size={20} color={c.textSecondary} />}
-          onPress={() => {
-            playFeedback('tap');
-            router.push('/charity-policy');
-          }}
-        />
-
         <SectionTitle>Subscriptions</SectionTitle>
 
         <StoreItemRow
