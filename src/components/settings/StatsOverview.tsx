@@ -2,12 +2,13 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-import { colors } from '../../theme/colors';
+import { colors, useColors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
-import { spacing } from '../../theme';
+import { spacing, borderRadius } from '../../theme';
 import { Difficulty, MAX_MISTAKES } from '../../engine/types';
 import { formatTime } from '../../utils/formatTime';
 import { StatCard } from '../home/StatCard';
+import { ActivityCalendar } from '../home/ActivityCalendar';
 import { SettingsSection } from './SettingsSection';
 import { StatRow } from './StatRow';
 import {
@@ -17,7 +18,7 @@ import {
   useTotalHintFreeWins,
   useTotalPerfectWins,
 } from '../../stores/userStatsStore';
-import { useCurrentStreak } from '../../stores/playerStreakStore';
+import { useCurrentStreak, usePlayerStreakStore } from '../../stores/playerStreakStore';
 import { useGlobalRank } from '../../hooks/useGlobalRank';
 
 const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard', 'expert'];
@@ -42,6 +43,7 @@ function TimeBadges({ lives, hints }: { lives: number; hints: number }) {
 }
 
 export function StatsOverview() {
+  const c = useColors();
   const stats = useUserStats();
   const longestWinStreak = useLongestWinStreak();
   const totalGamesWon = useTotalGamesWon();
@@ -49,9 +51,16 @@ export function StatsOverview() {
   const totalPerfectWins = useTotalPerfectWins();
   const currentStreak = useCurrentStreak();
   const { globalRank, avgTimePercentiles } = useGlobalRank();
+  const completedDates = usePlayerStreakStore((s) => s.completedDates);
+  const frozenDates = usePlayerStreakStore((s) => s.frozenDates);
+  const gamesPlayedByDate = usePlayerStreakStore((s) => s.gamesPlayedByDate);
 
   return (
     <>
+      <View style={[styles.calendarCard, { backgroundColor: c.cardBackground }]}>
+        <ActivityCalendar completedDates={completedDates} frozenDates={frozenDates} gamesPlayedByDate={gamesPlayedByDate} />
+      </View>
+
       <SettingsSection title="Your Stats">
         <View style={styles.highlightRow}>
           <StatCard label="Day Streak" value={currentStreak} />
@@ -109,6 +118,12 @@ export function StatsOverview() {
 }
 
 const styles = StyleSheet.create({
+  calendarCard: {
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+    overflow: 'hidden',
+  },
   highlightRow: {
     flexDirection: 'row',
     gap: spacing.md,

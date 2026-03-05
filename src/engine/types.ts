@@ -253,6 +253,7 @@ export interface DailyChallengeState {
   streakFreezesCount: number; // Consumable: use one to avoid losing streak on a missed day
   frozenDates: string[]; // YYYY-MM-DD dates covered by streak freeze consumption
   streakLostInfo: { previousStreak: number; reigniteCost: number } | null;
+  gamesPlayedByDate: Record<string, number>; // YYYY-MM-DD -> total games played (wins + losses)
 }
 
 // Activity calendar day for display
@@ -260,6 +261,7 @@ export interface ActivityDay {
   date: string; // YYYY-MM-DD
   completed: boolean;
   frozen?: boolean;
+  count?: number; // total games played (wins + losses) on this day
 }
 
 // Mochi points awarded by difficulty (daily challenges)
@@ -384,6 +386,7 @@ export const createEmptyDailyChallengeState = (): DailyChallengeState => ({
   streakFreezesCount: 0,
   frozenDates: [],
   streakLostInfo: null,
+  gamesPlayedByDate: {},
 });
 
 // ============================================

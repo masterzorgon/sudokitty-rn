@@ -14,6 +14,7 @@ export function handleGameWon(): void {
   usePlayerProgressStore.getState().addXP(xpReward);
 
   usePlayerStreakStore.getState().recordGameWin();
+  usePlayerStreakStore.getState().recordGamePlayed();
 
   if (!isDaily) {
     const mochiReward = calculateMochiReward(difficulty, timeElapsed);
@@ -30,4 +31,5 @@ export function handleGameWon(): void {
 
 export function handleGameLost(): void {
   useUserStatsStore.getState().recordLoss();
+  usePlayerStreakStore.getState().recordGamePlayed();
 }

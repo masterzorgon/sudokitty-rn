@@ -27,13 +27,19 @@ interface ActivityCalendarProps {
   completedDates: string[];
   /** Array of YYYY-MM-DD date strings where a streak freeze was consumed */
   frozenDates?: string[];
+  /** Map of YYYY-MM-DD -> total games played (wins + losses) for intensity coloring */
+  gamesPlayedByDate?: Record<string, number>;
 }
 
 // ============================================
 // Helpers
 // ============================================
 
-function buildActivityGrid(completedDates: string[], frozenDates: string[] = []): ActivityDay[] {
+function buildActivityGrid(
+  completedDates: string[],
+  frozenDates: string[] = [],
+  gamesPlayedByDate: Record<string, number> = {},
+): ActivityDay[] {
   const completedSet = new Set(completedDates);
   const frozenSet = new Set(frozenDates);
 
@@ -63,6 +69,7 @@ function buildActivityGrid(completedDates: string[], frozenDates: string[] = [])
       date: dateString,
       completed: completedSet.has(dateString),
       frozen: frozenSet.has(dateString),
+      count: gamesPlayedByDate[dateString] ?? 0,
     });
     current.setDate(current.getDate() + 1);
   }
@@ -81,7 +88,7 @@ function buildActivityGrid(completedDates: string[], frozenDates: string[] = [])
 
 const FROZEN_COLOR = colors.freezeBlue;
 
-export const ActivityCalendar = memo(({ completedDates, frozenDates = [] }: ActivityCalendarProps) => {
+export const ActivityCalendar = memo(({ completedDates, frozenDates = [], gamesPlayedByDate = {} }: ActivityCalendarProps) => {
   const c = useColors();
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -89,7 +96,10 @@ export const ActivityCalendar = memo(({ completedDates, frozenDates = [] }: Acti
     setContainerWidth(e.nativeEvent.layout.width);
   };
 
-  const activityData = useMemo(() => buildActivityGrid(completedDates, frozenDates), [completedDates, frozenDates]);
+  const activityData = useMemo(
+    () => buildActivityGrid(completedDates, frozenDates, gamesPlayedByDate),
+    [completedDates, frozenDates, gamesPlayedByDate],
+  );
 
   // Organize into columns (weeks)
   const columns = useMemo(() => {
@@ -146,15 +156,19 @@ export const ActivityCalendar = memo(({ completedDates, frozenDates = [] }: Acti
               <View key={rowIndex} style={styles.row}>
                 {Array.from({ length: numCols }, (_, colIndex) => {
                   const day = columns[colIndex]?.[rowIndex];
-                  const isCompleted = day?.completed ?? false;
                   const isFrozen = day?.frozen ?? false;
                   const isRecent = day?.date ? day.date >= thirtyDaysAgo : false;
+                  const count = day?.count ?? 0;
 
                   let bgColor: string;
                   if (isFrozen) {
                     bgColor = isRecent ? FROZEN_COLOR : FROZEN_COLOR + '66';
-                  } else if (isCompleted) {
-                    bgColor = isRecent ? c.accent : c.accent + '66';
+                  } else if (count >= 4) {
+                    bgColor = isRecent ? c.accent : c.accent + '88';
+                  } else if (count >= 2) {
+                    bgColor = isRecent ? c.accent + 'BB' : c.accent + '66';
+                  } else if (count === 1) {
+                    bgColor = isRecent ? c.accent + '66' : c.accent + '33';
                   } else {
                     bgColor = colors.gridLine;
                   }

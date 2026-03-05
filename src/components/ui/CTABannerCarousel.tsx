@@ -116,7 +116,7 @@ function usePromoActions(): Record<PromoKey, () => void> {
     setTimeout(() => {
       Alert.alert(
         'Did you leave a review?',
-        'Thanks for supporting SudoKitty! 🐱',
+        'We would love to hear your feedback!',
         [
           {
             text: 'Not yet',

@@ -34,6 +34,7 @@ interface PlayerStreakStore extends DailyChallengeState {
   loadState: () => Promise<void>;
   saveState: () => Promise<void>;
   recordGameWin: () => void; // Called on ANY game win (regular or daily)
+  recordGamePlayed: () => void; // Called on ANY game completion (win or loss)
   syncFromRemote: () => Promise<void>; // Pull remote streak on launch
   getActivityData: (weeks?: number) => ActivityDay[];
 
@@ -95,6 +96,7 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
             state.streakFreezesCount = stored.streakFreezesCount ?? 0;
             state.frozenDates = stored.frozenDates ?? [];
             state.streakLostInfo = stored.streakLostInfo ?? null;
+            state.gamesPlayedByDate = stored.gamesPlayedByDate ?? {};
             state.mochiHistory = storedHistory || [];
             state.isLoaded = true;
           });
@@ -146,7 +148,7 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
 
       // Save state to AsyncStorage
       saveState: async () => {
-        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, totalGamesWon, lastFirstPuzzleDate, lastDailyLoginDate, streakFreezesCount, frozenDates, streakLostInfo, mochiHistory } =
+        const { currentStreak, longestStreak, lastCompletedDate, completedDates, totalMochiPoints, totalGamesWon, lastFirstPuzzleDate, lastDailyLoginDate, streakFreezesCount, frozenDates, streakLostInfo, gamesPlayedByDate, mochiHistory } =
           get();
         await storage.set<DailyChallengeState>(STORAGE_KEYS.DAILY_CHALLENGE_STATE, {
           currentStreak,
@@ -160,6 +162,7 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
           streakFreezesCount,
           frozenDates,
           streakLostInfo,
+          gamesPlayedByDate,
         });
         await storage.set<MochiHistoryEntry[]>(STORAGE_KEYS.MOCHI_HISTORY, mochiHistory);
       },
@@ -208,6 +211,15 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
           totalMochiPoints: get().totalMochiPoints,
           totalXP: usePlayerProgressStore.getState().totalXP,
         });
+      },
+
+      // Record any game completion (win or loss) for the activity heatmap
+      recordGamePlayed: () => {
+        const today = getTodayDateString();
+        set((state) => {
+          state.gamesPlayedByDate[today] = (state.gamesPlayedByDate[today] ?? 0) + 1;
+        });
+        get().saveState();
       },
 
       // Pull streak from Supabase and adopt if remote is higher
@@ -449,6 +461,7 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
           state.streakFreezesCount = 0;
           state.frozenDates = [];
           state.streakLostInfo = null;
+          state.gamesPlayedByDate = {};
         });
         get().saveState();
       },
