@@ -13,7 +13,7 @@ import { ScreenBackground } from '../src/components/ui/Layout';
 import { showRewardedAd } from '../src/services/adService';
 import { showInterstitialIfReady } from '../src/services/adService';
 import { useGameStore } from '../src/stores/gameStore';
-import { usePremiumStore } from '../src/stores/premiumStore';
+import { useEffectivePremium } from '../src/stores/premiumStore';
 import { formatTime } from '../src/utils/formatTime';
 import { playFeedback } from '../src/utils/feedback';
 import {
@@ -68,7 +68,7 @@ export default function EndGameScreen() {
   const newGame = useGameStore((s) => s.newGame);
   const resetGame = useGameStore((s) => s.resetGame);
   const startTimer = useGameStore((s) => s.startTimer);
-  const isPremium = usePremiumStore((s) => s.isPremium);
+  const isPremium = useEffectivePremium();
 
   const livesRemaining = MAX_MISTAKES - mistakeCount;
   const xpEarned = isWon ? calculateXPReward(difficulty, timeElapsed) : 0;

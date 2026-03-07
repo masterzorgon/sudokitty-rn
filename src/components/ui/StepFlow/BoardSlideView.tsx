@@ -65,6 +65,7 @@ export function BoardSlideView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    overflow: 'visible',
   },
   mascotZone: {
     flex: 1,
@@ -72,9 +73,12 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
     alignSelf: 'center',
     justifyContent: 'flex-end',
+    overflow: 'visible',
+    zIndex: 1,
   },
   boardContainer: {
     alignItems: 'center',
+    zIndex: 0,
   },
   bottomZone: {
     paddingTop: spacing.xxl + spacing.xxl, // 64pt — pushes nav buttons below the sudoku board

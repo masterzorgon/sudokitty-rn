@@ -14,6 +14,7 @@ const BORDER_RADIUS = 16;
 const POINTER_WIDTH = 16;
 const POINTER_HEIGHT = 10;
 const STROKE_WIDTH = 1.5;
+const SVG_BLEED = Math.ceil(STROKE_WIDTH) + 1;
 const STROKE_COLOR = '#d0c8c4';
 const FILL_COLOR = colors.cardBackground;
 
@@ -32,6 +33,7 @@ function buildPath(
   h: number,
   direction: PointerDirection,
   position: number,
+  inset = 0,
 ): string {
   const s = STROKE_WIDTH / 2;
   const r = BORDER_RADIUS;
@@ -40,12 +42,12 @@ function buildPath(
   const half = pw / 2;
 
   if (direction === 'up') {
-    const top = s;
-    const bottom = h - s;
-    const left = s;
-    const right = w - s;
-    const bodyTop = ph + s;
-    const cx = Math.max(left + r + half, Math.min(right - r - half, w * position));
+    const top = inset + s;
+    const bottom = inset + h - s;
+    const left = inset + s;
+    const right = inset + w - s;
+    const bodyTop = inset + ph + s;
+    const cx = Math.max(left + r + half, Math.min(right - r - half, inset + w * position));
     return [
       `M ${left + r} ${bodyTop}`,
       `L ${cx - half} ${bodyTop}`,
@@ -64,12 +66,12 @@ function buildPath(
   }
 
   if (direction === 'down') {
-    const top = s;
-    const bottom = h - s;
-    const left = s;
-    const right = w - s;
+    const top = inset + s;
+    const bottom = inset + h - s;
+    const left = inset + s;
+    const right = inset + w - s;
     const bodyBottom = bottom - ph;
-    const cx = Math.max(left + r + half, Math.min(right - r - half, w * position));
+    const cx = Math.max(left + r + half, Math.min(right - r - half, inset + w * position));
     return [
       `M ${left + r} ${top}`,
       `L ${right - r} ${top}`,
@@ -88,12 +90,12 @@ function buildPath(
   }
 
   if (direction === 'left') {
-    const top = s;
-    const bottom = h - s;
-    const left = s;
-    const right = w - s;
-    const bodyLeft = ph + s;
-    const cy = Math.max(top + r + half, Math.min(bottom - r - half, h * position));
+    const top = inset + s;
+    const bottom = inset + h - s;
+    const left = inset + s;
+    const right = inset + w - s;
+    const bodyLeft = inset + ph + s;
+    const cy = Math.max(top + r + half, Math.min(bottom - r - half, inset + h * position));
     return [
       `M ${bodyLeft + r} ${top}`,
       `L ${right - r} ${top}`,
@@ -112,12 +114,12 @@ function buildPath(
   }
 
   // right
-  const top = s;
-  const bottom = h - s;
-  const left = s;
-  const right = w - s;
+  const top = inset + s;
+  const bottom = inset + h - s;
+  const left = inset + s;
+  const right = inset + w - s;
   const bodyRight = right - ph;
-  const cy = Math.max(top + r + half, Math.min(bottom - r - half, h * position));
+  const cy = Math.max(top + r + half, Math.min(bottom - r - half, inset + h * position));
   return [
     `M ${left + r} ${top}`,
     `L ${bodyRight - r} ${top}`,
@@ -174,15 +176,20 @@ export function SpeechBubble({
     <View style={[styles.wrapper, style]} onLayout={onLayout}>
       {size.w > 0 && size.h > 0 && (
         <Svg
-          width={size.w}
-          height={size.h}
-          style={styles.svg}
+          width={size.w + SVG_BLEED * 2}
+          height={size.h + SVG_BLEED * 2}
+          style={[
+            styles.svg,
+            { top: -SVG_BLEED, left: -SVG_BLEED },
+          ]}
         >
           <Path
-            d={buildPath(size.w, size.h, pointerDirection, pointerPosition)}
+            d={buildPath(size.w, size.h, pointerDirection, pointerPosition, SVG_BLEED)}
             fill={FILL_COLOR}
             stroke={STROKE_COLOR}
             strokeWidth={STROKE_WIDTH}
+            strokeLinejoin="round"
+            strokeLinecap="round"
           />
         </Svg>
       )}
@@ -195,6 +202,7 @@ export function SpeechBubble({
 
 const styles = StyleSheet.create({
   wrapper: {
+    position: 'relative',
     overflow: 'visible',
   },
   svg: {

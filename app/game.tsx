@@ -26,7 +26,7 @@ import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../src/engine/types';
 import { playFeedback } from '../src/utils/feedback';
 import { loadSfx, unloadSfx } from '../src/services/sfxService';
-import { usePremiumStore } from '../src/stores/premiumStore';
+import { useEffectivePremium } from '../src/stores/premiumStore';
 
 export default function GameScreen() {
   const c = useColors();
@@ -48,7 +48,7 @@ export default function GameScreen() {
   const startTimer = useGameStore((s) => s.startTimer);
   const pauseGame = useGameStore((s) => s.pauseGame);
   const resumeGame = useGameStore((s) => s.resumeGame);
-  const isPremium = usePremiumStore((s) => s.isPremium);
+  const isPremium = useEffectivePremium();
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigatedToEndGame = useRef(false);
 

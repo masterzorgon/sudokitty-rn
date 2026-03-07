@@ -17,7 +17,7 @@ import { spacing, borderRadius } from '../../src/theme';
 import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
 import { usePlayerStreakStore } from '../../src/stores/playerStreakStore';
-import { useIsPremium } from '../../src/stores/premiumStore';
+import { useEffectivePremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
 import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, MOCHI_PACK_PRODUCT_IDS, type MochiPackProductId } from '../../src/constants/economy';
@@ -67,7 +67,7 @@ const priceStyles = StyleSheet.create({
 export default function StoreScreen() {
   const c = useColors();
   const router = useRouter();
-  const isPremium = useIsPremium();
+  const isPremium = useEffectivePremium();
   const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
   const streakFreezesCount = usePlayerStreakStore((s) => s.streakFreezesCount);
   const buyStreakFreeze = usePlayerStreakStore((s) => s.buyStreakFreeze);

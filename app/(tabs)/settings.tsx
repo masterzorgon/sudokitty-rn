@@ -34,7 +34,7 @@ import {
   trackExternalLinkOpened,
   trackPaywallOpened,
 } from '../../src/utils/analytics';
-import { useIsPremium } from '../../src/stores/premiumStore';
+import { useEffectivePremium } from '../../src/stores/premiumStore';
 import {
   presentPaywall,
   presentPaywallAlways,
@@ -64,7 +64,7 @@ export default function SettingsScreen() {
   const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
   const setColorTheme = useSettingsStore((s) => s.setColorTheme);
 
-  const isPremium = useIsPremium();
+  const isPremium = useEffectivePremium();
 
   const resetGame = useGameStore((s) => s.resetGame);
   const resetDailyChallenge = usePlayerStreakStore((s) => s.resetState);

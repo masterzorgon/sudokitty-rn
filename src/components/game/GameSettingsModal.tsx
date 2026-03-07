@@ -20,7 +20,7 @@ import {
 } from '../../stores/settingsStore';
 import { useGameStore } from '../../stores/gameStore';
 import { useOwnedTracksStore } from '../../stores/ownedTracksStore';
-import { useIsPremium } from '../../stores/premiumStore';
+import { useEffectivePremium } from '../../stores/premiumStore';
 import { presentPaywall } from '../../lib/revenueCat';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../constants/backingTracks';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
@@ -124,7 +124,7 @@ function MusicPage({
 
 export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameSettingsModalProps) {
   const c = useColors();
-  const isPremium = useIsPremium();
+  const isPremium = useEffectivePremium();
 
   // Settings state
   const soundsEnabled = useSoundsEnabled();

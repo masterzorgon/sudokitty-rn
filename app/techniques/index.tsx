@@ -5,7 +5,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { colors, useColors } from '../../src/theme/colors';
@@ -27,7 +27,7 @@ import {
 } from '../../src/stores/techniqueProgressStore';
 import { playFeedback } from '../../src/utils/feedback';
 import { trackPaywallOpened } from '../../src/utils/analytics';
-import { useIsPremium } from '../../src/stores/premiumStore';
+import { useEffectivePremium } from '../../src/stores/premiumStore';
 import { presentPaywall } from '../../src/lib/revenueCat';
 import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
 import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
@@ -118,12 +118,11 @@ function TechniqueCard({
           {!isLocked ? (
             <View style={styles.starsContainer}>
               {[1, 2, 3].map((starNum) => (
-                <Feather
+                <Ionicons
                   key={starNum}
-                  name="star"
+                  name={starNum <= progress.findSuccesses ? 'star' : 'star-outline'}
                   size={14}
                   color={starNum <= progress.findSuccesses ? '#FFD700' : colors.textLight}
-                  fill={starNum <= progress.findSuccesses ? '#FFD700' : 'transparent'}
                 />
               ))}
             </View>
@@ -200,7 +199,7 @@ export default function TechniquesListScreen() {
   const completionCount = useCompletionCount();
   const groups = getTechniquesGroupedByCategory();
   const totalTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
-  const isPremium = useIsPremium();
+  const isPremium = useEffectivePremium();
 
   const handleSelectTechnique = async (techniqueId: string) => {
     const meta = getTechniqueMetadata(techniqueId);

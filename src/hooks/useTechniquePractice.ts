@@ -20,7 +20,7 @@ import {
   isPlacementTechnique,
 } from '../engine/validation';
 import { useTechniqueProgressStore } from '../stores/techniqueProgressStore';
-import { usePremiumStore } from '../stores/premiumStore';
+import { useEffectivePremium } from '../stores/premiumStore';
 import { playFeedback } from '../utils/feedback';
 import { Position, positionKey } from '../engine/types';
 import { TechniqueResult } from '../engine/solver/types';
@@ -78,7 +78,7 @@ export function useTechniquePractice() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const techniqueId = id ?? '';
   const metadata = getTechniqueMetadata(techniqueId);
-  const isPremium = usePremiumStore((s) => s.isPremium);
+  const isPremium = useEffectivePremium();
 
   // ---- Puzzle state ----
   const [puzzleState, setPuzzleState] = useState<PuzzleState | null>(null);

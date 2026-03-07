@@ -29,7 +29,7 @@ import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuCard, SkeuButton } from './Skeuomorphic';
 import { playFeedback } from '../../utils/feedback';
-import { useIsPremium } from '../../stores/premiumStore';
+import { useEffectivePremium } from '../../stores/premiumStore';
 import { useAppRatedStore, useHasRated } from '../../stores/appRatedStore';
 import { presentPaywallAlways } from '../../lib/revenueCat';
 
@@ -295,7 +295,7 @@ interface PromoConfig {
 }
 
 function usePromos(filter?: PromoKey[]): PromoConfig[] {
-  const isPremium = useIsPremium();
+  const isPremium = useEffectivePremium();
   const hasRated = useHasRated();
   const actions = usePromoActions();
 

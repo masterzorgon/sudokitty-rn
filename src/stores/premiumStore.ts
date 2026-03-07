@@ -11,6 +11,7 @@ import {
   addCustomerInfoListener,
 } from '../lib/revenueCat';
 import type { CustomerInfo } from 'react-native-purchases';
+import { TEST_MODE_BYPASS_PAYWALL } from '../constants/testMode';
 
 // ============================================
 // Types
@@ -56,7 +57,17 @@ export const usePremiumStore = create<PremiumState & PremiumActions>()(
 // Selectors
 // ============================================
 
+/** Raw premium status from RevenueCat (no test-mode bypass). */
 export const useIsPremium = () => usePremiumStore((s) => s.isPremium);
+
+/**
+ * Returns true when user has premium OR test mode bypass is enabled.
+ * Use this for all paywall-gated features so they work in dev/test builds.
+ */
+export function useEffectivePremium(): boolean {
+  const isPremium = usePremiumStore((s) => s.isPremium);
+  return isPremium || TEST_MODE_BYPASS_PAYWALL;
+}
 
 // ============================================
 // Real-time listener
