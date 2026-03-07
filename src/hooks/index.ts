@@ -10,3 +10,5 @@ export type { TechniquePhase, FindPhase, PuzzleState } from './useTechniquePract
 
 export { useBackgroundMusic } from './useBackgroundMusic';
 export { useVisibilityAnimation } from './useVisibilityAnimation';
+export { useXPBadge } from './useXPBadge';
+export type { BadgeEvent } from './useXPBadge';

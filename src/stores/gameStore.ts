@@ -35,6 +35,7 @@ import {
 } from '../services/puzzleCacheService';
 import { handleGameWon, handleGameLost } from '../services/gameOutcomeHandler';
 import { recordGameCompletion } from '../services/gameCompletionService';
+import { GAME_BASE_XP } from '../constants/xp';
 
 // Create empty cell
 const createCell = (
@@ -202,6 +203,8 @@ interface GameState {
   // Completion tracking (for wave animations)
   lastCompletedUnits: CompletedUnit[];
   lastCorrectCell: Position | null;
+  /** Only set by inputNumber on correct placement — used for XP badge (hints excluded) */
+  lastManualCorrectCell: Position | null;
 
   // Consecutive correct placements (for streak animations)
   correctStreak: number;
@@ -213,6 +216,9 @@ interface GameState {
   // Continue / daily tracking
   isDaily: boolean;
   continueCount: number;
+
+  // XP badge (per-placement XP for manual correct entries)
+  xpPerPlacement: number;
 }
 
 // Game actions interface
@@ -283,11 +289,13 @@ const initialState: GameState = {
   historyIndex: -1,
   lastCompletedUnits: [],
   lastCorrectCell: null,
+  lastManualCorrectCell: null,
   correctStreak: 0,
   lastHint: null,
   hintHighlightCells: [],
   isDaily: false,
   continueCount: 0,
+  xpPerPlacement: 1,
 };
 
 // Create the store
@@ -315,6 +323,11 @@ export const useGameStore = create<GameState & GameActions>()(
         }
 
         const board = createBoardFromPuzzle(puzzle, solution);
+        const fillableCount = board.flat().filter((c) => !c.isGiven).length;
+        const xpPerPlacement = Math.max(
+          1,
+          Math.round(GAME_BASE_XP[difficulty] / fillableCount),
+        );
 
         set((state) => {
           state.board = board;
@@ -332,9 +345,11 @@ export const useGameStore = create<GameState & GameActions>()(
           state.historyIndex = -1;
           state.lastCompletedUnits = [];
           state.lastCorrectCell = null;
+          state.lastManualCorrectCell = null;
           state.correctStreak = 0;
           state.isDaily = false;
           state.continueCount = 0;
+          state.xpPerPlacement = xpPerPlacement;
         });
       },
 
@@ -342,6 +357,11 @@ export const useGameStore = create<GameState & GameActions>()(
       newDailyGame: (dateString: string, difficulty: Difficulty) => {
         const generated = generateDailyPuzzle(dateString, difficulty);
         const board = createBoardFromPuzzle(generated.puzzle, generated.solution);
+        const fillableCount = board.flat().filter((c) => !c.isGiven).length;
+        const xpPerPlacement = Math.max(
+          1,
+          Math.round(GAME_BASE_XP[difficulty] / fillableCount),
+        );
 
         set((state) => {
           state.board = board;
@@ -359,9 +379,11 @@ export const useGameStore = create<GameState & GameActions>()(
           state.historyIndex = -1;
           state.lastCompletedUnits = [];
           state.lastCorrectCell = null;
+          state.lastManualCorrectCell = null;
           state.correctStreak = 0;
           state.isDaily = true;
           state.continueCount = 0;
+          state.xpPerPlacement = xpPerPlacement;
         });
       },
 
@@ -447,8 +469,9 @@ export const useGameStore = create<GameState & GameActions>()(
                 result.isGameLost = true;
               }
             } else {
-              // Correct answer
+              // Correct answer (manual placement only — hints use useHint/applyHint)
               draft.lastCorrectCell = { row, col };
+              draft.lastManualCorrectCell = { row, col };
               draft.correctStreak++;
 
               // Remove this number from notes in related cells
@@ -763,6 +786,7 @@ export const useGameStore = create<GameState & GameActions>()(
           restoreFromSnapshot(draft.board, snapshot);
           draft.historyIndex--;
           draft.lastCorrectCell = null;
+          draft.lastManualCorrectCell = null;
           draft.lastCompletedUnits = [];
         });
 
