@@ -40,41 +40,6 @@ export const level3Puzzles: PartialPuzzleBank = {
         placements: [],
       },
     },
-    {
-      puzzle: [
-        [1, 0, 2, 0, 0, 0, 5, 0, 8],
-        [3, 0, 0, 1, 5, 6, 4, 9, 2],
-        [0, 0, 4, 0, 2, 0, 0, 0, 0],
-        [6, 0, 1, 0, 3, 4, 0, 0, 5],
-        [2, 0, 0, 6, 0, 0, 3, 0, 0],
-        [0, 4, 3, 0, 7, 2, 0, 1, 6],
-        [4, 1, 0, 2, 0, 7, 0, 0, 3],
-        [8, 3, 6, 0, 0, 0, 0, 0, 9],
-        [7, 2, 0, 3, 6, 0, 0, 0, 0],
-      ],
-      solution: [
-        [1, 9, 2, 7, 4, 3, 5, 6, 8],
-        [3, 8, 7, 1, 5, 6, 4, 9, 2],
-        [5, 6, 4, 9, 2, 8, 7, 3, 1],
-        [6, 7, 1, 8, 3, 4, 9, 2, 5],
-        [2, 5, 8, 6, 9, 1, 3, 4, 7],
-        [9, 4, 3, 5, 7, 2, 8, 1, 6],
-        [4, 1, 9, 2, 8, 7, 6, 5, 3],
-        [8, 3, 6, 4, 1, 5, 2, 7, 9],
-        [7, 2, 5, 3, 6, 9, 1, 8, 4],
-      ],
-      techniqueResult: {
-        techniqueName: 'Naked Triple',
-        level: 3,
-        explanation: 'R5C3, R5C8, R5C9 form a naked triple with candidates 4, 7, 8 in row 5',
-        highlightCells: [{ row: 4, col: 2 }, { row: 4, col: 7 }, { row: 4, col: 8 }],
-        eliminations: [
-          { position: { row: 4, col: 1 }, candidates: [7, 8] },
-          { position: { row: 4, col: 4 }, candidates: [8] },
-        ],
-        placements: [],
-      },
-    },
   ],
 
   'hidden-triple': [

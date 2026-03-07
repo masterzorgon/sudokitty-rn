@@ -37,6 +37,13 @@ Generated from Phase 1 Board and Data Integrity validation.
 - kraken-fish
 - brute-force
 
+## Phase 2 Removals (Technique Verification)
+
+| Technique ID | Puzzle | Issue                                                                 |
+|--------------|--------|-----------------------------------------------------------------------|
+| naked-triple | 1      | Solver finds different naked triple instance; stored result did not match |
+| xy-wing      | 0      | Solver could not find XY-Wing (candidate state not reproducible)     |
+
 ## Next Steps
 
 For techniques with empty curated arrays, the app uses `generateWithFallback` which tries on-device generation first. To restore curated content for removed techniques, add new puzzles with valid solutions (verified by running the solver or integrity tests).

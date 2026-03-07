@@ -49,38 +49,7 @@ export const level4Puzzles: PartialPuzzleBank = {
   ],
 
   'xy-wing': [
-    {
-      puzzle: [
-        [0, 0, 0, 7, 9, 5, 8, 1, 4],
-        [0, 0, 0, 4, 1, 2, 6, 3, 9],
-        [0, 4, 9, 8, 3, 6, 5, 7, 2],
-        [9, 0, 0, 5, 8, 0, 7, 2, 6],
-        [7, 8, 0, 1, 0, 0, 9, 4, 5],
-        [5, 2, 0, 0, 7, 9, 3, 8, 1],
-        [2, 0, 8, 0, 4, 7, 1, 0, 3],
-        [0, 0, 0, 0, 0, 8, 2, 0, 7],
-        [6, 0, 7, 0, 5, 0, 4, 9, 8],
-      ],
-      solution: [
-        [3, 6, 2, 7, 9, 5, 8, 1, 4],
-        [8, 7, 5, 4, 1, 2, 6, 3, 9],
-        [1, 4, 9, 8, 3, 6, 5, 7, 2],
-        [9, 1, 3, 5, 8, 4, 7, 2, 6],
-        [7, 8, 6, 1, 2, 3, 9, 4, 5],
-        [5, 2, 4, 6, 7, 9, 3, 8, 1],
-        [2, 5, 8, 9, 4, 7, 1, 6, 3],
-        [4, 9, 1, 3, 6, 8, 2, 5, 7],
-        [6, 3, 7, 2, 5, 1, 4, 9, 8],
-      ],
-      techniqueResult: {
-        techniqueName: 'XY-Wing',
-        level: 4,
-        explanation: 'XY-Wing: Pivot R6C4 (4,6), wings R2C4 (4,2) and R5C5 (6,2) eliminate 2',
-        highlightCells: [{ row: 5, col: 3 }, { row: 1, col: 3 }, { row: 4, col: 4 }],
-        eliminations: [{ position: { row: 1, col: 4 }, candidates: [2] }],
-        placements: [],
-      },
-    },
+    // REMOVED puzzle 0: solver could not find XY-Wing (candidate state not reproducible)
     {
       puzzle: [
         [0, 2, 0, 4, 8, 0, 5, 0, 3],
