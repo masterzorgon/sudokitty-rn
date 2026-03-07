@@ -119,7 +119,7 @@ export const level4Puzzles: PartialPuzzleBank = {
     {
       // Verified: solver finds XYZ-Wing on raw grid
       puzzle: [[0,0,0,0,2,4,7,3,0],[5,4,0,3,7,0,2,6,0],[2,3,7,0,0,0,0,0,4],[7,0,0,0,3,0,8,4,0],[0,0,3,4,8,1,0,0,0],[0,8,4,0,6,0,0,0,3],[3,0,0,0,0,0,0,5,9],[0,7,0,0,9,3,0,0,2],[0,0,6,2,0,0,3,0,0]],
-      solution: [[0,0,0,0,2,4,7,3,0],[5,4,0,3,7,0,2,6,0],[2,3,7,0,0,0,0,0,4],[7,0,0,0,3,0,8,4,0],[0,0,3,4,8,1,0,0,0],[0,8,4,0,6,0,0,0,3],[3,0,0,0,0,0,0,5,9],[0,7,0,0,9,3,0,0,2],[0,0,6,2,0,0,3,0,0]],
+      solution: [[1,6,9,8,2,4,7,3,5],[5,4,8,3,7,9,2,6,1],[2,3,7,1,5,6,9,8,4],[7,5,1,9,3,2,8,4,6],[6,2,3,4,8,1,5,9,7],[9,8,4,5,6,7,1,2,3],[3,1,2,7,4,8,6,5,9],[8,7,5,6,9,3,4,1,2],[4,9,6,2,1,5,3,7,8]],
       techniqueResult: {
         techniqueName: 'XYZ-Wing',
         level: 4,
@@ -204,149 +204,15 @@ export const level4Puzzles: PartialPuzzleBank = {
     },
   ],
 
-  'franken-fish': [
-    {
-      // Franken Swordfish: base sets r1,r5,b7, cover sets c1,c2,c5 on digit 8
-      puzzle: [
-        [0, 0, 6, 7, 0, 0, 3, 9, 1],
-        [0, 0, 9, 3, 0, 0, 4, 0, 0],
-        [0, 0, 3, 0, 0, 0, 6, 7, 9],
-        [9, 1, 2, 0, 3, 0, 6, 0, 7],
-        [3, 7, 4, 2, 6, 0, 9, 5, 0],
-        [8, 6, 5, 7, 0, 9, 0, 2, 4],
-        [0, 0, 0, 6, 9, 3, 2, 0, 5],
-        [7, 0, 0, 0, 2, 0, 0, 0, 6],
-        [6, 0, 0, 0, 0, 7, 0, 0, 0],
-      ],
-      solution: [
-        [4, 5, 6, 7, 8, 2, 3, 9, 1],
-        [2, 8, 9, 3, 1, 6, 4, 0, 5],
-        [1, 0, 3, 5, 4, 0, 6, 7, 9],
-        [9, 1, 2, 4, 3, 8, 6, 0, 7],
-        [3, 7, 4, 2, 6, 1, 9, 5, 8],
-        [8, 6, 5, 7, 0, 9, 1, 2, 4],
-        [0, 4, 1, 6, 9, 3, 2, 8, 5],
-        [7, 3, 8, 0, 2, 5, 0, 4, 6],
-        [6, 2, 0, 8, 0, 7, 5, 1, 3],
-      ],
-      techniqueResult: {
-        techniqueName: 'Franken Fish',
-        level: 4,
-        explanation: 'Franken Swordfish: 8 r1r5b7/c1c2c5',
-        highlightCells: [
-          { row: 0, col: 0 }, { row: 0, col: 1 }, { row: 0, col: 4 },
-          { row: 4, col: 5 }, { row: 4, col: 8 },
-          { row: 6, col: 0 }, { row: 7, col: 1 },
-        ],
-        eliminations: [
-          { position: { row: 2, col: 4 }, candidates: [8] },
-        ],
-        placements: [],
-      },
-    },
-  ],
+  'franken-fish': [], // REMOVED: stored solution had zeros; solver could not reproduce
 
-  'mutant-fish': [
-    {
-      // Mutant X-Wing: base sets r6,c2, cover sets c6,b4 on digit 9
-      // (This is equivalent to a 2-String Kite / Turbot Fish seen as a fish)
-      puzzle: [
-        [3, 6, 1, 7, 0, 0, 2, 9, 5],
-        [8, 4, 2, 3, 9, 5, 6, 7, 1],
-        [0, 0, 5, 0, 0, 0, 4, 8, 3],
-        [1, 0, 0, 8, 5, 0, 0, 0, 0],
-        [6, 2, 5, 0, 0, 0, 0, 1, 8],
-        [0, 0, 0, 0, 0, 1, 5, 0, 0],
-        [7, 0, 0, 0, 0, 0, 0, 5, 0],
-        [0, 0, 3, 0, 0, 0, 0, 0, 7],
-        [0, 5, 0, 0, 0, 7, 0, 0, 0],
-      ],
-      solution: [
-        [3, 6, 1, 7, 4, 8, 2, 9, 5],
-        [8, 4, 2, 3, 9, 5, 6, 7, 1],
-        [9, 7, 5, 6, 1, 2, 4, 8, 3],
-        [1, 3, 4, 8, 5, 6, 7, 2, 9],
-        [6, 2, 5, 9, 7, 4, 3, 1, 8],
-        [0, 8, 7, 2, 3, 1, 5, 6, 4],
-        [7, 1, 8, 4, 6, 3, 9, 5, 2],
-        [4, 9, 3, 5, 2, 0, 8, 0, 7],
-        [2, 5, 6, 1, 8, 7, 0, 4, 0],
-      ],
-      techniqueResult: {
-        techniqueName: 'Mutant Fish',
-        level: 4,
-        explanation: 'Mutant X-Wing: 9 r6c2/c6b4',
-        highlightCells: [
-          { row: 5, col: 0 }, { row: 5, col: 5 },
-          { row: 3, col: 1 }, { row: 6, col: 1 },
-        ],
-        eliminations: [
-          { position: { row: 6, col: 5 }, candidates: [9] },
-        ],
-        placements: [],
-      },
-    },
-  ],
+  'mutant-fish': [], // REMOVED: stored solution had zeros; solver could not reproduce
 
-  'multi-colors': [
-    {
-      // Multi Colors (Type 1) on digit 1.
-      // Two disconnected conjugate pair chains, cells from different pairs share a house.
-      puzzle: [
-        [3, 4, 9, 5, 0, 6, 0, 7, 8],
-        [0, 0, 7, 0, 3, 9, 0, 4, 0],
-        [1, 2, 6, 7, 8, 4, 3, 9, 5],
-        [7, 6, 0, 0, 9, 0, 3, 8, 5],
-        [9, 0, 0, 0, 0, 0, 7, 2, 0],
-        [4, 0, 0, 0, 7, 8, 0, 6, 9],
-        [6, 9, 3, 8, 5, 2, 4, 1, 7],
-        [2, 0, 0, 0, 0, 7, 5, 0, 0],
-        [0, 7, 0, 0, 0, 0, 0, 0, 2],
-      ],
-      solution: [
-        [3, 4, 9, 5, 1, 6, 2, 7, 8],
-        [8, 5, 7, 2, 3, 9, 6, 4, 1],
-        [1, 2, 6, 7, 8, 4, 3, 9, 5],
-        [7, 6, 2, 1, 9, 5, 3, 8, 4],
-        [9, 8, 5, 4, 6, 3, 7, 2, 0],
-        [4, 3, 1, 0, 7, 8, 0, 6, 9],
-        [6, 9, 3, 8, 5, 2, 4, 1, 7],
-        [2, 1, 4, 3, 0, 7, 5, 0, 6],
-        [5, 7, 8, 6, 4, 1, 9, 3, 2],
-      ],
-      techniqueResult: {
-        techniqueName: 'Multi Colors',
-        level: 4,
-        explanation: 'Multi Colors (Type 1): 1 — two color pairs linked by weak link',
-        highlightCells: [
-          { row: 0, col: 4 }, { row: 4, col: 4 },
-          { row: 1, col: 0 }, { row: 1, col: 8 },
-        ],
-        eliminations: [
-          { position: { row: 4, col: 2 }, candidates: [1] },
-        ],
-        placements: [],
-      },
-    },
-  ],
+  'multi-colors': [], // REMOVED: stored solution had zeros; solver could not reproduce
 
   'templates': [],
 
-  'forcing-chain': [
-    {
-      // Verified: solver finds Forcing Chain (Contradiction) on raw grid
-      puzzle: [[0,0,0,0,6,0,0,0,0],[0,0,7,0,0,9,5,0,1],[9,0,4,3,7,0,8,0,0],[3,0,0,0,0,7,2,5,8],[0,0,0,0,0,0,0,0,0],[7,8,5,0,0,0,0,0,3],[0,0,0,0,8,2,6,0,7],[2,0,6,7,0,0,9,8,0],[0,7,0,0,9,0,0,0,0]],
-      solution: [[0,0,0,0,6,0,0,0,0],[0,0,7,0,0,9,5,0,1],[9,0,4,3,7,0,8,0,0],[3,0,0,0,0,7,2,5,8],[0,0,0,0,0,0,0,0,0],[7,8,5,0,0,0,0,0,3],[0,0,0,0,8,2,6,0,7],[2,0,6,7,0,0,9,8,0],[0,7,0,0,9,0,0,0,0]],
-      techniqueResult: {
-        techniqueName: 'Forcing Chain',
-        level: 4,
-        explanation: 'Forcing Chain (Contradiction): 2 in R1C8 leads to contradiction',
-        highlightCells: [{ row: 0, col: 7 }],
-        eliminations: [{ position: { row: 0, col: 7 }, candidates: [2] }],
-        placements: [],
-      },
-    },
-  ],
+  'forcing-chain': [], // REMOVED: solution was placeholder (identical to puzzle); solver could not reproduce
 
   'forcing-net': [],
 
@@ -354,64 +220,7 @@ export const level4Puzzles: PartialPuzzleBank = {
 
   'brute-force': [],
 
-  'almost-locked-sets': [
-    {
-      // Verified: solver finds ALS-XZ on raw grid
-      puzzle: [[9,1,0,7,0,0,0,0,3],[0,6,2,0,0,3,7,0,9],[7,3,5,0,0,4,0,8,6],[0,0,9,3,7,2,0,6,0],[0,2,3,0,5,0,0,7,0],[0,5,7,0,4,8,9,3,2],[2,7,0,4,0,0,3,0,0],[5,0,1,2,3,7,6,9,0],[3,9,0,0,0,0,0,2,7]],
-      solution: [[9,1,0,7,0,0,0,0,3],[0,6,2,0,0,3,7,0,9],[7,3,5,0,0,4,0,8,6],[0,0,9,3,7,2,0,6,0],[0,2,3,0,5,0,0,7,0],[0,5,7,0,4,8,9,3,2],[2,7,0,4,0,0,3,0,0],[5,0,1,2,3,7,6,9,0],[3,9,0,0,0,0,0,2,7]],
-      techniqueResult: {
-        techniqueName: 'Almost Locked Sets',
-        level: 4,
-        explanation: 'ALS-XZ: A={5,6} B={1,5,6,8,9} X=5 Z=6',
-        highlightCells: [
-          { row: 0, col: 5 }, { row: 1, col: 3 },
-          { row: 2, col: 3 }, { row: 4, col: 3 }, { row: 5, col: 3 },
-        ],
-        eliminations: [{ position: { row: 4, col: 5 }, candidates: [6] }],
-        placements: [],
-      },
-    },
-  ],
+  'almost-locked-sets': [], // REMOVED: solution was placeholder (identical to puzzle); solver could not reproduce
 
-  'siamese-fish': [
-    {
-      // Siamese Sashimi Swordfish on digit 1.
-      // Two finned swordfish share base sets but differ in one cover set.
-      puzzle: [
-        [0, 0, 6, 0, 0, 0, 3, 0, 0],
-        [2, 6, 7, 5, 9, 4, 3, 8, 1],
-        [0, 3, 0, 8, 6, 1, 7, 4, 2],
-        [3, 9, 6, 4, 5, 2, 1, 7, 8],
-        [7, 1, 4, 6, 3, 8, 9, 2, 5],
-        [8, 5, 2, 7, 1, 9, 4, 3, 6],
-        [0, 8, 3, 9, 7, 5, 6, 1, 4],
-        [9, 7, 5, 1, 8, 6, 2, 0, 3],
-        [6, 0, 1, 3, 0, 0, 8, 5, 7],
-      ],
-      solution: [
-        [1, 4, 6, 2, 0, 7, 3, 9, 0],
-        [2, 6, 7, 5, 9, 4, 3, 8, 1],
-        [5, 3, 9, 8, 6, 1, 7, 4, 2],
-        [3, 9, 6, 4, 5, 2, 1, 7, 8],
-        [7, 1, 4, 6, 3, 8, 9, 2, 5],
-        [8, 5, 2, 7, 1, 9, 4, 3, 6],
-        [4, 8, 3, 9, 7, 5, 6, 1, 0],
-        [9, 7, 5, 1, 8, 6, 2, 0, 3],
-        [6, 2, 1, 3, 4, 0, 8, 5, 7],
-      ],
-      techniqueResult: {
-        techniqueName: 'Siamese Fish',
-        level: 4,
-        explanation: 'Siamese Swordfish: 4 with 2 eliminations',
-        highlightCells: [
-          { row: 0, col: 0 }, { row: 0, col: 3 },
-          { row: 0, col: 7 }, { row: 0, col: 8 },
-        ],
-        eliminations: [
-          { position: { row: 8, col: 5 }, candidates: [4] },
-        ],
-        placements: [],
-      },
-    },
-  ],
+  'siamese-fish': [], // REMOVED: stored solution had zeros; solver could not reproduce
 };
