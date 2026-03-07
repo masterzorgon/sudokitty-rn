@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   mascotWrapper: {
     marginLeft: -10,
     marginRight: 15,
-    top: 12,
+    top: 12 + GAME_LAYOUT.MASCOT_SIZE * 0.1, // 10% lower (12 + 12 = 24)
   },
   bubbleContainer: {
     flex: 1,

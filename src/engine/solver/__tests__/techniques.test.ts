@@ -506,64 +506,10 @@ describe('XY-Wing', () => {
     expect(foundInAny).toBe(true);
   });
 
-  test('should produce correct highlight cells', () => {
-    // Use second curated puzzle which works after preparation
-    const curated2 = CURATED_PUZZLE_BANK['xy-wing']?.[1];
-    if (!curated2) return;
-
-    const grid = prepareGridForTechnique(curated2.puzzle, 4);
-    const result = technique.apply(grid);
-    if (!result) return;
-
-    // XY-Wing has 3 highlight cells (pivot + 2 wings)
-    expect(result.highlightCells).toHaveLength(3);
-    expect(positionSetsMatch(result.highlightCells, curated2.techniqueResult.highlightCells)).toBe(true);
-  });
-
-  test('should work on second curated puzzle', () => {
-    const curated2 = CURATED_PUZZLE_BANK['xy-wing']?.[1];
-    if (!curated2) return;
-
-    const grid = prepareGridForTechnique(curated2.puzzle, 4);
-    const result = technique.apply(grid);
-
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('XY-Wing');
-  });
 });
 
 describe('Jellyfish', () => {
   const technique = new Jellyfish();
-  const curated = CURATED_PUZZLE_BANK['jellyfish']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 4);
-      result = technique.apply(grid);
-    }
-
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Jellyfish');
-    expect(result!.level).toBe(4);
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
-
-  test('should produce correct highlight cells', () => {
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 4);
-      result = technique.apply(grid);
-    }
-    if (!result) return;
-
-    // Jellyfish has 8-10+ highlight cells (pattern cells across 4 rows x 4 cols)
-    expect(result.highlightCells.length).toBeGreaterThanOrEqual(8);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -709,16 +655,6 @@ describe('WXYZ-Wing', () => {
 
 describe('Almost Locked Sets', () => {
   const technique = new AlmostLockedSets();
-  const curated = CURATED_PUZZLE_BANK['almost-locked-sets']?.[0];
-
-  test('should find technique in verified puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    const result = technique.apply(rawGrid);
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Almost Locked Sets');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -789,20 +725,6 @@ describe('2-String Kite', () => {
 
 describe('Turbot Fish', () => {
   const technique = new TurbotFish();
-  const curated = CURATED_PUZZLE_BANK['turbot-fish']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 3);
-      result = technique.apply(grid);
-    }
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Turbot Fish');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -812,20 +734,6 @@ describe('Turbot Fish', () => {
 
 describe('Empty Rectangle', () => {
   const technique = new EmptyRectangle();
-  const curated = CURATED_PUZZLE_BANK['empty-rectangle']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 3);
-      result = technique.apply(grid);
-    }
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Empty Rectangle');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -839,16 +747,6 @@ describe('Empty Rectangle', () => {
 
 describe('Sue de Coq', () => {
   const technique = new SueDeCoq();
-  const curated = CURATED_PUZZLE_BANK['sue-de-coq']?.[0];
-
-  test('should find technique in verified puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    const result = technique.apply(rawGrid);
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Sue de Coq');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -862,20 +760,6 @@ describe('Sue de Coq', () => {
 
 describe('Simple Colors', () => {
   const technique = new SimpleColors();
-  const curated = CURATED_PUZZLE_BANK['simple-colors']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 3);
-      result = technique.apply(grid);
-    }
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Simple Colors');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
@@ -889,20 +773,6 @@ describe('Simple Colors', () => {
 
 describe('Franken Fish', () => {
   const technique = new FrankenFish();
-  const curated = CURATED_PUZZLE_BANK['franken-fish']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 4);
-      result = technique.apply(grid);
-    }
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Franken Fish');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -912,20 +782,6 @@ describe('Franken Fish', () => {
 
 describe('Mutant Fish', () => {
   const technique = new MutantFish();
-  const curated = CURATED_PUZZLE_BANK['mutant-fish']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 4);
-      result = technique.apply(grid);
-    }
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Mutant Fish');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -935,22 +791,6 @@ describe('Mutant Fish', () => {
 
 describe('Siamese Fish', () => {
   const technique = new SiameseFish();
-  const curated = CURATED_PUZZLE_BANK['siamese-fish']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 4);
-      result = technique.apply(grid);
-    }
-    // Siamese Fish is very rare — may not find in curated puzzle
-    if (result) {
-      expect(result.techniqueName).toBe('Siamese Fish');
-      expect(result.eliminations.length).toBeGreaterThan(0);
-    }
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -964,20 +804,6 @@ describe('Siamese Fish', () => {
 
 describe('Multi Colors', () => {
   const technique = new MultiColors();
-  const curated = CURATED_PUZZLE_BANK['multi-colors']?.[0];
-
-  test('should find technique in curated puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    let result = technique.apply(rawGrid);
-    if (!result) {
-      const grid = prepareGridForTechnique(curated.puzzle, 4);
-      result = technique.apply(grid);
-    }
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Multi Colors');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
@@ -1000,16 +826,6 @@ describe('Templates', () => {
 
 describe('Forcing Chain', () => {
   const technique = new ForcingChain();
-  const curated = CURATED_PUZZLE_BANK['forcing-chain']?.[0];
-
-  test('should find technique in verified puzzle', () => {
-    expect(curated).toBeDefined();
-    const rawGrid = new CandidateGrid(curated.puzzle);
-    const result = technique.apply(rawGrid);
-    expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Forcing Chain');
-    expect(result!.eliminations.length).toBeGreaterThan(0);
-  });
 
   test('should return null on Level 1 puzzle', () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);

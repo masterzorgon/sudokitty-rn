@@ -44,6 +44,12 @@ Generated from Phase 1 Board and Data Integrity validation.
 | naked-triple | 1      | Solver finds different naked triple instance; stored result did not match |
 | xy-wing      | 0      | Solver could not find XY-Wing (candidate state not reproducible)     |
 
+## Phase 3 (Description and Instruction Review)
+
+- **Automated tests**: Added `lessonInstructionVerification.test.ts` — metadata completeness (non-empty descriptions, no placeholders, length bounds, consistency) and step template robustness (render without throw, valid highlight cells 0–8) for all curated techniques.
+- **Manual checklist**: Created `docs/PHASE3_MANUAL_REVIEW_CHECKLIST.md` for human review of longDescription, shortDescription, step text, and Mochi hints.
+- **Fallback steps**: No techniques currently use fallback. All techniques in TECHNIQUE_STEP_TEMPLATES have custom step templates; `renderSteps` falls back to raw `explanation` only when no template exists or a template throws.
+
 ## Next Steps
 
 For techniques with empty curated arrays, the app uses `generateWithFallback` which tries on-device generation first. To restore curated content for removed techniques, add new puzzles with valid solutions (verified by running the solver or integrity tests).
