@@ -2,6 +2,7 @@
 // Maps from engine technique names to user-facing display data
 
 import { TechniqueLevel } from '../engine/solver/types';
+import { CURATED_PUZZLE_BANK } from './techniquePuzzleBank';
 
 // ============================================
 // Types
@@ -719,9 +720,16 @@ export function getTechniqueMetadataByName(name: string): TechniqueMetadata | un
   return TECHNIQUE_METADATA.find((t) => t.name === name);
 }
 
+/** Expert techniques require at least one configured curated puzzle to be shown in lessons. */
+export function isTechniqueLessonVisible(technique: TechniqueMetadata): boolean {
+  if (technique.level < 4) return true;
+  const puzzles = CURATED_PUZZLE_BANK[technique.id];
+  return Array.isArray(puzzles) && puzzles.length > 0;
+}
+
 /** Get all techniques for a given category */
 export function getTechniquesByCategory(category: TechniqueCategory): TechniqueMetadata[] {
-  return TECHNIQUE_METADATA.filter((t) => t.category === category);
+  return TECHNIQUE_METADATA.filter((t) => t.category === category && isTechniqueLessonVisible(t));
 }
 
 /** Get all techniques grouped by category (in difficulty order), with techniques sorted by level then alphabetically */
@@ -756,7 +764,7 @@ export function getTechniquesGroupedByType(): Array<{
     type,
     color: TECHNIQUE_TYPE_COLORS[type],
     techniques: TECHNIQUE_METADATA
-      .filter((t) => t.techniqueType === type)
+      .filter((t) => t.techniqueType === type && isTechniqueLessonVisible(t))
       .sort((a, b) => a.level - b.level),
   }));
 }

@@ -13,7 +13,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
 import { storage, STORAGE_KEYS } from '../utils/storage';
-import { TECHNIQUE_METADATA } from '../data/techniqueMetadata';
+import { TECHNIQUE_METADATA, isTechniqueLessonVisible } from '../data/techniqueMetadata';
 
 // ============================================
 // Types
@@ -242,19 +242,29 @@ export const useTechniqueProgressStore = create<
 
       // Count of completed techniques
       getCompletionCount: (): number => {
-        return Object.values(get().techniques).filter((p) => p.isCompleted).length;
+        const visibleTechniqueIds = new Set(
+          TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).map((t) => t.id),
+        );
+        return Object.values(get().techniques).filter(
+          (p) => p.isCompleted && visibleTechniqueIds.has(p.techniqueId),
+        ).length;
       },
 
       // Total technique count (only solver-backed techniques)
       getTotalCount: (): number => {
-        return TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
+        return TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).length;
       },
 
       // Overall progress (0-1, only solver-backed techniques)
       getOverallProgress: (): number => {
-        const total = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
+        const visibleTechniqueIds = new Set(
+          TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).map((t) => t.id),
+        );
+        const total = visibleTechniqueIds.size;
         if (total === 0) return 0;
-        const completed = Object.values(get().techniques).filter((p) => p.isCompleted).length;
+        const completed = Object.values(get().techniques).filter(
+          (p) => p.isCompleted && visibleTechniqueIds.has(p.techniqueId),
+        ).length;
         return completed / total;
       },
     })),
@@ -283,7 +293,10 @@ export const useTechniqueProgress = (techniqueId: string) =>
 
 export const useCompletionCount = () =>
   useTechniqueProgressStore((s) =>
-    Object.values(s.techniques).filter((p) => p.isCompleted).length,
+    Object.values(s.techniques).filter((p) => {
+      const metadata = TECHNIQUE_METADATA.find((t) => t.id === p.techniqueId);
+      return Boolean(metadata?.hasSolver && metadata && isTechniqueLessonVisible(metadata) && p.isCompleted);
+    }).length,
   );
 
 export const useIsLoaded = () =>

@@ -19,6 +19,7 @@ import {
   TechniqueCategory,
   CATEGORY_COLORS,
   TECHNIQUE_METADATA,
+  isTechniqueLessonVisible,
 } from '../../src/data/techniqueMetadata';
 import {
   useTechniqueProgress,
@@ -198,7 +199,9 @@ export default function TechniquesListScreen() {
   const router = useRouter();
   const completionCount = useCompletionCount();
   const groups = getTechniquesGroupedByCategory();
-  const totalTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver).length;
+  const totalTechniques = TECHNIQUE_METADATA.filter(
+    (t) => t.hasSolver && isTechniqueLessonVisible(t),
+  ).length;
   const isPremium = useEffectivePremium();
 
   const handleSelectTechnique = async (techniqueId: string) => {

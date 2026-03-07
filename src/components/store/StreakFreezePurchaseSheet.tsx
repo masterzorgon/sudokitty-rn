@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
 import { StoreItemRow } from '../ui/StoreItemRow';
 import { usePlayerStreakStore } from '../../stores/playerStreakStore';
-import { MOCHIS_COST, MOCHI_PACK_AMOUNTS } from '../../constants/economy';
+import { getStreakFreezeCost, MOCHI_PACK_AMOUNTS } from '../../constants/economy';
 import { getMochiPackProducts, purchaseMochiPack } from '../../lib/revenueCat';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 import {
@@ -29,12 +29,12 @@ export function StreakFreezePurchaseSheet({ visible, onDismiss }: StreakFreezePu
   const c = useColors();
   const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
   const freezeCount = usePlayerStreakStore((s) => s.streakFreezesCount ?? 0);
-  const buyStreakFreeze = usePlayerStreakStore((s) => s.buyStreakFreeze);
+  const buyStreakFreezes = usePlayerStreakStore((s) => s.buyStreakFreezes);
   const layoutRef = useRef<SelectionSheetLayoutRef>(null);
 
   const [selectedQty, setSelectedQty] = useState<number | null>(null);
 
-  const selectedCost = selectedQty ? selectedQty * MOCHIS_COST.streak_freeze : null;
+  const selectedCost = selectedQty ? getStreakFreezeCost(selectedQty as 1 | 2 | 3) : null;
   const canAfford = selectedCost !== null && totalMochis >= selectedCost;
   const showInsufficientFunds = selectedQty !== null && !canAfford;
 
@@ -53,12 +53,8 @@ export function StreakFreezePurchaseSheet({ visible, onDismiss }: StreakFreezePu
   const handlePurchase = useCallback(() => {
     if (!selectedQty) return;
 
-    let purchased = 0;
-    for (let i = 0; i < selectedQty; i++) {
-      if (buyStreakFreeze()) purchased++;
-    }
-
-    if (purchased > 0) {
+    const purchased = selectedQty as 1 | 2 | 3;
+    if (buyStreakFreezes(purchased)) {
       layoutRef.current?.close(() => {
         Alert.alert(
           'Streak Freeze Purchased!',
@@ -69,7 +65,7 @@ export function StreakFreezePurchaseSheet({ visible, onDismiss }: StreakFreezePu
         handleDismiss();
       });
     }
-  }, [selectedQty, buyStreakFreeze, handleDismiss]);
+  }, [selectedQty, buyStreakFreezes, handleDismiss]);
 
   const handleInsufficientFunds = useCallback(async () => {
     if (!selectedCost) return;
@@ -127,7 +123,7 @@ export function StreakFreezePurchaseSheet({ visible, onDismiss }: StreakFreezePu
       onButtonPress={handlePurchase}
     >
       {FREEZE_OPTIONS.map(({ qty, label }) => {
-        const cost = qty * MOCHIS_COST.streak_freeze;
+        const cost = getStreakFreezeCost(qty);
         const isSelected = selectedQty === qty;
         const affordable = totalMochis >= cost;
 

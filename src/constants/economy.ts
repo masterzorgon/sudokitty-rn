@@ -1,19 +1,22 @@
 // Mochi economy constants - single currency for earn and spend
-
-import type { Difficulty } from '../engine/types';
-
-// ============================================
-// Mochis spend (consumables and premium)
-// ============================================
-
 export const MOCHIS_COST = {
   common_box: 10,
   rare_box: 40,
   legendary_box: 100,
   backing_track: 100,
-  streak_freeze: 300,
-  streak_reignite: 600,
+  streak_freeze: 950,
+  streak_reignite: 2950,
 } as const;
+
+export const STREAK_FREEZE_TIER_PRICES: Record<1 | 2 | 3, number> = {
+  1: 950,
+  2: 1850,
+  3: 2750,
+};
+
+export function getStreakFreezeCost(qty: 1 | 2 | 3): number {
+  return STREAK_FREEZE_TIER_PRICES[qty];
+}
 
 // ============================================
 // Mochi IAP packs (RevenueCat consumables)

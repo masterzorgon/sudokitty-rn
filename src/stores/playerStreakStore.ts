@@ -21,7 +21,7 @@ import { storage, STORAGE_KEYS } from '../utils/storage';
 import { syncStreakToSupabase, pullStreakFromSupabase } from '../services/streakSyncService';
 import { usePlayerProgressStore } from './playerProgressStore';
 import { syncEconomyToSupabase } from '../services/economySyncService';
-import { MOCHIS_COST } from '../constants/economy';
+import { MOCHIS_COST, getStreakFreezeCost } from '../constants/economy';
 
 interface PlayerStreakStore extends DailyChallengeState {
   // Loading state
@@ -46,6 +46,7 @@ interface PlayerStreakStore extends DailyChallengeState {
   recordFirstPuzzleOfDayIfNeeded: () => boolean;
   applyDailyLoginBonusIfNeeded: () => void;
   buyStreakFreeze: () => boolean;
+  buyStreakFreezes: (qty: 1 | 2 | 3) => boolean;
   consumeStreakFreezeIfAvailable: () => boolean;
   reigniteStreak: () => boolean;
   clearStreakLostInfo: () => void;
@@ -390,6 +391,18 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
         if (!spent) return false;
         set((state) => {
           state.streakFreezesCount = (state.streakFreezesCount ?? 0) + 1;
+        });
+        get().saveState();
+        void syncEconomyToSupabase();
+        return true;
+      },
+
+      buyStreakFreezes: (qty: 1 | 2 | 3): boolean => {
+        const cost = getStreakFreezeCost(qty);
+        const spent = get().spendMochis(cost, 'streak_freeze');
+        if (!spent) return false;
+        set((state) => {
+          state.streakFreezesCount = (state.streakFreezesCount ?? 0) + qty;
         });
         get().saveState();
         void syncEconomyToSupabase();

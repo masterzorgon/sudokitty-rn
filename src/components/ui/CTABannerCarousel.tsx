@@ -39,7 +39,9 @@ const MochiTechniquesImg = require('../../../assets/images/mochi/mochi-technique
 
 type PromoKey = 'techniques' | 'invite' | 'rate';
 
-const SHARE_MESSAGE = 'Check out SudoKitty — a cute way to master sudoku! 🐱🧩';
+const SHARE_MESSAGE = 'Check out SudoKitty — an app that helps you master sudoku!';
+/** iOS App Store URL — replace idXXXXXXXXX with your app’s Apple ID from App Store Connect */
+const IOS_APP_STORE_URL = 'https://apps.apple.com/app/sudokitty/idXXXXXXXXX';
 
 interface PromoCopyEntry {
   badge: string;
@@ -101,7 +103,11 @@ function usePromoActions(): Record<PromoKey, () => void> {
 
   const handleInvite = useCallback(async () => {
     try {
-      await Share.share({ message: SHARE_MESSAGE });
+      await Share.share({
+        message: `${SHARE_MESSAGE} ${IOS_APP_STORE_URL}`,
+        url: IOS_APP_STORE_URL,
+        title: 'Sudokitty',
+      });
     } catch { /* user cancelled */ }
   }, []);
 
