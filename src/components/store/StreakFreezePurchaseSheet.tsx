@@ -113,7 +113,7 @@ export function StreakFreezePurchaseSheet({ visible, onDismiss }: StreakFreezePu
         </View>
       }
       onInsufficientFundsPress={handleInsufficientFunds}
-      inactiveButtonLabel="Select a quantity"
+      inactiveButtonLabel="Select a Quantity"
       activeButtonContent={
         <View style={ss.buttonRow}>
           <Text style={ss.buttonText}>

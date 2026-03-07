@@ -20,7 +20,6 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
   const sheetRef = useRef<SheetWrapperRef>(null);
 
   const addPaidHints = useGameStore((s) => s.addPaidHints);
-  const useHint = useGameStore((s) => s.useHint);
 
   const handleWatchAd = async () => {
     const earned = await showRewardedAd();
@@ -28,7 +27,6 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
       addPaidHints(1);
       sheetRef.current?.close(() => {
         onClose();
-        useHint();
       });
     }
   };
@@ -65,7 +63,7 @@ export function HintAdSheet({ visible, onClose }: HintAdSheetProps) {
         contentStyle={styles.adButtonContent}
       >
         <Text style={[styles.adButtonText, { color: SKEU_VARIANTS.primary.textColor }]}>
-          Watch Ad for a Free Hint
+          Get a Free Hint
         </Text>
       </SkeuButton>
 

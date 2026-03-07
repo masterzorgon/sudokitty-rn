@@ -158,6 +158,12 @@ export function useTechniquePractice() {
       onSuccess(toPuzzleState(next));
       return;
     }
+    // No curated puzzles: avoid running the generator (it can hang for 5s+ for rare techniques)
+    const curatedList = CURATED_PUZZLE_BANK[techniqueId];
+    if (!curatedList || curatedList.length === 0) {
+      onError();
+      return;
+    }
     setStatusOverride('loading');
     setTimeout(() => {
       const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, {

@@ -266,7 +266,7 @@ export default function FeedbackScreen() {
           <View style={styles.section}>
             <Text style={styles.label}>Reason for reaching out</Text>
             <Dropdown
-              label="Select a reason"
+              label="Select a Reason"
               value={category}
               options={CATEGORIES}
               onSelect={setCategory}

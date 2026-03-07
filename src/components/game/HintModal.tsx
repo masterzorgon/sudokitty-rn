@@ -151,9 +151,11 @@ export function HintModal() {
         borderRadius={borderRadius.lg}
         style={styles.button}
         contentStyle={styles.buttonContent}
+        sheen={false}
+        showHighlight={false}
         accessibilityLabel="Apply hint"
       >
-        <Text style={styles.buttonText}>APPLY HINT</Text>
+        <Text style={styles.buttonText}>Apply Hint</Text>
       </SkeuButton>
     </SheetWrapper>
   );

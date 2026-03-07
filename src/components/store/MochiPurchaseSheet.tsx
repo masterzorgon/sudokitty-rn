@@ -83,7 +83,7 @@ export function MochiPurchaseSheet({ visible, onDismiss }: MochiPurchaseSheetPro
       title="Purchase more mochis"
       buttonActive={!!selectedPackId}
       buttonLoading={purchasing}
-      inactiveButtonLabel="Select your package"
+      inactiveButtonLabel="Select Your Package"
       activeButtonContent={
         <View style={ss.buttonRow}>
           <Text style={ss.buttonText}>Purchase {selectedAmount?.toLocaleString()}</Text>

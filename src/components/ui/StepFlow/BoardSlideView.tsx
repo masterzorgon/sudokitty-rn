@@ -48,13 +48,13 @@ export function BoardSlideView({
           <View style={styles.navButtonWrapper}>
             <AppButton
               onPress={onPrevious}
-              label="back"
+              label="Back"
               variant="neutral"
               disabled={isFirst}
             />
           </View>
           <View style={styles.navButtonWrapper}>
-            <AppButton onPress={onNext} label="next" />
+            <AppButton onPress={onNext} label="Next" />
           </View>
         </View>
       </View>

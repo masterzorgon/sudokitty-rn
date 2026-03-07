@@ -47,11 +47,14 @@ export const GameHeader = () => {
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
+  const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
 
   // Settings
   const timerEnabled = useTimerEnabled();
   const unlimitedMistakes = useUnlimitedMistakes();
   const unlimitedHints = useUnlimitedHints();
+  const hintsRemaining = Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining;
+  const hintsConsumed = Math.max(MAX_HINTS - hintsRemaining, 0);
 
   return (
     <View style={styles.container}>
@@ -88,7 +91,7 @@ export const GameHeader = () => {
           <Text style={[styles.infinityIcon, { color: colors.hintGold }]}>∞</Text>
         ) : (
           <IconIndicator
-            used={hintsUsed}
+            used={hintsConsumed}
             total={MAX_HINTS}
             filledIcon="bulb"
             emptyIcon="bulb-outline"

@@ -143,6 +143,7 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
   const difficulty = useGameStore((s) => s.difficulty);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
+  const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
 
   // Track state
   const ownedTrackIds = useOwnedTracksStore((s) => s.ownedTrackIds);
@@ -230,7 +231,9 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
 
   // Derived stats
   const livesRemaining = unlimitedMistakes ? '\u221E' : String(MAX_MISTAKES - mistakeCount);
-  const hintsRemaining = unlimitedHints ? '\u221E' : String(MAX_HINTS - hintsUsed);
+  const hintsRemaining = unlimitedHints
+    ? '\u221E'
+    : String(Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining);
 
   return (
     <SheetWrapper

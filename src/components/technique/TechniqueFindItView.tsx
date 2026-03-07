@@ -87,7 +87,7 @@ export function TechniqueFindItView({
         onDismiss={onTryAgain}
         title="not quite!"
         description={validationResult?.feedback ?? ''}
-        action={{ label: 'try again', onPress: onTryAgain }}
+        action={{ label: 'Try Again', onPress: onTryAgain }}
         dismissOnTapOutside={false}
       />
     </Animated.View>
@@ -121,19 +121,19 @@ function getControlsConfig(
 ): FindItControlsConfig {
   if (isElimination && findPhase === 'pattern') {
     return {
-      secondary: { label: 'back', onPress: onBack, variant: 'neutral', icon: 'chevron-left', iconPosition: 'left' },
-      primary: { label: 'submit', onPress: onConfirmPattern, icon: 'chevron-right', disabled: patternCellCount === 0 },
+      secondary: { label: 'Back', onPress: onBack, variant: 'neutral', icon: 'chevron-left', iconPosition: 'left' },
+      primary: { label: 'Submit', onPress: onConfirmPattern, icon: 'chevron-right', disabled: patternCellCount === 0 },
     };
   }
   if (isElimination && findPhase === 'elimination') {
     return {
-      secondary: { label: 'back', onPress: onBackToPattern, variant: 'neutral' },
-      primary: { label: 'submit', onPress: onSubmitSelection, disabled: eliminationCellCount === 0 },
+      secondary: { label: 'Back', onPress: onBackToPattern, variant: 'neutral' },
+      primary: { label: 'Submit', onPress: onSubmitSelection, disabled: eliminationCellCount === 0 },
     };
   }
   return {
-    secondary: { label: 'back', onPress: onBack, variant: 'neutral' },
-    primary: { label: 'submit', onPress: onSubmitSelection, disabled: selectedCellCount === 0 },
+    secondary: { label: 'Back', onPress: onBack, variant: 'neutral' },
+    primary: { label: 'Submit', onPress: onSubmitSelection, disabled: selectedCellCount === 0 },
   };
 }
 
