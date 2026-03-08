@@ -1,9 +1,10 @@
-import React, { useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useCallback, useImperativeHandle, forwardRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
   Modal,
   Pressable,
+  PanResponder,
   useWindowDimensions,
   ViewStyle,
 } from 'react-native';
@@ -19,6 +20,9 @@ import Animated, {
 
 import { colors, useColors } from '../../../theme/colors';
 import { spacing, borderRadius } from '../../../theme';
+
+const DISMISS_DISTANCE = 120;
+const DISMISS_VELOCITY = 0.8;
 
 export interface SheetWrapperRef {
   close: (callback?: () => void) => void;
@@ -44,7 +48,7 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
 
     useEffect(() => {
       if (visible) {
-        translateY.value = withSpring(0, { tension: 65, friction: 11 });
+        translateY.value = withSpring(0, { damping: 18, stiffness: 140 });
       } else {
         translateY.value = screenHeight;
       }
@@ -65,6 +69,29 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
 
     useImperativeHandle(ref, () => ({ close: animateOut }), [animateOut]);
 
+    const panResponder = useMemo(
+      () =>
+        PanResponder.create({
+          onStartShouldSetPanResponder: () => false,
+          onMoveShouldSetPanResponder: (_, gs) =>
+            gs.dy > 8 && Math.abs(gs.dy) > Math.abs(gs.dx) * 1.5,
+          onPanResponderMove: (_, gs) => {
+            translateY.value = Math.max(0, gs.dy);
+          },
+          onPanResponderRelease: (_, gs) => {
+            if (gs.dy > DISMISS_DISTANCE || gs.vy > DISMISS_VELOCITY) {
+              animateOut();
+            } else {
+              translateY.value = withSpring(0, { damping: 22, stiffness: 300 });
+            }
+          },
+          onPanResponderTerminate: () => {
+            translateY.value = withSpring(0, { damping: 22, stiffness: 300 });
+          },
+        }),
+      [translateY, animateOut],
+    );
+
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateY.value }],
     }));
@@ -72,7 +99,10 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
     const handleTapOutside = dismissOnTapOutside ? () => animateOut() : undefined;
 
     const sheetContent = (
-      <Animated.View style={[styles.container, containerStyle, animatedStyle]}>
+      <Animated.View
+        style={[styles.container, containerStyle, animatedStyle]}
+        {...panResponder.panHandlers}
+      >
         <LinearGradient
           colors={c.homeGradient as any}
           start={{ x: 0.5, y: 0 }}
