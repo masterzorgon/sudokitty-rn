@@ -12,6 +12,7 @@ export type { RollingNumberProps, RollingTimeProps } from './RollingNumber';
 export { ShowcasePage } from './ShowcasePage';
 export type { ShowcasePageBadge, ShowcasePageAction } from './ShowcasePage';
 export { StoreItemRow } from './StoreItemRow';
+export { MochiPricePill } from './MochiPricePill';
 
 // Grouped subfolders
 export * from './Sheet';

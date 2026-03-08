@@ -19,6 +19,8 @@ interface DemoPlayButtonProps {
   progress: number;
   onPress: () => void;
   size?: number;
+  /** Override accent color (e.g. for disabled state) */
+  color?: string;
 }
 
 const STROKE_WIDTH = 3;
@@ -29,8 +31,10 @@ export function DemoPlayButton({
   progress,
   onPress,
   size = 48,
+  color: colorOverride,
 }: DemoPlayButtonProps) {
   const c = useColors();
+  const color = colorOverride ?? c.accent;
   const inset = STROKE_WIDTH / 2;
   const rectSize = size - STROKE_WIDTH;
   const perimeter = 2 * (rectSize + rectSize) - 8 * CORNER_RADIUS + 2 * Math.PI * CORNER_RADIUS;
@@ -57,7 +61,7 @@ export function DemoPlayButton({
 
   return (
     <Pressable onPress={onPress} style={[styles.container, { width: size, height: size }]}>
-      <View style={[styles.background, { borderRadius: CORNER_RADIUS, backgroundColor: c.accentLight + '40' }]} />
+      <View style={[styles.background, { borderRadius: CORNER_RADIUS, backgroundColor: (colorOverride ?? c.accentLight) + '40' }]} />
 
       <AnimatedSvg
         width={size}
@@ -71,7 +75,7 @@ export function DemoPlayButton({
           height={rectSize}
           rx={CORNER_RADIUS}
           ry={CORNER_RADIUS}
-          stroke={c.accent}
+          stroke={color}
           strokeWidth={STROKE_WIDTH}
           fill="none"
           strokeLinecap="round"
@@ -83,7 +87,7 @@ export function DemoPlayButton({
       <Ionicons
         name={isPlaying ? 'pause' : 'play'}
         size={size * 0.4}
-        color={c.accent}
+        color={color}
         style={styles.icon}
       />
     </Pressable>

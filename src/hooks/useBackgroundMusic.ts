@@ -1,197 +1,69 @@
-// Background music hook for game screen
-// Connects audio service to React lifecycle, stores, and AppState
+/**
+ * Background music hook for game screen.
+ * Connects audio service to React lifecycle, stores, and AppState.
+ *
+ * BEHAVIOR CONTRACT:
+ * - musicEnabled (not soundsEnabled) controls background music.
+ * - Game 'playing' or 'paused': music plays (settings sheet open does not stop music).
+ * - Game 'won' or 'lost': music fades out.
+ * - App background: music pauses. App foreground: music resumes if policy allows.
+ *
+ * All playback decisions route through musicCoordinator.
+ */
 
-import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import * as audioService from '../services/audioService';
-import { useSoundsEnabled } from '../stores/settingsStore';
+import * as musicCoordinator from '../services/musicCoordinator';
+import { useMusicEnabled } from '../stores/settingsStore';
 import { useGameStore } from '../stores/gameStore';
 import { useActiveTrackId } from '../stores/ownedTracksStore';
 import { getTrackById } from '../constants/backingTracks';
 
-// ============================================
-// Constants
-// ============================================
-
-const MUSIC_VOLUME = 0.35; // Ambient level - won't overpower haptics or UI sounds
-const FADE_DURATION_MS = 500;
-
-// ============================================
-// Hook
-// ============================================
-
 export function useBackgroundMusic() {
-  const soundsEnabled = useSoundsEnabled();
+  const musicEnabled = useMusicEnabled();
   const gameStatus = useGameStore((s) => s.gameStatus);
   const activeTrackId = useActiveTrackId();
-  
-  const mountedRef = useRef(true);
-  const currentFadeRef = useRef<{ cancel: () => void } | null>(null);
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
-  const initialTrackRef = useRef(activeTrackId);
-
-  // ============================================
-  // Load and initialize on mount
-  // ============================================
 
   useEffect(() => {
-    mountedRef.current = true;
+    musicCoordinator.init();
 
     (async () => {
-      const track = getTrackById(initialTrackRef.current);
+      const track = getTrackById(activeTrackId);
       await audioService.loadBackgroundMusic(track?.asset);
-      
-      if (!mountedRef.current) return;
-
-      const currentStatus = useGameStore.getState().gameStatus;
-
-      if (soundsEnabled && currentStatus === 'playing') {
-        await audioService.play(0);
-        if (mountedRef.current) {
-          currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
-        }
-      }
     })();
 
     return () => {
-      mountedRef.current = false;
-      
-      if (currentFadeRef.current) {
-        currentFadeRef.current.cancel();
-        currentFadeRef.current = null;
-      }
-
-      (async () => {
-        if (await audioService.isPlaying()) {
-          const fadeOut = audioService.fade(0, FADE_DURATION_MS);
-          await new Promise((resolve) => setTimeout(resolve, FADE_DURATION_MS));
-          fadeOut.cancel();
-        }
-        await audioService.pause();
-        await audioService.unload();
-      })();
+      musicCoordinator.dispose();
     };
   }, []);
 
-  // ============================================
-  // Watch activeTrackId changes
-  // ============================================
+  useEffect(() => {
+    musicCoordinator.sync({
+      musicEnabled,
+      appActive: AppState.currentState === 'active',
+      gameStatus: gameStatus as musicCoordinator.GameStatus,
+      activeTrackId,
+    });
+  }, [musicEnabled, gameStatus, activeTrackId]);
 
   useEffect(() => {
-    if (!mountedRef.current || !audioService.isLoaded()) return;
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      musicCoordinator.sync({
+        musicEnabled,
+        appActive: nextState === 'active',
+        gameStatus: gameStatus as musicCoordinator.GameStatus,
+        activeTrackId,
+      });
+    });
+    return () => subscription.remove();
+  }, [musicEnabled, gameStatus, activeTrackId]);
 
+  useEffect(() => {
+    if (!audioService.isLoaded()) return;
     const track = getTrackById(activeTrackId);
     if (track) {
       audioService.switchTrack(track.asset);
     }
   }, [activeTrackId]);
-
-  // ============================================
-  // Watch soundsEnabled toggle
-  // ============================================
-
-  useEffect(() => {
-    if (!mountedRef.current || !audioService.isLoaded()) {
-      return;
-    }
-
-    (async () => {
-      // Cancel previous fade
-      if (currentFadeRef.current) {
-        currentFadeRef.current.cancel();
-        currentFadeRef.current = null;
-      }
-
-      if (soundsEnabled && gameStatus === 'playing') {
-        // Fade in and play
-        await audioService.play(0);
-        if (mountedRef.current) {
-          currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
-        }
-      } else {
-        // Fade out and pause
-        if (await audioService.isPlaying()) {
-          currentFadeRef.current = audioService.fade(0, FADE_DURATION_MS);
-          await new Promise((resolve) => setTimeout(resolve, FADE_DURATION_MS));
-          if (mountedRef.current) {
-            await audioService.pause();
-          }
-        }
-      }
-    })();
-  }, [soundsEnabled]);
-
-  // ============================================
-  // Watch gameStatus changes
-  // ============================================
-
-  useEffect(() => {
-    if (!mountedRef.current || !audioService.isLoaded() || !soundsEnabled) {
-      return;
-    }
-
-    (async () => {
-      // Cancel previous fade
-      if (currentFadeRef.current) {
-        currentFadeRef.current.cancel();
-        currentFadeRef.current = null;
-      }
-
-      if (gameStatus === 'playing') {
-        const playing = await audioService.isPlaying();
-        if (!playing) {
-          await audioService.play(0);
-          if (mountedRef.current) {
-            currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
-          }
-        }
-      } else if (gameStatus === 'paused' || gameStatus === 'won' || gameStatus === 'lost') {
-        if (await audioService.isPlaying()) {
-          currentFadeRef.current = audioService.fade(0, FADE_DURATION_MS);
-          await new Promise((resolve) => setTimeout(resolve, FADE_DURATION_MS));
-          if (mountedRef.current) {
-            await audioService.pause();
-          }
-        }
-      }
-    })();
-  }, [gameStatus, soundsEnabled]);
-
-  // ============================================
-  // Watch AppState (background/foreground)
-  // ============================================
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
-      const previousState = appStateRef.current;
-      appStateRef.current = nextAppState;
-
-      if (!mountedRef.current || !audioService.isLoaded() || !soundsEnabled) {
-        return;
-      }
-
-      (async () => {
-        if (previousState === 'active' && nextAppState.match(/inactive|background/)) {
-          // App going to background - pause immediately
-          if (currentFadeRef.current) {
-            currentFadeRef.current.cancel();
-            currentFadeRef.current = null;
-          }
-          await audioService.pause();
-        } else if (previousState.match(/inactive|background/) && nextAppState === 'active') {
-          // App coming to foreground - resume if game is playing
-          if (gameStatus === 'playing') {
-            await audioService.play(0);
-            if (mountedRef.current) {
-              currentFadeRef.current = audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
-            }
-          }
-        }
-      })();
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [soundsEnabled, gameStatus]);
 }

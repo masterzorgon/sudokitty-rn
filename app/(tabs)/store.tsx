@@ -23,42 +23,16 @@ import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backin
 import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, MOCHI_PACK_PRODUCT_IDS, type MochiPackProductId } from '../../src/constants/economy';
 import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
-import { DemoPlayButton } from '../../src/components/ui/DemoPlayButton';
 import { playFeedback } from '../../src/utils/feedback';
 import { SectionTitle } from '../../src/components/ui/Typography/SectionTitle';
 import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
+import { MusicTrackCard } from '../../src/components/ui/MusicTrackCard';
+import { MochiPricePill } from '../../src/components/ui/MochiPricePill';
 import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
 import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
 const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 const MochiMochisImg = require('../../assets/images/mochi/mochi-mochis.png');
-
-// ============================================
-// Mochi Price Pill
-// ============================================
-
-function MochiPricePill({ price }: { price: number }) {
-  const c = useColors();
-  return (
-    <View style={priceStyles.pill}>
-      <MochiPointIcon width={21} height={21} />
-      <Text style={[priceStyles.text, { color: c.textPrimary }]}>{price}</Text>
-    </View>
-  );
-}
-
-const priceStyles = StyleSheet.create({
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  text: {
-    fontFamily: fontFamilies.semibold,
-    fontSize: 18,
-  },
-});
-
 
 // ============================================
 // Store Screen
@@ -278,37 +252,16 @@ export default function StoreScreen() {
         {BACKING_TRACKS.map((track) => {
           const isOwned = ownedTrackIds.includes(track.id);
           const isActive = activeTrackId === track.id;
-          const isDemoPlaying = demoPlayingTrackId === track.id;
-
           return (
-            <StoreItemRow
+            <MusicTrackCard
               key={track.id}
-              icon={
-                <DemoPlayButton
-                  isPlaying={isDemoPlaying}
-                  progress={isDemoPlaying ? demoProgress : 0}
-                  onPress={() => handleToggleDemo(track)}
-                  size={48}
-                />
-              }
-              title={track.name}
-              subtitle={
-                isOwned
-                  ? isActive ? 'Playing' : 'Owned'
-                  : undefined
-              }
-              trailing={
-                isOwned ? (
-                  isActive ? (
-                    <Ionicons name="checkmark-circle" size={24} color={c.accent} />
-                  ) : (
-                    <Ionicons name="ellipse-outline" size={24} color={c.boxBorder} />
-                  )
-                ) : (
-                  <MochiPricePill price={track.cost} />
-                )
-              }
-              onPress={
+              track={track}
+              isOwned={isOwned}
+              isActive={isActive}
+              isDemoPlaying={demoPlayingTrackId === track.id}
+              demoProgress={demoPlayingTrackId === track.id ? demoProgress : 0}
+              onToggleDemo={() => handleToggleDemo(track)}
+              onSelect={
                 !isOwned && track.cost > 0
                   ? () => openTrackSheet(track)
                   : isOwned && !isActive

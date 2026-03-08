@@ -1,38 +1,26 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Text,
-  Pressable,
-  Dimensions,
-  ScrollView,
-  FlatList,
-  type ViewToken,
-} from 'react-native';
+import React, { useCallback, useRef } from 'react';
+import { View, StyleSheet, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import {
   useSettingsStore,
-  useSoundsEnabled,
   useHapticsEnabled,
   useUnlimitedMistakes,
   useUnlimitedHints,
 } from '../../stores/settingsStore';
 import { useGameStore } from '../../stores/gameStore';
-import { useOwnedTracksStore } from '../../stores/ownedTracksStore';
 import { useEffectivePremium } from '../../stores/premiumStore';
 import { presentPaywall } from '../../lib/revenueCat';
-import { BACKING_TRACKS, type BackingTrackDef } from '../../constants/backingTracks';
 import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
-import { playDemo, stopDemo } from '../../services/trackDemoService';
 import { colors, useColors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
+import { fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
 import { SkeuCard } from '../ui/Skeuomorphic';
 import { AppButton } from '../ui/AppButton';
 import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
 import { SettingsToggleRow } from '../settings/SettingsToggleRow';
-import { playFeedback } from '../../utils/feedback';
+import { AudioSettingsSection } from '../settings/AudioSettingsSection';
+import { MusicTrackSelector } from '../ui/MusicTrackSelector';
 import { formatTime } from '../../utils/formatTime';
 
 // MARK: - Types
@@ -40,15 +28,9 @@ import { formatTime } from '../../utils/formatTime';
 interface GameSettingsModalProps {
   visible: boolean;
   onClose: () => void;
-  onNavigateToStore?: () => void;
 }
 
 // MARK: - Constants
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const DEMO_BUTTON_SIZE = 36;
-const CARD_CONTENT_WIDTH = SCREEN_WIDTH - spacing.lg * 2 - spacing.md * 2;
 
 // MARK: - StatPill Component
 
@@ -61,110 +43,25 @@ function StatPill({ icon, value, cream }: { icon: string; value: string; cream: 
   );
 }
 
-// MARK: - MusicPage Component (single page inside the swipeable card)
-
-function MusicPage({
-  track,
-  isActive,
-  isDemoPlaying,
-  onToggleDemo,
-  onSelect,
-  width,
-}: {
-  track: BackingTrackDef;
-  isActive: boolean;
-  isDemoPlaying: boolean;
-  onToggleDemo: () => void;
-  onSelect: () => void;
-  width: number;
-}) {
-  const c = useColors();
-
-  return (
-    <View style={[styles.musicPage, { width }]}>
-      <Text style={[styles.musicNowPlaying, { color: c.textSecondary }]}>
-        {isActive ? 'Now Playing' : 'Tap to Select'}
-      </Text>
-      <Text style={[styles.musicTrackName, { color: c.textPrimary }]} numberOfLines={1}>
-        {track.name}
-      </Text>
-      <View style={styles.musicControls}>
-        <Pressable
-          onPress={onToggleDemo}
-          style={[styles.demoButton, { backgroundColor: c.accent + '20' }]}
-          accessibilityLabel={isDemoPlaying ? 'Stop preview' : 'Play preview'}
-        >
-          <Ionicons
-            name={isDemoPlaying ? 'pause' : 'play'}
-            size={18}
-            color={c.accent}
-          />
-        </Pressable>
-        {!isActive && (
-          <Pressable
-            onPress={onSelect}
-            style={[styles.selectButton, { backgroundColor: c.accent }]}
-            accessibilityLabel={`Select ${track.name}`}
-          >
-            <Text style={styles.selectButtonText}>Use This</Text>
-          </Pressable>
-        )}
-        {isActive && (
-          <View style={styles.activeIndicator}>
-            <Ionicons name="checkmark-circle" size={22} color={c.accent} />
-            <Text style={[styles.activeText, { color: c.accent }]}>Selected</Text>
-          </View>
-        )}
-      </View>
-    </View>
-  );
-}
-
 // MARK: - GameSettingsModal Component
 
-export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameSettingsModalProps) {
+export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) {
   const c = useColors();
   const isPremium = useEffectivePremium();
 
-  // Settings state
-  const soundsEnabled = useSoundsEnabled();
   const hapticsEnabled = useHapticsEnabled();
   const unlimitedMistakes = useUnlimitedMistakes();
   const unlimitedHints = useUnlimitedHints();
 
-  // Settings actions
-  const setSoundsEnabled = useSettingsStore((s) => s.setSoundsEnabled);
   const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
   const setUnlimitedMistakes = useSettingsStore((s) => s.setUnlimitedMistakes);
   const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
 
-  // Game stats
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const difficulty = useGameStore((s) => s.difficulty);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
   const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
-
-  // Track state
-  const ownedTrackIds = useOwnedTracksStore((s) => s.ownedTrackIds);
-  const activeTrackId = useOwnedTracksStore((s) => s.activeTrackId);
-  const setActiveTrack = useOwnedTracksStore((s) => s.setActiveTrack);
-
-  const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-
-  const ownedTracks = useMemo(
-    () => BACKING_TRACKS.filter((t) => ownedTrackIds.includes(t.id)),
-    [ownedTrackIds],
-  );
-
-  // Set initial page to the active track when modal opens
-  useEffect(() => {
-    if (visible) {
-      const idx = ownedTracks.findIndex((t) => t.id === activeTrackId);
-      if (idx >= 0) setCurrentPage(idx);
-    }
-  }, [visible]);
 
   const handlePremiumToggle = useCallback(
     async (enabled: boolean, setter: (v: boolean) => void) => {
@@ -184,50 +81,11 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
     [isPremium],
   );
 
-  const handleToggleDemo = useCallback(async (track: BackingTrackDef) => {
-    if (demoPlayingTrackId === track.id) {
-      await stopDemo();
-      setDemoPlayingTrackId(null);
-    } else {
-      await stopDemo();
-      await playDemo(track.asset, track.demoDurationMs);
-      setDemoPlayingTrackId(track.id);
-      setTimeout(() => {
-        setDemoPlayingTrackId((current) => (current === track.id ? null : current));
-      }, track.demoDurationMs);
-    }
-  }, [demoPlayingTrackId]);
-
-  const handleSelectTrack = useCallback((trackId: string) => {
-    playFeedback('tap');
-    setActiveTrack(trackId);
-  }, [setActiveTrack]);
-
   const sheetRef = useRef<SheetWrapperRef>(null);
 
   const handleClose = useCallback(() => {
-    stopDemo();
-    setDemoPlayingTrackId(null);
     sheetRef.current?.close();
   }, []);
-
-  const handleNavigateToStore = useCallback(() => {
-    stopDemo();
-    setDemoPlayingTrackId(null);
-    sheetRef.current?.close(() => {
-      onNavigateToStore?.();
-    });
-  }, [onNavigateToStore]);
-
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index != null) {
-        setCurrentPage(viewableItems[0].index);
-      }
-    },
-  ).current;
-
-  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   // Derived stats
   const livesRemaining = unlimitedMistakes ? '\u221E' : String(MAX_MISTAKES - mistakeCount);
@@ -241,139 +99,59 @@ export function GameSettingsModal({ visible, onClose, onNavigateToStore }: GameS
       visible={visible}
       onDismiss={onClose}
       blurBackground={false}
-      containerStyle={{ backgroundColor: c.cream, maxHeight: SCREEN_HEIGHT * 0.85 }}
+      containerStyle={{ backgroundColor: c.cream, maxHeight: '85%' }}
     >
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-            contentContainerStyle={styles.scrollContent}
-          >
-            {/* Section 1: Game Stats Pills */}
-            <View style={styles.statsRow}>
-              <StatPill icon="timer-outline" value={formatTime(timeElapsed)} cream={c.cream} />
-              <StatPill icon="skull-outline" value={difficulty} cream={c.cream} />
-              <StatPill icon="heart" value={livesRemaining} cream={c.cream} />
-              <StatPill icon="bulb" value={hintsRemaining} cream={c.cream} />
-            </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Section 1: Game Stats Pills */}
+        <View style={styles.statsRow}>
+          <StatPill icon="timer-outline" value={formatTime(timeElapsed)} cream={c.cream} />
+          <StatPill icon="skull-outline" value={difficulty} cream={c.cream} />
+          <StatPill icon="heart" value={livesRemaining} cream={c.cream} />
+          <StatPill icon="bulb" value={hintsRemaining} cream={c.cream} />
+        </View>
 
-            {/* Section 2: Music Selector Card */}
-            {soundsEnabled && ownedTracks.length > 0 && (
-              <View style={styles.musicSection}>
-                <SkeuCard
-                  borderRadius={borderRadius.lg}
-                  contentStyle={styles.musicCardContent}
-                >
-                  {ownedTracks.length === 1 ? (
-                    <MusicPage
-                      track={ownedTracks[0]}
-                      isActive={ownedTracks[0].id === activeTrackId}
-                      isDemoPlaying={demoPlayingTrackId === ownedTracks[0].id}
-                      onToggleDemo={() => handleToggleDemo(ownedTracks[0])}
-                      onSelect={() => handleSelectTrack(ownedTracks[0].id)}
-                      width={CARD_CONTENT_WIDTH}
-                    />
-                  ) : (
-                    <>
-                      <FlatList
-                        data={ownedTracks}
-                        horizontal
-                        pagingEnabled
-                        showsHorizontalScrollIndicator={false}
-                        keyExtractor={(item) => item.id}
-                        initialScrollIndex={Math.max(0, ownedTracks.findIndex((t) => t.id === activeTrackId))}
-                        getItemLayout={(_, index) => ({
-                          length: CARD_CONTENT_WIDTH,
-                          offset: CARD_CONTENT_WIDTH * index,
-                          index,
-                        })}
-                        onViewableItemsChanged={onViewableItemsChanged}
-                        viewabilityConfig={viewabilityConfig}
-                        renderItem={({ item }) => (
-                          <MusicPage
-                            track={item}
-                            isActive={item.id === activeTrackId}
-                            isDemoPlaying={demoPlayingTrackId === item.id}
-                            onToggleDemo={() => handleToggleDemo(item)}
-                            onSelect={() => handleSelectTrack(item.id)}
-                            width={CARD_CONTENT_WIDTH}
-                          />
-                        )}
-                      />
-                      <View style={styles.dotsRow}>
-                        {ownedTracks.map((t, i) => (
-                          <View
-                            key={t.id}
-                            style={[
-                              styles.dot,
-                              {
-                                backgroundColor:
-                                  i === currentPage ? c.accent : colors.gridLine,
-                              },
-                            ]}
-                          />
-                        ))}
-                      </View>
-                    </>
-                  )}
-                </SkeuCard>
+        {/* Section 2: Music Track Carousel (above toggle card, always visible) */}
+        <MusicTrackSelector />
 
-                <Pressable onPress={handleNavigateToStore} style={styles.getMoreLink}>
-                  <Text style={[styles.getMoreText, { color: c.accent }]}>
-                    Get More in Store
-                  </Text>
-                  <Ionicons name="chevron-forward" size={14} color={c.accent} />
-                </Pressable>
-              </View>
-            )}
+        {/* Section 3: Audio + Timer + Haptics */}
+        <View style={styles.audioSection}>
+          <AudioSettingsSection
+            showTimer
+            showTrackSelector
+            surface="modal"
+          />
+        </View>
 
-            {/* Section 3: Toggles */}
-            <View style={styles.settingsList}>
-              <SettingsToggleRow
-                label="Sounds"
-                description="Game audio effects"
-                value={soundsEnabled}
-                onValueChange={setSoundsEnabled}
-                isLast
-                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
-              />
+        {/* Section 4: Premium toggles */}
+        <SkeuCard borderRadius={borderRadius.lg} contentStyle={styles.premiumCardContent}>
+          <SettingsToggleRow
+            label="Unlimited mistakes"
+            description="No penalty for wrong answers"
+            value={unlimitedMistakes}
+            onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
+          />
+          <SettingsToggleRow
+            label="Unlimited hints"
+            description="No limit on hints per game"
+            value={unlimitedHints}
+            onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
+            isLast
+          />
+        </SkeuCard>
+      </ScrollView>
 
-              <SettingsToggleRow
-                label="Haptics"
-                description="Vibration feedback"
-                value={hapticsEnabled}
-                onValueChange={setHapticsEnabled}
-                isLast
-                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
-              />
-
-              <SettingsToggleRow
-                label="Unlimited mistakes"
-                description="No penalty for wrong answers"
-                value={unlimitedMistakes}
-                onValueChange={(v) => handlePremiumToggle(v, setUnlimitedMistakes)}
-                isLast
-                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
-              />
-
-              <SettingsToggleRow
-                label="Unlimited hints"
-                description="No limit on hints per game"
-                value={unlimitedHints}
-                onValueChange={(v) => handlePremiumToggle(v, setUnlimitedHints)}
-                isLast
-                containerStyle={{ backgroundColor: c.cream, borderRadius: styles.settingsRow.borderRadius }}
-              />
-            </View>
-          </ScrollView>
-
-          {/* Section 4: Close Button */}
-          <View style={styles.closeButtonWrapper}>
-            <AppButton
-              onPress={handleClose}
-              label="Resume Game"
-              variant="primary"
-            />
-          </View>
+      {/* Section 5: Close Button */}
+      <View style={styles.closeButtonWrapper}>
+        <AppButton
+          onPress={handleClose}
+          label="Resume Game"
+          variant="primary"
+        />
+      </View>
     </SheetWrapper>
   );
 }
@@ -407,92 +185,13 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 
-  // Music section
-  musicSection: {
-    marginBottom: spacing.lg,
-  },
-  musicCardContent: {
-    paddingVertical: spacing.md,
-    overflow: 'hidden',
-  },
-  musicPage: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  musicNowPlaying: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  musicTrackName: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 18,
-  },
-  musicControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginTop: spacing.xs,
-  },
-  demoButton: {
-    width: DEMO_BUTTON_SIZE,
-    height: DEMO_BUTTON_SIZE,
-    borderRadius: DEMO_BUTTON_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectButton: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-  },
-  selectButtonText: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 13,
-    color: colors.white,
-  },
-  activeIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  activeText: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 13,
-  },
-  dotsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    marginTop: spacing.md,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  getMoreLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-    marginTop: spacing.md,
-  },
-  getMoreText: {
-    fontFamily: fontFamilies.bold,
-    fontSize: 13,
-  },
-
-  // Settings
-  settingsList: {
-    gap: spacing.md,
+  // Audio section
+  audioSection: {
     marginBottom: spacing.md,
   },
-  settingsRow: {
-    borderRadius: borderRadius.md,
+  premiumCardContent: {
+    padding: 0,
+    overflow: 'visible',
   },
 
   // Close button

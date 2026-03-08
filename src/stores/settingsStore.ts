@@ -1,5 +1,9 @@
 // Settings store for user preferences
-// Handles sounds, haptics, timer visibility, unlimited mistakes/hints, and theme
+// Handles sounds (SFX only), music (background tracks), haptics, timer visibility, unlimited mistakes/hints, and theme
+//
+// Audio ownership:
+// - soundsEnabled: SFX only (game sound effects). Zero effect on background music.
+// - musicEnabled: background music only. Zero effect on SFX.
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -9,6 +13,7 @@ import type { ThemeName } from '../theme/palettes';
 
 interface SettingsState {
   soundsEnabled: boolean;
+  musicEnabled: boolean;
   hapticsEnabled: boolean;
   timerEnabled: boolean;
   unlimitedMistakes: boolean;
@@ -18,6 +23,7 @@ interface SettingsState {
 
 interface SettingsActions {
   setSoundsEnabled: (enabled: boolean) => void;
+  setMusicEnabled: (enabled: boolean) => void;
   setHapticsEnabled: (enabled: boolean) => void;
   setTimerEnabled: (enabled: boolean) => void;
   setUnlimitedMistakes: (enabled: boolean) => void;
@@ -28,6 +34,7 @@ interface SettingsActions {
 
 const initialState: SettingsState = {
   soundsEnabled: true,
+  musicEnabled: true,
   hapticsEnabled: true,
   timerEnabled: true,
   unlimitedMistakes: false,
@@ -43,6 +50,11 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setSoundsEnabled: (enabled: boolean) => {
         set({ soundsEnabled: enabled });
         trackSettingChanged('sounds', enabled);
+      },
+
+      setMusicEnabled: (enabled: boolean) => {
+        set({ musicEnabled: enabled });
+        trackSettingChanged('music', enabled);
       },
 
       setHapticsEnabled: (enabled: boolean) => {
@@ -71,13 +83,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       },
 
       resetSettings: () => {
-        set(initialState);
+        set({ ...initialState });
       },
     }),
     {
       name: '@sudokitty/settings',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 3,
+      version: 4,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Record<string, unknown>;
         if (version < 2) {
@@ -89,6 +101,9 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           state.unlimitedHints = false;
           delete state.mistakeLimitEnabled;
         }
+        if (version < 4) {
+          state.musicEnabled = true;
+        }
         return state as unknown as SettingsState & SettingsActions;
       },
     }
@@ -97,6 +112,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 
 // Selectors for optimized subscriptions
 export const useSoundsEnabled = () => useSettingsStore((s) => s.soundsEnabled);
+export const useMusicEnabled = () => useSettingsStore((s) => s.musicEnabled);
 export const useHapticsEnabled = () => useSettingsStore((s) => s.hapticsEnabled);
 export const useTimerEnabled = () => useSettingsStore((s) => s.timerEnabled);
 export const useUnlimitedMistakes = () => useSettingsStore((s) => s.unlimitedMistakes);

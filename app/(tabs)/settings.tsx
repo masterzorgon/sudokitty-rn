@@ -11,6 +11,7 @@ import {
   SettingsSection,
   SettingsToggleRow,
   SettingsLinkRow,
+  AudioSettingsSection,
 } from '../../src/components/settings';
 import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
 import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
@@ -19,9 +20,6 @@ import { StatsCTA } from '../../src/components/home';
 import { playFeedback } from '../../src/utils/feedback';
 import {
   useSettingsStore,
-  useSoundsEnabled,
-  useHapticsEnabled,
-  useTimerEnabled,
   useUnlimitedMistakes,
   useUnlimitedHints,
   useColorTheme,
@@ -50,16 +48,10 @@ export default function SettingsScreen() {
   const c = useColors();
 
   // Settings state
-  const soundsEnabled = useSoundsEnabled();
-  const hapticsEnabled = useHapticsEnabled();
-  const timerEnabled = useTimerEnabled();
   const unlimitedMistakes = useUnlimitedMistakes();
   const unlimitedHints = useUnlimitedHints();
   const colorTheme = useColorTheme();
 
-  const setSoundsEnabled = useSettingsStore((s) => s.setSoundsEnabled);
-  const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
-  const setTimerEnabled = useSettingsStore((s) => s.setTimerEnabled);
   const setUnlimitedMistakes = useSettingsStore((s) => s.setUnlimitedMistakes);
   const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
   const setColorTheme = useSettingsStore((s) => s.setColorTheme);
@@ -193,26 +185,11 @@ export default function SettingsScreen() {
 
         {/* Game Preferences */}
         <SettingsSection title="Game">
-          <SettingsToggleRow
-            label="Sounds"
-            value={soundsEnabled}
-            onValueChange={setSoundsEnabled}
-            icon="volume-2"
-            accessibilityHint="Toggle game sounds on or off"
-          />
-          <SettingsToggleRow
-            label="Haptics"
-            value={hapticsEnabled}
-            onValueChange={setHapticsEnabled}
-            icon="smartphone"
-            accessibilityHint="Toggle haptic feedback on or off"
-          />
-          <SettingsToggleRow
-            label="Timer"
-            value={timerEnabled}
-            onValueChange={setTimerEnabled}
-            icon="clock"
-            accessibilityHint="Show or hide the game timer"
+          <AudioSettingsSection
+            showTimer
+            showTrackSelector={false}
+            surface="screen"
+            isLastSection={false}
           />
           <SettingsToggleRow
             label="Unlimited mistakes"

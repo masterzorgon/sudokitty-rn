@@ -24,7 +24,6 @@ import {
 import {
   useTechniqueProgress,
   useCompletionCount,
-  COMPLETION_THRESHOLD,
 } from '../../src/stores/techniqueProgressStore';
 import { playFeedback } from '../../src/utils/feedback';
 import { trackPaywallOpened } from '../../src/utils/analytics';

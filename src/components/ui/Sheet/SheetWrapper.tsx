@@ -13,7 +13,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
   runOnJS,
 } from 'react-native-reanimated';
@@ -48,7 +47,7 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
 
     useEffect(() => {
       if (visible) {
-        translateY.value = withSpring(0, { damping: 18, stiffness: 140 });
+        translateY.value = withTiming(0, { duration: 250 });
       } else {
         translateY.value = screenHeight;
       }
@@ -82,11 +81,11 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
             if (gs.dy > DISMISS_DISTANCE || gs.vy > DISMISS_VELOCITY) {
               animateOut();
             } else {
-              translateY.value = withSpring(0, { damping: 22, stiffness: 300 });
+              translateY.value = withTiming(0, { duration: 200 });
             }
           },
           onPanResponderTerminate: () => {
-            translateY.value = withSpring(0, { damping: 22, stiffness: 300 });
+            translateY.value = withTiming(0, { duration: 200 });
           },
         }),
       [translateY, animateOut],
