@@ -40,8 +40,6 @@ export default function GameScreen() {
   const isDaily = params.isDaily === 'true';
   const difficulty = params.difficulty;
 
-  const tick = useGameStore((s) => s.tick);
-  const isTimerRunning = useGameStore((s) => s.isTimerRunning);
   const gameStatus = useGameStore((s) => s.gameStatus);
   const newGame = useGameStore((s) => s.newGame);
   const newDailyGame = useGameStore((s) => s.newDailyGame);
@@ -49,7 +47,6 @@ export default function GameScreen() {
   const pauseGame = useGameStore((s) => s.pauseGame);
   const resumeGame = useGameStore((s) => s.resumeGame);
   const isPremium = useIsPremium();
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigatedToEndGame = useRef(false);
 
   // Settings modal state
@@ -89,26 +86,6 @@ export default function GameScreen() {
       }, startGameAnimations.controlsDelay);
     }
   }, []);
-
-  // Timer effect
-  useEffect(() => {
-    if (isTimerRunning) {
-      timerRef.current = setInterval(() => {
-        tick();
-      }, 1000);
-    } else {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isTimerRunning, tick]);
 
   // Navigate to end-game screen when game ends
   useEffect(() => {

@@ -953,6 +953,23 @@ useGameStore.subscribe(
   },
 );
 
+// Singleton timer: exactly one interval ever, regardless of how many game screens are mounted
+let _timerInterval: ReturnType<typeof setInterval> | null = null;
+useGameStore.subscribe(
+  (s) => s.isTimerRunning,
+  (isRunning) => {
+    if (_timerInterval) {
+      clearInterval(_timerInterval);
+      _timerInterval = null;
+    }
+    if (isRunning) {
+      _timerInterval = setInterval(() => {
+        useGameStore.getState().tick();
+      }, 1000);
+    }
+  },
+);
+
 // Selectors for optimized subscriptions
 export const useSelectedCell = () => useGameStore((s) => s.selectedCell);
 export const useIsNotesMode = () => useGameStore((s) => s.isNotesMode);

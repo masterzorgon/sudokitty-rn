@@ -3,13 +3,11 @@ import { Tabs, useRouter } from 'expo-router';
 
 import { SplitNavBar, SecondaryTab } from '@/src/components/ui/SplitNavBar';
 import { useGameStore } from '@/src/stores/gameStore';
-import { startGameAnimations } from '@/src/theme/animations';
 import { Difficulty } from '@/src/engine/types';
 
 export default function TabLayout() {
   const router = useRouter();
   const resumeGame = useGameStore((s) => s.resumeGame);
-  const startTimer = useGameStore((s) => s.startTimer);
   const resetGame = useGameStore((s) => s.resetGame);
 
   // Handle new game - navigate to game screen with difficulty
@@ -24,10 +22,6 @@ export default function TabLayout() {
   const handleResume = () => {
     resumeGame();
     router.push('/game');
-    // Start timer after navigation animations
-    setTimeout(() => {
-      startTimer();
-    }, startGameAnimations.controlsDelay);
   };
 
   // Handle quit game - clear game state without navigating

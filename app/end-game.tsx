@@ -65,9 +65,7 @@ export default function EndGameScreen() {
   const isWon = status === 'won';
   const canContinue = useGameStore((s) => s.canContinue);
   const continueGame = useGameStore((s) => s.continueGame);
-  const newGame = useGameStore((s) => s.newGame);
   const resetGame = useGameStore((s) => s.resetGame);
-  const startTimer = useGameStore((s) => s.startTimer);
   const isPremium = useEffectivePremium();
 
   const livesRemaining = MAX_MISTAKES - mistakeCount;
@@ -97,13 +95,12 @@ export default function EndGameScreen() {
     if (!isPremium) {
       await showInterstitialIfReady();
     }
-    newGame(difficulty);
     router.dismissAll();
     router.push({
       pathname: '/game',
       params: { difficulty, isDaily: String(isDaily) },
     });
-  }, [difficulty, isDaily, isPremium, newGame, router]);
+  }, [difficulty, isDaily, isPremium, router]);
 
   const handleGoHome = useCallback(() => {
     playFeedback('tap');
