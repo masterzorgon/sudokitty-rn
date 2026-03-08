@@ -30,7 +30,7 @@ export function BoardSlideView({
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
       <View style={styles.mascotZone}>
-        <GameMascot message={mascotMessage} maxLines={0} flexibleHeight />
+        <GameMascot message={mascotMessage} maxLines={0} flexibleHeight skipEntering />
       </View>
 
       <View style={styles.boardContainer}>

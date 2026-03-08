@@ -1,58 +1,66 @@
 // GameMascot - Mascot with contextual speech bubble for game screen
 // Presentational component - receives message as prop from parent
 
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   FadeIn,
-  withSpring,
+  useSharedValue,
+  useAnimatedStyle,
   withTiming,
+  runOnJS,
 } from 'react-native-reanimated';
 
 import { MochiCat } from '../home/MochiCat';
 import { GAME_LAYOUT } from '../../constants/layout';
 import { SpeechBubble } from '../ui/Typography/SpeechBubble';
 
-const BubbleEntering = () => {
-  'worklet';
-  const initialValues = {
-    opacity: 0,
-    transform: [{ scale: 0.85 }],
-  };
-  const animations = {
-    opacity: withTiming(1, { duration: 100 }),
-    transform: [
-      { scale: withSpring(1, { damping: 50, stiffness: 400 }) },
-    ],
-  };
-  return { initialValues, animations };
-};
-
-const BubbleExiting = () => {
-  'worklet';
-  const initialValues = {
-    opacity: 1,
-    transform: [{ scale: 1 }],
-  };
-  const animations = {
-    opacity: withTiming(0, { duration: 100 }),
-    transform: [
-      { scale: withTiming(0.8, { duration: 100 }) },
-    ],
-  };
-  return { initialValues, animations };
-};
-
 interface GameMascotProps {
   message: string | null;
   maxLines?: number;
   flexibleHeight?: boolean;
+  skipEntering?: boolean;
 }
 
-export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flexibleHeight = false }: GameMascotProps) {
+export const GameMascot = memo(function GameMascot({
+  message,
+  maxLines = 2,
+  flexibleHeight = false,
+  skipEntering = false,
+}: GameMascotProps) {
+  const [displayMessage, setDisplayMessage] = useState(message ?? '');
+  const textOpacity = useSharedValue(message ? 1 : 0);
+
+  useEffect(() => {
+    if (!message) {
+      textOpacity.value = withTiming(0, { duration: 80 });
+      return;
+    }
+
+    if (!displayMessage || message === displayMessage) {
+      setDisplayMessage(message);
+      textOpacity.value = 1;
+      return;
+    }
+
+    textOpacity.value = withTiming(0, { duration: 60 }, (finished) => {
+      if (finished) {
+        runOnJS(setDisplayMessage)(message);
+        textOpacity.value = withTiming(1, { duration: 90 });
+      }
+    });
+  }, [message, displayMessage, textOpacity]);
+
+  const animatedTextStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+    transform: [{ scale: 0.985 + textOpacity.value * 0.015 }],
+  }));
+
+  const bubbleWrapperStyle = flexibleHeight ? styles.bubbleWrapperFlexible : styles.bubbleWrapper;
+
   return (
-    <Animated.View 
-      entering={FadeIn.duration(400).delay(200)}
+    <Animated.View
+      entering={skipEntering ? undefined : FadeIn.duration(400).delay(200)}
       style={[styles.container, flexibleHeight && styles.containerFlexible]}
     >
       <View style={styles.mascotWrapper}>
@@ -61,18 +69,14 @@ export const GameMascot = memo(function GameMascot({ message, maxLines = 2, flex
 
       <View style={styles.bubbleContainer}>
         {message && (
-          <Animated.View
-            key={message}
-            entering={BubbleEntering}
-            exiting={BubbleExiting}
-            style={flexibleHeight ? styles.bubbleWrapperFlexible : styles.bubbleWrapper}
-          >
+          <Animated.View style={bubbleWrapperStyle}>
             <SpeechBubble
-              text={message}
+              text={displayMessage}
               pointerDirection="left"
               pointerPosition={0.9}
               maxLines={flexibleHeight ? undefined : (maxLines || undefined)}
               scrollable={flexibleHeight}
+              contentContainerStyle={animatedTextStyle}
             />
           </Animated.View>
         )}

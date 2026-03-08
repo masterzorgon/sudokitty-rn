@@ -53,7 +53,7 @@ export function TechniqueFindItView({
   return (
     <Animated.View entering={FadeIn.duration(300)} style={styles.gameLayout}>
       <View style={styles.mascotZone}>
-        <GameMascot message={mochiMessage} flexibleHeight />
+        <GameMascot message={mochiMessage} flexibleHeight skipEntering />
       </View>
 
       <View style={styles.boardContainer}>

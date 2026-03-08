@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, ViewStyle, TextStyle, StyleProp, LayoutChangeEvent } from 'react-native';
+import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { colors } from '../../../theme/colors';
@@ -26,6 +27,7 @@ export interface SpeechBubbleProps {
   scrollable?: boolean;
   style?: ViewStyle;
   textStyle?: StyleProp<TextStyle>;
+  contentContainerStyle?: StyleProp<ViewStyle>;
 }
 
 function buildPath(
@@ -154,12 +156,15 @@ export function SpeechBubble({
   scrollable = false,
   style,
   textStyle,
+  contentContainerStyle,
 }: SpeechBubbleProps) {
   const [size, setSize] = useState({ w: 0, h: 0 });
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
-    setSize({ w: width, h: height });
+    setSize((prev) =>
+      prev.w === width && prev.h === height ? prev : { w: width, h: height }
+    );
   }, []);
 
   const contentPadding = getContentPadding(pointerDirection);
@@ -172,9 +177,14 @@ export function SpeechBubble({
     <Text style={[styles.text, textStyle]} numberOfLines={maxLines}>{text}</Text>
   );
 
+  const isReady = size.w > 0 && size.h > 0;
+
   return (
-    <View style={[styles.wrapper, style]} onLayout={onLayout}>
-      {size.w > 0 && size.h > 0 && (
+    <View
+      style={[styles.wrapper, style, !isReady && styles.hidden]}
+      onLayout={onLayout}
+    >
+      {isReady && (
         <Svg
           width={size.w + SVG_BLEED * 2}
           height={size.h + SVG_BLEED * 2}
@@ -193,9 +203,9 @@ export function SpeechBubble({
           />
         </Svg>
       )}
-      <View style={contentPadding}>
+      <Animated.View style={[contentPadding, contentContainerStyle]}>
         {textContent}
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -221,5 +231,8 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 0,
+  },
+  hidden: {
+    opacity: 0,
   },
 });
