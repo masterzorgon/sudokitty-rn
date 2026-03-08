@@ -110,11 +110,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: colors.white,
     height: 30,
+    width: CELL_SIZE * 9,
     borderWidth: 1,
     borderColor: colors.gridLineBold,
   },
   section: {
-    width: CELL_SIZE * 3,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: spacing.xs,

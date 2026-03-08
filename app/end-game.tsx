@@ -68,7 +68,6 @@ export default function EndGameScreen() {
   const resetGame = useGameStore((s) => s.resetGame);
   const isPremium = useEffectivePremium();
 
-  const livesRemaining = MAX_MISTAKES - mistakeCount;
   const xpEarned = isWon ? calculateXPReward(difficulty, timeElapsed) : 0;
   const mochisEarned = isWon
     ? isDaily
@@ -78,6 +77,14 @@ export default function EndGameScreen() {
   const rewardBreakdown = isWon && !isDaily
     ? calculateMochiRewardBreakdown(difficulty, timeElapsed)
     : null;
+
+  const livesRemaining = MAX_MISTAKES - mistakeCount;
+  const xpCouldHaveWon = !isWon ? calculateXPReward(difficulty, timeElapsed) : 0;
+  const mochisCouldHaveWon = !isWon
+    ? isDaily
+      ? DAILY_MOCHI_POINTS[difficulty]
+      : calculateMochiReward(difficulty, timeElapsed)
+    : 0;
 
   const showContinue = !isWon && canContinue();
 
@@ -133,7 +140,7 @@ export default function EndGameScreen() {
         >
           {isWon && (
             <>
-              <StatRow label="XP Earned" value={`+${xpEarned}`} icon="sparkles-outline" iconColor={c.accent} />
+              <StatRow label="XP Earned" value={`+${xpEarned}`} icon="sparkles-outline" />
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
               {rewardBreakdown ? (
                 <>
@@ -156,16 +163,32 @@ export default function EndGameScreen() {
                 />
               )}
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+              <StatRow
+                label="Lives Remaining"
+                value={`${Math.max(0, livesRemaining)} / ${MAX_MISTAKES}`}
+                icon="heart-outline"
+              />
+              <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+            </>
+          )}
+          {!isWon && (
+            <>
+              <StatRow
+                label="XP Could Have Won"
+                value={`+${xpCouldHaveWon}`}
+                icon="sparkles-outline"
+              />
+              <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+              <StatRow
+                label="Mochis Could Have Won"
+                value={`+${mochisCouldHaveWon}`}
+                iconComponent={<MochiPointIcon width={16} height={16} color={c.accent} />}
+                iconColor={c.accent}
+              />
+              <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
             </>
           )}
           <StatRow label="Time" value={formatTime(timeElapsed)} icon="time-outline" />
-          <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
-          <StatRow
-            label="Lives Remaining"
-            value={`${Math.max(0, livesRemaining)} / ${MAX_MISTAKES}`}
-            icon="heart-outline"
-            iconColor="#F87171"
-          />
           <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
           <StatRow label="Hints Used" value={`${hintsUsed}`} icon="bulb-outline" />
           <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
