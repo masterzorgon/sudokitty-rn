@@ -12,7 +12,7 @@ import { colors, useColors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing, borderRadius } from '../../src/theme';
 import { BackButton } from '../../src/components/ui/BackButton';
-import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
+import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
 import {
   getTechniquesGroupedByCategory,
   TechniqueMetadata,
@@ -51,87 +51,52 @@ function TechniqueCard({
   const progress = useTechniqueProgress(technique.id);
   const difficultyColor = CATEGORY_COLORS[technique.category];
 
-  // For techniques without a solver, show "Coming Soon" instead of progress
-  if (!technique.hasSolver) {
-    return (
-      <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
-        <SkeuCard
-          onPress={onPress}
-          borderRadius={borderRadius.lg}
-          showHighlight={false}
-          contentStyle={styles.cardContent}
-          accessibilityLabel={`${technique.name}, ${technique.category}, Coming soon`}
-        >
-          {/* Left: Name, badge, and description */}
-          <View style={styles.cardText}>
-            <View style={styles.titleRow}>
-              <Text style={styles.cardTitle}>{technique.name}</Text>
-              <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
-                <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
-                  {technique.category}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.cardSubtext} numberOfLines={1} ellipsizeMode="tail">
-              {technique.shortDescription}
-            </Text>
-          </View>
+  const icon = (
+    <View style={[styles.iconCircle, { backgroundColor: `${difficultyColor}18` }]}>
+      <Ionicons name="book-outline" size={22} color={difficultyColor} />
+    </View>
+  );
 
-          {/* Right: Coming Soon pill and chevron */}
-          <View style={styles.cardRight}>
-            <View style={styles.comingSoonPill}>
-              <Text style={styles.comingSoonText}>Coming Soon</Text>
-            </View>
-            <Feather name="chevron-right" size={18} color={colors.textLight} />
-          </View>
-        </SkeuCard>
-      </Animated.View>
-    );
-  }
+  const subtitle = !technique.hasSolver
+    ? 'Coming soon'
+    : technique.shortDescription;
+
+  const trailing = !technique.hasSolver ? (
+    <View style={styles.trailingRow}>
+      <View style={[styles.comingSoonPill, { backgroundColor: `${c.textSecondary}18` }]}>
+        <Text style={[styles.comingSoonText, { color: c.textSecondary }]}>Coming Soon</Text>
+      </View>
+      <Feather name="chevron-right" size={20} color={c.textSecondary} />
+    </View>
+  ) : (
+    <View style={styles.trailingRow}>
+      {!isLocked ? (
+        <View style={styles.starsContainer}>
+          {[1, 2, 3].map((starNum) => (
+            <Ionicons
+              key={starNum}
+              name={starNum <= progress.findSuccesses ? 'star' : 'star-outline'}
+              size={14}
+              color={starNum <= progress.findSuccesses ? '#FFD700' : c.textSecondary}
+            />
+          ))}
+        </View>
+      ) : (
+        <Feather name="lock" size={14} color={c.textSecondary} />
+      )}
+      <Feather name="chevron-right" size={20} color={c.textSecondary} />
+    </View>
+  );
 
   return (
-      <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
-      <SkeuCard
+    <Animated.View entering={FadeInDown.delay(100 + index * 60).duration(300)}>
+      <StoreItemRow
+        icon={icon}
+        title={technique.name}
+        subtitle={subtitle}
+        trailing={trailing}
         onPress={onPress}
-        borderRadius={borderRadius.lg}
-        showHighlight={false}
-        contentStyle={styles.cardContent}
-        accessibilityLabel={`${technique.name}, ${technique.category}`}
-      >
-        {/* Left: Name, badge, and description */}
-        <View style={styles.cardText}>
-          <View style={styles.titleRow}>
-            <Text style={styles.cardTitle}>{technique.name}</Text>
-            <View style={[styles.difficultyBadge, { backgroundColor: `${difficultyColor}18` }]}>
-              <Text style={[styles.difficultyBadgeText, { color: difficultyColor }]}>
-                {technique.category}
-              </Text>
-            </View>
-          </View>
-          <Text style={styles.cardSubtext} numberOfLines={1} ellipsizeMode="tail">
-            {technique.shortDescription}
-          </Text>
-        </View>
-
-        {/* Right: 3-star progress or lock + chevron */}
-        <View style={styles.cardRight}>
-          {!isLocked ? (
-            <View style={styles.starsContainer}>
-              {[1, 2, 3].map((starNum) => (
-                <Ionicons
-                  key={starNum}
-                  name={starNum <= progress.findSuccesses ? 'star' : 'star-outline'}
-                  size={14}
-                  color={starNum <= progress.findSuccesses ? '#FFD700' : colors.textLight}
-                />
-              ))}
-            </View>
-          ) : (
-            <Feather name="lock" size={14} color={colors.textLight} />
-          )}
-          <Feather name="chevron-right" size={18} color={colors.textLight} />
-        </View>
-      </SkeuCard>
+      />
     </Animated.View>
   );
 }
@@ -309,63 +274,32 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   sectionCards: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
-  cardContent: {
+  iconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  trailingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    gap: spacing.md,
-  },
-  cardText: {
-    flex: 1,
-    gap: 6,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  cardTitle: {
-    ...typography.headline,
-    color: colors.textPrimary,
-    fontSize: 14,
-  },
-  difficultyBadge: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-  },
-  difficultyBadgeText: {
-    fontSize: 10,
-    fontFamily: 'Pally-Medium',
-  },
-  cardSubtext: {
-    fontSize: 11,
-    fontFamily: 'Pally-Regular',
-    color: colors.textSecondary,
-    marginTop: 2,
+    gap: spacing.sm,
   },
   starsContainer: {
     flexDirection: 'row',
     gap: 2,
   },
-  cardRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
   comingSoonPill: {
-    backgroundColor: `${colors.textLight}20`,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: borderRadius.full,
   },
   comingSoonText: {
-    fontSize: 10,
-    fontFamily: 'Pally-Medium',
-    color: colors.textLight,
+    fontSize: 13,
+    fontFamily: 'Pally-Regular',
   },
   emptySection: {
     paddingVertical: spacing.sm,
