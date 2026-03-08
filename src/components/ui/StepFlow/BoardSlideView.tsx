@@ -74,11 +74,11 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     justifyContent: 'flex-end',
     overflow: 'visible',
-    zIndex: 1,
+    zIndex: 0,
   },
   boardContainer: {
     alignItems: 'center',
-    zIndex: 0,
+    zIndex: 1,
   },
   bottomZone: {
     paddingTop: spacing.xxl + spacing.xxl, // 64pt — pushes nav buttons below the sudoku board
