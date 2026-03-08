@@ -98,7 +98,8 @@ export default function EndGameScreen() {
       await showInterstitialIfReady();
     }
     newGame(difficulty);
-    router.replace({
+    router.dismissAll();
+    router.push({
       pathname: '/game',
       params: { difficulty, isDaily: String(isDaily) },
     });
@@ -107,7 +108,7 @@ export default function EndGameScreen() {
   const handleGoHome = useCallback(() => {
     playFeedback('tap');
     resetGame();
-    router.replace('/');
+    router.dismissAll();
   }, [resetGame, router]);
 
   return (
