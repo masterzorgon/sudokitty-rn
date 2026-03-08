@@ -17,6 +17,7 @@ import { CELL_SIZE } from './SudokuCell';
 
 const BADGE_WIDTH = 56;
 const BADGE_HEIGHT = 24;
+const EDGE_INSET = 12; // Keep badge away from screen edges to avoid clipping
 const ENTRY_MS = 100;
 const HOLD_MS = 800;
 const EXIT_MS = 500;
@@ -73,7 +74,12 @@ export function XPBadge({ row, col, xp, eventKey }: XPBadgeProps) {
     opacity: opacity.value,
   }));
 
-  const left = col * CELL_SIZE + (CELL_SIZE - BADGE_WIDTH) / 2;
+  const boardWidth = 9 * CELL_SIZE;
+  const centeredLeft = col * CELL_SIZE + (CELL_SIZE - BADGE_WIDTH) / 2;
+  const left = Math.max(
+    EDGE_INSET,
+    Math.min(boardWidth - BADGE_WIDTH - EDGE_INSET, centeredLeft),
+  );
   const top = row * CELL_SIZE - 8; // Slightly above cell top
 
   return (
