@@ -26,22 +26,29 @@ export interface XPBadgeProps {
   row: number;
   col: number;
   xp: number;
+  /** Optional event key to force animation replay on same-cell consecutive placements */
+  eventKey?: number;
 }
 
-export function XPBadge({ row, col, xp }: XPBadgeProps) {
+export function XPBadge({ row, col, xp, eventKey }: XPBadgeProps) {
   const c = useColors();
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(0);
 
   useEffect(() => {
+    // Reset to initial values before replaying (avoids remount for same-cell placements)
+    scale.value = 0.6;
+    opacity.value = 0;
+    translateY.value = 0;
+
     // Entry: snappy scale + opacity (timing, no spring overshoot)
     scale.value = withTiming(1, {
-      duration: 100,
+      duration: ENTRY_MS,
       easing: Easing.out(Easing.quad),
     });
     opacity.value = withSequence(
-      withTiming(1, { duration: 100, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: ENTRY_MS, easing: Easing.out(Easing.quad) }),
       withDelay(
         HOLD_MS,
         withTiming(0, {
@@ -59,7 +66,7 @@ export function XPBadge({ row, col, xp }: XPBadgeProps) {
         easing: Easing.out(Easing.quad),
       }),
     );
-  }, [row, col, xp]);
+  }, [row, col, xp, eventKey]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { translateY: translateY.value }],

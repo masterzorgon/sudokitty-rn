@@ -3,6 +3,7 @@
 // Uses probability-based triggering for frequent events (mistakes, correct answers)
 
 import { useState, useEffect, useRef } from 'react';
+import { InteractionManager } from 'react-native';
 import { useGameStore } from '../stores/gameStore';
 
 // MARK: - Types
@@ -95,21 +96,18 @@ export function useGameMascotMessage(): string | null {
   // Timer ref for auto-dismiss
   const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Helper to show a message with auto-dismiss
+  // Helper to show a message with auto-dismiss.
+  // Deferred so mascot message does not compete with animation-critical render cycle.
   const showMessage = (msg: string, persist = false, duration = MESSAGE_DURATION_MS) => {
-    // Clear any existing timer
     if (dismissTimerRef.current) {
       clearTimeout(dismissTimerRef.current);
     }
-    
-    setMessage(msg);
-    
-    // Auto-dismiss unless persist is true (for win/lose states)
-    if (!persist) {
-      dismissTimerRef.current = setTimeout(() => {
-        setMessage(null);
-      }, duration);
-    }
+    InteractionManager.runAfterInteractions(() => {
+      setMessage(msg);
+      if (!persist) {
+        dismissTimerRef.current = setTimeout(() => setMessage(null), duration);
+      }
+    });
   };
 
   // Unified message trigger with probability check

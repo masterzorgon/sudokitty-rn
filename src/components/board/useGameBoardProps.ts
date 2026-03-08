@@ -1,7 +1,7 @@
 // Bridge hook: reads gameStore and returns SudokuBoardProps for the main game screen.
 // This keeps the game screen code clean while SudokuBoard stays props-driven.
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useGameStore, useRelatedCells } from '../../stores/gameStore';
 import { playFeedback } from '../../utils/feedback';
 import type { SudokuBoardProps, SudokuCellData } from './SudokuBoard';
@@ -13,18 +13,33 @@ export function useGameBoardProps(): SudokuBoardProps {
   const selectCell = useGameStore((s) => s.selectCell);
   const relatedCells = useRelatedCells();
 
-  const cells: SudokuCellData[][] = useMemo(
-    () =>
-      board.map((row) =>
-        row.map((cell) => ({
+  const prevCellsRef = useRef<SudokuCellData[][]>([]);
+
+  const cells: SudokuCellData[][] = useMemo(() => {
+    const prev = prevCellsRef.current;
+    const next = board.map((row, r) =>
+      row.map((cell, c) => {
+        const p = prev[r]?.[c];
+        if (
+          p &&
+          p.value === cell.value &&
+          p.isGiven === cell.isGiven &&
+          p.isValid === cell.isValid &&
+          p.notes === cell.notes
+        ) {
+          return p;
+        }
+        return {
           value: cell.value,
           isGiven: cell.isGiven,
           isValid: cell.isValid,
           notes: cell.notes,
-        })),
-      ),
-    [board],
-  );
+        };
+      }),
+    );
+    prevCellsRef.current = next;
+    return next;
+  }, [board]);
 
   const onCellPress = useCallback(
     (row: number, col: number) => {

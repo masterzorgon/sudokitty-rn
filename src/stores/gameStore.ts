@@ -1,6 +1,7 @@
 // Core game state management with Zustand
 // Replaces iOS GameViewModel
 
+import { useMemo } from 'react';
 import { enableMapSet } from 'immer';
 import { create } from 'zustand';
 import { useShallow } from 'zustand/react/shallow';
@@ -1014,13 +1015,15 @@ export const useResumableGameInfo = () => {
   };
 };
 
+const EMPTY_RELATED_SET = new Set<string>();
+
 // Selector for cells related to current selection
 export const useRelatedCells = (): Set<string> => {
   const selectedCell = useGameStore((s) => s.selectedCell);
-  if (!selectedCell) return new Set();
-
-  const related = getRelatedPositions(selectedCell);
-  return new Set(related.map(positionKey));
+  return useMemo(() => {
+    if (!selectedCell) return EMPTY_RELATED_SET;
+    return new Set(getRelatedPositions(selectedCell).map(positionKey));
+  }, [selectedCell?.row, selectedCell?.col]);
 };
 
 // Hint selectors

@@ -1,31 +1,42 @@
 // Animated game view - renders the Sudoku board with entrance animation
 // Board is positioned in the middle zone, pushed toward the bottom
 
-import React from 'react';
+import React, { memo } from 'react';
 import { View } from 'react-native';
 import { SudokuBoard, useGameBoardProps, XPBadge, CELL_SIZE } from '../board';
-import { useBoardAnimations } from '../../hooks/useBoardAnimations';
+import { useBoardAnimationsSync } from '../../hooks/useBoardAnimations';
 import { useXPBadge } from '../../hooks/useXPBadge';
+
+/** Subscribes to completion events and syncs to store. Renders nothing. */
+const BoardAnimationLayer = memo(function BoardAnimationLayer() {
+  useBoardAnimationsSync();
+  return null;
+});
+
+const XPBadgeOverlay = memo(function XPBadgeOverlay() {
+  const badgeEvent = useXPBadge();
+  if (!badgeEvent) return null;
+  return (
+    <XPBadge
+      row={badgeEvent.row}
+      col={badgeEvent.col}
+      xp={badgeEvent.xp}
+      eventKey={badgeEvent.key}
+    />
+  );
+});
 
 export const AnimatedGameView = () => {
   const boardProps = useGameBoardProps();
-  const activeAnimations = useBoardAnimations();
-  const badgeEvent = useXPBadge();
 
   return (
     <View
       style={{ width: 9 * CELL_SIZE, height: 9 * CELL_SIZE }}
       pointerEvents="box-none"
     >
-      <SudokuBoard {...boardProps} activeAnimations={activeAnimations} animateEntrance />
-      {badgeEvent && (
-        <XPBadge
-          key={badgeEvent.key}
-          row={badgeEvent.row}
-          col={badgeEvent.col}
-          xp={badgeEvent.xp}
-        />
-      )}
+      <BoardAnimationLayer />
+      <SudokuBoard {...boardProps} animateEntrance />
+      <XPBadgeOverlay />
     </View>
   );
 };

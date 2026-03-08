@@ -21,15 +21,12 @@ import { useMusicEnabled } from '../../stores/settingsStore';
 import * as musicCoordinator from '../../services/musicCoordinator';
 import { playFeedback } from '../../utils/feedback';
 import { spacing } from '../../theme';
+import { swipeGesture } from '../../theme/animations';
 import { MusicTrackCard } from './MusicTrackCard';
 
 const PEEK_OFFSET = 8;
 const SCALE_STEP = 0.03;
-const SWIPE_THRESHOLD = 180;
-const VELOCITY_THRESHOLD = 1500;
-const OFFSCREEN_X = 500;
-const FRICTION_POWER = 0.65;
-const FRICTION_SCALE = 3.5;
+const { threshold: SWIPE_THRESHOLD, velocityThreshold: VELOCITY_THRESHOLD, offscreenX: OFFSCREEN_X, frictionPower: FRICTION_POWER, frictionScale: FRICTION_SCALE } = swipeGesture;
 const RANK_ANIM_DURATION = 250;
 
 function StackedTrackCard({

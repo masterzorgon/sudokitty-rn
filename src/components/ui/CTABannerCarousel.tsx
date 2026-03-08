@@ -27,6 +27,7 @@ import Animated, {
 import { useColors } from '../../theme/colors';
 import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
+import { swipeGesture } from '../../theme/animations';
 import { SkeuCard, SkeuButton } from './Skeuomorphic';
 import { playFeedback } from '../../utils/feedback';
 import { useEffectivePremium } from '../../stores/premiumStore';
@@ -288,11 +289,7 @@ const cardStyles = StyleSheet.create({
 
 const PEEK_OFFSET = 8;
 const SCALE_STEP = 0.03;
-const SWIPE_THRESHOLD = 180;
-const VELOCITY_THRESHOLD = 1500;
-const OFFSCREEN_X = 500;
-const FRICTION_POWER = 0.65;
-const FRICTION_SCALE = 3.5;
+const { threshold: SWIPE_THRESHOLD, velocityThreshold: VELOCITY_THRESHOLD, offscreenX: OFFSCREEN_X, frictionPower: FRICTION_POWER, frictionScale: FRICTION_SCALE } = swipeGesture;
 const RANK_ANIM_DURATION = 250;
 
 interface PromoConfig {

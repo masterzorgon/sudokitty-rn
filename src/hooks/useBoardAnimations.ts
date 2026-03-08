@@ -1,12 +1,15 @@
-// Hook that subscribes to game store completion events and produces
-// a per-cell animation map for the SudokuBoard.
-//
-// Returns a Map<string, CellAnimationState[]> keyed by position key ("row-col").
-// Each entry contains staggered animation data that SudokuCell consumes to
-// render wave pulses when rows, columns, or boxes are completed.
+// Hook that subscribes to game store completion events and syncs
+// a per-cell animation map to the boardAnimationStore.
+// Cells subscribe individually via useBoardAnimationsForCell so only
+// affected cells re-render when animations change.
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
+import {
+  setBoardAnimations,
+  getBoardAnimations,
+  subscribeToCellAnimations,
+} from '../stores/boardAnimationStore';
 import {
   Position,
   CompletedUnit,
@@ -112,52 +115,44 @@ function buildAnimationMap(
 }
 
 // ============================================
-// Hook
+// Hooks
 // ============================================
 
 const EMPTY_MAP = new Map<string, CellAnimationState[]>();
 
-export function useBoardAnimations(): Map<string, CellAnimationState[]> {
+/**
+ * Syncs completion events to boardAnimationStore. Call from a component that
+ * renders nothing (or is isolated) so animation updates don't trigger board re-renders.
+ */
+export function useBoardAnimationsSync(): void {
   const lastCompletedUnits = useGameStore((s) => s.lastCompletedUnits);
-  const [activeAnimations, setActiveAnimations] =
-    useState<Map<string, CellAnimationState[]>>(EMPTY_MAP);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastBatchIdRef = useRef<number>(0);
 
   useEffect(() => {
-    // Clear any existing auto-clear timer
     if (clearTimerRef.current) {
       clearTimeout(clearTimerRef.current);
       clearTimerRef.current = null;
     }
 
     if (lastCompletedUnits.length === 0) {
-      // No completions — clear animations immediately
-      if (activeAnimations.size > 0) {
-        setActiveAnimations(EMPTY_MAP);
-      }
+      setBoardAnimations(EMPTY_MAP);
       return;
     }
 
-    // Use the first unit's timestamp as batch ID
     const batchId = lastCompletedUnits[0].timestamp;
-
-    // Skip if we already processed this batch
     if (batchId === lastBatchIdRef.current) return;
     lastBatchIdRef.current = batchId;
 
-    // Build animation map and set it
     const map = buildAnimationMap(lastCompletedUnits, batchId);
-    setActiveAnimations(map);
+    setBoardAnimations(map);
 
-    // Auto-clear after the wave finishes
     clearTimerRef.current = setTimeout(() => {
-      setActiveAnimations(EMPTY_MAP);
+      setBoardAnimations(EMPTY_MAP);
       clearTimerRef.current = null;
     }, WAVE_DURATION + CLEAR_BUFFER);
   }, [lastCompletedUnits]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (clearTimerRef.current) {
@@ -165,6 +160,22 @@ export function useBoardAnimations(): Map<string, CellAnimationState[]> {
       }
     };
   }, []);
+}
 
-  return activeAnimations;
+/**
+ * Subscribe to completion animations for a single cell. Only this cell re-renders
+ * when its animation state changes, not the full board.
+ */
+export function useBoardAnimationsForCell(
+  key: string
+): CellAnimationState[] | undefined {
+  const [animations, setAnimations] = useState<CellAnimationState[] | undefined>(
+    () => getBoardAnimations().get(key)
+  );
+
+  useEffect(() => {
+    return subscribeToCellAnimations(key, setAnimations);
+  }, [key]);
+
+  return animations;
 }

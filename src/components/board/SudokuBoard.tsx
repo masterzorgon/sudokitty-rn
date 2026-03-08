@@ -44,7 +44,7 @@ export interface SudokuBoardProps {
   compact?: boolean;
   /** Show checkerboard box tinting */
   showBoxTinting?: boolean;
-  /** Active completion animations per cell (keyed by position key) */
+  /** @deprecated Use boardAnimationStore + useBoardAnimationsForCell in SudokuCell instead */
   activeAnimations?: Map<string, CellAnimationState[]>;
 }
 
@@ -69,7 +69,7 @@ export const SudokuBoard = memo(({
   animateValues = true,
   compact = false,
   showBoxTinting = true,
-  activeAnimations,
+  activeAnimations: _activeAnimations, // deprecated, cells use useBoardAnimationsForCell
 }: SudokuBoardProps) => {
   const cellSize = compact ? COMPACT_CELL_SIZE : CELL_SIZE;
   const dragEnabled = interactive && !!onCellPress;
@@ -142,28 +142,6 @@ export const SudokuBoard = memo(({
     });
   }, []);
 
-  // Cache per-cell animation arrays by batchId so memo() on SudokuCell
-  // can skip unaffected cells when the animation map changes.
-  const animCacheRef = useRef<Map<string, CellAnimationState[]>>(new Map());
-  const animBatchRef = useRef<number>(0);
-
-  const getStableCellAnimations = useCallback(
-    (key: string): CellAnimationState[] | undefined => {
-      const entry = activeAnimations?.get(key);
-      if (!entry) return undefined;
-      const batchId = entry[0]?.batchId ?? 0;
-      if (batchId !== animBatchRef.current) {
-        animBatchRef.current = batchId;
-        animCacheRef.current = new Map();
-      }
-      const cached = animCacheRef.current.get(key);
-      if (cached) return cached;
-      animCacheRef.current.set(key, entry);
-      return entry;
-    },
-    [activeAnimations],
-  );
-
   // --- Grid rendering ---
   const gridContent = (
     <View style={styles.board}>
@@ -192,8 +170,6 @@ export const SudokuBoard = memo(({
             const cellDelay =
               (row + col) * startGameAnimations.cellCascade.delayPerCell;
 
-            const cellAnimations = getStableCellAnimations(key);
-
             const cellContent = (
               <SudokuCell
                 key={`${row}-${col}`}
@@ -211,7 +187,6 @@ export const SudokuBoard = memo(({
                 onPress={interactive ? handleCellPress : undefined}
                 animateValues={animateValues}
                 compact={compact}
-                completionAnimations={cellAnimations}
               />
             );
 

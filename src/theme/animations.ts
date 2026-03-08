@@ -171,6 +171,20 @@ export const startGameAnimations = {
   } as WithSpringConfig,
 };
 
+// Swipe gesture config for stacked-card carousels (CTABannerCarousel, MusicTrackSelector)
+export const swipeGesture = {
+  // Minimum drag distance (px) to commit a swipe
+  threshold: 80,
+  // Minimum fling velocity (px/s) to commit a swipe
+  velocityThreshold: 800,
+  // How far off-screen the card travels during a committed swipe
+  offscreenX: 500,
+  // Power applied to raw dx before scaling — values closer to 1 feel more 1:1 with the finger
+  frictionPower: 0.85,
+  // Multiplier applied after the power curve — lower = card moves less per px of finger travel
+  frictionScale: 1.5,
+};
+
 // Scale values for animations
 export const scales = {
   pressed: 0.95,

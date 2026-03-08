@@ -15,7 +15,8 @@ import Animated, {
 import { colors, useColors } from '../../theme/colors';
 import { typography, fontFamilies } from '../../theme/typography';
 import { springConfigs, timingConfigs } from '../../theme/animations';
-import type { CellAnimationState } from '../../engine/types';
+import { positionKey, type CellAnimationState } from '../../engine/types';
+import { useBoardAnimationsForCell } from '../../hooks/useBoardAnimations';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Grid spans full screen width (edge-to-edge) for the main game
@@ -76,11 +77,17 @@ export const SudokuCell = memo(({
   onPress,
   animateValues = true,
   compact = false,
-  completionAnimations,
+  completionAnimations: completionAnimationsProp,
 }: SudokuCellProps) => {
   const c = useColors();
   const cellSize = compact ? COMPACT_CELL_SIZE : CELL_SIZE;
   const displayValue = value === 0 ? null : value;
+
+  // Subscribe to completion animations from store (main game) or use prop (technique practice)
+  const key = positionKey({ row, col });
+  const completionAnimationsFromStore = useBoardAnimationsForCell(key);
+  const completionAnimations =
+    completionAnimationsProp ?? completionAnimationsFromStore;
 
   // Animation shared values (always created for hook consistency, but only driven when enabled)
   const glowOpacity = useSharedValue(0);
