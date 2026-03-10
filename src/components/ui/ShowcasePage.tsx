@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useColors } from '../../theme/colors';
 import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme';
+import { BottomActionBar } from './Layout/BottomActionBar';
 import { AppButton } from './AppButton';
 import { SpeechBubble } from './Typography/SpeechBubble';
 
@@ -84,14 +85,14 @@ export function ShowcasePage({
       </View>
 
       {action && (
-        <View style={styles.actionContainer}>
+        <BottomActionBar style={styles.actionBar}>
           <AppButton
             onPress={action.onPress}
             label={action.label}
             icon={action.icon}
             iconPosition={action.iconPosition}
           />
-        </View>
+        </BottomActionBar>
       )}
     </View>
   );
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
   bubbleOverride: {
     width: '100%',
   },
-  actionContainer: {
-    paddingBottom: spacing.xl,
+  actionBar: {
+    paddingHorizontal: 0,
   },
 });

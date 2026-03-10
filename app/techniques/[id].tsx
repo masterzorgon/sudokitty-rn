@@ -33,7 +33,7 @@ export default function TechniquePracticeScreen() {
 
   if (!state.metadata) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
         <Text style={styles.errorText}>Technique not found: {state.techniqueId}</Text>
       </SafeAreaView>
     );
@@ -42,7 +42,7 @@ export default function TechniquePracticeScreen() {
   const { metadata, phase, sequence } = state;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <SequenceHeader
         onBack={state.handleBack}
         stepCount={state.puzzleState && phase !== 'loading' && phase !== 'error' && phase !== 'coming-soon' && phase !== 'locked' ? sequence.totalSteps : undefined}

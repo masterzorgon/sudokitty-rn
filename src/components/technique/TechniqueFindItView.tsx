@@ -3,8 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { spacing } from '../../theme';
-import { GAME_LAYOUT } from '../../constants/layout';
 import { SudokuBoard, puzzleToCellData } from '../board';
+import { BottomActionBar } from '../ui/Layout/BottomActionBar';
 import { GameMascot } from '../game';
 import { AppButton } from '../ui/AppButton';
 import { BottomSheet } from '../ui/Sheet/BottomSheet';
@@ -68,7 +68,7 @@ export function TechniqueFindItView({
         />
       </View>
 
-      <View style={styles.bottomZone}>
+      <BottomActionBar style={styles.bottomZone}>
         <FindItControls
           isElimination={isElimination}
           findPhase={findPhase}
@@ -80,7 +80,7 @@ export function TechniqueFindItView({
           onSubmitSelection={onSubmitSelection}
           onBack={onBack}
         />
-      </View>
+      </BottomActionBar>
 
       <BottomSheet
         visible={showIncorrectModal}
@@ -217,8 +217,6 @@ const styles = StyleSheet.create({
   },
   bottomZone: {
     paddingTop: spacing.xxl + spacing.xxl,
-    paddingBottom: spacing.md,
-    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },
   buttonRow: {
     flexDirection: 'row',

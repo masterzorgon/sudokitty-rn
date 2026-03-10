@@ -9,7 +9,7 @@ import { useColors } from '../src/theme/colors';
 import { typography, fontFamilies } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { SkeuButton, SkeuCard, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
-import { ScreenBackground } from '../src/components/ui/Layout';
+import { ScreenBackground, BottomActionBar } from '../src/components/ui/Layout';
 import { showRewardedAd } from '../src/services/adService';
 import { showInterstitialIfReady } from '../src/services/adService';
 import { useGameStore } from '../src/stores/gameStore';
@@ -116,7 +116,7 @@ export default function EndGameScreen() {
   }, [resetGame, router]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <ScreenBackground showBottom={false} />
 
       <View style={styles.content}>
@@ -199,7 +199,8 @@ export default function EndGameScreen() {
         <View style={{ flex: 1 }} />
 
         {/* Action Buttons */}
-        <View style={styles.actions}>
+        <BottomActionBar style={styles.actionsBar}>
+          <View style={styles.actions}>
           {showContinue && (
             <SkeuButton
               onPress={handleContinue}
@@ -251,7 +252,8 @@ export default function EndGameScreen() {
               Return Home
             </Text>
           </Pressable>
-        </View>
+          </View>
+        </BottomActionBar>
       </View>
     </SafeAreaView>
   );
@@ -265,7 +267,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.lg,
   },
   title: {
     ...typography.largeTitle,
@@ -293,6 +294,9 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.regular,
     marginTop: spacing.xs,
     marginLeft: spacing.xl + spacing.xs,
+  },
+  actionsBar: {
+    paddingHorizontal: 0,
   },
   actions: {
     gap: spacing.md,

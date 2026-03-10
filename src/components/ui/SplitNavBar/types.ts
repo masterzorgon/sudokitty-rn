@@ -1,5 +1,6 @@
 // Type definitions for Split Navigation Bar
 import { Difficulty } from '@/src/engine/types';
+import { BOTTOM_ACTION_OFFSET } from '@/src/theme';
 
 // Tab types for left cluster (Home, Profile, Settings)
 export type SecondaryTab = 'index' | 'stats' | 'store' | 'settings';
@@ -67,7 +68,7 @@ export interface MenuRowProps {
 
 // Layout constants
 export const LAYOUT = {
-  bottomOffset: 16,
+  bottomOffset: BOTTOM_ACTION_OFFSET,
   horizontalPadding: 16,
   leftClusterRadius: 24,
   leftClusterPaddingH: 20,

@@ -16,6 +16,9 @@ export const spacing = {
 /** Standard horizontal inset for screen-level content and headers. */
 export const SCREEN_PADDING = spacing.lg;
 
+/** Fixed offset above safe area for bottom action bars (matches SplitNavBar). */
+export const BOTTOM_ACTION_OFFSET = 16;
+
 // Border radius
 export const borderRadius = {
   xs: 4, // Cells

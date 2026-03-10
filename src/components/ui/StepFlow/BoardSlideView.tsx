@@ -3,9 +3,9 @@ import { View, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { spacing } from '../../../theme';
-import { GAME_LAYOUT } from '../../../constants/layout';
 import { SudokuBoard, puzzleToCellData } from '../../board';
 import { GameMascot } from '../../game';
+import { BottomActionBar } from '../Layout/BottomActionBar';
 import { AppButton } from '../AppButton';
 
 interface BoardSlideViewProps {
@@ -43,7 +43,7 @@ export function BoardSlideView({
         />
       </View>
 
-      <View style={styles.bottomZone}>
+      <BottomActionBar style={styles.bottomZone}>
         <View style={styles.stepNav}>
           <View style={styles.navButtonWrapper}>
             <AppButton
@@ -57,7 +57,7 @@ export function BoardSlideView({
             <AppButton onPress={onNext} label="Next" />
           </View>
         </View>
-      </View>
+      </BottomActionBar>
     </Animated.View>
   );
 }
@@ -82,8 +82,6 @@ const styles = StyleSheet.create({
   },
   bottomZone: {
     paddingTop: spacing.xxl + spacing.xxl, // 64pt — pushes nav buttons below the sudoku board
-    paddingBottom: spacing.md,
-    paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },
   stepNav: {
     flexDirection: 'row',

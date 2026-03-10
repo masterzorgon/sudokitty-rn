@@ -31,6 +31,7 @@ import { colors, useColors } from '../src/theme/colors';
 import { typography } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
 import { BackButton } from '../src/components/ui/BackButton';
+import { BottomActionBar } from '../src/components/ui/Layout';
 import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
 import { playFeedback } from '../src/utils/feedback';
 import { trackFeedbackSubmitted } from '../src/utils/analytics';
@@ -243,7 +244,7 @@ export default function FeedbackScreen() {
   }, [canSubmit, isSubmitting, category, name, email, message, getDeviceInfo, router]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -336,7 +337,7 @@ export default function FeedbackScreen() {
         </ScrollView>
 
         {/* Submit Button */}
-        <View style={styles.footer}>
+        <BottomActionBar style={styles.footer}>
           {isSubmitting ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator color={c.accent} />
@@ -359,7 +360,7 @@ export default function FeedbackScreen() {
               </Text>
             </SkeuButton>
           )}
-        </View>
+        </BottomActionBar>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -511,9 +512,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   footer: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingBottom: spacing.lg,
+    paddingTop: spacing.md,
   },
   loadingContainer: {
     flexDirection: 'row',
