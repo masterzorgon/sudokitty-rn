@@ -12,6 +12,9 @@ export default function TabLayout() {
 
   // Handle new game - navigate to game screen with difficulty
   const handleNewGame = (difficulty: Difficulty) => {
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/94ae2156-4726-49ff-ada6-508e5ac3a39a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'61110b'},body:JSON.stringify({sessionId:'61110b',location:'_layout.tsx:handleNewGame',message:'handleNewGame called',data:{difficulty},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
+    // #endregion
     router.push({
       pathname: '/game',
       params: { difficulty },
@@ -34,6 +37,7 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: { display: 'none' },
+        lazy: false,
       }}
       tabBar={(props) => {
         // Map route name to SecondaryTab, filtering out 'daily'

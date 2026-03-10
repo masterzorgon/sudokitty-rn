@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef, useState } from 'react';
 import { View, StatusBar, AppState, AppStateStatus } from 'react-native';
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
 import { useColors } from '../src/theme/colors';
@@ -112,9 +113,10 @@ function RootLayoutNav() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.cream }}>
-      <StatusBar barStyle="dark-content" />
-      <Stack
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+      <View style={{ flex: 1, backgroundColor: c.cream }}>
+        <StatusBar barStyle="dark-content" />
+        <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: c.cream },
@@ -182,5 +184,6 @@ function RootLayoutNav() {
         />
       </Stack>
     </View>
+    </SafeAreaProvider>
   );
 }

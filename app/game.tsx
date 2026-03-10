@@ -2,7 +2,7 @@
 // Separate from tabs for clean navigation experience
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -19,7 +19,7 @@ import {
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
 import { useGameMascotMessage, useBackgroundMusic } from '../src/hooks';
-import { colors, useColors } from '../src/theme/colors';
+import { useColors } from '../src/theme/colors';
 import { spacing } from '../src/theme';
 import { startGameAnimations } from '../src/theme/animations';
 import { GAME_LAYOUT } from '../src/constants/layout';
@@ -167,26 +167,6 @@ export default function GameScreen() {
         <AnimatedGameView />
       </View>
 
-      {/* DEV ONLY: debug utility buttons */}
-      {__DEV__ && gameStatus === 'playing' && (
-        <View style={styles.debugBar}>
-          {[
-            { label: 'Drain Hints', action: 'debugDrainHints' as const },
-            { label: 'Lose', action: 'debugForceLose' as const },
-            { label: 'Win', action: 'debugForceWin' as const },
-            { label: 'Animate', action: 'debugTriggerAnimation' as const },
-          ].map(({ label, action }) => (
-            <TouchableOpacity
-              key={action}
-              style={styles.debugButton}
-              onPress={() => useGameStore.getState()[action]()}
-            >
-              <Text style={styles.debugText}>{label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
       {/* BOTTOM ZONE - Controls */}
       <View style={styles.bottomZone}>
         <View style={styles.controlsContainer}>
@@ -247,24 +227,5 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
-  },
-  // DEV ONLY: debug animation triggers
-  debugBar: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 6,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 4,
-  },
-  debugButton: {
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  debugText: {
-    fontSize: 11,
-    fontFamily: 'Pally-Medium',
-    color: colors.textLight,
   },
 });

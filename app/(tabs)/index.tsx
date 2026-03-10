@@ -33,6 +33,9 @@ const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 
 // MARK: - Constants
 
+// Estimate header height to avoid layout jolt: insets.top + spacing.sm + pill row
+const ESTIMATED_HEADER_CONTENT_HEIGHT = 50;
+
 // Nav bar height estimate: paddingV (14) * 2 + content (~24) = ~52px
 // Nav bar bottomOffset: 16px
 // Gap above nav bar: 20px
@@ -44,7 +47,8 @@ export default function HomeScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [headerHeight, setHeaderHeight] = useState(0);
+  // Estimate header height to avoid layout jolt: insets.top + spacing.sm + pill row
+  const [headerHeight, setHeaderHeight] = useState(insets.top + ESTIMATED_HEADER_CONTENT_HEIGHT);
 
   // Store hooks
   const loadState = usePlayerStreakStore((s) => s.loadState);
