@@ -23,6 +23,8 @@ interface SettingsToggleRowProps {
   accessibilityHint?: string;
   isLast?: boolean;
   containerStyle?: ViewStyle;
+  /** When provided, called with the new toggle value to derive force-feedback options. */
+  feedbackOptions?: (newValue: boolean) => { forceHaptic?: boolean; forceSfx?: boolean } | undefined;
 }
 
 export function SettingsToggleRow({
@@ -36,13 +38,15 @@ export function SettingsToggleRow({
   accessibilityHint,
   isLast = false,
   containerStyle,
+  feedbackOptions,
 }: SettingsToggleRowProps) {
   const handleValueChange = useCallback(
     (newValue: boolean) => {
-      playFeedback('tap');
+      const options = feedbackOptions?.(newValue);
+      playFeedback('tap', options);
       onValueChange(newValue);
     },
-    [onValueChange]
+    [onValueChange, feedbackOptions]
   );
 
   return (

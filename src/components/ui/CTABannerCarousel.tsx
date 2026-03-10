@@ -402,6 +402,7 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
   }, [promos, rotation]);
 
   const advanceState = useCallback(() => {
+    playFeedback('selection');
     setRotation((prev) => prev + 1);
     swiping.current = false;
   }, []);

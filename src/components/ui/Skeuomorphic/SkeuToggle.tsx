@@ -14,7 +14,6 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useThemedSkeuVariants } from '../../../theme/skeuomorphic';
-import { playFeedback } from '../../../utils/feedback';
 
 // Toggle dimensions
 const TRACK_WIDTH = 52;
@@ -61,7 +60,6 @@ export function SkeuToggle({
 
   const handlePress = useCallback(() => {
     if (disabled) return;
-    playFeedback('tap');
     onValueChange(!value);
   }, [disabled, value, onValueChange]);
 

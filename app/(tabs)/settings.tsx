@@ -165,7 +165,10 @@ export default function SettingsScreen() {
               return (
                 <Pressable
                   key={name}
-                  onPress={() => setColorTheme(name)}
+                  onPress={() => {
+                    playFeedback('tap');
+                    setColorTheme(name);
+                  }}
                   style={[
                     styles.themeSwatch,
                     { backgroundColor: swatch },

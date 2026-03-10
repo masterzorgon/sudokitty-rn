@@ -45,13 +45,18 @@ const SFX_MAP: Record<FeedbackId, SfxId | null> = {
   hint: 'hint',
 };
 
+export interface PlayFeedbackOptions {
+  forceHaptic?: boolean;
+  forceSfx?: boolean;
+}
+
 /**
  * Play haptic and/or sound feedback for a semantic interaction.
  * Haptics and sounds are independently controlled by user settings.
  */
-export function playFeedback(id: FeedbackId): void {
+export function playFeedback(id: FeedbackId, options?: PlayFeedbackOptions): void {
   const haptic = HAPTIC_MAP[id];
   const sfx = SFX_MAP[id];
-  if (haptic) playHaptic(haptic);
-  if (sfx) playSfx(sfx);
+  if (haptic) playHaptic(haptic, { force: options?.forceHaptic });
+  if (sfx) playSfx(sfx, { force: options?.forceSfx });
 }

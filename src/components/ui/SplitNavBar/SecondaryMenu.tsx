@@ -31,7 +31,7 @@ export function SecondaryMenu({
 
   const menuItems = MENU_CONFIGS[menuType];
 
-  // PanResponder for swipe-down to dismiss
+  // PanResponder for swipe-down to dismiss for swipe-down to dismiss
   const panResponder = useMemo(
     () =>
       PanResponder.create({

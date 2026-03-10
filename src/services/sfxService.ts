@@ -61,8 +61,8 @@ export async function loadSfx(): Promise<void> {
   loaded = true;
 }
 
-export async function playSfx(id: SfxId): Promise<void> {
-  if (!useSettingsStore.getState().soundsEnabled) return;
+export async function playSfx(id: SfxId, options?: { force?: boolean }): Promise<void> {
+  if (!options?.force && !useSettingsStore.getState().soundsEnabled) return;
   const sound = sounds[id];
   if (!sound) return;
   try {

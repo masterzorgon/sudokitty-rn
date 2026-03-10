@@ -69,6 +69,7 @@ export function AudioSettingsSection({
       value={soundsEnabled}
       onValueChange={setSoundsEnabled}
       icon={showIcons ? 'volume-2' : undefined}
+      feedbackOptions={(on) => (on ? { forceSfx: true } : undefined)}
     />
   );
 
@@ -94,6 +95,7 @@ export function AudioSettingsSection({
       onValueChange={setHapticsEnabled}
       icon={showIcons ? 'smartphone' : undefined}
       isLast={isLastSection}
+      feedbackOptions={(on) => (on ? { forceHaptic: true } : undefined)}
     />
   );
 

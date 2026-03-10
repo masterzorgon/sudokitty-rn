@@ -89,13 +89,14 @@ export default function GameScreen() {
 
   // Navigate to end-game screen when game ends
   useEffect(() => {
-    if ((gameStatus === 'won' || gameStatus === 'lost') && !navigatedToEndGame.current) {
+    const currentStatus = useGameStore.getState().gameStatus;
+    if ((currentStatus === 'won' || currentStatus === 'lost') && !navigatedToEndGame.current) {
       navigatedToEndGame.current = true;
       const { difficulty: d, timeElapsed, mistakeCount, hintsUsed, continueCount, getProgress } =
         useGameStore.getState();
       const progress = getProgress();
       const endGameParams = {
-        status: gameStatus,
+        status: currentStatus,
         difficulty: d,
         timeElapsed: String(timeElapsed),
         mistakeCount: String(mistakeCount),
@@ -105,18 +106,19 @@ export default function GameScreen() {
         progress: String(Math.round(progress * 100)),
       };
 
-      if (gameStatus === 'won') {
+      if (currentStatus === 'won') {
         router.replace({ pathname: '/end-game', params: endGameParams });
       } else {
         router.push({ pathname: '/end-game', params: endGameParams });
       }
-    } else if (gameStatus === 'playing') {
+    } else if (currentStatus === 'playing') {
       navigatedToEndGame.current = false;
     }
   }, [gameStatus, isDaily, router]);
 
   // Handle back button - pause game instead of resetting
   const handleGoBack = useCallback(() => {
+    playFeedback('tap');
     // Only pause if game is still in progress
     if (gameStatus === 'playing') {
       pauseGame();

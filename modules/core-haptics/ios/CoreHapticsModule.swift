@@ -78,83 +78,83 @@ public class CoreHapticsModule: Module {
     case "selection":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.25),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.35),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.55),
         ], relativeTime: 0),
       ], parameters: [])
 
     case "tap":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.5),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.6),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.6),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.65),
         ], relativeTime: 0),
       ], parameters: [])
 
     case "tapHeavy":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.35),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.9),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.4),
         ], relativeTime: 0),
       ], parameters: [])
 
     case "correct":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.4),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.5),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.45),
         ], relativeTime: 0),
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.7),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.6),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.7),
         ], relativeTime: 0.08),
       ], parameters: [])
 
     case "unitComplete":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.35),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.45),
           CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5),
         ], relativeTime: 0),
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.55),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.65),
           CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.6),
-        ], relativeTime: 0.1),
+        ], relativeTime: 0.07),
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.7),
-        ], relativeTime: 0.2),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.85),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.75),
+        ], relativeTime: 0.15),
       ], parameters: [])
 
     case "mistake":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.8),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.9),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.9),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.95),
         ], relativeTime: 0),
         CHHapticEvent(eventType: .hapticTransient, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.6),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.9),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.7),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.85),
         ], relativeTime: 0.1),
       ], parameters: [])
 
     case "gameWon":
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticContinuous, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.3),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.35),
           CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.3),
-        ], relativeTime: 0, duration: 0.4),
+        ], relativeTime: 0, duration: 0.45),
         CHHapticEvent(eventType: .hapticTransient, parameters: [
           CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
           CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.5),
-        ], relativeTime: 0.4),
+        ], relativeTime: 0.45),
       ], parameterCurves: [
         CHHapticParameterCurve(
           parameterID: .hapticIntensityControl,
           controlPoints: [
-            CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: 0.3),
-            CHHapticParameterCurve.ControlPoint(relativeTime: 0.4, value: 0.9),
+            CHHapticParameterCurve.ControlPoint(relativeTime: 0, value: 0.35),
+            CHHapticParameterCurve.ControlPoint(relativeTime: 0.45, value: 0.95),
           ],
           relativeTime: 0
         ),
@@ -164,18 +164,18 @@ public class CoreHapticsModule: Module {
       return try? CHHapticPattern(events: [
         CHHapticEvent(eventType: .hapticTransient, parameters: [
           CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
-          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.3),
+          CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.35),
         ], relativeTime: 0),
         CHHapticEvent(eventType: .hapticContinuous, parameters: [
-          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.6),
+          CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.65),
           CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.1),
-        ], relativeTime: 0.05, duration: 0.3),
+        ], relativeTime: 0.05, duration: 0.35),
       ], parameterCurves: [
         CHHapticParameterCurve(
           parameterID: .hapticIntensityControl,
           controlPoints: [
-            CHHapticParameterCurve.ControlPoint(relativeTime: 0.05, value: 0.6),
-            CHHapticParameterCurve.ControlPoint(relativeTime: 0.35, value: 0.0),
+            CHHapticParameterCurve.ControlPoint(relativeTime: 0.05, value: 0.65),
+            CHHapticParameterCurve.ControlPoint(relativeTime: 0.4, value: 0.0),
           ],
           relativeTime: 0
         ),

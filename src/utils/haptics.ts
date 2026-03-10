@@ -25,8 +25,8 @@ const SELECTION_THROTTLE_MS = 80;
 /**
  * Play a semantic haptic pattern. Respects hapticsEnabled setting.
  */
-export function playHaptic(pattern: HapticPattern): void {
-  if (!useSettingsStore.getState().hapticsEnabled) return;
+export function playHaptic(pattern: HapticPattern, options?: { force?: boolean }): void {
+  if (!options?.force && !useSettingsStore.getState().hapticsEnabled) return;
   if (!supportsHaptics) return;
 
   if (pattern === 'selection') {
