@@ -1,8 +1,10 @@
 // Sound effects service
-// Pre-loads short audio clips and plays them on demand
-// Uses expo-av, respects soundsEnabled setting
+// Pre-loads short audio clips and plays them on demand.
+// Guarded: only loads when soundsEnabled is true. No load = no audio session = no pops.
+// Uses audioSessionManager for ref-counted session lifecycle.
 
 import { useSettingsStore } from '../stores/settingsStore';
+import * as session from './audioSessionManager';
 
 let Audio: typeof import('expo-av').Audio | null = null;
 
@@ -34,8 +36,14 @@ const SFX_VOLUME = 0.7;
 const sounds: Partial<Record<SfxId, any>> = {};
 let loaded = false;
 
+/**
+ * Preload all SFX into memory.
+ * Skipped when soundsEnabled is false — no audio session activation.
+ */
 export async function loadSfx(): Promise<void> {
   if (loaded) return;
+  if (!useSettingsStore.getState().soundsEnabled) return;
+
   if (!Audio) {
     try {
       const av = await import('expo-av');
@@ -44,6 +52,8 @@ export async function loadSfx(): Promise<void> {
       return;
     }
   }
+
+  await session.acquire();
 
   await Promise.all(
     (Object.entries(SFX_ASSETS) as [SfxId, number][]).map(async ([id, asset]) => {
@@ -56,13 +66,19 @@ export async function loadSfx(): Promise<void> {
       } catch {
         // Missing asset — sfx will be a no-op for this id
       }
-    })
+    }),
   );
   loaded = true;
 }
 
 export async function playSfx(id: SfxId, options?: { force?: boolean }): Promise<void> {
   if (!options?.force && !useSettingsStore.getState().soundsEnabled) return;
+
+  // Lazy-load on first forced play if sounds were disabled at mount time
+  if (!loaded && options?.force) {
+    await loadSfxForce();
+  }
+
   const sound = sounds[id];
   if (!sound) return;
   try {
@@ -73,16 +89,63 @@ export async function playSfx(id: SfxId, options?: { force?: boolean }): Promise
   }
 }
 
-export async function unloadSfx(): Promise<void> {
+/**
+ * Force-load SFX regardless of settings (used for force-play on settings toggle).
+ */
+async function loadSfxForce(): Promise<void> {
+  if (loaded) return;
+  if (!Audio) {
+    try {
+      const av = await import('expo-av');
+      Audio = av.Audio;
+    } catch {
+      return;
+    }
+  }
+
+  await session.acquire();
+
   await Promise.all(
-    Object.values(sounds).map(async (s) => {
+    (Object.entries(SFX_ASSETS) as [SfxId, number][]).map(async ([id, asset]) => {
+      try {
+        const { sound } = await Audio!.Sound.createAsync(asset, {
+          shouldPlay: false,
+          volume: SFX_VOLUME,
+        });
+        sounds[id] = sound;
+      } catch { /* ignore */ }
+    }),
+  );
+  loaded = true;
+}
+
+/**
+ * Unload all SFX from memory.
+ * Sets volume to 0 before unloading to prevent pop, then releases audio session.
+ */
+export async function unloadSfx(): Promise<void> {
+  const entries = Object.values(sounds);
+  if (entries.length === 0) {
+    loaded = false;
+    return;
+  }
+
+  await Promise.all(
+    entries.map(async (s) => {
+      try {
+        await s?.setVolumeAsync(0);
+      } catch { /* best-effort */ }
       try {
         await s?.unloadAsync();
-      } catch {
-        // ignore
-      }
-    })
+      } catch { /* ignore */ }
+    }),
   );
   Object.keys(sounds).forEach((k) => delete sounds[k as SfxId]);
+
+  const wasLoaded = loaded;
   loaded = false;
+
+  if (wasLoaded) {
+    await session.release();
+  }
 }

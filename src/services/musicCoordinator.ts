@@ -35,7 +35,7 @@ function deriveMode(inputs: MusicInputs): AudioMode {
 
 async function applyTransition(
   targetMode: AudioMode,
-  myId: number
+  myId: number,
 ): Promise<void> {
   if (disposed || myId !== transitionId) return;
 
@@ -50,10 +50,9 @@ async function applyTransition(
   } else if (targetMode === 'silent' || targetMode === 'preview') {
     if (!audioService.isLoaded()) return;
     if (await audioService.isPlaying()) {
-      const fadeOut = audioService.fade(0, FADE_DURATION_MS);
+      audioService.fade(0, FADE_DURATION_MS);
       await new Promise((r) => setTimeout(r, FADE_DURATION_MS));
       if (myId !== transitionId) return;
-      fadeOut.cancel();
       await audioService.pause();
     }
   }
@@ -85,7 +84,7 @@ export function sync(inputs: MusicInputs): void {
 export function startPreview(
   asset: number,
   durationMs: number,
-  callbacks?: DemoCallbacks
+  callbacks?: DemoCallbacks,
 ): void {
   if (disposed) return;
 
@@ -98,10 +97,9 @@ export function startPreview(
 
   (async () => {
     if (audioService.isLoaded() && (await audioService.isPlaying())) {
-      const fadeOut = audioService.fade(0, FADE_DURATION_MS);
+      audioService.fade(0, FADE_DURATION_MS);
       await new Promise((r) => setTimeout(r, FADE_DURATION_MS));
       if (myId !== transitionId) return;
-      fadeOut.cancel();
       await audioService.pause();
     }
 
@@ -131,7 +129,6 @@ export function stopPreview(): void {
 
 /**
  * Initialize coordinator. Call once when game screen mounts.
- * Load is handled by useBackgroundMusic; coordinator only manages playback decisions.
  */
 export function init(): void {
   disposed = false;
@@ -139,6 +136,9 @@ export function init(): void {
 
 /**
  * Dispose coordinator. Call when game screen unmounts.
+ * Safely fades out and unloads without races:
+ * - Bumps transitionId to cancel in-flight transitions
+ * - Checks audioService.isLoaded() before each async step
  */
 export async function dispose(): Promise<void> {
   disposed = true;
@@ -146,13 +146,15 @@ export async function dispose(): Promise<void> {
   previewActive = false;
   trackStopDemo();
 
+  if (!audioService.isLoaded()) return;
+
+  if (await audioService.isPlaying()) {
+    audioService.fade(0, FADE_DURATION_MS);
+    await new Promise((r) => setTimeout(r, FADE_DURATION_MS));
+  }
+
+  // audioService.unload() already sets volume to 0 before unloading
   if (audioService.isLoaded()) {
-    if (await audioService.isPlaying()) {
-      const fadeOut = audioService.fade(0, FADE_DURATION_MS);
-      await new Promise((r) => setTimeout(r, FADE_DURATION_MS));
-      fadeOut.cancel();
-    }
-    await audioService.pause();
     await audioService.unload();
   }
 }

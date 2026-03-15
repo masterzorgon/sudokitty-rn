@@ -1,3 +1,5 @@
+import * as session from './audioSessionManager';
+
 let Audio: typeof import('expo-av').Audio | null = null;
 
 let demoSound: any | null = null;
@@ -38,6 +40,8 @@ export async function playDemo(
   if (!(await ensureAudio()) || !Audio) return;
 
   try {
+    await session.acquire();
+
     const { sound } = await Audio.Sound.createAsync(asset, {
       shouldPlay: true,
       volume: BASE_VOLUME,
@@ -57,17 +61,20 @@ export async function playDemo(
       }
     }, PROGRESS_STEP_MS);
 
-    endTimeout = setTimeout(() => {
+    endTimeout = setTimeout(async () => {
       const wasSound = demoSound;
       clearTimers();
       if (wasSound) {
-        try { wasSound.unloadAsync(); } catch {}
+        try { await wasSound.setVolumeAsync(0); } catch {}
+        try { await wasSound.unloadAsync(); } catch {}
       }
       demoSound = null;
+      await session.release();
       callbacks?.onComplete?.();
     }, durationMs);
   } catch {
     demoSound = null;
+    await session.release();
   }
 }
 
@@ -98,8 +105,10 @@ function clearTimers() {
 export async function stopDemo(): Promise<void> {
   clearTimers();
   if (demoSound) {
+    try { await demoSound.setVolumeAsync(0); } catch {}
     try { await demoSound.unloadAsync(); } catch {}
     demoSound = null;
+    await session.release();
   }
 }
 

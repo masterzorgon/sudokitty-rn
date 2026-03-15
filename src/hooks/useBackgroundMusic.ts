@@ -7,11 +7,12 @@
  * - Game 'playing' or 'paused': music plays (settings sheet open does not stop music).
  * - Game 'won' or 'lost': music fades out.
  * - App background: music pauses. App foreground: music resumes if policy allows.
+ * - When musicEnabled is false, audio is NOT loaded (no audio session = no pops).
  *
  * All playback decisions route through musicCoordinator.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import * as audioService from '../services/audioService';
 import * as musicCoordinator from '../services/musicCoordinator';
@@ -24,20 +25,28 @@ export function useBackgroundMusic() {
   const musicEnabled = useMusicEnabled();
   const gameStatus = useGameStore((s) => s.gameStatus);
   const activeTrackId = useActiveTrackId();
+  const prevMusicEnabled = useRef(musicEnabled);
 
+  // Init/dispose coordinator lifecycle
   useEffect(() => {
     musicCoordinator.init();
-
-    (async () => {
-      const track = getTrackById(activeTrackId);
-      await audioService.loadBackgroundMusic(track?.asset);
-    })();
-
-    return () => {
-      musicCoordinator.dispose();
-    };
+    return () => { musicCoordinator.dispose(); };
   }, []);
 
+  // Load music when enabled, unload when disabled.
+  // On mount: only load if musicEnabled is true.
+  // On toggle: load/unload reactively.
+  useEffect(() => {
+    if (musicEnabled) {
+      const track = getTrackById(activeTrackId);
+      audioService.loadBackgroundMusic(track?.asset);
+    } else if (prevMusicEnabled.current && !musicEnabled) {
+      audioService.unload();
+    }
+    prevMusicEnabled.current = musicEnabled;
+  }, [musicEnabled]);
+
+  // Sync coordinator on input changes
   useEffect(() => {
     musicCoordinator.sync({
       musicEnabled,
@@ -47,6 +56,7 @@ export function useBackgroundMusic() {
     });
   }, [musicEnabled, gameStatus, activeTrackId]);
 
+  // Respond to app state changes (background/foreground)
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState) => {
       musicCoordinator.sync({
@@ -59,6 +69,7 @@ export function useBackgroundMusic() {
     return () => subscription.remove();
   }, [musicEnabled, gameStatus, activeTrackId]);
 
+  // Track switching
   useEffect(() => {
     if (!audioService.isLoaded()) return;
     const track = getTrackById(activeTrackId);

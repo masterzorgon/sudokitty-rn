@@ -14,7 +14,6 @@ import { useTechniqueProgressStore } from '../src/stores/techniqueProgressStore'
 import { usePlayerStreakStore } from '../src/stores/playerStreakStore';
 import { initRevenueCat } from '../src/lib/revenueCat';
 import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStore';
-import { configureAudioSession } from '../src/services/audioService';
 import { preloadInterstitial, preloadRewarded } from '../src/services/adService';
 import { useAppRatedStore } from '../src/stores/appRatedStore';
 import { runEconomyV2Migration } from '../src/services/economyMigration';
@@ -93,8 +92,8 @@ function RootLayoutNav() {
     prefetchPuzzles(Object.keys(TECHNIQUE_IDS));
     // Pull remote streak data (background, best-effort)
     usePlayerStreakStore.getState().syncFromRemote();
-    // Configure audio session for background music
-    configureAudioSession();
+    // Audio session is now managed lazily by audioSessionManager
+    // (acquired on first load, released on last unload)
     // RevenueCat: init -> sync entitlements -> start real-time listener
     initRevenueCat().then(() => {
       usePremiumStore.getState().syncStatus();
