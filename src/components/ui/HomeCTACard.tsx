@@ -1,6 +1,3 @@
-// Reusable CTA card for home screen (daily challenge, techniques, etc.)
-// Same look as the original TechniquesCTA: SkeuButton with icon, title, subtitle, chevron
-
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';

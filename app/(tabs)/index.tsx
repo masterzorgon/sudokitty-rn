@@ -24,8 +24,7 @@ import { ScreenBackground } from '../../src/components/ui/Layout/ScreenBackgroun
 import { ScreenHeader } from '../../src/components/ui/Layout/ScreenHeader';
 import { SpeechBubble } from '../../src/components/ui/Typography/SpeechBubble';
 import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
-import { getRandomWelcomeMessage } from '../../src/constants/welcomeMessages';
-import { runEconomyV2Migration } from '../../src/services/economyMigration';
+import { preloadedWelcomeMessage } from '../_layout';
 import { getMochiPackProducts } from '../../src/lib/revenueCat';
 import { MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../../src/constants/economy';
 
@@ -51,7 +50,6 @@ export default function HomeScreen() {
   const [headerHeight, setHeaderHeight] = useState(insets.top + ESTIMATED_HEADER_CONTENT_HEIGHT);
 
   // Store hooks
-  const loadState = usePlayerStreakStore((s) => s.loadState);
   const currentStreak = useCurrentStreak();
   const streakLostInfo = usePlayerStreakStore((s) => s.streakLostInfo);
   const reigniteStreak = usePlayerStreakStore((s) => s.reigniteStreak);
@@ -61,8 +59,8 @@ export default function HomeScreen() {
   // Purchase sheet for reigniting streak
   const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
 
-  // Welcome message for speech bubble
-  const [welcomeMessage, setWelcomeMessage] = useState('');
+  // Welcome message for speech bubble (pre-fetched during splash)
+  const [welcomeMessage] = useState(preloadedWelcomeMessage);
 
   // DEV ONLY: Credit 500 mochis for testing — remove after use
   useEffect(() => {
@@ -71,14 +69,7 @@ export default function HomeScreen() {
     }
   }, []);
 
-  // Run economy v2 migration, load state, then apply daily login bonus if new day
-  useEffect(() => {
-    (async () => {
-      await runEconomyV2Migration();
-      loadState();
-      usePlayerStreakStore.getState().applyDailyLoginBonusIfNeeded();
-    })();
-  }, [loadState]);
+  // Economy migration + loadState + daily bonus now run during splash in _layout.tsx
 
   // Show reignite sheet when streak is lost
   const handleInsufficientFunds = useCallback(async (itemPrice: number) => {
@@ -115,9 +106,7 @@ export default function HomeScreen() {
     }
   }, [streakLostInfo, reigniteStreak, handleInsufficientFunds]);
 
-  useEffect(() => {
-    getRandomWelcomeMessage().then(setWelcomeMessage);
-  }, []);
+  // Welcome message now pre-fetched during splash in _layout.tsx
 
   const handleTechniquesPress = () => {
     playFeedback('tap');

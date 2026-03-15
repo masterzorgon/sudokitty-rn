@@ -89,9 +89,19 @@ export const SudokuCell = memo(({
   const completionAnimations =
     completionAnimationsProp ?? completionAnimationsFromStore;
 
-  // Animation shared values (always created for hook consistency, but only driven when enabled)
+  // Animation shared values. Initialize backgroundProgress from props to avoid flash on resume:
+  // first frame shows correct highlight state instead of default then effect-update.
+  const initialBackground = isSecondaryHighlight
+    ? 0.6
+    : isSelected
+      ? 1
+      : isRelated
+        ? 0.4
+        : isHighlighted
+          ? 0.25
+          : 0;
   const glowOpacity = useSharedValue(0);
-  const backgroundProgress = useSharedValue(0);
+  const backgroundProgress = useSharedValue(initialBackground);
 
   // Wave completion animation shared value
   const waveGlow = useSharedValue(0);

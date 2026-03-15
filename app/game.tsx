@@ -164,7 +164,7 @@ export default function GameScreen() {
 
       {/* GRID ZONE - Game board (edge-to-edge) */}
       <View style={styles.gridContainer}>
-        <AnimatedGameView />
+        <AnimatedGameView animateEntrance={!!difficulty} />
       </View>
 
       {/* BOTTOM ZONE - Controls */}

@@ -17,6 +17,10 @@ import { usePremiumStore, startPremiumListener } from '../src/stores/premiumStor
 import { configureAudioSession } from '../src/services/audioService';
 import { preloadInterstitial, preloadRewarded } from '../src/services/adService';
 import { useAppRatedStore } from '../src/stores/appRatedStore';
+import { runEconomyV2Migration } from '../src/services/economyMigration';
+import { getRandomWelcomeMessage } from '../src/constants/welcomeMessages';
+
+export let preloadedWelcomeMessage = '';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -46,11 +50,16 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  // Warm caches and hydrate technique progress before hiding splash
+  // Warm caches, hydrate stores, run migration, and pre-fetch welcome message before hiding splash
   useEffect(() => {
     Promise.all([
       warmCaches(),
       useTechniqueProgressStore.getState().loadState(),
+      runEconomyV2Migration().then(() => {
+        usePlayerStreakStore.getState().loadState();
+        usePlayerStreakStore.getState().applyDailyLoginBonusIfNeeded();
+      }),
+      getRandomWelcomeMessage().then((msg) => { preloadedWelcomeMessage = msg; }),
     ]).then(() => setDataReady(true));
   }, []);
 

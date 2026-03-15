@@ -26,7 +26,12 @@ const XPBadgeOverlay = memo(function XPBadgeOverlay() {
   );
 });
 
-export const AnimatedGameView = () => {
+export interface AnimatedGameViewProps {
+  /** Skip entrance animation when resuming (board already visible). Default: true for new games. */
+  animateEntrance?: boolean;
+}
+
+export const AnimatedGameView = ({ animateEntrance = true }: AnimatedGameViewProps) => {
   const boardProps = useGameBoardProps();
 
   return (
@@ -35,7 +40,7 @@ export const AnimatedGameView = () => {
       pointerEvents="box-none"
     >
       <BoardAnimationLayer />
-      <SudokuBoard {...boardProps} animateEntrance />
+      <SudokuBoard {...boardProps} animateEntrance={animateEntrance} />
       <XPBadgeOverlay />
     </View>
   );

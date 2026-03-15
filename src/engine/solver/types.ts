@@ -141,7 +141,7 @@ export interface Hint {
 export const MOCHI_TECHNIQUE_HINTS: Record<string, string[]> = {
   'Naked Single': [
     "psst... look for a cell with only one option~",
-    "mew! there's a cell that can only be one number~",
+    "there's a cell that can only be one number~",
     "*whiskers twitch* this cell has no choice but one!",
   ],
   'Hidden Single': [
