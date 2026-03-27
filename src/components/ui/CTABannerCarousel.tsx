@@ -402,7 +402,7 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
   }, [promos, rotation]);
 
   const advanceState = useCallback(() => {
-    playFeedback('selection');
+    playFeedback('carouselSwipe');
     setRotation((prev) => prev + 1);
     swiping.current = false;
   }, []);
@@ -415,13 +415,19 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
     swiping.current = false;
   }, [dragX]);
 
+  const horizontalSwipeActivated = (
+    _e: GestureResponderEvent,
+    gs: PanResponderGestureState,
+  ) =>
+    Math.abs(gs.dx) > 6 &&
+    Math.abs(gs.dx) > Math.abs(gs.dy) * 0.85;
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (
-        _e: GestureResponderEvent,
-        gs: PanResponderGestureState,
-      ) => Math.abs(gs.dx) > 10 && Math.abs(gs.dx) > Math.abs(gs.dy),
+      /** Claim gesture early vs parent ScrollView when swipe is mostly horizontal */
+      onMoveShouldSetPanResponderCapture: horizontalSwipeActivated,
+      onMoveShouldSetPanResponder: horizontalSwipeActivated,
       onPanResponderMove: (_e, gs) => {
         const sign = gs.dx >= 0 ? 1 : -1;
         dragX.value = sign * Math.pow(Math.abs(gs.dx), FRICTION_POWER) * FRICTION_SCALE;

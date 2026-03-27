@@ -13,11 +13,16 @@ export type HapticPattern =
   | 'selection'
   | 'tap'
   | 'tapHeavy'
+  | 'carouselSwipe'
+  | 'pencilMark'
+  | 'erase'
   | 'correct'
   | 'unitComplete'
   | 'mistake'
   | 'gameWon'
-  | 'gameLost';
+  | 'gameLost'
+  | 'streak'
+  | 'levelUp';
 
 let lastSelectionTime = 0;
 const SELECTION_THROTTLE_MS = 80;

@@ -92,10 +92,10 @@ export const NumberPad = memo(() => {
         inputNumber(num);
         return;
       }
-      // Notes mode: selection tick (haptic only) per plan
+      // Notes mode: subtle pencil-mark haptic
       if (isNotesMode) {
         inputNumber(num);
-        playFeedback('selection');
+        playFeedback('pencilMark');
         return;
       }
       const result = inputNumber(num);

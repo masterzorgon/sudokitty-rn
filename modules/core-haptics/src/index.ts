@@ -11,11 +11,16 @@ export type HapticPattern =
   | 'selection'
   | 'tap'
   | 'tapHeavy'
+  | 'carouselSwipe'
+  | 'pencilMark'
+  | 'erase'
   | 'correct'
   | 'unitComplete'
   | 'mistake'
   | 'gameWon'
-  | 'gameLost';
+  | 'gameLost'
+  | 'streak'
+  | 'levelUp';
 
 export function play(pattern: HapticPattern): void {
   CoreHapticsModule.play(pattern);

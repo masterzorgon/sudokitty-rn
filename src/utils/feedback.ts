@@ -6,8 +6,10 @@ import { playSfx, type SfxId } from '../services/sfxService';
 
 export type FeedbackId =
   | 'selection'
+  | 'carouselSwipe'
   | 'tap'
   | 'tapHeavy'
+  | 'pencilMark'
   | 'correct'
   | 'unitComplete'
   | 'mistake'
@@ -19,22 +21,26 @@ export type FeedbackId =
 
 const HAPTIC_MAP: Record<FeedbackId, HapticPattern | null> = {
   selection: 'selection',
+  carouselSwipe: 'carouselSwipe',
   tap: 'tap',
   tapHeavy: 'tapHeavy',
+  pencilMark: 'pencilMark',
   correct: 'correct',
   unitComplete: 'unitComplete',
   mistake: 'mistake',
   gameWon: 'gameWon',
   gameLost: 'gameLost',
-  erase: 'tap',
+  erase: 'erase',
   notesToggle: 'tap',
   hint: 'tap',
 };
 
 const SFX_MAP: Record<FeedbackId, SfxId | null> = {
   selection: null,
+  carouselSwipe: null,
   tap: 'tap',
   tapHeavy: 'tap',
+  pencilMark: null,
   correct: 'correct',
   unitComplete: 'unitComplete',
   mistake: 'mistake',
