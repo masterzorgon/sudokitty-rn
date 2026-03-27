@@ -70,7 +70,7 @@ export const GameHeader = () => {
       {/* Section 2: Lives (Mistakes) */}
       <View style={[styles.section, styles.sectionDivider]}>
         {unlimitedMistakes ? (
-          <Text style={[styles.infinityIcon, { color: colors.errorText }]}>∞</Text>
+          <Text style={[styles.infinityIcon, { color: colors.textSecondary }]}>∞</Text>
         ) : (
           <IconIndicator
             used={mistakeCount}
@@ -131,8 +131,8 @@ const styles = StyleSheet.create({
   },
   infinityIcon: {
     fontFamily: typography.caption.fontFamily,
-    fontSize: 18,
-    lineHeight: 20,
+    fontSize: 24,
+    lineHeight: 24,
   },
   xpRow: {
     flexDirection: 'row',

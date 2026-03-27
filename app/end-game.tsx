@@ -29,8 +29,10 @@ import MochiPointIcon from '../assets/images/icons/mochi-point.svg';
 const MochiWowImg = require('../assets/images/mochi/mochi-wow.png');
 const MochiQuitImg = require('../assets/images/mochi/mochi-quit.png');
 
-function difficultyLabel(d: Difficulty): string {
-  return d.charAt(0).toUpperCase() + d.slice(1);
+/** Display multiplier without trailing .0 for whole numbers (e.g. 1.5, 2, 1). */
+function formatXpMultiplier(mult: number): string {
+  if (Number.isInteger(mult)) return String(mult);
+  return String(mult);
 }
 
 function StatRow({ label, value, icon, iconComponent, iconColor }: {
@@ -64,7 +66,6 @@ export default function EndGameScreen() {
   const mistakeCount = parseInt(s(params.mistakeCount), 10);
   const hintsUsed = parseInt(s(params.hintsUsed), 10);
   const isDaily = s(params.isDaily) === 'true';
-  const progress = parseInt(s(params.progress), 10);
   const rawXpEarned = parseInt(s(params.xpEarned), 10);
   const pointsThisGame = Number.isFinite(rawXpEarned) ? rawXpEarned : 0;
 
@@ -76,7 +77,10 @@ export default function EndGameScreen() {
 
   const difficultyMult = DIFFICULTY_XP_MULTIPLIER[difficulty];
   const finalXpWon = isWon ? Math.round(pointsThisGame * difficultyMult) : 0;
-  const showDifficultyXpBreakdown = isWon && difficultyMult > 1.0;
+  const totalXpDisplayLine =
+    difficultyMult === 1
+      ? `+${finalXpWon}`
+      : `${pointsThisGame} × ${formatXpMultiplier(difficultyMult)} = +${finalXpWon}`;
 
   const mochisEarned = isWon
     ? isDaily
@@ -148,29 +152,7 @@ export default function EndGameScreen() {
         >
           {isWon && (
             <>
-              {showDifficultyXpBreakdown ? (
-                <>
-                  <StatRow label="Points Earned" value={`${pointsThisGame}`} icon="star" />
-                  <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
-                  <StatRow
-                    label={`${difficultyLabel(difficulty)} Bonus`}
-                    value={`x${difficultyMult}`}
-                    icon="trending-up-outline"
-                  />
-                  <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
-                  <StatRow
-                    label="Total XP"
-                    value={`+${finalXpWon}`}
-                    icon="sparkles-outline"
-                  />
-                </>
-              ) : (
-                <StatRow
-                  label="XP Earned"
-                  value={`+${finalXpWon}`}
-                  icon="sparkles-outline"
-                />
-              )}
+              <StatRow label="Total XP" value={totalXpDisplayLine} icon="sparkles" />
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
               {rewardBreakdown ? (
                 <>
@@ -196,18 +178,14 @@ export default function EndGameScreen() {
               <StatRow
                 label="Lives Remaining"
                 value={`${Math.max(0, livesRemaining)} / ${MAX_MISTAKES}`}
-                icon="heart-outline"
+                icon="heart"
               />
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
             </>
           )}
           {!isWon && (
             <>
-              <StatRow
-                label="Points Earned"
-                value={`${pointsThisGame}`}
-                icon="star"
-              />
+              <StatRow label="Points Earned" value={`${pointsThisGame}`} icon="star" />
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
               <StatRow
                 label="Mochis Could Have Won"
@@ -218,11 +196,9 @@ export default function EndGameScreen() {
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
             </>
           )}
-          <StatRow label="Time" value={formatTime(timeElapsed)} icon="time-outline" />
+          <StatRow label="Time" value={formatTime(timeElapsed)} icon="time" />
           <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
-          <StatRow label="Hints Used" value={`${hintsUsed}`} icon="bulb-outline" />
-          <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
-          <StatRow label="Progress" value={`${progress}%`} icon="pie-chart-outline" />
+          <StatRow label="Hints Used" value={`${hintsUsed}`} icon="bulb" />
         </SkeuCard>
 
         {/* Spacer */}
@@ -277,7 +253,7 @@ export default function EndGameScreen() {
             onPress={handleGoHome}
             hitSlop={12}
           >
-            <Ionicons name="arrow-back" size={20} color={c.textSecondary} />
+            <Ionicons name="arrow-back-circle" size={22} color={c.textSecondary} />
             <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
               Return Home
             </Text>
@@ -363,11 +339,13 @@ const statStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.sm,
   },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+    flexShrink: 0,
   },
   label: {
     ...typography.body,
@@ -376,5 +354,9 @@ const statStyles = StyleSheet.create({
   value: {
     ...typography.body,
     fontFamily: fontFamilies.bold,
+    flex: 1,
+    minWidth: 0,
+    flexShrink: 1,
+    textAlign: 'right',
   },
 });

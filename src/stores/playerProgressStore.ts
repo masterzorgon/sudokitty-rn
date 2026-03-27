@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { xpForLevel } from '../constants/xp';
+import { levelFromTotalXP, xpForLevel } from '../constants/xp';
 import { usePlayerStreakStore } from './playerStreakStore';
 
 interface PlayerProgressState {
@@ -35,6 +35,16 @@ export const usePlayerProgressStore = create<PlayerProgressState & PlayerProgres
     {
       name: '@sudokitty/player_progress',
       storage: createJSONStorage(() => AsyncStorage),
+      merge: (persistedState, currentState) => {
+        const p = persistedState as Partial<PlayerProgressState> | null | undefined;
+        const totalXP =
+          typeof p?.totalXP === 'number' ? p.totalXP : currentState.totalXP;
+        return {
+          ...currentState,
+          totalXP,
+          level: levelFromTotalXP(totalXP),
+        };
+      },
     },
   ),
 );

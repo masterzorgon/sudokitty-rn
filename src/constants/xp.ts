@@ -1,12 +1,5 @@
 import { type Difficulty } from '../engine/types';
 
-export const GAME_BASE_XP: Record<Difficulty, number> = {
-  easy: 10,
-  medium: 25,
-  hard: 50,
-  expert: 100,
-};
-
 /** Flat base points per correct placement (difficulty-agnostic during play). */
 export const POINTS_PER_PLACEMENT = 10;
 
@@ -27,9 +20,22 @@ export function getStreakMultiplier(streak: number): number {
   return 1.0;
 }
 
-/** Cumulative XP needed to reach a given level. */
+/** Cumulative XP needed to reach a given level (cubic — quick early levels, steeper at high level). */
 export function xpForLevel(level: number): number {
-  return 100 * level + 10 * level * level;
+  return level * (15 * level * level + 150 * level + 5000);
+}
+
+/**
+ * Highest level the player has legitimately reached for this `totalXP`.
+ * Keeps persisted `level` in sync when level thresholds change or after restores.
+ */
+export function levelFromTotalXP(totalXP: number): number {
+  const xp = Math.max(0, Math.floor(totalXP));
+  let level = 0;
+  while (xp >= xpForLevel(level + 1)) {
+    level += 1;
+  }
+  return level;
 }
 
 export function xpToNextLevel(totalXP: number, currentLevel: number): number {
