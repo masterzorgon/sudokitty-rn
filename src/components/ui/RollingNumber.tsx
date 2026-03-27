@@ -28,6 +28,9 @@ const getDigitByIndex = (value: number, digitIndex: number, maxDigits: number): 
   return parseInt(paddedValue[maxDigits - 1 - digitIndex] ?? '0', 10);
 };
 
+/** How hidden leading zeros shift the digit strip (default: centered, like timer) */
+export type RollingDigitsAlign = 'center' | 'end';
+
 interface AnimatedDigitProps {
   index: number;
   value: number;
@@ -39,6 +42,7 @@ interface AnimatedDigitProps {
   padWithZeros?: boolean;
   /** Animate value with linear timing on the UI thread (count-up effect) */
   countUp?: boolean;
+  digitsAlign: RollingDigitsAlign;
 }
 
 const AnimatedDigit = memo(({
@@ -51,6 +55,7 @@ const AnimatedDigit = memo(({
   maxDigits,
   padWithZeros = false,
   countUp = false,
+  digitsAlign = 'center',
 }: AnimatedDigitProps) => {
   const animatedValue = useSharedValue(value);
   const prevValue = useRef(value);
@@ -109,17 +114,23 @@ const AnimatedDigit = memo(({
   // Opacity and position adjustment for leading zeros
   // When padWithZeros is true, keep fixed position (no translateX shift)
   const rContainerStyle = useAnimatedStyle(() => {
+    const inv = invisibleDigitsAmount.value;
+    // end: right-align value so ones place stays fixed as digit count grows (header XP + suffix)
+    // center: legacy odometer look (timer, etc.)
+    const shift = padWithZeros
+      ? 0
+      : digitsAlign === 'end'
+        ? -width * inv
+        : (-width * inv) / 2;
     return {
       opacity: withTiming(isVisible.value ? 1 : 0, { duration: 150 }),
       transform: [
         {
-          translateX: padWithZeros
-            ? 0
-            : withSpring((-width * invisibleDigitsAmount.value) / 2, ROLLING_SPRING_CONFIG),
+          translateX: padWithZeros ? 0 : withSpring(shift, ROLLING_SPRING_CONFIG),
         },
       ],
     };
-  });
+  }, [padWithZeros, digitsAlign, width]);
 
   const flattenedTextStyle = useMemo(() => StyleSheet.flatten(textStyle), [textStyle]);
 
@@ -184,6 +195,8 @@ export interface RollingNumberProps {
   padWithZeros?: boolean;
   /** Animate increases with a linear count-up on the UI thread (no extra JS re-renders) */
   countUp?: boolean;
+  /** Right-align digits so length changes don't shift the group relative to a suffix (e.g. "XP") */
+  digitsAlign?: RollingDigitsAlign;
 }
 
 export const RollingNumber = memo(({
@@ -196,6 +209,7 @@ export const RollingNumber = memo(({
   maxDigits: maxDigitsProp,
   padWithZeros = false,
   countUp = false,
+  digitsAlign = 'center',
 }: RollingNumberProps) => {
   // Calculate dimensions based on font size if not provided
   // Height uses 1.4x multiplier to match typical text line-height for baseline alignment
@@ -227,6 +241,7 @@ export const RollingNumber = memo(({
             maxDigits={maxDigits}
             padWithZeros={padWithZeros}
             countUp={countUp}
+            digitsAlign={digitsAlign}
           />
         ))}
       </Animated.View>

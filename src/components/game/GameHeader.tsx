@@ -3,8 +3,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useGameStore, useXPEarnedThisGame } from '../../stores/gameStore';
 import { useTimerEnabled, useUnlimitedMistakes } from '../../stores/settingsStore';
-import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { colors, useColors } from '../../theme/colors';
+import { typography, fontFamilies } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES } from '../../engine/types';
 import { RollingTime, RollingNumber } from '../ui';
@@ -44,6 +44,7 @@ const IconIndicator = ({
 );
 
 export const GameHeader = () => {
+  const c = useColors();
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
   const xpEarned = useXPEarnedThisGame();
@@ -81,10 +82,9 @@ export const GameHeader = () => {
         )}
       </View>
 
-      {/* Section 3: XP earned this game (in-game points; difficulty multiplier at win) */}
+      {/* Section 3: XP earned — badge (theme primary) + rolling total */}
       <View style={styles.section}>
         <View style={styles.xpRow}>
-          <Ionicons name="star" size={14} color={colors.hintGold} />
           <RollingNumber
             value={xpEarned}
             fontSize={13}
@@ -92,8 +92,12 @@ export const GameHeader = () => {
             textStyle={typography.caption}
             maxDigits={5}
             countUp
+            digitsAlign="end"
           />
-          <Text style={[styles.xpSuffix, { color: colors.textSecondary }]}>XP</Text>
+          <View style={[styles.xpBadge, { backgroundColor: c.buttonPrimary }]}>
+            <Text style={styles.xpBadgeLabel}>XP</Text>
+            <Ionicons name="star" size={11} color={colors.white} />
+          </View>
         </View>
       </View>
     </View>
@@ -134,11 +138,21 @@ const styles = StyleSheet.create({
   xpRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
   },
-  xpSuffix: {
-    ...typography.caption,
-    fontSize: 13,
-    marginLeft: 2,
+  xpBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  xpBadgeLabel: {
+    color: colors.white,
+    fontSize: 10,
+    fontFamily: fontFamilies.bold,
+    letterSpacing: 0.3,
+    lineHeight: 12,
   },
 });

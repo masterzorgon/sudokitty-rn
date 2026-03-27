@@ -8,7 +8,7 @@ export { DemoPlayButton } from './DemoPlayButton';
 export { HomeCTACard } from './HomeCTACard';
 export { RewardsPill } from './RewardsPill';
 export { RollingNumber, RollingTime } from './RollingNumber';
-export type { RollingNumberProps, RollingTimeProps } from './RollingNumber';
+export type { RollingNumberProps, RollingTimeProps, RollingDigitsAlign } from './RollingNumber';
 export { ShowcasePage } from './ShowcasePage';
 export type { ShowcasePageBadge, ShowcasePageAction } from './ShowcasePage';
 export { StoreItemRow } from './StoreItemRow';
