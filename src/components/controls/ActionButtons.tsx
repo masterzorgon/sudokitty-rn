@@ -6,6 +6,9 @@ import { View, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useGameStore, useCanUseHint } from '../../stores/gameStore';
+import { useUnlimitedHints } from '../../stores/settingsStore';
+import { useEffectivePremium } from '../../stores/premiumStore';
+import { MAX_HINTS } from '../../engine/types';
 import { colors } from '../../theme/colors';
 import { fontFamilies } from '../../theme/typography';
 import { SkeuButton } from '../ui/Skeuomorphic';
@@ -20,6 +23,10 @@ interface ActionButtonProps {
   isActive?: boolean;
   disabled?: boolean;
   feedbackId?: 'erase' | 'notesToggle' | 'hint';
+  /** Small circular badge over top-right of icon (e.g. hint count / "Ad") */
+  badge?: string;
+  /** Horizontal inset for badge (negative = overlap past icon edge); e.g. -14 for "Ad", -10 for "1" */
+  badgeInsetRight?: number;
 }
 
 const ActionButton = memo(({
@@ -29,6 +36,8 @@ const ActionButton = memo(({
   isActive = false,
   disabled = false,
   feedbackId,
+  badge,
+  badgeInsetRight = -10,
 }: ActionButtonProps) => {
   const iconColor = disabled
     ? colors.textLight
@@ -49,7 +58,16 @@ const ActionButton = memo(({
         contentStyle={styles.buttonFace}
         accessibilityLabel={`${label} button`}
       >
-        <Ionicons name={icon} size={24} color={iconColor} />
+        <View style={styles.iconWithBadge}>
+          <Ionicons name={icon} size={24} color={iconColor} />
+          {badge != null && badge !== '' && (
+            <View style={[styles.hintBadge, { right: badgeInsetRight }]}>
+              <Text style={[styles.hintBadgeText, badge === '∞' && styles.hintBadgeTextInfinity]}>
+                {badge}
+              </Text>
+            </View>
+          )}
+        </View>
         <Text style={[styles.label, isActive && styles.labelActive]}>
           {label}
         </Text>
@@ -69,10 +87,25 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
   const toggleNotesMode = useGameStore((s) => s.toggleNotesMode);
   const isNotesMode = useGameStore((s) => s.isNotesMode);
   const useHint = useGameStore((s) => s.useHint);
+  const hintsUsed = useGameStore((s) => s.hintsUsed);
+  const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
   const gameStatus = useGameStore((s) => s.gameStatus);
   const canUseHint = useCanUseHint();
+  const unlimitedHints = useUnlimitedHints();
+  const isPremium = useEffectivePremium();
 
   const isPlaying = gameStatus === 'playing';
+
+  const hintsRemaining =
+    Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining;
+  const hintBadgeContent =
+    isPremium && unlimitedHints
+      ? '∞'
+      : hintsRemaining > 0
+        ? String(hintsRemaining)
+        : 'Ad';
+
+  const hintBadgeInsetRight = hintBadgeContent === 'Ad' ? -14 : -10;
 
   const handleHintPress = () => {
     if (canUseHint) {
@@ -115,6 +148,8 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
         onPress={handleHintPress}
         disabled={hintDisabled}
         feedbackId="hint"
+        badge={hintBadgeContent}
+        badgeInsetRight={hintBadgeInsetRight}
       />
     </View>
   );
@@ -128,6 +163,34 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     flex: 1,
+  },
+  iconWithBadge: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hintBadge: {
+    position: 'absolute',
+    top: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#8a7878',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  hintBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontFamily: fontFamilies.bold,
+    lineHeight: 13,
+  },
+  hintBadgeTextInfinity: {
+    fontSize: 10.8,
+    lineHeight: 14,
   },
   buttonFace: {
     height: BUTTON_HEIGHT,

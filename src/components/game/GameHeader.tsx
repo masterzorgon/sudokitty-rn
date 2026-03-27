@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useGameStore } from '../../stores/gameStore';
-import { useTimerEnabled, useUnlimitedMistakes, useUnlimitedHints } from '../../stores/settingsStore';
+import { useGameStore, useXPEarnedThisGame } from '../../stores/gameStore';
+import { useTimerEnabled, useUnlimitedMistakes } from '../../stores/settingsStore';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
-import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
+import { MAX_MISTAKES } from '../../engine/types';
 import { RollingTime } from '../ui';
 import { CELL_SIZE } from '../board/SudokuCell';
 
@@ -46,15 +46,11 @@ const IconIndicator = ({
 export const GameHeader = () => {
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   const mistakeCount = useGameStore((s) => s.mistakeCount);
-  const hintsUsed = useGameStore((s) => s.hintsUsed);
-  const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
+  const xpEarned = useXPEarnedThisGame();
 
   // Settings
   const timerEnabled = useTimerEnabled();
   const unlimitedMistakes = useUnlimitedMistakes();
-  const unlimitedHints = useUnlimitedHints();
-  const hintsRemaining = Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining;
-  const hintsConsumed = Math.max(MAX_HINTS - hintsRemaining, 0);
 
   return (
     <View style={styles.container}>
@@ -85,19 +81,14 @@ export const GameHeader = () => {
         )}
       </View>
 
-      {/* Section 3: Hints */}
+      {/* Section 3: XP earned this game */}
       <View style={styles.section}>
-        {unlimitedHints ? (
-          <Text style={[styles.infinityIcon, { color: colors.hintGold }]}>∞</Text>
-        ) : (
-          <IconIndicator
-            used={hintsConsumed}
-            total={MAX_HINTS}
-            filledIcon="bulb"
-            emptyIcon="bulb-outline"
-            filledColor={colors.hintGold}
-          />
-        )}
+        <View style={styles.xpRow}>
+          <Ionicons name="star" size={14} color={colors.hintGold} />
+          <Text style={[styles.xpText, { color: colors.textSecondary }]}>
+            {xpEarned} XP
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -133,5 +124,14 @@ const styles = StyleSheet.create({
     fontFamily: typography.caption.fontFamily,
     fontSize: 18,
     lineHeight: 20,
+  },
+  xpRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  xpText: {
+    ...typography.caption,
+    fontSize: 13,
   },
 });

@@ -220,6 +220,8 @@ interface GameState {
 
   // XP badge (per-placement XP for manual correct entries)
   xpPerPlacement: number;
+  /** Cumulative XP from manual correct placements this game (hints excluded) */
+  xpEarnedThisGame: number;
 }
 
 // Game actions interface
@@ -297,6 +299,7 @@ const initialState: GameState = {
   isDaily: false,
   continueCount: 0,
   xpPerPlacement: 1,
+  xpEarnedThisGame: 0,
 };
 
 // Create the store
@@ -351,6 +354,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.isDaily = false;
           state.continueCount = 0;
           state.xpPerPlacement = xpPerPlacement;
+          state.xpEarnedThisGame = 0;
           state.lastHint = null;
           state.hintHighlightCells = [];
         });
@@ -387,6 +391,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.isDaily = true;
           state.continueCount = 0;
           state.xpPerPlacement = xpPerPlacement;
+          state.xpEarnedThisGame = 0;
           state.lastHint = null;
           state.hintHighlightCells = [];
         });
@@ -478,6 +483,7 @@ export const useGameStore = create<GameState & GameActions>()(
               draft.lastCorrectCell = { row, col };
               draft.lastManualCorrectCell = { row, col };
               draft.correctStreak++;
+              draft.xpEarnedThisGame += draft.xpPerPlacement;
 
               // Remove this number from notes in related cells
               clearRelatedNotes(draft.board, row, col, num);
@@ -980,6 +986,7 @@ export const useIsNotesMode = () => useGameStore((s) => s.isNotesMode);
 export const useGameStatus = () => useGameStore((s) => s.gameStatus);
 export const useMistakeCount = () => useGameStore((s) => s.mistakeCount);
 export const useHintsUsed = () => useGameStore((s) => s.hintsUsed);
+export const useXPEarnedThisGame = () => useGameStore((s) => s.xpEarnedThisGame);
 export const useCanUseHint = () => {
   const hintsUsed = useGameStore((s) => s.hintsUsed);
   const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
