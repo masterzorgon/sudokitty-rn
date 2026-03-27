@@ -39,7 +39,6 @@ function StackedTrackCard({
   currentRotation,
   isActive,
   demoPlayingTrackId,
-  demoProgress,
   disabled,
   onToggleDemo,
   onSelect,
@@ -53,7 +52,6 @@ function StackedTrackCard({
   currentRotation: number;
   isActive: boolean;
   demoPlayingTrackId: string | null;
-  demoProgress: number;
   disabled?: boolean;
   onToggleDemo: () => void;
   onSelect: () => void;
@@ -95,7 +93,6 @@ function StackedTrackCard({
         track={track}
         isActive={isActive}
         isDemoPlaying={demoPlayingTrackId === track.id}
-        demoProgress={demoProgress}
         disabled={disabled}
         onToggleDemo={onToggleDemo}
         onSelect={onSelect}
@@ -122,7 +119,6 @@ export function MusicTrackSelector() {
 
   const [rotation, setRotation] = useState(initialRotation);
   const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
-  const [demoProgress, setDemoProgress] = useState(0);
 
   const dragX = useSharedValue(0);
   const rotationSV = useSharedValue(0);
@@ -153,24 +149,19 @@ export function MusicTrackSelector() {
       if (demoPlayingTrackId === track.id) {
         musicCoordinator.stopPreview();
         setDemoPlayingTrackId(null);
-        setDemoProgress(0);
       }
       return;
     }
     if (demoPlayingTrackId === track.id) {
       musicCoordinator.stopPreview();
       setDemoPlayingTrackId(null);
-      setDemoProgress(0);
     } else {
       musicCoordinator.startPreview(track.asset, track.demoDurationMs, {
-        onProgress: (fraction) => setDemoProgress(fraction),
         onComplete: () => {
           setDemoPlayingTrackId(null);
-          setDemoProgress(0);
         },
       });
       setDemoPlayingTrackId(track.id);
-      setDemoProgress(0);
     }
   }, [demoPlayingTrackId, musicEnabled]);
 
@@ -232,7 +223,6 @@ export function MusicTrackSelector() {
           track={track}
           isActive={track.id === activeTrackId}
           isDemoPlaying={demoPlayingTrackId === track.id}
-          demoProgress={demoProgress}
           disabled={!musicEnabled}
           onToggleDemo={() => handleToggleDemo(track)}
           onSelect={() => handleSelectTrack(track.id)}
@@ -265,7 +255,6 @@ export function MusicTrackSelector() {
               currentRotation={rotation}
               isActive={track.id === activeTrackId}
               demoPlayingTrackId={demoPlayingTrackId}
-              demoProgress={demoProgress}
               disabled={!musicEnabled}
               onToggleDemo={() => handleToggleDemo(track)}
               onSelect={() => handleSelectTrack(track.id)}

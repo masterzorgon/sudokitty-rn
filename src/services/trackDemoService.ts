@@ -37,7 +37,10 @@ export async function playDemo(
 ): Promise<void> {
   await stopDemo();
 
-  if (!(await ensureAudio()) || !Audio) return;
+  const audioModuleReady = await ensureAudio();
+  if (!audioModuleReady || !Audio) {
+    return;
+  }
 
   try {
     await session.acquire();

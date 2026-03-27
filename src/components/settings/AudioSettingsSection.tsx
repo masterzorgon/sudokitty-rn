@@ -65,7 +65,7 @@ export function AudioSettingsSection({
     <SettingsToggleRow
       key="sounds"
       label="Sounds"
-      description="Game sound effects"
+      description="Interactive and sound effects"
       value={soundsEnabled}
       onValueChange={setSoundsEnabled}
       icon={showIcons ? 'volume-2' : undefined}

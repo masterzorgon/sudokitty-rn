@@ -62,7 +62,6 @@ export default function StoreScreen() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [purchaseInProgress, setPurchaseInProgress] = useState<string | null>(null);
   const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
-  const [demoProgress, setDemoProgress] = useState(0);
   const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
 
   const mountedRef = useRef(true);
@@ -101,19 +100,13 @@ export default function StoreScreen() {
     if (demoPlayingTrackId === track.id) {
       await stopDemo();
       setDemoPlayingTrackId(null);
-      setDemoProgress(0);
     } else {
       await stopDemo();
       setDemoPlayingTrackId(track.id);
-      setDemoProgress(0);
       await playDemo(track.asset, track.demoDurationMs, {
-        onProgress: (fraction) => {
-          if (mountedRef.current) setDemoProgress(fraction);
-        },
         onComplete: () => {
           if (mountedRef.current) {
             setDemoPlayingTrackId(null);
-            setDemoProgress(0);
           }
         },
       });
@@ -281,7 +274,6 @@ export default function StoreScreen() {
               isOwned={isOwned}
               isActive={isActive}
               isDemoPlaying={demoPlayingTrackId === track.id}
-              demoProgress={demoPlayingTrackId === track.id ? demoProgress : 0}
               onToggleDemo={() => handleToggleDemo(track)}
               onSelect={
                 !isOwned && track.cost > 0

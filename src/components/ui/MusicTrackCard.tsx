@@ -12,7 +12,6 @@ export interface MusicTrackCardProps {
   isOwned?: boolean;
   isActive: boolean;
   isDemoPlaying: boolean;
-  demoProgress: number;
   disabled?: boolean;
   onToggleDemo: () => void;
   onSelect: () => void;
@@ -23,7 +22,6 @@ export function MusicTrackCard({
   isOwned = true,
   isActive,
   isDemoPlaying,
-  demoProgress,
   disabled = false,
   onToggleDemo,
   onSelect,
@@ -35,7 +33,7 @@ export function MusicTrackCard({
   const icon = (
     <DemoPlayButton
       isPlaying={isDemoPlaying}
-      progress={demoProgress}
+      durationMs={track.demoDurationMs}
       onPress={onToggleDemo}
       size={48}
       color={disabled ? mutedColor : undefined}
