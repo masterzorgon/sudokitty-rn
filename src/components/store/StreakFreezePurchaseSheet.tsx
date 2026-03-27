@@ -5,7 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../../theme/colors';
 import { StoreItemRow } from '../ui/StoreItemRow';
 import { usePlayerStreakStore } from '../../stores/playerStreakStore';
-import { getStreakFreezeCost, MOCHI_PACK_AMOUNTS } from '../../constants/economy';
+import {
+  getStreakFreezeCost,
+  MOCHI_PACK_AMOUNTS,
+  STREAK_FREEZE_PACK_OPTIONS,
+} from '../../constants/economy';
 import { getMochiPackProducts, purchaseMochiPack } from '../../lib/revenueCat';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 import {
@@ -13,12 +17,6 @@ import {
   selectionSheetStyles as ss,
   type SelectionSheetLayoutRef,
 } from './SelectionSheetLayout';
-
-const FREEZE_OPTIONS = [
-  { qty: 1, label: '1 Streak Freeze' },
-  { qty: 2, label: '2 Streak Freezes' },
-  { qty: 3, label: '3 Streak Freezes' },
-] as const;
 
 export interface StreakFreezePurchaseSheetProps {
   visible: boolean;
@@ -122,7 +120,7 @@ export function StreakFreezePurchaseSheet({ visible, onDismiss }: StreakFreezePu
       }
       onButtonPress={handlePurchase}
     >
-      {FREEZE_OPTIONS.map(({ qty, label }) => {
+      {STREAK_FREEZE_PACK_OPTIONS.map(({ qty, label }) => {
         const cost = getStreakFreezeCost(qty);
         const isSelected = selectedQty === qty;
         const affordable = totalMochis >= cost;

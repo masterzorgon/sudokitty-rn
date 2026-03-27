@@ -18,6 +18,13 @@ export function getStreakFreezeCost(qty: 1 | 2 | 3): number {
   return STREAK_FREEZE_TIER_PRICES[qty];
 }
 
+/** Labels and quantities for streak freeze bundles (store + purchase sheet). */
+export const STREAK_FREEZE_PACK_OPTIONS = [
+  { qty: 1 as const, label: '1 Streak Freeze' },
+  { qty: 2 as const, label: '2 Streak Freezes' },
+  { qty: 3 as const, label: '3 Streak Freezes' },
+] as const;
+
 // ============================================
 // Mochi IAP packs (RevenueCat consumables)
 // ============================================

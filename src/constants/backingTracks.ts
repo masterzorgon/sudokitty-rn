@@ -22,9 +22,6 @@ export const BACKING_TRACKS: BackingTrackDef[] = [
   { id: 'track_9', name: 'Hanami Festival', cost: MOCHIS_COST.backing_track, asset: require('../../assets/audio/tracks/hanami-festival.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
   { id: 'track_10', name: 'Pastel Rave', cost: MOCHIS_COST.backing_track, asset: require('../../assets/audio/tracks/pastel-rave.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
   { id: 'track_11', name: 'Cottagecore Cat', cost: MOCHIS_COST.backing_track, asset: require('../../assets/audio/tracks/cottagecore-cat.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
-  { id: 'track_12', name: 'Midnight Mochi', cost: MOCHIS_COST.backing_track, asset: require('../../assets/audio/tracks/midnight-mochi.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
-  { id: 'track_13', name: 'Neon Harajuku', cost: MOCHIS_COST.backing_track, asset: require('../../assets/audio/tracks/neon-harajuku.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
-  { id: 'track_14', name: 'Zen Garden', cost: MOCHIS_COST.backing_track, asset: require('../../assets/audio/tracks/zen-garden.m4a'), demoDurationMs: DEFAULT_DEMO_MS },
 ];
 
 export function getTrackById(id: string): BackingTrackDef | undefined {

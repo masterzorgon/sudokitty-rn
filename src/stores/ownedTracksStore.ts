@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { getTrackById } from '../constants/backingTracks';
+import { BACKING_TRACKS, getTrackById } from '../constants/backingTracks';
 import { usePlayerStreakStore } from './playerStreakStore';
 
 interface OwnedTracksState {
@@ -54,7 +54,17 @@ export const useOwnedTracksStore = create<OwnedTracksState & OwnedTracksActions>
     }),
     {
       name: '@sudokitty/owned_tracks',
+      version: 1,
       storage: createJSONStorage(() => AsyncStorage),
+      migrate: (persistedState: OwnedTracksState) => {
+        const validIds = new Set(BACKING_TRACKS.map((t) => t.id));
+        let ownedTrackIds = (persistedState?.ownedTrackIds ?? []).filter((id) => validIds.has(id));
+        if (ownedTrackIds.length === 0) ownedTrackIds = ['default'];
+        let activeTrackId = persistedState?.activeTrackId ?? 'default';
+        if (!validIds.has(activeTrackId)) activeTrackId = 'default';
+        if (!ownedTrackIds.includes(activeTrackId)) activeTrackId = 'default';
+        return { ...persistedState, ownedTrackIds, activeTrackId };
+      },
     },
   ),
 );

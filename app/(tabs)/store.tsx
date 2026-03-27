@@ -20,7 +20,14 @@ import { usePlayerStreakStore } from '../../src/stores/playerStreakStore';
 import { useEffectivePremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
-import { MOCHIS_COST, MOCHI_PACK_AMOUNTS, MOCHI_PACK_PRODUCT_IDS, type MochiPackProductId } from '../../src/constants/economy';
+import {
+  MOCHIS_COST,
+  MOCHI_PACK_AMOUNTS,
+  MOCHI_PACK_PRODUCT_IDS,
+  getStreakFreezeCost,
+  STREAK_FREEZE_PACK_OPTIONS,
+  type MochiPackProductId,
+} from '../../src/constants/economy';
 import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
 import { playFeedback } from '../../src/utils/feedback';
@@ -44,7 +51,7 @@ export default function StoreScreen() {
   const isPremium = useEffectivePremium();
   const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
   const streakFreezesCount = usePlayerStreakStore((s) => s.streakFreezesCount);
-  const buyStreakFreeze = usePlayerStreakStore((s) => s.buyStreakFreeze);
+  const buyStreakFreezes = usePlayerStreakStore((s) => s.buyStreakFreezes);
 
   const ownedTrackIds = useOwnedTracksStore((s) => s.ownedTrackIds);
   const activeTrackId = useOwnedTracksStore((s) => s.activeTrackId);
@@ -80,13 +87,6 @@ export default function StoreScreen() {
   // ============================================
   // Handlers
   // ============================================
-
-  const handleBuyStreakFreeze = useCallback(() => {
-    const success = buyStreakFreeze();
-    if (success) {
-      Alert.alert('Streak Freeze Purchased!', 'Your streak is protected for one missed day.');
-    }
-  }, [buyStreakFreeze]);
 
   const handleBuyTrack = useCallback((trackId: string) => {
     const track = BACKING_TRACKS.find((t) => t.id === trackId);
@@ -155,18 +155,34 @@ export default function StoreScreen() {
   }, [totalMochis, handlePurchasePack]);
 
   // Sheet openers
-  const openStreakFreezeSheet = useCallback(() => {
-    playFeedback('tap');
-    setSheetConfig({
-      image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} contentFit="contain" />,
-      title: 'Each streak freeze protects your streak for 1 missed day!',
-      price: MOCHIS_COST.streak_freeze,
-      currency: 'mochis',
-      buttonLabel: `Buy for ${MOCHIS_COST.streak_freeze}`,
-      onConfirm: handleBuyStreakFreeze,
-      onInsufficientFunds: () => handleInsufficientFunds(MOCHIS_COST.streak_freeze),
-    });
-  }, [handleBuyStreakFreeze, handleInsufficientFunds]);
+  const openStreakFreezeSheet = useCallback(
+    (qty: 1 | 2 | 3) => {
+      playFeedback('tap');
+      const cost = getStreakFreezeCost(qty);
+      setSheetConfig({
+        image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} contentFit="contain" />,
+        title: 'Each streak freeze protects your streak for 1 missed day!',
+        price: cost,
+        currency: 'mochis',
+        buttonLabel: `Buy for ${cost}`,
+        onConfirm: () => {
+          const success = buyStreakFreezes(qty);
+          if (success) {
+            if (qty === 1) {
+              Alert.alert('Streak Freeze Purchased!', 'Your streak is protected for one missed day.');
+            } else {
+              Alert.alert(
+                'Streak Freeze Purchased!',
+                `${qty} streak freezes added. You're protected for ${qty} missed days.`,
+              );
+            }
+          }
+        },
+        onInsufficientFunds: () => handleInsufficientFunds(cost),
+      });
+    },
+    [buyStreakFreezes, handleInsufficientFunds],
+  );
 
   const openTrackSheet = useCallback((track: BackingTrackDef) => {
     playFeedback('tap');
@@ -231,21 +247,27 @@ export default function StoreScreen() {
 
         <SectionTitle>Streak Freeze</SectionTitle>
 
-        <StoreItemRow
-          icon={
-            <View style={[styles.iconCircle, { backgroundColor: '#E3F2FD' }]}>
-              <Ionicons name="snow" size={22} color="#42A5F5" />
-            </View>
-          }
-          title="Streak Freeze"
-          subtitle={
-            (streakFreezesCount ?? 0) > 0
+        {STREAK_FREEZE_PACK_OPTIONS.map(({ qty, label }, index) => {
+          const cost = getStreakFreezeCost(qty);
+          const subtitle =
+            index === 0 && (streakFreezesCount ?? 0) > 0
               ? `Protect your streak · You have ${streakFreezesCount}`
-              : 'Protect your streak for missed days'
-          }
-          trailing={<MochiPricePill price={MOCHIS_COST.streak_freeze} />}
-          onPress={openStreakFreezeSheet}
-        />
+              : 'Protect your streak for missed days';
+          return (
+            <StoreItemRow
+              key={qty}
+              icon={
+                <View style={[styles.iconCircle, { backgroundColor: '#E3F2FD' }]}>
+                  <Ionicons name="snow" size={22} color="#42A5F5" />
+                </View>
+              }
+              title={label}
+              subtitle={subtitle}
+              trailing={<MochiPricePill price={cost} />}
+              onPress={() => openStreakFreezeSheet(qty)}
+            />
+          );
+        })}
 
         <SectionTitle>Sound Tracks</SectionTitle>
 
