@@ -92,7 +92,6 @@ export const GameHeader = () => {
             textStyle={typography.caption}
             maxDigits={5}
             countUp
-            digitsAlign="end"
           />
           <View style={[styles.xpBadge, { backgroundColor: c.buttonPrimary }]}>
             <Text style={styles.xpBadgeLabel}>XP</Text>
