@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -36,17 +36,22 @@ export function LevelProgressPill({
   const borderColor = c.levelPillBorder as string;
   const textColor = c.levelPillText as string;
 
-  const animatedFraction = useSharedValue(progressFraction);
+  const [pillWidth, setPillWidth] = useState(0);
+  const handleLayout = useCallback((e: LayoutChangeEvent) => {
+    setPillWidth(e.nativeEvent.layout.width);
+  }, []);
+
+  const animatedWidth = useSharedValue(0);
 
   useEffect(() => {
-    animatedFraction.value = withSpring(progressFraction, {
+    animatedWidth.value = withSpring(progressFraction * pillWidth, {
       damping: 20,
       stiffness: 120,
     });
-  }, [progressFraction]);
+  }, [progressFraction, pillWidth]);
 
   const fillStyle = useAnimatedStyle(() => ({
-    width: `${animatedFraction.value * 100}%`,
+    width: animatedWidth.value,
   }));
 
   const skeuColors: CustomSkeuColors = {
@@ -83,7 +88,12 @@ export function LevelProgressPill({
       contentStyle={faceStyle}
       accessibilityLabel={`Level ${level}, ${currentXP} of ${xpThreshold} XP`}
     >
-      <Animated.View style={[styles.fill, { backgroundColor: borderColor + '30' }, fillStyle]} />
+      <Animated.View
+        onLayout={handleLayout}
+        style={[styles.fillTrack]}
+      >
+        <Animated.View style={[styles.fill, { backgroundColor: borderColor + '30' }, fillStyle]} />
+      </Animated.View>
 
       <View style={styles.leftGroup}>
         <View style={[styles.iconCircle, iconCircleStyle]}>
@@ -103,6 +113,11 @@ const styles = StyleSheet.create({
   container: {
     overflow: 'visible',
     borderRadius: borderRadius.full,
+  },
+  fillTrack: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
   },
   fill: {
     position: 'absolute',
