@@ -59,6 +59,7 @@ export function HintModal() {
   return (
     <SheetWrapper
       ref={sheetRef}
+      embedded
       visible={lastHint !== null}
       onDismiss={dismissHintModal}
       blurBackground={false}

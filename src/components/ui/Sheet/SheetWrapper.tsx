@@ -34,11 +34,20 @@ export interface SheetWrapperProps {
   blurBackground?: boolean;
   containerStyle?: ViewStyle;
   children: React.ReactNode;
+  embedded?: boolean;
 }
 
 export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
   function SheetWrapper(
-    { visible, onDismiss, dismissOnTapOutside = true, blurBackground = true, containerStyle, children },
+    {
+      visible,
+      onDismiss,
+      dismissOnTapOutside = true,
+      blurBackground = true,
+      containerStyle,
+      children,
+      embedded = false,
+    },
     ref,
   ) {
     const c = useColors();
@@ -114,30 +123,45 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
       </Animated.View>
     );
 
+    const overlayInner =
+      blurBackground ? (
+        <BlurView intensity={60} tint="dark" style={styles.overlay}>
+          <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+          {sheetContent}
+        </BlurView>
+      ) : (
+        <View style={[styles.overlay, styles.dimOverlay]}>
+          <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+          {sheetContent}
+        </View>
+      );
+
+    if (embedded) {
+      if (!visible) {
+        return null;
+      }
+      return <View style={styles.embeddedRoot}>{overlayInner}</View>;
+    }
+
     return (
       <Modal
         visible={visible}
         transparent
-        animationType="fade"
+        animationType="none"
         onRequestClose={() => animateOut()}
       >
-        {blurBackground ? (
-          <BlurView intensity={60} tint="dark" style={styles.overlay}>
-            <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
-            {sheetContent}
-          </BlurView>
-        ) : (
-          <View style={[styles.overlay, styles.dimOverlay]}>
-            <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
-            {sheetContent}
-          </View>
-        )}
+        {overlayInner}
       </Modal>
     );
   },
 );
 
 const styles = StyleSheet.create({
+  embeddedRoot: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 99999,
+    elevation: 99999,
+  },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',

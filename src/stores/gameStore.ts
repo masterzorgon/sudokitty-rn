@@ -351,6 +351,8 @@ export const useGameStore = create<GameState & GameActions>()(
           state.isDaily = false;
           state.continueCount = 0;
           state.xpPerPlacement = xpPerPlacement;
+          state.lastHint = null;
+          state.hintHighlightCells = [];
         });
       },
 
@@ -385,6 +387,8 @@ export const useGameStore = create<GameState & GameActions>()(
           state.isDaily = true;
           state.continueCount = 0;
           state.xpPerPlacement = xpPerPlacement;
+          state.lastHint = null;
+          state.hintHighlightCells = [];
         });
       },
 
