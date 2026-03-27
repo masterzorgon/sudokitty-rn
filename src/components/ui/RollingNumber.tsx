@@ -1,9 +1,10 @@
 // Animated rolling number component - digits roll vertically like an odometer
 // Inspired by wheel picker animation pattern
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useRef } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import Animated, {
+  Easing,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
@@ -19,9 +20,11 @@ import { fontFamilies } from '../../theme/typography';
 const ROLLING_SPRING_CONFIG = springConfigs.rolling;
 
 // Extract a specific digit from a number by index (0 = ones, 1 = tens, etc.)
+// Rounds so fractional values during count-up animation resolve to stable digits
 const getDigitByIndex = (value: number, digitIndex: number, maxDigits: number): number => {
   'worklet';
-  const paddedValue = Math.abs(value).toString().padStart(maxDigits, '0');
+  const intValue = Math.round(Math.abs(value));
+  const paddedValue = intValue.toString().padStart(maxDigits, '0');
   return parseInt(paddedValue[maxDigits - 1 - digitIndex] ?? '0', 10);
 };
 
@@ -34,6 +37,8 @@ interface AnimatedDigitProps {
   textStyle: StyleProp<TextStyle>;
   maxDigits: number;
   padWithZeros?: boolean;
+  /** Animate value with linear timing on the UI thread (count-up effect) */
+  countUp?: boolean;
 }
 
 const AnimatedDigit = memo(({
@@ -45,13 +50,30 @@ const AnimatedDigit = memo(({
   textStyle,
   maxDigits,
   padWithZeros = false,
+  countUp = false,
 }: AnimatedDigitProps) => {
   const animatedValue = useSharedValue(value);
+  const prevValue = useRef(value);
 
-  // Update animated value when prop changes
+  // Update animated value when prop changes (count-up uses UI-thread withTiming)
   useEffect(() => {
-    animatedValue.value = value;
-  }, [value, animatedValue]);
+    if (countUp) {
+      const delta = value - prevValue.current;
+      if (delta > 0) {
+        const baseDuration = Math.min(800, Math.max(300, delta * 30));
+        const duration = Math.round(baseDuration * 1.08);
+        animatedValue.value = withTiming(value, {
+          duration,
+          easing: Easing.linear,
+        });
+      } else {
+        animatedValue.value = value;
+      }
+    } else {
+      animatedValue.value = value;
+    }
+    prevValue.current = value;
+  }, [value, animatedValue, countUp]);
 
   // Extract the digit at this position
   const digit = useDerivedValue(() => {
@@ -60,7 +82,8 @@ const AnimatedDigit = memo(({
 
   // Calculate invisible leading digits for centering
   const invisibleDigitsAmount = useDerivedValue(() => {
-    const len = Math.abs(animatedValue.value).toString().length;
+    const intValue = Math.round(Math.abs(animatedValue.value));
+    const len = intValue.toString().length;
     return maxDigits - len;
   }, [maxDigits]);
 
@@ -159,6 +182,8 @@ export interface RollingNumberProps {
   digitWidth?: number;
   maxDigits?: number;
   padWithZeros?: boolean;
+  /** Animate increases with a linear count-up on the UI thread (no extra JS re-renders) */
+  countUp?: boolean;
 }
 
 export const RollingNumber = memo(({
@@ -170,6 +195,7 @@ export const RollingNumber = memo(({
   digitWidth,
   maxDigits: maxDigitsProp,
   padWithZeros = false,
+  countUp = false,
 }: RollingNumberProps) => {
   // Calculate dimensions based on font size if not provided
   // Height uses 1.4x multiplier to match typical text line-height for baseline alignment
@@ -200,6 +226,7 @@ export const RollingNumber = memo(({
             textStyle={combinedTextStyle}
             maxDigits={maxDigits}
             padWithZeros={padWithZeros}
+            countUp={countUp}
           />
         ))}
       </Animated.View>

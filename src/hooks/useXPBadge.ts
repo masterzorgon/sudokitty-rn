@@ -1,6 +1,6 @@
 // Hook that subscribes to lastManualCorrectCell + xpPerPlacement and produces
 // a transient BadgeEvent for the XP placement badge overlay.
-// Fires only for manual correct placements (hints never set lastManualCorrectCell).
+// Fires on manual and hinted placements (both set lastManualCorrectCell + xpPerPlacement).
 
 import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../stores/gameStore';

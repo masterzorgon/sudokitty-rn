@@ -1,4 +1,4 @@
-import { GAME_PAR_TIMES, type Difficulty } from '../engine/types';
+import { type Difficulty } from '../engine/types';
 
 export const GAME_BASE_XP: Record<Difficulty, number> = {
   easy: 10,
@@ -7,11 +7,24 @@ export const GAME_BASE_XP: Record<Difficulty, number> = {
   expert: 100,
 };
 
-export function calculateXPReward(difficulty: Difficulty, timeSeconds: number): number {
-  const base = GAME_BASE_XP[difficulty];
-  const par = GAME_PAR_TIMES[difficulty];
-  const ratio = Math.min(2, Math.max(1, par / Math.max(timeSeconds, 1)));
-  return Math.round(base * ratio);
+/** Flat base points per correct placement (difficulty-agnostic during play). */
+export const POINTS_PER_PLACEMENT = 10;
+
+export const UNIT_COMPLETION_BONUS = 250;
+
+/** Applied to `xpEarnedThisGame` when the player wins (modest reward for harder puzzles). */
+export const DIFFICULTY_XP_MULTIPLIER: Record<Difficulty, number> = {
+  easy: 1.0,
+  medium: 1.25,
+  hard: 1.5,
+  expert: 2.0,
+};
+
+export function getStreakMultiplier(streak: number): number {
+  if (streak >= 10) return 3.0;
+  if (streak >= 6) return 2.0;
+  if (streak >= 3) return 1.5;
+  return 1.0;
 }
 
 /** Cumulative XP needed to reach a given level. */

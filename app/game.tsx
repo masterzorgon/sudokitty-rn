@@ -92,8 +92,15 @@ export default function GameScreen() {
     const currentStatus = useGameStore.getState().gameStatus;
     if ((currentStatus === 'won' || currentStatus === 'lost') && !navigatedToEndGame.current) {
       navigatedToEndGame.current = true;
-      const { difficulty: d, timeElapsed, mistakeCount, hintsUsed, continueCount, getProgress } =
-        useGameStore.getState();
+      const {
+        difficulty: d,
+        timeElapsed,
+        mistakeCount,
+        hintsUsed,
+        continueCount,
+        getProgress,
+        xpEarnedThisGame,
+      } = useGameStore.getState();
       const progress = getProgress();
       const endGameParams = {
         status: currentStatus,
@@ -104,6 +111,7 @@ export default function GameScreen() {
         continueCount: String(continueCount),
         isDaily: String(isDaily),
         progress: String(Math.round(progress * 100)),
+        xpEarned: String(xpEarnedThisGame),
       };
 
       if (currentStatus === 'won') {

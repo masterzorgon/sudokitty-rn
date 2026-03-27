@@ -36,7 +36,11 @@ import {
 } from '../services/puzzleCacheService';
 import { handleGameWon, handleGameLost } from '../services/gameOutcomeHandler';
 import { recordGameCompletion } from '../services/gameCompletionService';
-import { GAME_BASE_XP } from '../constants/xp';
+import {
+  POINTS_PER_PLACEMENT,
+  UNIT_COMPLETION_BONUS,
+  getStreakMultiplier,
+} from '../constants/xp';
 
 // Create empty cell
 const createCell = (
@@ -149,6 +153,27 @@ const isBoxComplete = (board: Cell[][], boxIndex: number): boolean => {
   return true;
 };
 
+/** Row/col/box units completed by a placement at (row, col). */
+const collectCompletedUnits = (
+  board: Cell[][],
+  row: number,
+  col: number
+): CompletedUnit[] => {
+  const timestamp = Date.now();
+  const units: CompletedUnit[] = [];
+  const boxIndex = getBoxIndex(row, col);
+  if (isRowComplete(board, row)) {
+    units.push({ type: 'row', index: row, epicenter: { row, col }, timestamp });
+  }
+  if (isColumnComplete(board, col)) {
+    units.push({ type: 'column', index: col, epicenter: { row, col }, timestamp });
+  }
+  if (isBoxComplete(board, boxIndex)) {
+    units.push({ type: 'box', index: boxIndex, epicenter: { row, col }, timestamp });
+  }
+  return units;
+};
+
 // Check if entire board is complete
 const isBoardComplete = (board: Cell[][]): boolean => {
   for (let row = 0; row < BOARD_SIZE; row++) {
@@ -204,7 +229,7 @@ interface GameState {
   // Completion tracking (for wave animations)
   lastCompletedUnits: CompletedUnit[];
   lastCorrectCell: Position | null;
-  /** Only set by inputNumber on correct placement — used for XP badge (hints excluded) */
+  /** Last placement that earned XP (manual or hint) — drives XP badge overlay */
   lastManualCorrectCell: Position | null;
 
   // Consecutive correct placements (for streak animations)
@@ -220,7 +245,7 @@ interface GameState {
 
   // XP badge (per-placement XP for manual correct entries)
   xpPerPlacement: number;
-  /** Cumulative XP from manual correct placements this game (hints excluded) */
+  /** Cumulative in-game points (manual + hinted placements; pre difficulty multiplier) */
   xpEarnedThisGame: number;
 }
 
@@ -245,7 +270,6 @@ interface GameActions {
   // Hints
   useHint: () => { row: number; col: number; value: number } | null;
   getStrategicHint: () => Hint | null;
-  applyHint: (hint: Hint) => void;
   clearHintHighlight: () => void;
   dismissHintModal: () => void;
 
@@ -298,7 +322,7 @@ const initialState: GameState = {
   hintHighlightCells: [],
   isDaily: false,
   continueCount: 0,
-  xpPerPlacement: 1,
+  xpPerPlacement: 0,
   xpEarnedThisGame: 0,
 };
 
@@ -327,11 +351,6 @@ export const useGameStore = create<GameState & GameActions>()(
         }
 
         const board = createBoardFromPuzzle(puzzle, solution);
-        const fillableCount = board.flat().filter((c) => !c.isGiven).length;
-        const xpPerPlacement = Math.max(
-          1,
-          Math.round(GAME_BASE_XP[difficulty] / fillableCount),
-        );
 
         set((state) => {
           state.board = board;
@@ -353,7 +372,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.correctStreak = 0;
           state.isDaily = false;
           state.continueCount = 0;
-          state.xpPerPlacement = xpPerPlacement;
+          state.xpPerPlacement = 0;
           state.xpEarnedThisGame = 0;
           state.lastHint = null;
           state.hintHighlightCells = [];
@@ -364,11 +383,6 @@ export const useGameStore = create<GameState & GameActions>()(
       newDailyGame: (dateString: string, difficulty: Difficulty) => {
         const generated = generateDailyPuzzle(dateString, difficulty);
         const board = createBoardFromPuzzle(generated.puzzle, generated.solution);
-        const fillableCount = board.flat().filter((c) => !c.isGiven).length;
-        const xpPerPlacement = Math.max(
-          1,
-          Math.round(GAME_BASE_XP[difficulty] / fillableCount),
-        );
 
         set((state) => {
           state.board = board;
@@ -390,7 +404,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.correctStreak = 0;
           state.isDaily = true;
           state.continueCount = 0;
-          state.xpPerPlacement = xpPerPlacement;
+          state.xpPerPlacement = 0;
           state.xpEarnedThisGame = 0;
           state.lastHint = null;
           state.hintHighlightCells = [];
@@ -479,48 +493,31 @@ export const useGameStore = create<GameState & GameActions>()(
                 result.isGameLost = true;
               }
             } else {
-              // Correct answer (manual placement only — hints use useHint/applyHint)
-              draft.lastCorrectCell = { row, col };
-              draft.lastManualCorrectCell = { row, col };
-              draft.correctStreak++;
-              draft.xpEarnedThisGame += draft.xpPerPlacement;
+              // Correct answer (manual placement — hints use dismissHintModal after sheet)
+              const streakMultiplier = getStreakMultiplier(draft.correctStreak);
+              const placementPoints = Math.round(
+                POINTS_PER_PLACEMENT * streakMultiplier,
+              );
 
               // Remove this number from notes in related cells
               clearRelatedNotes(draft.board, row, col, num);
 
-              // Check for completed units
-              const timestamp = Date.now();
-              const boxIndex = getBoxIndex(row, col);
-
-              if (isRowComplete(draft.board, row)) {
-                result.completedUnits.push({
-                  type: 'row',
-                  index: row,
-                  epicenter: { row, col },
-                  timestamp,
-                });
+              const completedUnits = collectCompletedUnits(draft.board, row, col);
+              for (const u of completedUnits) {
+                result.completedUnits.push(u);
               }
 
-              if (isColumnComplete(draft.board, col)) {
-                result.completedUnits.push({
-                  type: 'column',
-                  index: col,
-                  epicenter: { row, col },
-                  timestamp,
-                });
-              }
+              const completionBonus = completedUnits.length * UNIT_COMPLETION_BONUS;
+              const totalThisMove = placementPoints + completionBonus;
 
-              if (isBoxComplete(draft.board, boxIndex)) {
-                result.completedUnits.push({
-                  type: 'box',
-                  index: boxIndex,
-                  epicenter: { row, col },
-                  timestamp,
-                });
-              }
+              draft.xpPerPlacement = totalThisMove;
+              draft.xpEarnedThisGame += totalThisMove;
+              draft.correctStreak++;
+              draft.lastCorrectCell = { row, col };
+              draft.lastManualCorrectCell = { row, col };
 
-              if (result.completedUnits.length > 0) {
-                draft.lastCompletedUnits = result.completedUnits;
+              if (completedUnits.length > 0) {
+                draft.lastCompletedUnits = completedUnits;
               }
 
               // Check for win
@@ -554,10 +551,14 @@ export const useGameStore = create<GameState & GameActions>()(
           draft.historyIndex++;
 
           const targetCell = draft.board[row][col];
+          const hadValue = targetCell.value !== null;
           targetCell.value = null;
           targetCell.notes.clear();
           targetCell.isValid = true;
           draft.highlightedNumber = null;
+          if (hadValue) {
+            draft.correctStreak = 0;
+          }
         });
       },
 
@@ -591,7 +592,7 @@ export const useGameStore = create<GameState & GameActions>()(
         });
         const strategicHint = solver.getHint(puzzle);
 
-        // Use strategic hint only if it produces a direct placement
+        // Strategic placement: show explanation first; value placed in dismissHintModal
         if (strategicHint?.targetValue) {
           const { targetCell, targetValue } = strategicHint;
 
@@ -599,29 +600,9 @@ export const useGameStore = create<GameState & GameActions>()(
             draft.hintsUsed++;
             if (usePaidSlot && draft.paidHintsRemaining > 0) draft.paidHintsRemaining--;
             draft.selectedCell = targetCell;
-
-            const snapshot = createSnapshot(draft.board);
-            draft.history = draft.history.slice(0, draft.historyIndex + 1);
-            draft.history.push(snapshot);
-            draft.historyIndex++;
-
-            const cell = draft.board[targetCell.row][targetCell.col];
-            cell.value = targetValue!;
-            cell.notes.clear();
-            cell.isValid = true;
             draft.highlightedNumber = targetValue!;
-            draft.lastCorrectCell = targetCell;
-
-            clearRelatedNotes(draft.board, targetCell.row, targetCell.col, targetValue!);
-
-            // Store hint so the modal can display the explanation
             draft.lastHint = strategicHint;
             draft.hintHighlightCells = strategicHint.highlightCells;
-
-            if (isBoardComplete(draft.board)) {
-              draft.gameStatus = 'won';
-              draft.isTimerRunning = false;
-            }
           });
 
           return { row: targetCell.row, col: targetCell.col, value: targetValue! };
@@ -660,6 +641,20 @@ export const useGameStore = create<GameState & GameActions>()(
           draft.lastCorrectCell = randomCell;
 
           clearRelatedNotes(draft.board, randomCell.row, randomCell.col, correctValue);
+
+          const completedUnits = collectCompletedUnits(
+            draft.board,
+            randomCell.row,
+            randomCell.col,
+          );
+          const completionBonus = completedUnits.length * UNIT_COMPLETION_BONUS;
+          const totalThisMove = POINTS_PER_PLACEMENT + completionBonus;
+          draft.xpPerPlacement = totalThisMove;
+          draft.xpEarnedThisGame += totalThisMove;
+          draft.lastManualCorrectCell = randomCell;
+          if (completedUnits.length > 0) {
+            draft.lastCompletedUnits = completedUnits;
+          }
 
           if (isBoardComplete(draft.board)) {
             draft.gameStatus = 'won';
@@ -702,68 +697,6 @@ export const useGameStore = create<GameState & GameActions>()(
         return hint;
       },
 
-      // Apply a strategic hint (place the value and update state)
-      applyHint: (hint: Hint) => {
-        const state = get();
-        if (state.gameStatus !== 'playing') return;
-
-        const { unlimitedHints } = useSettingsStore.getState();
-        const canUseFree = unlimitedHints || state.hintsUsed < MAX_HINTS;
-        if (!canUseFree && state.paidHintsRemaining <= 0) {
-          return; // No hint available; caller can show HintAdSheet
-        }
-        const usePaidSlot = !canUseFree;
-
-        // For placement hints, apply the value
-        if (hint.targetValue) {
-          set((draft) => {
-            draft.hintsUsed++;
-            if (usePaidSlot && draft.paidHintsRemaining > 0) draft.paidHintsRemaining--;
-            draft.selectedCell = hint.targetCell;
-
-            // Save snapshot for undo
-            const snapshot = createSnapshot(draft.board);
-            draft.history = draft.history.slice(0, draft.historyIndex + 1);
-            draft.history.push(snapshot);
-            draft.historyIndex++;
-
-            // Place the value
-            const cell = draft.board[hint.targetCell.row][hint.targetCell.col];
-            cell.value = hint.targetValue!;
-            cell.notes.clear();
-            cell.isValid = true;
-            draft.highlightedNumber = hint.targetValue!;
-            draft.lastCorrectCell = hint.targetCell;
-
-            // Clear related notes
-            clearRelatedNotes(
-              draft.board,
-              hint.targetCell.row,
-              hint.targetCell.col,
-              hint.targetValue!
-            );
-
-            // Clear hint state
-            draft.lastHint = null;
-            draft.hintHighlightCells = [];
-
-            // Check for win
-            if (isBoardComplete(draft.board)) {
-              draft.gameStatus = 'won';
-              draft.isTimerRunning = false;
-            }
-          });
-        } else {
-          // Elimination-only hint - just highlight and explain
-          set((draft) => {
-            draft.hintsUsed++;
-            if (usePaidSlot && draft.paidHintsRemaining > 0) draft.paidHintsRemaining--;
-            draft.lastHint = null;
-            draft.hintHighlightCells = [];
-          });
-        }
-      },
-
       addPaidHints: (count: number) => {
         if (count <= 0) return;
         set((state) => {
@@ -779,9 +712,63 @@ export const useGameStore = create<GameState & GameActions>()(
         });
       },
 
-      // Dismiss the hint explanation modal
+      // After reading the hint sheet: place value, award XP, then clear hint UI state
       dismissHintModal: () => {
         set((draft) => {
+          const hint = draft.lastHint;
+          if (!hint) return;
+
+          if (draft.gameStatus !== 'playing') {
+            draft.lastHint = null;
+            draft.hintHighlightCells = [];
+            return;
+          }
+
+          if (hint.targetValue) {
+            const targetCell = hint.targetCell;
+            const targetValue = hint.targetValue;
+
+            draft.selectedCell = targetCell;
+
+            const snapshot = createSnapshot(draft.board);
+            draft.history = draft.history.slice(0, draft.historyIndex + 1);
+            draft.history.push(snapshot);
+            draft.historyIndex++;
+
+            const cell = draft.board[targetCell.row][targetCell.col];
+            cell.value = targetValue;
+            cell.notes.clear();
+            cell.isValid = true;
+            draft.highlightedNumber = targetValue;
+            draft.lastCorrectCell = targetCell;
+
+            clearRelatedNotes(
+              draft.board,
+              targetCell.row,
+              targetCell.col,
+              targetValue,
+            );
+
+            const completedUnits = collectCompletedUnits(
+              draft.board,
+              targetCell.row,
+              targetCell.col,
+            );
+            const completionBonus = completedUnits.length * UNIT_COMPLETION_BONUS;
+            const totalThisMove = POINTS_PER_PLACEMENT + completionBonus;
+            draft.xpPerPlacement = totalThisMove;
+            draft.xpEarnedThisGame += totalThisMove;
+            draft.lastManualCorrectCell = targetCell;
+            if (completedUnits.length > 0) {
+              draft.lastCompletedUnits = completedUnits;
+            }
+
+            if (isBoardComplete(draft.board)) {
+              draft.gameStatus = 'won';
+              draft.isTimerRunning = false;
+            }
+          }
+
           draft.lastHint = null;
           draft.hintHighlightCells = [];
         });

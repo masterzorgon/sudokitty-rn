@@ -3,14 +3,14 @@ import { usePlayerStreakStore } from '../stores/playerStreakStore';
 import { usePlayerProgressStore } from '../stores/playerProgressStore';
 import { useUserStatsStore } from '../stores/userStatsStore';
 import { calculateMochiReward } from '../engine/types';
-import { calculateXPReward } from '../constants/xp';
+import { DIFFICULTY_XP_MULTIPLIER } from '../constants/xp';
 
 export function handleGameWon(): void {
-  const { difficulty, timeElapsed, mistakeCount, hintsUsed, isDaily, continueCount } =
+  const { difficulty, timeElapsed, mistakeCount, hintsUsed, isDaily, continueCount, xpEarnedThisGame } =
     useGameStore.getState();
 
-  // Add XP before recordGameWin so streak sync includes updated totalXP
-  const xpReward = calculateXPReward(difficulty, timeElapsed);
+  // In-game points × modest difficulty multiplier (matches end-game screen)
+  const xpReward = Math.round(xpEarnedThisGame * DIFFICULTY_XP_MULTIPLIER[difficulty]);
   usePlayerProgressStore.getState().addXP(xpReward);
 
   usePlayerStreakStore.getState().recordGameWin();

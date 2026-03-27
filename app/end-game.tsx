@@ -23,11 +23,15 @@ import {
   calculateMochiRewardBreakdown,
   DAILY_MOCHI_POINTS,
 } from '../src/engine/types';
-import { calculateXPReward } from '../src/constants/xp';
+import { DIFFICULTY_XP_MULTIPLIER } from '../src/constants/xp';
 import MochiPointIcon from '../assets/images/icons/mochi-point.svg';
 
 const MochiWowImg = require('../assets/images/mochi/mochi-wow.png');
 const MochiQuitImg = require('../assets/images/mochi/mochi-quit.png');
+
+function difficultyLabel(d: Difficulty): string {
+  return d.charAt(0).toUpperCase() + d.slice(1);
+}
 
 function StatRow({ label, value, icon, iconComponent, iconColor }: {
   label: string;
@@ -61,6 +65,8 @@ export default function EndGameScreen() {
   const hintsUsed = parseInt(s(params.hintsUsed), 10);
   const isDaily = s(params.isDaily) === 'true';
   const progress = parseInt(s(params.progress), 10);
+  const rawXpEarned = parseInt(s(params.xpEarned), 10);
+  const pointsThisGame = Number.isFinite(rawXpEarned) ? rawXpEarned : 0;
 
   const isWon = status === 'won';
   const canContinue = useGameStore((s) => s.canContinue);
@@ -68,7 +74,10 @@ export default function EndGameScreen() {
   const resetGame = useGameStore((s) => s.resetGame);
   const isPremium = useEffectivePremium();
 
-  const xpEarned = isWon ? calculateXPReward(difficulty, timeElapsed) : 0;
+  const difficultyMult = DIFFICULTY_XP_MULTIPLIER[difficulty];
+  const finalXpWon = isWon ? Math.round(pointsThisGame * difficultyMult) : 0;
+  const showDifficultyXpBreakdown = isWon && difficultyMult > 1.0;
+
   const mochisEarned = isWon
     ? isDaily
       ? DAILY_MOCHI_POINTS[difficulty]
@@ -79,7 +88,6 @@ export default function EndGameScreen() {
     : null;
 
   const livesRemaining = MAX_MISTAKES - mistakeCount;
-  const xpCouldHaveWon = !isWon ? calculateXPReward(difficulty, timeElapsed) : 0;
   const mochisCouldHaveWon = !isWon
     ? isDaily
       ? DAILY_MOCHI_POINTS[difficulty]
@@ -140,7 +148,29 @@ export default function EndGameScreen() {
         >
           {isWon && (
             <>
-              <StatRow label="XP Earned" value={`+${xpEarned}`} icon="sparkles-outline" />
+              {showDifficultyXpBreakdown ? (
+                <>
+                  <StatRow label="Points Earned" value={`${pointsThisGame}`} icon="star" />
+                  <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+                  <StatRow
+                    label={`${difficultyLabel(difficulty)} Bonus`}
+                    value={`x${difficultyMult}`}
+                    icon="trending-up-outline"
+                  />
+                  <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
+                  <StatRow
+                    label="Total XP"
+                    value={`+${finalXpWon}`}
+                    icon="sparkles-outline"
+                  />
+                </>
+              ) : (
+                <StatRow
+                  label="XP Earned"
+                  value={`+${finalXpWon}`}
+                  icon="sparkles-outline"
+                />
+              )}
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
               {rewardBreakdown ? (
                 <>
@@ -174,9 +204,9 @@ export default function EndGameScreen() {
           {!isWon && (
             <>
               <StatRow
-                label="XP Could Have Won"
-                value={`+${xpCouldHaveWon}`}
-                icon="sparkles-outline"
+                label="Points Earned"
+                value={`${pointsThisGame}`}
+                icon="star"
               />
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
               <StatRow

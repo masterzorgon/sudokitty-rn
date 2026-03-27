@@ -7,7 +7,7 @@ import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing } from '../../theme';
 import { MAX_MISTAKES } from '../../engine/types';
-import { RollingTime } from '../ui';
+import { RollingTime, RollingNumber } from '../ui';
 import { CELL_SIZE } from '../board/SudokuCell';
 
 
@@ -81,13 +81,19 @@ export const GameHeader = () => {
         )}
       </View>
 
-      {/* Section 3: XP earned this game */}
+      {/* Section 3: XP earned this game (in-game points; difficulty multiplier at win) */}
       <View style={styles.section}>
         <View style={styles.xpRow}>
           <Ionicons name="star" size={14} color={colors.hintGold} />
-          <Text style={[styles.xpText, { color: colors.textSecondary }]}>
-            {xpEarned} XP
-          </Text>
+          <RollingNumber
+            value={xpEarned}
+            fontSize={13}
+            color={colors.textSecondary}
+            textStyle={typography.caption}
+            maxDigits={5}
+            countUp
+          />
+          <Text style={[styles.xpSuffix, { color: colors.textSecondary }]}>XP</Text>
         </View>
       </View>
     </View>
@@ -130,8 +136,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  xpText: {
+  xpSuffix: {
     ...typography.caption,
     fontSize: 13,
+    marginLeft: 2,
   },
 });
