@@ -22,7 +22,9 @@ import {
   MAX_MISTAKES,
   calculateMochiReward,
   calculateMochiRewardBreakdown,
+  DAILY_DIFFICULTY_SCHEDULE,
   DAILY_MOCHI_POINTS,
+  getTodayDateString,
 } from '../src/engine/types';
 import { DIFFICULTY_XP_MULTIPLIER } from '../src/constants/xp';
 import MochiPointIcon from '../assets/images/icons/mochi-point.svg';
@@ -114,6 +116,14 @@ export default function EndGameScreen() {
     playFeedback('tap');
     if (!isPremium) {
       await showInterstitialIfReady();
+    }
+    const st = useGameStore.getState();
+    if (isDaily) {
+      const today = getTodayDateString();
+      const dailyDifficulty = DAILY_DIFFICULTY_SCHEDULE[new Date().getDay()];
+      st.newDailyGame(today, dailyDifficulty);
+    } else {
+      st.newGame(difficulty);
     }
     router.dismissAll();
     router.push({

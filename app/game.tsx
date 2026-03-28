@@ -73,13 +73,32 @@ export default function GameScreen() {
   // Initialize game on mount
   useEffect(() => {
     if (difficulty) {
+      const st = useGameStore.getState();
+      const today = getTodayDateString();
+      const dayOfWeek = new Date().getDay();
+      const dailyDifficulty = DAILY_DIFFICULTY_SCHEDULE[dayOfWeek];
+
+      let skipNewGame = false;
       if (isDaily) {
-        const today = getTodayDateString();
-        const dayOfWeek = new Date().getDay();
-        const dailyDifficulty = DAILY_DIFFICULTY_SCHEDULE[dayOfWeek];
-        newDailyGame(today, dailyDifficulty);
+        skipNewGame =
+          st.gameStatus === 'playing' &&
+          st.isDaily &&
+          st.difficulty === dailyDifficulty &&
+          st.getProgress() === 0;
       } else {
-        newGame(difficulty);
+        skipNewGame =
+          st.gameStatus === 'playing' &&
+          !st.isDaily &&
+          st.difficulty === difficulty &&
+          st.getProgress() === 0;
+      }
+
+      if (!skipNewGame) {
+        if (isDaily) {
+          newDailyGame(today, dailyDifficulty);
+        } else {
+          newGame(difficulty);
+        }
       }
       setTimeout(() => {
         startTimer();
