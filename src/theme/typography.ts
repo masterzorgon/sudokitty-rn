@@ -1,11 +1,5 @@
-// Typography system for Sudokitty
-// Uses Pally - a soft, rounded display font
-// Perfect for the cute, friendly aesthetic of the app
-
 import { TextStyle } from "react-native";
 
-// Font family names - Pally with different weights
-// Each weight requires its own font file (OTF doesn't support weight variants)
 export const fontFamilies = {
   regular: "Pally-Regular",
   medium: "Pally-Medium",
@@ -13,7 +7,6 @@ export const fontFamilies = {
   bold: "Pally-Bold",
 };
 
-// Font weights mapping (for reference, actual weight is determined by fontFamily)
 export const fontWeights = {
   regular: "400" as const,
   medium: "500" as const,
@@ -21,7 +14,6 @@ export const fontWeights = {
   bold: "700" as const,
 };
 
-// Font sizes
 export const fontSizes = {
   xs: 10,
   sm: 12,
@@ -34,9 +26,7 @@ export const fontSizes = {
   notes: 10,
 };
 
-// Pre-defined text styles using Open Runde font family
 export const typography: Record<string, TextStyle> = {
-  // Titles
   largeTitle: {
     fontFamily: fontFamilies.bold,
     fontSize: fontSizes.largeTitle,
@@ -47,14 +37,10 @@ export const typography: Record<string, TextStyle> = {
     fontSize: fontSizes.title,
     letterSpacing: -0.3,
   },
-
-  // Headings
   headline: {
     fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.headline,
   },
-
-  // Body text
   body: {
     fontFamily: fontFamilies.regular,
     fontSize: fontSizes.body,
@@ -64,8 +50,6 @@ export const typography: Record<string, TextStyle> = {
     fontFamily: fontFamilies.medium,
     fontSize: fontSizes.body,
   },
-
-  // Captions
   caption: {
     fontFamily: fontFamilies.medium,
     fontSize: fontSizes.caption,
@@ -74,14 +58,10 @@ export const typography: Record<string, TextStyle> = {
     fontFamily: fontFamilies.regular,
     fontSize: fontSizes.caption,
   },
-
-  // Small text
   small: {
     fontFamily: fontFamilies.regular,
     fontSize: fontSizes.sm,
   },
-
-  // Cell text - using Open Runde for consistent aesthetic
   cellValue: {
     fontFamily: fontFamilies.medium,
     fontSize: fontSizes.cell,
@@ -93,8 +73,6 @@ export const typography: Record<string, TextStyle> = {
     fontSize: fontSizes.notes,
     textAlign: "center",
   },
-
-  // Button text
   button: {
     fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.body,
