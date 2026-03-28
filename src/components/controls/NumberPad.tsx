@@ -55,18 +55,23 @@ const NumberButton = memo(({ number, onPress, isHighlighted, remaining, disabled
     <View style={styles.buttonWrapper}>
       <SkeuButton
         onPress={handlePress}
-        variant={isHighlighted ? 'primary' : 'secondary'}
-        customColors={isHighlighted ? undefined : whiteColors}
+        variant={isHighlighted && !disabled ? 'primary' : 'secondary'}
+        customColors={isHighlighted && !disabled ? undefined : whiteColors}
         borderRadius={BUTTON_RADIUS}
         showHighlight={false}
         disabled={disabled}
         contentStyle={styles.buttonFace}
-        accessibilityLabel={`Number ${number}, ${remaining} remaining`}
+        accessibilityLabel={
+          remaining === 0
+            ? `Number ${number}, all placed`
+            : `Number ${number}, ${remaining} remaining`
+        }
       >
         <Text
           style={[
             styles.buttonText,
-            isHighlighted && styles.buttonTextHighlighted,
+            isHighlighted && !disabled && styles.buttonTextHighlighted,
+            disabled && styles.buttonTextMuted,
           ]}
         >
           {number}
@@ -87,11 +92,7 @@ export const NumberPad = memo(() => {
   const handleNumberPress = useCallback(
     (num: number) => {
       if (gameStatus !== 'playing') return;
-      // Intentional silence: tapping fully-placed number (remaining=0) gets no feedback
-      if (remainingCounts[num] === 0) {
-        inputNumber(num);
-        return;
-      }
+      if (remainingCounts[num] === 0) return;
       // Notes mode: subtle pencil-mark haptic
       if (isNotesMode) {
         inputNumber(num);
@@ -110,7 +111,7 @@ export const NumberPad = memo(() => {
     [gameStatus, inputNumber, remainingCounts, isNotesMode]
   );
 
-  const isDisabled = gameStatus !== 'playing';
+  const padDisabled = gameStatus !== 'playing';
 
   return (
     <View style={styles.container}>
@@ -121,7 +122,7 @@ export const NumberPad = memo(() => {
           onPress={handleNumberPress}
           isHighlighted={highlightedNumber === num}
           remaining={remainingCounts[num]}
-          disabled={isDisabled}
+          disabled={padDisabled || remainingCounts[num] === 0}
         />
       ))}
     </View>
@@ -148,6 +149,10 @@ const styles = StyleSheet.create({
   },
   buttonTextHighlighted: {
     color: colors.white,
+  },
+  buttonTextMuted: {
+    color: colors.textLight,
+    opacity: 0.55,
   },
   dotsContainer: {
     alignItems: 'center',
