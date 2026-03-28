@@ -111,7 +111,9 @@ export const NumberPad = memo(() => {
     [gameStatus, inputNumber, remainingCounts, isNotesMode]
   );
 
-  const padDisabled = gameStatus !== 'playing';
+  // Mute entire pad only when not in an active in-session state (playing or paused).
+  // Paused (e.g. settings open) still blocks input via handleNumberPress, but keeps visuals.
+  const padDisabled = gameStatus !== 'playing' && gameStatus !== 'paused';
 
   return (
     <View style={styles.container}>
