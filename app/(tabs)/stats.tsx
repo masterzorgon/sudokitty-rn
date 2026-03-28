@@ -1,5 +1,3 @@
-// Stats screen — Analytics dashboard with activity calendar and game stats
-
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,7 +20,6 @@ export default function StatsScreen() {
       <ScreenContent contentStyle={contentStyle}>
         <StatsOverview />
 
-        {/* Bottom spacing */}
         <View style={{ height: 40 }} />
       </ScreenContent>
       <ScreenHeader onHeightChange={setHeaderHeight} />

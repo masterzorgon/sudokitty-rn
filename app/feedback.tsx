@@ -1,6 +1,3 @@
-// Feedback screen for user feedback submission
-// Includes dropdown reason selector, name, email, message, and Resend integration
-
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   StyleSheet,

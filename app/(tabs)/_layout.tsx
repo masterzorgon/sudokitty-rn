@@ -10,7 +10,6 @@ export default function TabLayout() {
   const resumeGame = useGameStore((s) => s.resumeGame);
   const resetGame = useGameStore((s) => s.resetGame);
 
-  // Handle new game - navigate to game screen with difficulty
   const handleNewGame = (difficulty: Difficulty) => {
     router.push({
       pathname: "/game",
@@ -18,13 +17,11 @@ export default function TabLayout() {
     });
   };
 
-  // Handle resume - resume existing game and navigate
   const handleResume = () => {
     resumeGame();
     router.push("/game");
   };
 
-  // Handle quit game - clear game state without navigating
   const handleQuitGame = () => {
     resetGame();
   };
@@ -43,9 +40,7 @@ export default function TabLayout() {
         freezeOnBlur: false,
       }}
       tabBar={(props) => {
-        // Map route name to SecondaryTab, filtering out 'daily'
         const routeName = props.state.routes[props.state.index].name;
-        // Default to 'index' if current route isn't a secondary tab
         const activeTab: SecondaryTab =
           routeName === "index" ||
           routeName === "store" ||

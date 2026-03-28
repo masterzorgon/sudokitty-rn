@@ -1,15 +1,12 @@
-// Difficulty selection modal
-// Matches iOS DifficultyPickerSheet.swift
+import { StatusBar } from "expo-status-bar";
+import { Platform, StyleSheet, View, Text, Pressable } from "react-native";
+import { router } from "expo-router";
 
-import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet, View, Text, Pressable } from 'react-native';
-import { router } from 'expo-router';
-
-import { useGameStore } from '../src/stores/gameStore';
-import { colors, useColors } from '../src/theme/colors';
-import { typography } from '../src/theme/typography';
-import { spacing, borderRadius } from '../src/theme';
-import { Difficulty, DIFFICULTY_CONFIG, getMochisRangeLabel } from '../src/engine/types';
+import { useGameStore } from "../src/stores/gameStore";
+import { colors, useColors } from "../src/theme/colors";
+import { typography } from "../src/theme/typography";
+import { spacing, borderRadius } from "../src/theme";
+import { Difficulty, DIFFICULTY_CONFIG, getMochisRangeLabel } from "../src/engine/types";
 
 interface DifficultyButtonProps {
   difficulty: Difficulty;
@@ -55,7 +52,7 @@ export default function ModalScreen() {
       </View>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
+      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </View>
   );
 }
@@ -69,7 +66,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.headline,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: spacing.xl,
   },
   buttonContainer: {

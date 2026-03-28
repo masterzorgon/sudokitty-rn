@@ -1,6 +1,3 @@
-// Techniques list screen - Browse and select techniques to learn
-// Grouped by difficulty: Beginner, Intermediate, Advanced, Expert
-
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -28,10 +25,6 @@ import { trackPaywallOpened } from "../../src/utils/analytics";
 import { useEffectivePremium } from "../../src/stores/premiumStore";
 import { presentPaywall } from "../../src/lib/revenueCat";
 import { CTABannerCarousel } from "../../src/components/ui/CTABannerCarousel";
-
-// ============================================
-// Technique Card Component
-// ============================================
 
 function TechniqueCard({
   technique,
@@ -96,10 +89,6 @@ function TechniqueCard({
   );
 }
 
-// ============================================
-// Category Section Component
-// ============================================
-
 function CategorySection({
   category,
   color,
@@ -119,12 +108,10 @@ function CategorySection({
 
   return (
     <Animated.View entering={FadeIn.delay(sectionIndex * 60).duration(300)} style={styles.section}>
-      {/* Section header */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{category}</Text>
       </View>
 
-      {/* Technique cards or empty state */}
       {isEmpty ? (
         <View style={styles.emptySection}>
           <Text style={styles.emptySectionText}>Coming soon</Text>
@@ -146,10 +133,6 @@ function CategorySection({
   );
 }
 
-// ============================================
-// Main Screen
-// ============================================
-
 export default function TechniquesListScreen() {
   const c = useColors();
   const router = useRouter();
@@ -162,7 +145,6 @@ export default function TechniquesListScreen() {
 
   const handleSelectTechnique = async (techniqueId: string) => {
     const meta = getTechniqueMetadata(techniqueId);
-    // Gate level 3-4 techniques behind premium
     if (!isPremium && meta && meta.level >= 2) {
       playFeedback("tap");
       trackPaywallOpened("technique_card");
@@ -178,7 +160,6 @@ export default function TechniquesListScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
-      {/* Header */}
       <View style={styles.header}>
         <BackButton />
         <View style={styles.headerCenter}>
@@ -190,7 +171,6 @@ export default function TechniquesListScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Technique list */}
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -210,16 +190,11 @@ export default function TechniquesListScreen() {
           />
         ))}
 
-        {/* Bottom spacing for scroll */}
         <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-// ============================================
-// Styles
-// ============================================
 
 const styles = StyleSheet.create({
   container: {

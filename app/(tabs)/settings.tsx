@@ -46,7 +46,6 @@ export default function SettingsScreen() {
   const router = useRouter();
   const c = useColors();
 
-  // Settings state
   const unlimitedMistakes = useUnlimitedMistakes();
   const unlimitedHints = useUnlimitedHints();
   const colorTheme = useColorTheme();
@@ -61,7 +60,6 @@ export default function SettingsScreen() {
   const resetDailyChallenge = usePlayerStreakStore((s) => s.resetState);
   const resetStats = useUserStatsStore((s) => s.resetStats);
 
-  // Single navigation helper: string = internal route, object = external URL with analytics
   const navigate = useCallback(
     async (dest: string | { url: string; trackKey: string }) => {
       if (typeof dest === "string") {
@@ -155,7 +153,6 @@ export default function SettingsScreen() {
           <StatsCTA onPress={handleViewStats} />
         </View>
 
-        {/* Appearance - Theme Color Picker */}
         <SettingsSection title="Appearance">
           <View style={styles.themePickerRow}>
             {THEME_NAMES.map((name) => {
@@ -183,7 +180,6 @@ export default function SettingsScreen() {
           </View>
         </SettingsSection>
 
-        {/* Game Preferences */}
         <SettingsSection title="Game">
           <AudioSettingsSection
             showTimer
@@ -208,7 +204,6 @@ export default function SettingsScreen() {
           />
         </SettingsSection>
 
-        {/* Learn */}
         <SettingsSection title="Learn">
           <SettingsLinkRow
             label="How to play"
@@ -230,7 +225,6 @@ export default function SettingsScreen() {
           />
         </SettingsSection>
 
-        {/* Premium */}
         <SettingsSection title="Premium">
           {!isPremium && (
             <SettingsLinkRow
@@ -255,7 +249,6 @@ export default function SettingsScreen() {
           />
         </SettingsSection>
 
-        {/* Support */}
         <SettingsSection title="Support">
           <SettingsLinkRow
             label="Send feedback"
@@ -278,7 +271,6 @@ export default function SettingsScreen() {
           />
         </SettingsSection>
 
-        {/* Reset Progress */}
         <SkeuCard borderRadius={borderRadius.lg} style={styles.resetContainer}>
           <SettingsLinkRow
             label="Reset progress"

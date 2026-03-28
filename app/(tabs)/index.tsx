@@ -31,25 +31,15 @@ export default function HomeScreen() {
   const router = useRouter();
   const [headerHeight, setHeaderHeight] = useState(ESTIMATED_HEADER_CONTENT_HEIGHT);
 
-  // Store hooks
   const currentStreak = useCurrentStreak();
   const streakLostInfo = usePlayerStreakStore((s) => s.streakLostInfo);
   const reigniteStreak = usePlayerStreakStore((s) => s.reigniteStreak);
   const clearStreakLostInfo = usePlayerStreakStore((s) => s.clearStreakLostInfo);
   const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
 
-  // Purchase sheet for reigniting streak
   const [sheetConfig, setSheetConfig] = useState<PurchaseSheetConfig | null>(null);
 
-  // Welcome message for speech bubble (pre-fetched during splash)
   const [welcomeMessage] = useState(preloadedWelcomeMessage);
-
-  // DEV ONLY: Credit 500 mochis for testing — remove after use
-  useEffect(() => {
-    if (__DEV__) {
-      usePlayerStreakStore.getState().addMochiHistoryEntry(500, "bonus");
-    }
-  }, []);
 
   const handleInsufficientFunds = useCallback(
     async (itemPrice: number) => {
@@ -106,9 +96,7 @@ export default function HomeScreen() {
       <ScreenBackground />
 
       <View style={[styles.content, { paddingTop: headerHeight }]}>
-        {/* Mochi Cat Hero Section */}
         <View style={styles.heroSection}>
-          {/* Mochi Cat Character */}
           <Animated.View
             entering={FadeInDown.delay(200).duration(500).springify()}
             style={styles.catContainer}
@@ -116,7 +104,6 @@ export default function HomeScreen() {
             <MochiCat size={180} variant="welcome" />
           </Animated.View>
 
-          {/* Speech bubble with dynamic random welcome message */}
           {welcomeMessage ? (
             <Animated.View
               entering={FadeInUp.delay(400).duration(400).springify()}
@@ -131,13 +118,11 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
-        {/* Streak pill */}
         <Animated.View entering={FadeInUp.delay(800).duration(400)} style={styles.streakContainer}>
           <StreakPill streakCount={currentStreak} onPress={handleStreakPress} />
         </Animated.View>
       </View>
 
-      {/* CTA cards - fixed above nav bar */}
       <Animated.View
         entering={FadeInDown.delay(1000).duration(400)}
         style={[styles.ctaSection, { bottom: insets.bottom + CTA_BOTTOM_OFFSET }]}
