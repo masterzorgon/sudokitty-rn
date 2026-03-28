@@ -195,8 +195,9 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
           color={colors.textLight}
           textStyle={typography.caption}
           maxDigits={3}
+          digitsAlign="end"
         />
-        <Text style={[styles.percentSign, { marginLeft: percentage < 10 ? -12 : -7 }]}>%</Text>
+        <Text style={styles.percentSign}>%</Text>
       </View>
 
       {onSettingsPress && (
@@ -269,12 +270,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'flex-end',
+    // Fixed width sized to "100%" at fontSize 20: 3 digits × 13px + 2px gap + ~12px for '%'
+    width: 56,
+    gap: 2,
   },
   percentSign: {
     ...typography.caption,
     color: colors.textLight,
     fontSize: 20,
-    // marginLeft is set dynamically based on digit count
   },
   settingsButton: {
     padding: 4,
