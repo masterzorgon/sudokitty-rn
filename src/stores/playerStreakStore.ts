@@ -15,6 +15,7 @@ import {
   getYesterdayDateString,
   daysBetweenDates,
   addDaysToDate,
+  areMissedDaysCoveredByFrozenDates,
   createEmptyDailyChallengeState,
 } from '../engine/types';
 import { storage, STORAGE_KEYS } from '../utils/storage';
@@ -172,7 +173,14 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
       recordGameWin: () => {
         const today = getTodayDateString();
         const yesterday = getYesterdayDateString();
-        const { lastCompletedDate, currentStreak, longestStreak, completedDates, totalGamesWon } = get();
+        const {
+          lastCompletedDate,
+          currentStreak,
+          longestStreak,
+          completedDates,
+          totalGamesWon,
+          frozenDates,
+        } = get();
 
         let newStreak = currentStreak;
         let newLastCompleted = lastCompletedDate;
@@ -180,6 +188,9 @@ export const usePlayerStreakStore = create<PlayerStreakStore>()(
         // Only update streak once per day (first win of the day)
         if (lastCompletedDate !== today) {
           if (lastCompletedDate === yesterday) {
+            newStreak = currentStreak + 1;
+          } else if (areMissedDaysCoveredByFrozenDates(lastCompletedDate, yesterday, frozenDates ?? [])) {
+            // Missed days were preserved via streak freezes on load; treat like consecutive play.
             newStreak = currentStreak + 1;
           } else {
             newStreak = 1;

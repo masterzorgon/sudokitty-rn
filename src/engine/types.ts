@@ -362,6 +362,26 @@ export function addDaysToDate(dateStr: string, n: number): string {
   return d.toISOString().split('T')[0];
 }
 
+/**
+ * True when every calendar day strictly after `lastCompleted` through `yesterday` is listed in
+ * `frozenDates` (streak freezes applied on load for missed days).
+ */
+export function areMissedDaysCoveredByFrozenDates(
+  lastCompleted: string | null,
+  yesterday: string,
+  frozenDates: string[],
+): boolean {
+  if (!lastCompleted) return false;
+  if (lastCompleted >= yesterday) return false;
+  const frozenSet = new Set(frozenDates);
+  let d = addDaysToDate(lastCompleted, 1);
+  while (d <= yesterday) {
+    if (!frozenSet.has(d)) return false;
+    d = addDaysToDate(d, 1);
+  }
+  return true;
+}
+
 // Helper to generate deterministic seed from date string
 export const getDateSeed = (dateString: string): number => {
   let hash = 0;

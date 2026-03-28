@@ -185,7 +185,7 @@ export default function EndGameScreen() {
           )}
           {!isWon && (
             <>
-              <StatRow label="Points Earned" value={`${pointsThisGame}`} icon="star" />
+              <StatRow label="XP Could Have Earned" value={`${pointsThisGame}`} icon="star" />
               <View style={[styles.divider, { backgroundColor: c.gridLine }]} />
               <StatRow
                 label="Mochis Could Have Won"
@@ -253,7 +253,7 @@ export default function EndGameScreen() {
             onPress={handleGoHome}
             hitSlop={12}
           >
-            <Ionicons name="arrow-back-circle" size={22} color={c.textSecondary} />
+            <Ionicons name="arrow-back" size={22} color={c.textSecondary} />
             <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
               Return Home
             </Text>
