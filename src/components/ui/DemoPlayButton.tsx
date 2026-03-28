@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import Svg, { Rect } from 'react-native-svg';
+import React, { useEffect, useMemo } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Svg, { Rect } from "react-native-svg";
 import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   useFrameCallback,
   useSharedValue,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { useColors } from '../../theme/colors';
-import { borderRadius as br } from '../../theme';
+import { useColors } from "../../theme/colors";
+import { borderRadius as br } from "../../theme";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
 const AnimatedSvg = Animated.createAnimatedComponent(Svg);
@@ -56,7 +56,7 @@ export function DemoPlayButton({
   const startTimestampSV = useSharedValue(0);
 
   const frameCallback = useFrameCallback((frameInfo) => {
-    'worklet';
+    "worklet";
     if (!isPlayingSV.value) {
       return;
     }
@@ -88,7 +88,7 @@ export function DemoPlayButton({
   }, [isPlaying, durationMs, frameCallback, durationMsSV, isPlayingSV, originReadySV, progressSV]);
 
   const animatedRectProps = useAnimatedProps(() => {
-    'worklet';
+    "worklet";
     const p = progressSV.value;
     const playing = isPlayingSV.value;
     let draw = 0;
@@ -112,7 +112,7 @@ export function DemoPlayButton({
       <View
         style={[
           styles.background,
-          { borderRadius: CORNER_RADIUS, backgroundColor: (colorOverride ?? c.accentLight) + '40' },
+          { borderRadius: CORNER_RADIUS, backgroundColor: (colorOverride ?? c.accentLight) + "40" },
         ]}
       />
 
@@ -139,7 +139,7 @@ export function DemoPlayButton({
       </AnimatedSvg>
 
       <Ionicons
-        name={isPlaying ? 'pause' : 'play'}
+        name={isPlaying ? "pause" : "play"}
         size={size * 0.4}
         color={color}
         style={styles.icon}
@@ -150,14 +150,14 @@ export function DemoPlayButton({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   background: {
     ...StyleSheet.absoluteFillObject,
   },
   ring: {
-    position: 'absolute',
+    position: "absolute",
   },
   icon: {
     marginLeft: 2,

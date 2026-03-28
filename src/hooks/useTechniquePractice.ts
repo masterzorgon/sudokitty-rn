@@ -1,37 +1,39 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
-import { getTechniqueMetadata } from '../data/techniqueMetadata';
-import { renderSteps, RenderedStep } from '../data/techniqueSteps';
-import {
-  getCuratedPuzzle,
-  generateWithFallback,
-} from '../engine/techniqueGenerator';
-import { CURATED_PUZZLE_BANK } from '../data/techniquePuzzleBank';
-import {
-  getCachedPuzzle,
-  consumeAndRefill,
-} from '../services/puzzleCacheService';
+import { getTechniqueMetadata } from "../data/techniqueMetadata";
+import { renderSteps, RenderedStep } from "../data/techniqueSteps";
+import { getCuratedPuzzle, generateWithFallback } from "../engine/techniqueGenerator";
+import { CURATED_PUZZLE_BANK } from "../data/techniquePuzzleBank";
+import { getCachedPuzzle, consumeAndRefill } from "../services/puzzleCacheService";
 import {
   validateSelection,
   PlacementSelection,
   EliminationSelection,
   ValidationResult,
   isPlacementTechnique,
-} from '../engine/validation';
-import { useTechniqueProgressStore } from '../stores/techniqueProgressStore';
-import { useEffectivePremium } from '../stores/premiumStore';
-import { playFeedback } from '../utils/feedback';
-import { Position, positionKey } from '../engine/types';
-import { TechniqueResult } from '../engine/solver/types';
-import { useSequence } from './useSequence';
+} from "../engine/validation";
+import { useTechniqueProgressStore } from "../stores/techniqueProgressStore";
+import { useEffectivePremium } from "../stores/premiumStore";
+import { playFeedback } from "../utils/feedback";
+import { Position, positionKey } from "../engine/types";
+import { TechniqueResult } from "../engine/solver/types";
+import { useSequence } from "./useSequence";
 
 // ============================================
 // Types
 // ============================================
 
-export type TechniquePhase = 'loading' | 'overview' | 'demo' | 'practice' | 'complete' | 'error' | 'coming-soon' | 'locked';
-export type FindPhase = 'pattern' | 'elimination';
+export type TechniquePhase =
+  | "loading"
+  | "overview"
+  | "demo"
+  | "practice"
+  | "complete"
+  | "error"
+  | "coming-soon"
+  | "locked";
+export type FindPhase = "pattern" | "elimination";
 
 export interface PuzzleState {
   puzzle: number[][];
@@ -52,11 +54,19 @@ function getNextPuzzle(techniqueId: string): {
   const cached = getCachedPuzzle(techniqueId);
   if (cached) {
     consumeAndRefill(techniqueId, cached.id);
-    return { puzzle: cached.puzzle, solution: cached.solution, techniqueResult: cached.techniqueResult };
+    return {
+      puzzle: cached.puzzle,
+      solution: cached.solution,
+      techniqueResult: cached.techniqueResult,
+    };
   }
   const curated = getCuratedPuzzle(CURATED_PUZZLE_BANK, techniqueId);
   if (curated.success && curated.puzzle && curated.solution && curated.techniqueResult) {
-    return { puzzle: curated.puzzle, solution: curated.solution, techniqueResult: curated.techniqueResult };
+    return {
+      puzzle: curated.puzzle,
+      solution: curated.solution,
+      techniqueResult: curated.techniqueResult,
+    };
   }
   return null;
 }
@@ -76,7 +86,7 @@ function toPuzzleState(raw: {
 export function useTechniquePractice() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const techniqueId = id ?? '';
+  const techniqueId = id ?? "";
   const metadata = getTechniqueMetadata(techniqueId);
   const isPremium = useEffectivePremium();
 
@@ -86,10 +96,12 @@ export function useTechniquePractice() {
   const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
-  const [statusOverride, setStatusOverride] = useState<'loading' | 'error' | 'coming-soon' | 'locked' | null>(null);
+  const [statusOverride, setStatusOverride] = useState<
+    "loading" | "error" | "coming-soon" | "locked" | null
+  >(null);
   const demoStartTime = useRef<number>(0);
 
-  const [findPhase, setFindPhase] = useState<FindPhase>('pattern');
+  const [findPhase, setFindPhase] = useState<FindPhase>("pattern");
   const [patternCells, setPatternCells] = useState<Set<string>>(new Set());
   const [eliminationCells, setEliminationCells] = useState<Set<string>>(new Set());
 
@@ -111,16 +123,16 @@ export function useTechniquePractice() {
   // Derive the current phase from the sequence step
   const phase: TechniquePhase = useMemo(() => {
     if (statusOverride) return statusOverride;
-    if (!puzzleState) return 'loading';
-    if (sequence.currentStep === 0) return 'overview';
-    if (sequence.currentStep <= demoStepCount) return 'demo';
-    if (sequence.currentStep === demoStepCount + 1) return 'practice';
-    return 'complete';
+    if (!puzzleState) return "loading";
+    if (sequence.currentStep === 0) return "overview";
+    if (sequence.currentStep <= demoStepCount) return "demo";
+    if (sequence.currentStep === demoStepCount + 1) return "practice";
+    return "complete";
   }, [statusOverride, puzzleState, sequence.currentStep, demoStepCount]);
 
   // The demo step index (0-based) within the demo phase
   const demoStepIndex = useMemo(() => {
-    if (phase !== 'demo') return 0;
+    if (phase !== "demo") return 0;
     return sequence.currentStep - 1;
   }, [phase, sequence.currentStep]);
 
@@ -130,53 +142,67 @@ export function useTechniquePractice() {
     setSelectedCells(new Set());
     setPatternCells(new Set());
     setEliminationCells(new Set());
-    setFindPhase('pattern');
+    setFindPhase("pattern");
   }, []);
 
   // ---- Mochi message ----
   const mochiMessage = useMemo((): string | null => {
-    if (phase === 'demo' && puzzleState) {
+    if (phase === "demo" && puzzleState) {
       return puzzleState.steps[demoStepIndex]?.text ?? null;
     }
-    if (phase === 'practice' && practicePuzzle) {
+    if (phase === "practice" && practicePuzzle) {
       if (validationResult) return validationResult.feedback;
-      if (!isElimination) return 'Tap the cell where you can apply this technique.';
-      return findPhase === 'pattern'
-        ? 'Tap the cells that form the pattern (e.g., the pair, triple, or wings).'
-        : 'Now tap the cells where candidates can be eliminated.';
+      if (!isElimination) return "Tap the cell where you can apply this technique.";
+      return findPhase === "pattern"
+        ? "Tap the cells that form the pattern (e.g., the pair, triple, or wings)."
+        : "Now tap the cells where candidates can be eliminated.";
     }
     return null;
-  }, [phase, puzzleState, demoStepIndex, practicePuzzle, validationResult, isElimination, findPhase]);
+  }, [
+    phase,
+    puzzleState,
+    demoStepIndex,
+    practicePuzzle,
+    validationResult,
+    isElimination,
+    findPhase,
+  ]);
 
   // ---- Puzzle loading ----
-  const loadPuzzleAsync = useCallback((
-    onSuccess: (ps: PuzzleState) => void,
-    onError: () => void,
-  ) => {
-    const next = getNextPuzzle(techniqueId);
-    if (next) {
-      onSuccess(toPuzzleState(next));
-      return;
-    }
-    // No curated puzzles: avoid running the generator (it can hang for 5s+ for rare techniques)
-    const curatedList = CURATED_PUZZLE_BANK[techniqueId];
-    if (!curatedList || curatedList.length === 0) {
-      onError();
-      return;
-    }
-    setStatusOverride('loading');
-    setTimeout(() => {
-      const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, {
-        maxRetries: 100,
-        timeoutMs: 5000,
-      });
-      if (result.success && result.puzzle && result.solution && result.techniqueResult) {
-        onSuccess(toPuzzleState({ puzzle: result.puzzle, solution: result.solution, techniqueResult: result.techniqueResult }));
-      } else {
-        onError();
+  const loadPuzzleAsync = useCallback(
+    (onSuccess: (ps: PuzzleState) => void, onError: () => void) => {
+      const next = getNextPuzzle(techniqueId);
+      if (next) {
+        onSuccess(toPuzzleState(next));
+        return;
       }
-    }, 50);
-  }, [techniqueId]);
+      // No curated puzzles: avoid running the generator (it can hang for 5s+ for rare techniques)
+      const curatedList = CURATED_PUZZLE_BANK[techniqueId];
+      if (!curatedList || curatedList.length === 0) {
+        onError();
+        return;
+      }
+      setStatusOverride("loading");
+      setTimeout(() => {
+        const result = generateWithFallback(techniqueId, CURATED_PUZZLE_BANK, {
+          maxRetries: 100,
+          timeoutMs: 5000,
+        });
+        if (result.success && result.puzzle && result.solution && result.techniqueResult) {
+          onSuccess(
+            toPuzzleState({
+              puzzle: result.puzzle,
+              solution: result.solution,
+              techniqueResult: result.techniqueResult,
+            }),
+          );
+        } else {
+          onError();
+        }
+      }, 50);
+    },
+    [techniqueId],
+  );
 
   const generatePuzzle = useCallback(() => {
     setGenerationError(null);
@@ -189,8 +215,8 @@ export function useTechniquePractice() {
         setStatusOverride(null);
       },
       () => {
-        setGenerationError('Could not find a suitable puzzle for this technique.');
-        setStatusOverride('error');
+        setGenerationError("Could not find a suitable puzzle for this technique.");
+        setStatusOverride("error");
       },
     );
   }, [loadPuzzleAsync, sequence]);
@@ -198,17 +224,17 @@ export function useTechniquePractice() {
   // Initial load
   useEffect(() => {
     if (!isPremium && metadata && metadata.level >= 3) {
-      setStatusOverride('locked');
+      setStatusOverride("locked");
     } else if (techniqueId && metadata?.hasSolver) {
       generatePuzzle();
     } else if (techniqueId && metadata && !metadata.hasSolver) {
-      setStatusOverride('coming-soon');
+      setStatusOverride("coming-soon");
     }
   }, [techniqueId, isPremium, generatePuzzle, metadata]);
 
   // Load practice puzzle when entering practice phase
   useEffect(() => {
-    if (phase === 'practice' && !practicePuzzle) {
+    if (phase === "practice" && !practicePuzzle) {
       resetFindState();
       loadPuzzleAsync(
         (ps) => {
@@ -216,8 +242,8 @@ export function useTechniquePractice() {
           setStatusOverride(null);
         },
         () => {
-          setGenerationError('Could not generate a practice puzzle.');
-          setStatusOverride('error');
+          setGenerationError("Could not generate a practice puzzle.");
+          setStatusOverride("error");
         },
       );
     }
@@ -225,15 +251,15 @@ export function useTechniquePractice() {
 
   // Record demo start time when entering demo phase
   useEffect(() => {
-    if (phase === 'demo' && demoStepIndex === 0) {
+    if (phase === "demo" && demoStepIndex === 0) {
       demoStartTime.current = Date.now();
     }
   }, [phase, demoStepIndex]);
 
   // Record demo completion when leaving last demo step
-  const prevPhaseRef = useRef<TechniquePhase>('loading');
+  const prevPhaseRef = useRef<TechniquePhase>("loading");
   useEffect(() => {
-    if (prevPhaseRef.current === 'demo' && phase === 'practice') {
+    if (prevPhaseRef.current === "demo" && phase === "practice") {
       const timeSeconds = Math.round((Date.now() - demoStartTime.current) / 1000);
       completeDemo(techniqueId, timeSeconds);
     }
@@ -246,101 +272,130 @@ export function useTechniquePractice() {
   }, [router]);
 
   const handleSequenceNext = useCallback(() => {
-    playFeedback('tap');
+    playFeedback("tap");
     sequence.next();
   }, [sequence]);
 
   const handleSequencePrevious = useCallback(() => {
-    playFeedback('tap');
+    playFeedback("tap");
     sequence.previous();
   }, [sequence]);
 
-  const handleCellPress = useCallback((row: number, col: number) => {
-    if (phase !== 'practice' || !practicePuzzle) return;
-    const key = positionKey({ row, col });
+  const handleCellPress = useCallback(
+    (row: number, col: number) => {
+      if (phase !== "practice" || !practicePuzzle) return;
+      const key = positionKey({ row, col });
 
-    if (!isElimination) {
-      setSelectedCells((prev) => {
-        const next = new Set(prev);
-        if (next.has(key)) { next.delete(key); } else { next.clear(); next.add(key); }
-        return next;
-      });
-    } else if (findPhase === 'pattern') {
-      setPatternCells((prev) => {
-        const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.add(key);
-        }
-        return next;
-      });
-    } else {
-      setEliminationCells((prev) => {
-        const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.add(key);
-        }
-        return next;
-      });
-    }
-    playFeedback('selection');
-  }, [phase, practicePuzzle, isElimination, findPhase]);
+      if (!isElimination) {
+        setSelectedCells((prev) => {
+          const next = new Set(prev);
+          if (next.has(key)) {
+            next.delete(key);
+          } else {
+            next.clear();
+            next.add(key);
+          }
+          return next;
+        });
+      } else if (findPhase === "pattern") {
+        setPatternCells((prev) => {
+          const next = new Set(prev);
+          if (next.has(key)) {
+            next.delete(key);
+          } else {
+            next.add(key);
+          }
+          return next;
+        });
+      } else {
+        setEliminationCells((prev) => {
+          const next = new Set(prev);
+          if (next.has(key)) {
+            next.delete(key);
+          } else {
+            next.add(key);
+          }
+          return next;
+        });
+      }
+      playFeedback("selection");
+    },
+    [phase, practicePuzzle, isElimination, findPhase],
+  );
 
   const handleConfirmPattern = useCallback(() => {
-    setFindPhase('elimination');
-    playFeedback('tap');
+    setFindPhase("elimination");
+    playFeedback("tap");
   }, []);
 
   const handleBackToPattern = useCallback(() => {
-    setFindPhase('pattern');
+    setFindPhase("pattern");
     setEliminationCells(new Set());
-    playFeedback('tap');
+    playFeedback("tap");
   }, []);
 
   const handleSubmitSelection = useCallback(() => {
-    if (!practicePuzzle || phase !== 'practice') return;
+    if (!practicePuzzle || phase !== "practice") return;
 
     let result: ValidationResult;
 
     if (!isElimination) {
       const positions = Array.from(selectedCells).map((key) => {
-        const [row, col] = key.split('-').map(Number);
+        const [row, col] = key.split("-").map(Number);
         return { row, col } as Position;
       });
       if (positions.length !== 1) {
         setValidationResult({
-          correct: false, patternCorrect: false, eliminationCorrect: false, placementCorrect: false,
-          feedback: 'Select exactly one cell where you think the value should be placed.',
+          correct: false,
+          patternCorrect: false,
+          eliminationCorrect: false,
+          placementCorrect: false,
+          feedback: "Select exactly one cell where you think the value should be placed.",
         });
         return;
       }
       const expected = practicePuzzle.techniqueResult.placements[0];
-      const selection: PlacementSelection = { type: 'placement', cell: positions[0], value: expected?.value ?? 0 };
+      const selection: PlacementSelection = {
+        type: "placement",
+        cell: positions[0],
+        value: expected?.value ?? 0,
+      };
       result = validateSelection(selection, practicePuzzle.techniqueResult, false);
     } else {
       const patternPositions = Array.from(patternCells).map((key) => {
-        const [row, col] = key.split('-').map(Number);
+        const [row, col] = key.split("-").map(Number);
         return { row, col } as Position;
       });
       const eliminationPositions = Array.from(eliminationCells).map((key) => {
-        const [row, col] = key.split('-').map(Number);
+        const [row, col] = key.split("-").map(Number);
         return { row, col } as Position;
       });
-      const selection: EliminationSelection = { type: 'elimination', patternCells: patternPositions, eliminationCells: eliminationPositions };
+      const selection: EliminationSelection = {
+        type: "elimination",
+        patternCells: patternPositions,
+        eliminationCells: eliminationPositions,
+      };
       result = validateSelection(selection, practicePuzzle.techniqueResult, false);
     }
 
     setValidationResult(result);
-    playFeedback(result.correct ? 'correct' : 'mistake');
+    playFeedback(result.correct ? "correct" : "mistake");
 
     if (result.correct) {
       recordFindAttempt(techniqueId, true);
       setTimeout(() => sequence.next(), 1500);
     }
-  }, [practicePuzzle, phase, isElimination, selectedCells, patternCells, eliminationCells, techniqueId, recordFindAttempt, sequence]);
+  }, [
+    practicePuzzle,
+    phase,
+    isElimination,
+    selectedCells,
+    patternCells,
+    eliminationCells,
+    techniqueId,
+    recordFindAttempt,
+    sequence,
+  ]);
 
   const handleTryAnother = useCallback(() => {
     resetFindState();
@@ -350,26 +405,34 @@ export function useTechniquePractice() {
         setPracticePuzzle(ps);
         setStatusOverride(null);
       },
-      () => setStatusOverride('error'),
+      () => setStatusOverride("error"),
     );
   }, [loadPuzzleAsync, resetFindState]);
 
   // ---- Board highlights ----
   const boardHighlightSet = useMemo((): Set<string> => {
-    if (phase === 'practice') {
+    if (phase === "practice") {
       return isElimination ? new Set([...patternCells, ...eliminationCells]) : selectedCells;
     }
-    if (phase === 'demo' && puzzleState) {
+    if (phase === "demo" && puzzleState) {
       const set = new Set<string>();
       const step = puzzleState.steps[demoStepIndex];
       if (step) step.highlightCells.forEach((pos) => set.add(positionKey(pos)));
       return set;
     }
     return new Set();
-  }, [phase, isElimination, patternCells, eliminationCells, selectedCells, puzzleState, demoStepIndex]);
+  }, [
+    phase,
+    isElimination,
+    patternCells,
+    eliminationCells,
+    selectedCells,
+    puzzleState,
+    demoStepIndex,
+  ]);
 
   const boardSecondarySet = useMemo((): Set<string> => {
-    return phase === 'practice' && isElimination ? eliminationCells : new Set<string>();
+    return phase === "practice" && isElimination ? eliminationCells : new Set<string>();
   }, [phase, isElimination, eliminationCells]);
 
   return {

@@ -13,10 +13,10 @@ import {
   identityTransform,
   mapDigit,
   PuzzleTransform,
-} from '../puzzleTransform';
-import { validateBoard } from '../generator';
-import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
-import { BOARD_SIZE } from '../types';
+} from "../puzzleTransform";
+import { validateBoard } from "../generator";
+import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
+import { BOARD_SIZE } from "../types";
 
 // ============================================
 // Helpers
@@ -59,11 +59,11 @@ function valueHistogram(grid: number[][]): Map<number, number> {
 // Identity Transform
 // ============================================
 
-describe('Identity transform', () => {
+describe("Identity transform", () => {
   const identity = identityTransform();
 
-  test('identity transform produces identical grid', () => {
-    const solution = CURATED_PUZZLE_BANK['naked-pair']![0].solution;
+  test("identity transform produces identical grid", () => {
+    const solution = CURATED_PUZZLE_BANK["naked-pair"]![0].solution;
     const result = transformGrid(solution, identity);
 
     for (let r = 0; r < BOARD_SIZE; r++) {
@@ -73,8 +73,8 @@ describe('Identity transform', () => {
     }
   });
 
-  test('identity transform preserves puzzle with zeros', () => {
-    const puzzle = CURATED_PUZZLE_BANK['naked-pair']![0].puzzle;
+  test("identity transform preserves puzzle with zeros", () => {
+    const puzzle = CURATED_PUZZLE_BANK["naked-pair"]![0].puzzle;
     const result = transformGrid(puzzle, identity);
 
     for (let r = 0; r < BOARD_SIZE; r++) {
@@ -84,13 +84,11 @@ describe('Identity transform', () => {
     }
   });
 
-  test('identity transform on curated puzzle preserves technique', () => {
-    const curated = CURATED_PUZZLE_BANK['naked-pair']![0];
+  test("identity transform on curated puzzle preserves technique", () => {
+    const curated = CURATED_PUZZLE_BANK["naked-pair"]![0];
     const transformed = transformCuratedPuzzle(curated, identity);
 
-    expect(transformed.techniqueResult.techniqueName).toBe(
-      curated.techniqueResult.techniqueName,
-    );
+    expect(transformed.techniqueResult.techniqueName).toBe(curated.techniqueResult.techniqueName);
   });
 });
 
@@ -98,7 +96,7 @@ describe('Identity transform', () => {
 // Grid Validity After Transform
 // ============================================
 
-describe('Grid validity after random transform', () => {
+describe("Grid validity after random transform", () => {
   // Test with 10 random transforms on each curated technique
   const techniqueIds = Object.keys(CURATED_PUZZLE_BANK);
 
@@ -147,8 +145,8 @@ describe('Grid validity after random transform', () => {
 // Digit Relabeling
 // ============================================
 
-describe('Digit relabeling', () => {
-  test('digit map covers all values 1-9 exactly once', () => {
+describe("Digit relabeling", () => {
+  test("digit map covers all values 1-9 exactly once", () => {
     for (let i = 0; i < 20; i++) {
       const transform = randomTransform();
       const values = transform.digitMap.slice(1); // skip index 0
@@ -157,14 +155,14 @@ describe('Digit relabeling', () => {
     }
   });
 
-  test('zero always maps to zero', () => {
+  test("zero always maps to zero", () => {
     for (let i = 0; i < 20; i++) {
       const transform = randomTransform();
       expect(transform.digitMap[0]).toBe(0);
     }
   });
 
-  test('mapDigit returns correct relabeling', () => {
+  test("mapDigit returns correct relabeling", () => {
     const transform: PuzzleTransform = {
       digitMap: [0, 5, 3, 7, 1, 9, 2, 8, 4, 6],
       rowPerm: [0, 1, 2, 3, 4, 5, 6, 7, 8],
@@ -183,8 +181,8 @@ describe('Digit relabeling', () => {
 // Row/Column Permutation Structure
 // ============================================
 
-describe('Band/stack-preserving permutations', () => {
-  test('row permutation preserves band boundaries', () => {
+describe("Band/stack-preserving permutations", () => {
+  test("row permutation preserves band boundaries", () => {
     for (let i = 0; i < 20; i++) {
       const transform = randomTransform();
       const { rowPerm } = transform;
@@ -201,7 +199,7 @@ describe('Band/stack-preserving permutations', () => {
     }
   });
 
-  test('column permutation preserves stack boundaries', () => {
+  test("column permutation preserves stack boundaries", () => {
     for (let i = 0; i < 20; i++) {
       const transform = randomTransform();
       const { colPerm } = transform;
@@ -216,7 +214,7 @@ describe('Band/stack-preserving permutations', () => {
     }
   });
 
-  test('row permutation is a valid permutation of 0-8', () => {
+  test("row permutation is a valid permutation of 0-8", () => {
     for (let i = 0; i < 20; i++) {
       const transform = randomTransform();
       const sorted = [...transform.rowPerm].sort((a, b) => a - b);
@@ -224,7 +222,7 @@ describe('Band/stack-preserving permutations', () => {
     }
   });
 
-  test('column permutation is a valid permutation of 0-8', () => {
+  test("column permutation is a valid permutation of 0-8", () => {
     for (let i = 0; i < 20; i++) {
       const transform = randomTransform();
       const sorted = [...transform.colPerm].sort((a, b) => a - b);
@@ -237,8 +235,8 @@ describe('Band/stack-preserving permutations', () => {
 // Transpose
 // ============================================
 
-describe('Transpose', () => {
-  test('transpose-only transform swaps rows and columns', () => {
+describe("Transpose", () => {
+  test("transpose-only transform swaps rows and columns", () => {
     const transform: PuzzleTransform = {
       digitMap: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
       rowPerm: [0, 1, 2, 3, 4, 5, 6, 7, 8],
@@ -246,7 +244,7 @@ describe('Transpose', () => {
       transpose: true,
     };
 
-    const solution = CURATED_PUZZLE_BANK['naked-pair']![0].solution;
+    const solution = CURATED_PUZZLE_BANK["naked-pair"]![0].solution;
     const result = transformGrid(solution, transform);
 
     for (let r = 0; r < BOARD_SIZE; r++) {
@@ -256,8 +254,8 @@ describe('Transpose', () => {
     }
   });
 
-  test('transposed solution is still a valid Sudoku', () => {
-    const solution = CURATED_PUZZLE_BANK['naked-pair']![0].solution;
+  test("transposed solution is still a valid Sudoku", () => {
+    const solution = CURATED_PUZZLE_BANK["naked-pair"]![0].solution;
     const transform: PuzzleTransform = {
       digitMap: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
       rowPerm: [0, 1, 2, 3, 4, 5, 6, 7, 8],
@@ -273,7 +271,7 @@ describe('Transpose', () => {
 // Technique Preservation (Core Property)
 // ============================================
 
-describe('Technique preservation after transform', () => {
+describe("Technique preservation after transform", () => {
   const techniqueIds = Object.keys(CURATED_PUZZLE_BANK);
 
   for (const techniqueId of techniqueIds) {
@@ -294,8 +292,7 @@ describe('Technique preservation after transform', () => {
 
           // Verify the technique result is non-trivial
           const result = transformed.techniqueResult;
-          const hasOutput =
-            result.eliminations.length > 0 || result.placements.length > 0;
+          const hasOutput = result.eliminations.length > 0 || result.placements.length > 0;
           if (hasOutput) successCount++;
         }
 
@@ -311,7 +308,7 @@ describe('Technique preservation after transform', () => {
 // Solution Correctness
 // ============================================
 
-describe('Transformed solution solves transformed puzzle', () => {
+describe("Transformed solution solves transformed puzzle", () => {
   const techniqueIds = Object.keys(CURATED_PUZZLE_BANK);
 
   for (const techniqueId of techniqueIds) {
@@ -338,9 +335,9 @@ describe('Transformed solution solves transformed puzzle', () => {
 // Randomness / Variety
 // ============================================
 
-describe('Transform variety', () => {
-  test('two random transforms produce different grids (with very high probability)', () => {
-    const curated = CURATED_PUZZLE_BANK['naked-pair']![0];
+describe("Transform variety", () => {
+  test("two random transforms produce different grids (with very high probability)", () => {
+    const curated = CURATED_PUZZLE_BANK["naked-pair"]![0];
     const t1 = transformCuratedPuzzle(curated);
     const t2 = transformCuratedPuzzle(curated);
 
@@ -355,11 +352,11 @@ describe('Transform variety', () => {
     expect(differs).toBe(true);
   });
 
-  test('random transforms produce variety of digit relabelings', () => {
+  test("random transforms produce variety of digit relabelings", () => {
     const seen = new Set<string>();
     for (let i = 0; i < 50; i++) {
       const t = randomTransform();
-      seen.add(t.digitMap.join(','));
+      seen.add(t.digitMap.join(","));
     }
     // Should see many distinct relabelings out of 50 trials
     expect(seen.size).toBeGreaterThan(30);
@@ -370,8 +367,8 @@ describe('Transform variety', () => {
 // Edge Cases
 // ============================================
 
-describe('Edge cases', () => {
-  test('transforms empty grid to empty grid', () => {
+describe("Edge cases", () => {
+  test("transforms empty grid to empty grid", () => {
     const emptyGrid = Array(9)
       .fill(null)
       .map(() => Array(9).fill(0));
@@ -385,15 +382,15 @@ describe('Edge cases', () => {
     }
   });
 
-  test('transforms full grid to full grid', () => {
-    const solution = CURATED_PUZZLE_BANK['naked-pair']![0].solution;
+  test("transforms full grid to full grid", () => {
+    const solution = CURATED_PUZZLE_BANK["naked-pair"]![0].solution;
     const transform = randomTransform();
     const result = transformGrid(solution, transform);
 
     expect(isComplete(result)).toBe(true);
   });
 
-  test('specific deterministic transform produces expected output', () => {
+  test("specific deterministic transform produces expected output", () => {
     // Digit-only relabeling: swap 1↔2, everything else identity
     const transform: PuzzleTransform = {
       digitMap: [0, 2, 1, 3, 4, 5, 6, 7, 8, 9],
@@ -426,7 +423,7 @@ describe('Edge cases', () => {
     }
   });
 
-  test('row swap within band produces valid grid', () => {
+  test("row swap within band produces valid grid", () => {
     // Swap rows 0 and 1 (within band 0), everything else identity
     const transform: PuzzleTransform = {
       digitMap: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -435,7 +432,7 @@ describe('Edge cases', () => {
       transpose: false,
     };
 
-    const solution = CURATED_PUZZLE_BANK['naked-pair']![0].solution;
+    const solution = CURATED_PUZZLE_BANK["naked-pair"]![0].solution;
     const result = transformGrid(solution, transform);
 
     // Row 0 of result should be row 1 of original (with same digits, no relabeling)

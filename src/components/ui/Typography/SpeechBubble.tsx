@@ -1,22 +1,31 @@
 // SpeechBubble - Reusable speech bubble with seamless outline including pointer
 // Uses SVG path for a continuous border across the entire silhouette
 
-import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, ViewStyle, TextStyle, StyleProp, LayoutChangeEvent } from 'react-native';
-import Animated from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+  StyleProp,
+  LayoutChangeEvent,
+} from "react-native";
+import Animated from "react-native-reanimated";
+import Svg, { Path } from "react-native-svg";
 
-import { colors } from '../../../theme/colors';
-import { fontFamilies } from '../../../theme/typography';
+import { colors } from "../../../theme/colors";
+import { fontFamilies } from "../../../theme/typography";
 
-type PointerDirection = 'up' | 'down' | 'left' | 'right';
+type PointerDirection = "up" | "down" | "left" | "right";
 
 const BORDER_RADIUS = 16;
 const POINTER_WIDTH = 16;
 const POINTER_HEIGHT = 10;
 const STROKE_WIDTH = 1.5;
 const SVG_BLEED = Math.ceil(STROKE_WIDTH) + 1;
-const STROKE_COLOR = '#d0c8c4';
+const STROKE_COLOR = "#d0c8c4";
 const FILL_COLOR = colors.cardBackground;
 
 export interface SpeechBubbleProps {
@@ -43,7 +52,7 @@ function buildPath(
   const ph = POINTER_HEIGHT;
   const half = pw / 2;
 
-  if (direction === 'up') {
+  if (direction === "up") {
     const top = inset + s;
     const bottom = inset + h - s;
     const left = inset + s;
@@ -63,11 +72,11 @@ function buildPath(
       `Q ${left} ${bottom} ${left} ${bottom - r}`,
       `L ${left} ${bodyTop + r}`,
       `Q ${left} ${bodyTop} ${left + r} ${bodyTop}`,
-      'Z',
-    ].join(' ');
+      "Z",
+    ].join(" ");
   }
 
-  if (direction === 'down') {
+  if (direction === "down") {
     const top = inset + s;
     const bottom = inset + h - s;
     const left = inset + s;
@@ -87,11 +96,11 @@ function buildPath(
       `Q ${left} ${bodyBottom} ${left} ${bodyBottom - r}`,
       `L ${left} ${top + r}`,
       `Q ${left} ${top} ${left + r} ${top}`,
-      'Z',
-    ].join(' ');
+      "Z",
+    ].join(" ");
   }
 
-  if (direction === 'left') {
+  if (direction === "left") {
     const top = inset + s;
     const bottom = inset + h - s;
     const left = inset + s;
@@ -111,8 +120,8 @@ function buildPath(
       `L ${bodyLeft} ${cy - half}`,
       `L ${bodyLeft} ${top + r}`,
       `Q ${bodyLeft} ${top} ${bodyLeft + r} ${top}`,
-      'Z',
-    ].join(' ');
+      "Z",
+    ].join(" ");
   }
 
   // right
@@ -135,16 +144,16 @@ function buildPath(
     `Q ${left} ${bottom} ${left} ${bottom - r}`,
     `L ${left} ${top + r}`,
     `Q ${left} ${top} ${left + r} ${top}`,
-    'Z',
-  ].join(' ');
+    "Z",
+  ].join(" ");
 }
 
 function getContentPadding(direction: PointerDirection) {
   return {
-    paddingTop: direction === 'up' ? POINTER_HEIGHT + 12 : 12,
-    paddingBottom: direction === 'down' ? POINTER_HEIGHT + 12 : 12,
-    paddingLeft: direction === 'left' ? POINTER_HEIGHT + 20 : 20,
-    paddingRight: direction === 'right' ? POINTER_HEIGHT + 20 : 20,
+    paddingTop: direction === "up" ? POINTER_HEIGHT + 12 : 12,
+    paddingBottom: direction === "down" ? POINTER_HEIGHT + 12 : 12,
+    paddingLeft: direction === "left" ? POINTER_HEIGHT + 20 : 20,
+    paddingRight: direction === "right" ? POINTER_HEIGHT + 20 : 20,
   };
 }
 
@@ -162,9 +171,7 @@ export function SpeechBubble({
 
   const onLayout = useCallback((e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
-    setSize((prev) =>
-      prev.w === width && prev.h === height ? prev : { w: width, h: height }
-    );
+    setSize((prev) => (prev.w === width && prev.h === height ? prev : { w: width, h: height }));
   }, []);
 
   const contentPadding = getContentPadding(pointerDirection);
@@ -174,24 +181,20 @@ export function SpeechBubble({
       <Text style={[styles.text, textStyle]}>{text}</Text>
     </ScrollView>
   ) : (
-    <Text style={[styles.text, textStyle]} numberOfLines={maxLines}>{text}</Text>
+    <Text style={[styles.text, textStyle]} numberOfLines={maxLines}>
+      {text}
+    </Text>
   );
 
   const isReady = size.w > 0 && size.h > 0;
 
   return (
-    <View
-      style={[styles.wrapper, style, !isReady && styles.hidden]}
-      onLayout={onLayout}
-    >
+    <View style={[styles.wrapper, style, !isReady && styles.hidden]} onLayout={onLayout}>
       {isReady && (
         <Svg
           width={size.w + SVG_BLEED * 2}
           height={size.h + SVG_BLEED * 2}
-          style={[
-            styles.svg,
-            { top: -SVG_BLEED, left: -SVG_BLEED },
-          ]}
+          style={[styles.svg, { top: -SVG_BLEED, left: -SVG_BLEED }]}
         >
           <Path
             d={buildPath(size.w, size.h, pointerDirection, pointerPosition, SVG_BLEED)}
@@ -203,20 +206,18 @@ export function SpeechBubble({
           />
         </Svg>
       )}
-      <Animated.View style={[contentPadding, contentContainerStyle]}>
-        {textContent}
-      </Animated.View>
+      <Animated.View style={[contentPadding, contentContainerStyle]}>{textContent}</Animated.View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrapper: {
-    position: 'relative',
-    overflow: 'visible',
+    position: "relative",
+    overflow: "visible",
   },
   svg: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -227,7 +228,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: colors.textSecondary,
     lineHeight: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   scroll: {
     flexGrow: 0,

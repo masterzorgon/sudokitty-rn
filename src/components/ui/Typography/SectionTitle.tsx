@@ -1,27 +1,23 @@
-import React from 'react';
-import { Text, type TextStyle } from 'react-native';
+import React from "react";
+import { Text, type TextStyle } from "react-native";
 
-import { useColors } from '../../../theme/colors';
-import { typography } from '../../../theme/typography';
-import { spacing } from '../../../theme';
+import { useColors } from "../../../theme/colors";
+import { typography } from "../../../theme/typography";
+import { spacing } from "../../../theme";
 
 interface SectionTitleProps {
   children: string;
-  variant?: 'default' | 'caption';
+  variant?: "default" | "caption";
   style?: TextStyle;
 }
 
-export function SectionTitle({ children, variant = 'default', style }: SectionTitleProps) {
+export function SectionTitle({ children, variant = "default", style }: SectionTitleProps) {
   const c = useColors();
 
-  const variantStyle = variant === 'caption' ? captionStyle : defaultStyle;
-  const variantColor = variant === 'caption' ? c.textSecondary : c.textPrimary;
+  const variantStyle = variant === "caption" ? captionStyle : defaultStyle;
+  const variantColor = variant === "caption" ? c.textSecondary : c.textPrimary;
 
-  return (
-    <Text style={[variantStyle, { color: variantColor }, style]}>
-      {children}
-    </Text>
-  );
+  return <Text style={[variantStyle, { color: variantColor }, style]}>{children}</Text>;
 }
 
 const defaultStyle: TextStyle = {
@@ -32,7 +28,7 @@ const defaultStyle: TextStyle = {
 
 const captionStyle: TextStyle = {
   ...typography.caption,
-  textTransform: 'uppercase',
+  textTransform: "uppercase",
   letterSpacing: 0.5,
   marginBottom: spacing.sm,
   marginLeft: spacing.xs,

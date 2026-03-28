@@ -1,8 +1,8 @@
 // XP placement badge — floats above the cell on manual correct placement.
 // Animates: entry (scale + opacity) → hold → exit (translate up + fade out).
 
-import React, { useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import React, { useEffect } from "react";
+import { StyleSheet, Text } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -10,10 +10,10 @@ import Animated, {
   withSequence,
   withTiming,
   Easing,
-} from 'react-native-reanimated';
-import { useColors } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { CELL_SIZE } from './SudokuCell';
+} from "react-native-reanimated";
+import { useColors } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { CELL_SIZE } from "./SudokuCell";
 
 const BADGE_WIDTH = 56;
 const BADGE_HEIGHT = 24;
@@ -76,10 +76,7 @@ export function XPBadge({ row, col, xp, eventKey }: XPBadgeProps) {
 
   const boardWidth = 9 * CELL_SIZE;
   const centeredLeft = col * CELL_SIZE + (CELL_SIZE - BADGE_WIDTH) / 2;
-  const left = Math.max(
-    EDGE_INSET,
-    Math.min(boardWidth - BADGE_WIDTH - EDGE_INSET, centeredLeft),
-  );
+  const left = Math.max(EDGE_INSET, Math.min(boardWidth - BADGE_WIDTH - EDGE_INSET, centeredLeft));
   const top = row * CELL_SIZE - 8; // Slightly above cell top
 
   return (
@@ -87,7 +84,7 @@ export function XPBadge({ row, col, xp, eventKey }: XPBadgeProps) {
       pointerEvents="none"
       style={[
         styles.badge,
-        { left, top, backgroundColor: 'rgba(255,255,255,0.95)' },
+        { left, top, backgroundColor: "rgba(255,255,255,0.95)" },
         animatedStyle,
       ]}
     >
@@ -98,13 +95,13 @@ export function XPBadge({ row, col, xp, eventKey }: XPBadgeProps) {
 
 const styles = StyleSheet.create({
   badge: {
-    position: 'absolute',
+    position: "absolute",
     width: BADGE_WIDTH,
     height: BADGE_HEIGHT,
     borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.15,
     shadowRadius: 3,

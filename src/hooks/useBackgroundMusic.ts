@@ -12,14 +12,14 @@
  * All playback decisions route through musicCoordinator.
  */
 
-import { useEffect, useRef } from 'react';
-import { AppState } from 'react-native';
-import * as audioService from '../services/audioService';
-import * as musicCoordinator from '../services/musicCoordinator';
-import { useMusicEnabled } from '../stores/settingsStore';
-import { useGameStore } from '../stores/gameStore';
-import { useActiveTrackId } from '../stores/ownedTracksStore';
-import { getTrackById } from '../constants/backingTracks';
+import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
+import * as audioService from "../services/audioService";
+import * as musicCoordinator from "../services/musicCoordinator";
+import { useMusicEnabled } from "../stores/settingsStore";
+import { useGameStore } from "../stores/gameStore";
+import { useActiveTrackId } from "../stores/ownedTracksStore";
+import { getTrackById } from "../constants/backingTracks";
 
 export function useBackgroundMusic() {
   const musicEnabled = useMusicEnabled();
@@ -30,7 +30,9 @@ export function useBackgroundMusic() {
   // Init/dispose coordinator lifecycle
   useEffect(() => {
     musicCoordinator.init();
-    return () => { musicCoordinator.dispose(); };
+    return () => {
+      musicCoordinator.dispose();
+    };
   }, []);
 
   // Load music when enabled, unload when disabled.
@@ -50,7 +52,7 @@ export function useBackgroundMusic() {
   useEffect(() => {
     musicCoordinator.sync({
       musicEnabled,
-      appActive: AppState.currentState === 'active',
+      appActive: AppState.currentState === "active",
       gameStatus: gameStatus as musicCoordinator.GameStatus,
       activeTrackId,
     });
@@ -58,10 +60,10 @@ export function useBackgroundMusic() {
 
   // Respond to app state changes (background/foreground)
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextState) => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
       musicCoordinator.sync({
         musicEnabled,
-        appActive: nextState === 'active',
+        appActive: nextState === "active",
         gameStatus: gameStatus as musicCoordinator.GameStatus,
         activeTrackId,
       });

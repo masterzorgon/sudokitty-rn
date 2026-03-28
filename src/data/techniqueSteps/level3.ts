@@ -1,5 +1,11 @@
-import { StepTemplate } from './types';
-import { formatPos, formatPositions, extractUnit, extractCandidates, extractNumber } from './helpers';
+import { StepTemplate } from "./types";
+import {
+  formatPos,
+  formatPositions,
+  extractUnit,
+  extractCandidates,
+  extractNumber,
+} from "./helpers";
 
 // Helper to extract candidate number from SDP explanation strings like "Skyscraper: 5 in rows..."
 function extractSDPCandidate(explanation: string): number | null {
@@ -15,12 +21,12 @@ export const nakedTripleSteps: StepTemplate[] = [
       return `Look at cells ${formatPositions(result.highlightCells)}. These three cells share a special relationship.`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*counts on paws* one, two, three!',
+    getMascotHint: () => "*counts on paws* one, two, three!",
   },
   {
     getText: (result) => {
       const candidates = extractCandidates(result.explanation);
-      const candidateStr = candidates.length > 0 ? candidates.join(', ') : 'three numbers';
+      const candidateStr = candidates.length > 0 ? candidates.join(", ") : "three numbers";
       return `Together, they contain at most three candidates: ${candidateStr}. This is a Naked Triple!`;
     },
     getHighlightCells: (result) => result.highlightCells,
@@ -28,27 +34,27 @@ export const nakedTripleSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const candidates = extractCandidates(result.explanation);
-      const candidateStr = candidates.length > 0 ? candidates.join(', ') : 'these values';
+      const candidateStr = candidates.length > 0 ? candidates.join(", ") : "these values";
       return `Since ${candidateStr} are locked into these three cells, they can be eliminated from other cells in the unit.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*focused stare* triple threat!',
+    getMascotHint: () => "*focused stare* triple threat!",
   },
 ];
 
 export const hiddenTripleSteps: StepTemplate[] = [
   {
     getText: (result) => {
-      const unit = extractUnit(result.explanation) ?? 'this unit';
+      const unit = extractUnit(result.explanation) ?? "this unit";
       return `Look at ${unit}. Three numbers are hiding together in exactly three cells.`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*curious meow* three numbers, three cells~',
+    getMascotHint: () => "*curious meow* three numbers, three cells~",
   },
   {
     getText: (result) => {
       const candidates = extractCandidates(result.explanation);
-      const candidateStr = candidates.length > 0 ? candidates.join(', ') : 'three numbers';
+      const candidateStr = candidates.length > 0 ? candidates.join(", ") : "three numbers";
       return `${candidateStr} only appear in ${formatPositions(result.highlightCells)}. This is a Hidden Triple!`;
     },
     getHighlightCells: (result) => result.highlightCells,
@@ -58,7 +64,7 @@ export const hiddenTripleSteps: StepTemplate[] = [
       return `Since these three values are locked into these cells, all OTHER candidates in these cells can be removed.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*stretches* clear out the extras~',
+    getMascotHint: () => "*stretches* clear out the extras~",
   },
 ];
 
@@ -66,10 +72,10 @@ export const xWingSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractNumber(result.explanation);
-      return `Look for where ${num ?? 'a number'} appears across two rows (or two columns).`;
+      return `Look for where ${num ?? "a number"} appears across two rows (or two columns).`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*stretches into X shape* see the pattern?',
+    getMascotHint: () => "*stretches into X shape* see the pattern?",
   },
   {
     getText: (result) => {
@@ -80,10 +86,10 @@ export const xWingSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractNumber(result.explanation);
-      return `The number must occupy one diagonal pair. So ${num ?? 'it'} can be eliminated from all other cells in those columns.`;
+      return `The number must occupy one diagonal pair. So ${num ?? "it"} can be eliminated from all other cells in those columns.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*crosses paws* X marks the spot!',
+    getMascotHint: () => "*crosses paws* X marks the spot!",
   },
 ];
 
@@ -91,22 +97,23 @@ export const finnedFishSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractNumber(result.explanation);
-      return `Look for an X-Wing pattern with ${num ?? 'a number'}, but one row has an extra cell — the "fin."`;
+      return `Look for an X-Wing pattern with ${num ?? "a number"}, but one row has an extra cell — the "fin."`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*squints* almost an X-Wing, but with a fin~',
+    getMascotHint: () => "*squints* almost an X-Wing, but with a fin~",
   },
   {
-    getText: () => `The fin breaks the regular X-Wing, but it restricts where eliminations can happen — only cells that see both the X-Wing column and the fin.`,
+    getText: () =>
+      `The fin breaks the regular X-Wing, but it restricts where eliminations can happen — only cells that see both the X-Wing column and the fin.`,
     getHighlightCells: (result) => result.highlightCells,
   },
   {
     getText: (result) => {
       const num = extractNumber(result.explanation);
-      return `Eliminate ${num ?? 'this candidate'} from cells that see the fin and lie in the X-Wing columns.`;
+      return `Eliminate ${num ?? "this candidate"} from cells that see the fin and lie in the X-Wing columns.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*flicks tail* the fin narrows it down!',
+    getMascotHint: () => "*flicks tail* the fin narrows it down!",
   },
 ];
 
@@ -118,10 +125,10 @@ export const skyscraperSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `Focus on candidate ${num ?? 'a number'}. Find two rows (or columns) where it appears in exactly two cells each.`;
+      return `Focus on candidate ${num ?? "a number"}. Find two rows (or columns) where it appears in exactly two cells each.`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*looks up* two towers rising from a shared base~',
+    getMascotHint: () => "*looks up* two towers rising from a shared base~",
   },
   {
     getText: (result) => {
@@ -132,10 +139,10 @@ export const skyscraperSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `Since one endpoint must contain ${num ?? 'this number'}, any cell that sees both endpoints can have it eliminated.`;
+      return `Since one endpoint must contain ${num ?? "this number"}, any cell that sees both endpoints can have it eliminated.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*stretches tall* the skyscraper reveals the truth!',
+    getMascotHint: () => "*stretches tall* the skyscraper reveals the truth!",
   },
 ];
 
@@ -143,10 +150,10 @@ export const twoStringKiteSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `Focus on candidate ${num ?? 'a number'}. Find a row and a column where it appears in exactly two cells each — these are the "strings."`;
+      return `Focus on candidate ${num ?? "a number"}. Find a row and a column where it appears in exactly two cells each — these are the "strings."`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*bats at string* two strings, one connection~',
+    getMascotHint: () => "*bats at string* two strings, one connection~",
   },
   {
     getText: (result) => {
@@ -157,10 +164,10 @@ export const twoStringKiteSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `One endpoint must contain ${num ?? 'this number'}. Eliminate it from any cell that sees both endpoints.`;
+      return `One endpoint must contain ${num ?? "this number"}. Eliminate it from any cell that sees both endpoints.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*playful swat* the kite string pulls the answer!',
+    getMascotHint: () => "*playful swat* the kite string pulls the answer!",
   },
 ];
 
@@ -168,10 +175,10 @@ export const turbotFishSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `Focus on candidate ${num ?? 'a number'}. Find two conjugate pairs (units with exactly two cells for this number).`;
+      return `Focus on candidate ${num ?? "a number"}. Find two conjugate pairs (units with exactly two cells for this number).`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*alert eyes* two strong links for the same number~',
+    getMascotHint: () => "*alert eyes* two strong links for the same number~",
   },
   {
     getText: (result) => {
@@ -182,10 +189,10 @@ export const turbotFishSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `The chain endpoints tell us: ${num ?? 'this number'} can be eliminated from any cell that sees both ends.`;
+      return `The chain endpoints tell us: ${num ?? "this number"} can be eliminated from any cell that sees both ends.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*splashes* caught by the turbot fish!',
+    getMascotHint: () => "*splashes* caught by the turbot fish!",
   },
 ];
 
@@ -193,10 +200,10 @@ export const emptyRectangleSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `Focus on candidate ${num ?? 'a number'} in a box. Its positions form an L-shape — restricted to one row and one column within the box.`;
+      return `Focus on candidate ${num ?? "a number"} in a box. Its positions form an L-shape — restricted to one row and one column within the box.`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*draws L in the air* see the shape in the box?',
+    getMascotHint: () => "*draws L in the air* see the shape in the box?",
   },
   {
     getText: (result) => {
@@ -208,11 +215,11 @@ export const emptyRectangleSteps: StepTemplate[] = [
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
       const target = result.eliminations[0]?.position;
-      const targetStr = target ? ` at ${formatPos(target)}` : '';
-      return `The ER and the conjugate pair work together: ${num ?? 'this number'} can be eliminated${targetStr}.`;
+      const targetStr = target ? ` at ${formatPos(target)}` : "";
+      return `The ER and the conjugate pair work together: ${num ?? "this number"} can be eliminated${targetStr}.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*tilts head* the rectangle reveals the answer!',
+    getMascotHint: () => "*tilts head* the rectangle reveals the answer!",
   },
 ];
 
@@ -225,11 +232,11 @@ export const sueDeCoqSteps: StepTemplate[] = [
     getText: (result) => {
       // Extract candidates from explanation like "candidates {3459} in row 7 and box 6"
       const match = result.explanation.match(/\{(\d+)\}/);
-      const cands = match ? match[1].split('').join(', ') : 'several candidates';
+      const cands = match ? match[1].split("").join(", ") : "several candidates";
       return `Look at the intersection of a box and a row/column. The cells there contain candidates {${cands}} — more than can fit!`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*examines closely* too many candidates for these cells~',
+    getMascotHint: () => "*examines closely* too many candidates for these cells~",
   },
   {
     getText: (result) => {
@@ -240,10 +247,10 @@ export const sueDeCoqSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
-      return `The locked sets let us eliminate ${elimCount} candidate${elimCount !== 1 ? 's' : ''} from the rest of the row and box.`;
+      return `The locked sets let us eliminate ${elimCount} candidate${elimCount !== 1 ? "s" : ""} from the rest of the row and box.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*counts on paws* so many eliminations at once!',
+    getMascotHint: () => "*counts on paws* so many eliminations at once!",
   },
 ];
 
@@ -255,14 +262,14 @@ export const simpleColorsSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const num = extractSDPCandidate(result.explanation);
-      return `Focus on candidate ${num ?? 'a number'}. Color conjugate pairs with two alternating colors along connected chains.`;
+      return `Focus on candidate ${num ?? "a number"}. Color conjugate pairs with two alternating colors along connected chains.`;
     },
     getHighlightCells: (result) => result.highlightCells,
-    getMascotHint: () => '*paints with paws* two colors, one digit~',
+    getMascotHint: () => "*paints with paws* two colors, one digit~",
   },
   {
     getText: (result) => {
-      const isWrap = result.explanation.includes('Wrap');
+      const isWrap = result.explanation.includes("Wrap");
       if (isWrap) {
         return `Color Wrap detected! Two cells with the same color see each other — that color can't be all true, so all cells with it are false.`;
       }
@@ -273,9 +280,9 @@ export const simpleColorsSteps: StepTemplate[] = [
   {
     getText: (result) => {
       const elimCount = result.eliminations.reduce((sum, e) => sum + e.candidates.length, 0);
-      return `Eliminate the candidate from ${elimCount} cell${elimCount !== 1 ? 's' : ''}.`;
+      return `Eliminate the candidate from ${elimCount} cell${elimCount !== 1 ? "s" : ""}.`;
     },
     getHighlightCells: (result) => result.eliminations.map((e) => e.position),
-    getMascotHint: () => '*satisfied purr* the colors revealed the truth!',
+    getMascotHint: () => "*satisfied purr* the colors revealed the truth!",
   },
 ];

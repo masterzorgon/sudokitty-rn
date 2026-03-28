@@ -1,6 +1,6 @@
 // Progress bar component - displays game completion progress
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { View, StyleSheet, Text, Pressable, LayoutChangeEvent } from 'react-native';
+import React, { useCallback, useEffect, useRef, useMemo } from "react";
+import { View, StyleSheet, Text, Pressable, LayoutChangeEvent } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,15 +8,15 @@ import Animated, {
   withSpring,
   withTiming,
   SharedValue,
-} from 'react-native-reanimated';
-import { Canvas, Circle } from '@shopify/react-native-skia';
-import { Ionicons, Feather } from '@expo/vector-icons';
-import { useProgress } from '../../stores/gameStore';
-import { colors, useColors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { borderRadius } from '../../theme';
-import { RollingNumber } from '../ui';
-import { GAME_LAYOUT } from '../../constants/layout';
+} from "react-native-reanimated";
+import { Canvas, Circle } from "@shopify/react-native-skia";
+import { Ionicons, Feather } from "@expo/vector-icons";
+import { useProgress } from "../../stores/gameStore";
+import { colors, useColors } from "../../theme/colors";
+import { typography } from "../../theme/typography";
+import { borderRadius } from "../../theme";
+import { RollingNumber } from "../ui";
+import { GAME_LAYOUT } from "../../constants/layout";
 
 // Individual particle component that reads from shared values
 interface ParticleProps {
@@ -78,7 +78,7 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
   // Particle colors from accent palette (inside component for theme support)
   const particleColors = useMemo(
     () => [c.accent, c.ctaPrimaryHighlight, c.accentLight, c.accentSecondary],
-    [c.accent, c.ctaPrimaryHighlight, c.accentLight, c.accentSecondary]
+    [c.accent, c.ctaPrimaryHighlight, c.accentLight, c.accentSecondary],
   );
 
   // Particle pool referencing the shared values
@@ -169,7 +169,9 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
       >
         <View style={styles.barWrapper}>
           <View style={styles.barBackground}>
-            <Animated.View style={[styles.barFill, { backgroundColor: c.accent }, animatedFillStyle]}>
+            <Animated.View
+              style={[styles.barFill, { backgroundColor: c.accent }, animatedFillStyle]}
+            >
               {/* Middle highlight layer - slightly lighter, inset 2px */}
               <View style={[styles.barFillMiddle, { backgroundColor: c.ctaPrimaryHighlight }]} />
               {/* Top gloss layer - lightest, thin strip near top */}
@@ -205,11 +207,7 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
       </View>
 
       {onSettingsPress && (
-        <Pressable
-          onPress={onSettingsPress}
-          hitSlop={12}
-          style={styles.settingsButton}
-        >
+        <Pressable onPress={onSettingsPress} hitSlop={12} style={styles.settingsButton}>
           <Feather name="settings" size={24} color={colors.textSecondary} />
         </Pressable>
       )}
@@ -219,8 +217,8 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     height: 44,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },
@@ -232,17 +230,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   barWrapper: {
-    position: 'relative',
-    overflow: 'visible', // Allow particles to escape wrapper
+    position: "relative",
+    overflow: "visible", // Allow particles to escape wrapper
   },
   barBackground: {
     height: GAME_LAYOUT.PROGRESS_BAR_HEIGHT,
     backgroundColor: colors.progressBarBg,
     borderRadius: borderRadius.full,
-    overflow: 'hidden', // Clip the fill bar
+    overflow: "hidden", // Clip the fill bar
   },
   particleCanvas: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: -40, // Extend right for particles
@@ -250,12 +248,12 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   barFill: {
-    height: '100%',
+    height: "100%",
     borderRadius: borderRadius.full,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   barFillMiddle: {
-    position: 'absolute',
+    position: "absolute",
     top: 2,
     left: 2,
     right: 2,
@@ -263,7 +261,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   barFillGloss: {
-    position: 'absolute',
+    position: "absolute",
     top: 3,
     left: 10,
     right: 10,
@@ -271,9 +269,9 @@ const styles = StyleSheet.create({
     borderRadius: 2,
   },
   percentageContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'flex-end',
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "flex-end",
     gap: 2,
     flexShrink: 0,
     minWidth: 36,

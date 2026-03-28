@@ -8,12 +8,7 @@
 // Also checks all instances of a digit in a house (if all lead to same conclusion).
 
 import { Position, BOARD_SIZE } from "../../../types";
-import {
-  CandidateGridInterface,
-  TechniqueResult,
-  TechniqueLevel,
-  Elimination,
-} from "../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Elimination } from "../../types";
 import { BaseTechnique } from "../Technique";
 
 interface Implication {

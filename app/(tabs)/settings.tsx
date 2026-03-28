@@ -1,46 +1,46 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View, Linking, Alert, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
-import { useColors } from '../../src/theme/colors';
-import { PALETTES, THEME_NAMES } from '../../src/theme/palettes';
-import { spacing, borderRadius } from '../../src/theme';
+import React, { useCallback, useMemo, useState } from "react";
+import { StyleSheet, View, Linking, Alert, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import { useColors } from "../../src/theme/colors";
+import { PALETTES, THEME_NAMES } from "../../src/theme/palettes";
+import { spacing, borderRadius } from "../../src/theme";
 import {
   SettingsSection,
   SettingsToggleRow,
   SettingsLinkRow,
   AudioSettingsSection,
-} from '../../src/components/settings';
-import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
-import { SkeuCard } from '../../src/components/ui/Skeuomorphic';
-import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
-import { StatsCTA } from '../../src/components/home';
-import { playFeedback } from '../../src/utils/feedback';
+} from "../../src/components/settings";
+import { ScreenBackground, ScreenContent, ScreenHeader } from "../../src/components/ui/Layout";
+import { SkeuCard } from "../../src/components/ui/Skeuomorphic";
+import { CTABannerCarousel } from "../../src/components/ui/CTABannerCarousel";
+import { StatsCTA } from "../../src/components/home";
+import { playFeedback } from "../../src/utils/feedback";
 import {
   useSettingsStore,
   useUnlimitedMistakes,
   useUnlimitedHints,
   useColorTheme,
-} from '../../src/stores/settingsStore';
-import { useGameStore } from '../../src/stores/gameStore';
-import { usePlayerStreakStore } from '../../src/stores/playerStreakStore';
-import { useUserStatsStore } from '../../src/stores/userStatsStore';
+} from "../../src/stores/settingsStore";
+import { useGameStore } from "../../src/stores/gameStore";
+import { usePlayerStreakStore } from "../../src/stores/playerStreakStore";
+import { useUserStatsStore } from "../../src/stores/userStatsStore";
 import {
   trackProgressReset,
   trackExternalLinkOpened,
   trackPaywallOpened,
-} from '../../src/utils/analytics';
-import { useEffectivePremium } from '../../src/stores/premiumStore';
+} from "../../src/utils/analytics";
+import { useEffectivePremium } from "../../src/stores/premiumStore";
 import {
   presentPaywall,
   presentPaywallAlways,
   presentCustomerCenter,
   restorePurchases,
-} from '../../src/lib/revenueCat';
+} from "../../src/lib/revenueCat";
 
-const RULES_URL = 'https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/';
-const PRIVACY_URL = 'https://example.com/privacy'; // TODO: Replace with actual privacy URL
+const RULES_URL = "https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/";
+const PRIVACY_URL = "https://example.com/privacy"; // TODO: Replace with actual privacy URL
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -64,14 +64,14 @@ export default function SettingsScreen() {
   // Single navigation helper: string = internal route, object = external URL with analytics
   const navigate = useCallback(
     async (dest: string | { url: string; trackKey: string }) => {
-      if (typeof dest === 'string') {
+      if (typeof dest === "string") {
         router.push(dest as any);
       } else {
         try {
           trackExternalLinkOpened(dest.trackKey);
           await Linking.openURL(dest.url);
         } catch {
-          Alert.alert('Error', 'Unable to open the link.');
+          Alert.alert("Error", "Unable to open the link.");
         }
       }
     },
@@ -97,17 +97,15 @@ export default function SettingsScreen() {
   );
 
   const handleUpgradePremium = useCallback(async () => {
-    trackPaywallOpened('settings');
+    trackPaywallOpened("settings");
     await presentPaywallAlways();
   }, []);
 
   const handleRestorePurchases = useCallback(async () => {
     const restored = await restorePurchases();
     Alert.alert(
-      restored ? 'Restored!' : 'Nothing to Restore',
-      restored
-        ? 'Your premium access has been restored.'
-        : 'No previous purchases found.',
+      restored ? "Restored!" : "Nothing to Restore",
+      restored ? "Your premium access has been restored." : "No previous purchases found.",
     );
   }, []);
 
@@ -116,28 +114,28 @@ export default function SettingsScreen() {
   }, []);
 
   const handleViewStats = useCallback(() => {
-    playFeedback('tap');
-    router.push('/(tabs)/stats');
+    playFeedback("tap");
+    router.push("/(tabs)/stats");
   }, [router]);
 
   const handleResetProgress = useCallback(() => {
     Alert.alert(
-      'Reset Progress',
-      'This will permanently delete all your game progress, stats, and streaks. This cannot be undone.',
+      "Reset Progress",
+      "This will permanently delete all your game progress, stats, and streaks. This cannot be undone.",
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Reset',
-          style: 'destructive',
+          text: "Reset",
+          style: "destructive",
           onPress: () => {
             resetGame();
             resetDailyChallenge();
             resetStats();
             trackProgressReset();
-            Alert.alert('Done', 'Your progress has been reset.');
+            Alert.alert("Done", "Your progress has been reset.");
           },
         },
-      ]
+      ],
     );
   }, [resetGame, resetDailyChallenge, resetStats]);
 
@@ -148,11 +146,10 @@ export default function SettingsScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       <ScreenBackground />
       <ScreenContent contentStyle={contentStyle}>
-
-        <CTABannerCarousel promos={['rate']} />
+        <CTABannerCarousel promos={["rate"]} />
 
         <View style={styles.statsCTAContainer}>
           <StatsCTA onPress={handleViewStats} />
@@ -168,7 +165,7 @@ export default function SettingsScreen() {
                 <Pressable
                   key={name}
                   onPress={() => {
-                    playFeedback('tap');
+                    playFeedback("tap");
                     setColorTheme(name);
                   }}
                   style={[
@@ -179,9 +176,7 @@ export default function SettingsScreen() {
                   accessibilityLabel={`${name} theme`}
                   accessibilityState={{ selected: isActive }}
                 >
-                  {isActive && (
-                    <Feather name="check" size={20} color="#FFFFFF" />
-                  )}
+                  {isActive && <Feather name="check" size={20} color="#FFFFFF" />}
                 </Pressable>
               );
             })}
@@ -217,18 +212,18 @@ export default function SettingsScreen() {
         <SettingsSection title="Learn">
           <SettingsLinkRow
             label="How to play"
-            onPress={() => navigate('/tutorial')}
+            onPress={() => navigate("/tutorial")}
             icon="help-circle"
             accessibilityHint="Open the interactive tutorial"
           />
           <SettingsLinkRow
             label="Advanced techniques"
-            onPress={() => navigate('/techniques')}
+            onPress={() => navigate("/techniques")}
             icon="award"
           />
           <SettingsLinkRow
             label="Sudoku rules"
-            onPress={() => navigate({ url: RULES_URL, trackKey: 'rules' })}
+            onPress={() => navigate({ url: RULES_URL, trackKey: "rules" })}
             icon="book"
             isExternal
             isLast
@@ -264,19 +259,19 @@ export default function SettingsScreen() {
         <SettingsSection title="Support">
           <SettingsLinkRow
             label="Send feedback"
-            onPress={() => navigate('/feedback')}
+            onPress={() => navigate("/feedback")}
             icon="message-circle"
             accessibilityHint="Send feedback to the developers"
           />
           <SettingsLinkRow
             label="Privacy preferences"
-            onPress={() => navigate({ url: PRIVACY_URL, trackKey: 'privacy' })}
+            onPress={() => navigate({ url: PRIVACY_URL, trackKey: "privacy" })}
             icon="shield"
             isExternal
           />
           <SettingsLinkRow
             label="App info"
-            onPress={() => navigate('/info')}
+            onPress={() => navigate("/info")}
             icon="info"
             accessibilityHint="View app information"
             isLast
@@ -294,7 +289,6 @@ export default function SettingsScreen() {
             isLast
           />
         </SkeuCard>
-
       </ScreenContent>
       <ScreenHeader onHeightChange={setHeaderHeight} />
     </SafeAreaView>
@@ -318,8 +312,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   themePickerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: spacing.lg,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
@@ -328,11 +322,11 @@ const styles = StyleSheet.create({
     width: SWATCH_SIZE,
     height: SWATCH_SIZE,
     borderRadius: SWATCH_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   themeSwatchActive: {
     borderWidth: 3,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
   },
 });

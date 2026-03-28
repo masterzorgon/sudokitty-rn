@@ -1,16 +1,16 @@
-import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   runOnJS,
   useDerivedValue,
   useFrameCallback,
   useSharedValue,
   type FrameInfo,
-} from 'react-native-reanimated';
-import { Canvas, Picture, Skia } from '@shopify/react-native-skia';
+} from "react-native-reanimated";
+import { Canvas, Picture, Skia } from "@shopify/react-native-skia";
 
-import { useColors } from '../../theme/colors';
-import { delays, durations } from '../../theme/animations';
+import { useColors } from "../../theme/colors";
+import { delays, durations } from "../../theme/animations";
 
 const DEFAULT_COUNT = 60;
 const NUM_WAVES = 4;
@@ -25,7 +25,7 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 function parseHexColor(hex: string): { r: number; g: number; b: number } {
-  const h = hex.replace('#', '').trim();
+  const h = hex.replace("#", "").trim();
   if (h.length === 3) {
     return {
       r: parseInt(h[0] + h[0], 16),
@@ -82,7 +82,7 @@ function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: n
 }
 
 function rgbToHex(r: number, g: number, b: number): string {
-  const to = (n: number) => clamp(n, 0, 255).toString(16).padStart(2, '0');
+  const to = (n: number) => clamp(n, 0, 255).toString(16).padStart(2, "0");
   return `#${to(r)}${to(g)}${to(b)}`;
 }
 
@@ -195,7 +195,7 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
 
   const physicsStep = useCallback(
     (frameInfo: FrameInfo) => {
-      'worklet';
+      "worklet";
       if (finished.value) {
         return;
       }
@@ -213,7 +213,7 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
       const sh = screenH.value;
 
       state.modify((value) => {
-        'worklet';
+        "worklet";
         for (let i = 0; i < value.length; i++) {
           const p = value[i];
           if (p.dead) {
@@ -282,7 +282,7 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
   }, [count, width, height, state, totalElapsed, finished, tick]);
 
   const picture = useDerivedValue(() => {
-    'worklet';
+    "worklet";
     void tick.value;
     const pieces = state.value;
     const sw = screenW.value;
@@ -306,10 +306,7 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
       const scaleX = Math.abs(sx) < 0.08 ? (sx >= 0 ? 0.08 : -0.08) : sx;
       canvas.scale(scaleX, 1);
       canvas.translate(-p.w / 2, -p.h / 2);
-      canvas.drawRRect(
-        Skia.RRectXY(Skia.XYWHRect(0, 0, p.w, p.h), 2, 2),
-        paint,
-      );
+      canvas.drawRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, p.w, p.h), 2, 2), paint);
       canvas.restore();
     }
 

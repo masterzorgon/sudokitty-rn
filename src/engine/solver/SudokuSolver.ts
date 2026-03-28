@@ -1,6 +1,6 @@
 // SudokuSolver - Main solver orchestrator using technique-based solving
 
-import { CandidateGrid } from './CandidateGrid';
+import { CandidateGrid } from "./CandidateGrid";
 import {
   Technique,
   TechniqueLevel,
@@ -9,9 +9,9 @@ import {
   SolverConfig,
   Hint,
   getMochiHint,
-} from './types';
-import { getTechniquesUpToLevel } from './techniques';
-import { getTechniqueMetadataByName } from '../../data/techniqueMetadata';
+} from "./types";
+import { getTechniquesUpToLevel } from "./techniques";
+import { getTechniqueMetadataByName } from "../../data/techniqueMetadata";
 
 const DEFAULT_CONFIG: Required<SolverConfig> = {
   maxTechniqueLevel: 4,
@@ -206,7 +206,7 @@ export const isSolvableLogically = (puzzle: number[][]): boolean => {
  * Quick utility to get the difficulty level of a puzzle.
  */
 export const getPuzzleDifficulty = (
-  puzzle: number[][]
+  puzzle: number[][],
 ): { level: TechniqueLevel | 0; solvable: boolean } => {
   const solver = new SudokuSolver({ maxTechniqueLevel: 4, trackSteps: false });
   const result = solver.solve(puzzle);

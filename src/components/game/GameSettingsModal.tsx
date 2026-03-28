@@ -1,26 +1,26 @@
-import React, { useCallback, useRef } from 'react';
-import { View, StyleSheet, Text, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useCallback, useRef } from "react";
+import { View, StyleSheet, Text, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import {
   useSettingsStore,
   useUnlimitedMistakes,
   useUnlimitedHints,
-} from '../../stores/settingsStore';
-import { useGameStore } from '../../stores/gameStore';
-import { useEffectivePremium } from '../../stores/premiumStore';
-import { presentPaywall } from '../../lib/revenueCat';
-import { MAX_MISTAKES, MAX_HINTS } from '../../engine/types';
-import { colors, useColors } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import { SkeuCard } from '../ui/Skeuomorphic';
-import { AppButton } from '../ui/AppButton';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
-import { SettingsToggleRow } from '../settings/SettingsToggleRow';
-import { AudioSettingsSection } from '../settings/AudioSettingsSection';
-import { MusicTrackSelector } from '../ui/MusicTrackSelector';
-import { formatTime } from '../../utils/formatTime';
+} from "../../stores/settingsStore";
+import { useGameStore } from "../../stores/gameStore";
+import { useEffectivePremium } from "../../stores/premiumStore";
+import { presentPaywall } from "../../lib/revenueCat";
+import { MAX_MISTAKES, MAX_HINTS } from "../../engine/types";
+import { colors, useColors } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import { SkeuCard } from "../ui/Skeuomorphic";
+import { AppButton } from "../ui/AppButton";
+import { SheetWrapper, type SheetWrapperRef } from "../ui/Sheet/SheetWrapper";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
+import { AudioSettingsSection } from "../settings/AudioSettingsSection";
+import { MusicTrackSelector } from "../ui/MusicTrackSelector";
+import { formatTime } from "../../utils/formatTime";
 
 // MARK: - Types
 
@@ -85,9 +85,9 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
   }, []);
 
   // Derived stats
-  const livesRemaining = unlimitedMistakes ? '\u221E' : String(MAX_MISTAKES - mistakeCount);
+  const livesRemaining = unlimitedMistakes ? "\u221E" : String(MAX_MISTAKES - mistakeCount);
   const hintsRemaining = unlimitedHints
-    ? '\u221E'
+    ? "\u221E"
     : String(Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining);
 
   return (
@@ -96,7 +96,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
       visible={visible}
       onDismiss={onClose}
       blurBackground={false}
-      containerStyle={{ backgroundColor: c.cream, maxHeight: '85%' }}
+      containerStyle={{ backgroundColor: c.cream, maxHeight: "85%" }}
     >
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -116,11 +116,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
 
         {/* Section 3: Audio + Timer + Haptics */}
         <View style={styles.audioSection}>
-          <AudioSettingsSection
-            showTimer
-            showTrackSelector
-            surface="modal"
-          />
+          <AudioSettingsSection showTimer showTrackSelector surface="modal" />
         </View>
 
         {/* Section 4: Premium toggles */}
@@ -143,11 +139,7 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
 
       {/* Section 5: Close Button */}
       <View style={styles.closeButtonWrapper}>
-        <AppButton
-          onPress={handleClose}
-          label="Resume Game"
-          variant="primary"
-        />
+        <AppButton onPress={handleClose} label="Resume Game" variant="primary" />
       </View>
     </SheetWrapper>
   );
@@ -162,16 +154,16 @@ const styles = StyleSheet.create({
 
   // Stats pills
   statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: spacing.lg,
     gap: spacing.sm,
   },
   statPill: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 4,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
@@ -188,7 +180,7 @@ const styles = StyleSheet.create({
   },
   premiumCardContent: {
     padding: 0,
-    overflow: 'visible',
+    overflow: "visible",
   },
 
   // Close button

@@ -2,9 +2,9 @@
 // Event-driven: messages appear only in response to events, then auto-dismiss
 // Uses probability-based triggering for frequent events (mistakes, correct answers)
 
-import { useState, useEffect, useRef } from 'react';
-import { InteractionManager } from 'react-native';
-import { useGameStore } from '../stores/gameStore';
+import { useState, useEffect, useRef } from "react";
+import { InteractionManager } from "react-native";
+import { useGameStore } from "../stores/gameStore";
 
 // MARK: - Types
 
@@ -28,7 +28,7 @@ const MESSAGE_DURATION_MS = 4500;
 
 const EVENT_CONFIG = {
   gameStart: {
-    messages: ['Good luck!', "Best of luck!", "Let's do this!", "You've got this!"],
+    messages: ["Good luck!", "Best of luck!", "Let's do this!", "You've got this!"],
     probability: 1.0,
     duration: 4500,
   },
@@ -89,10 +89,10 @@ export function useGameMascotMessage(): string | null {
 
   // Track previous state for detecting changes
   const prevStateRef = useRef<GameStateSnapshot | null>(null);
-  
+
   // Current displayed message (null = no bubble)
   const [message, setMessage] = useState<string | null>(null);
-  
+
   // Timer ref for auto-dismiss
   const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -117,7 +117,7 @@ export function useGameMascotMessage(): string | null {
       showMessage(
         pickRandom(config.messages),
         config.persist ?? false,
-        config.duration ?? MESSAGE_DURATION_MS
+        config.duration ?? MESSAGE_DURATION_MS,
       );
     }
   };
@@ -135,39 +135,43 @@ export function useGameMascotMessage(): string | null {
     const prevState = prevStateRef.current;
 
     // New game after win/loss — replace persisted bubble with a fresh good-luck line
-    if (prevState?.gameStatus && ['won', 'lost'].includes(prevState.gameStatus) && gameStatus === 'playing') {
+    if (
+      prevState?.gameStatus &&
+      ["won", "lost"].includes(prevState.gameStatus) &&
+      gameStatus === "playing"
+    ) {
       if (dismissTimerRef.current) {
         clearTimeout(dismissTimerRef.current);
         dismissTimerRef.current = null;
       }
-      tryShowMessage('gameStart');
+      tryShowMessage("gameStart");
     }
 
     // Game just started (first render with playing status)
-    if (prevState === null && gameStatus === 'playing') {
-      tryShowMessage('gameStart');
+    if (prevState === null && gameStatus === "playing") {
+      tryShowMessage("gameStart");
     }
-    
+
     // Game won
-    if (prevState?.gameStatus !== 'won' && gameStatus === 'won') {
-      tryShowMessage('win');
+    if (prevState?.gameStatus !== "won" && gameStatus === "won") {
+      tryShowMessage("win");
     }
-    
+
     // Game lost
-    if (prevState?.gameStatus !== 'lost' && gameStatus === 'lost') {
-      tryShowMessage('lose');
+    if (prevState?.gameStatus !== "lost" && gameStatus === "lost") {
+      tryShowMessage("lose");
     }
-    
+
     // Mistake made (probability-based)
     if (prevState !== null && mistakeCount > prevState.mistakeCount) {
-      tryShowMessage('mistake');
+      tryShowMessage("mistake");
     }
-    
+
     // Hint used (always respond)
     if (prevState !== null && hintsUsed > prevState.hintsUsed) {
-      tryShowMessage('hint');
+      tryShowMessage("hint");
     }
-    
+
     // Correct answer (probability-based, exclude hint-triggered fills)
     if (
       prevState !== null &&
@@ -177,9 +181,9 @@ export function useGameMascotMessage(): string | null {
         lastCorrectCell.col !== prevState.lastCorrectCell.col) &&
       hintsUsed === prevState.hintsUsed // Not from a hint
     ) {
-      tryShowMessage('correct');
+      tryShowMessage("correct");
     }
-    
+
     // Update previous state ref
     prevStateRef.current = currentState;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ref snapshot pattern; tryShowMessage not stable each render

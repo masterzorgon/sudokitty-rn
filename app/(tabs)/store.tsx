@@ -1,44 +1,44 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Alert,
-} from 'react-native';
-import { Image } from 'expo-image';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, Feather } from '@expo/vector-icons';
-import type { PurchasesStoreProduct } from 'react-native-purchases';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { View, StyleSheet, Alert } from "react-native";
+import { Image } from "expo-image";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons, Feather } from "@expo/vector-icons";
+import type { PurchasesStoreProduct } from "react-native-purchases";
 
-import { useColors } from '../../src/theme/colors';
-import { fontFamilies } from '../../src/theme/typography';
-import { spacing, borderRadius } from '../../src/theme';
-import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/components/ui/Layout';
-import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
-import { usePlayerStreakStore } from '../../src/stores/playerStreakStore';
-import { useEffectivePremium } from '../../src/stores/premiumStore';
-import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
-import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
+import { useColors } from "../../src/theme/colors";
+import { fontFamilies } from "../../src/theme/typography";
+import { spacing, borderRadius } from "../../src/theme";
+import { ScreenBackground, ScreenContent, ScreenHeader } from "../../src/components/ui/Layout";
+import { CTABannerCarousel } from "../../src/components/ui/CTABannerCarousel";
+import { usePlayerStreakStore } from "../../src/stores/playerStreakStore";
+import { useEffectivePremium } from "../../src/stores/premiumStore";
+import { useOwnedTracksStore } from "../../src/stores/ownedTracksStore";
+import { BACKING_TRACKS, type BackingTrackDef } from "../../src/constants/backingTracks";
 import {
   MOCHI_PACK_AMOUNTS,
   MOCHI_PACK_PRODUCT_IDS,
   getStreakFreezeCost,
   STREAK_FREEZE_PACK_OPTIONS,
   type MochiPackProductId,
-} from '../../src/constants/economy';
+} from "../../src/constants/economy";
 import {
   MOCHI_PACK_IMAGE_SOURCES,
   getMochiPackHeroSize,
-} from '../../src/constants/mochiPackImages';
-import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
-import { playDemo, stopDemo } from '../../src/services/trackDemoService';
-import { playFeedback } from '../../src/utils/feedback';
-import { SectionTitle } from '../../src/components/ui/Typography/SectionTitle';
-import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
-import { MusicTrackCard } from '../../src/components/ui/MusicTrackCard';
-import { MochiPricePill } from '../../src/components/ui/MochiPricePill';
-import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
-const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
-const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
+} from "../../src/constants/mochiPackImages";
+import {
+  getMochiPackProducts,
+  purchaseMochiPack,
+  presentPaywallAlways,
+} from "../../src/lib/revenueCat";
+import { playDemo, stopDemo } from "../../src/services/trackDemoService";
+import { playFeedback } from "../../src/utils/feedback";
+import { SectionTitle } from "../../src/components/ui/Typography/SectionTitle";
+import { StoreItemRow } from "../../src/components/ui/StoreItemRow";
+import { MusicTrackCard } from "../../src/components/ui/MusicTrackCard";
+import { MochiPricePill } from "../../src/components/ui/MochiPricePill";
+import { PurchaseSheet, type PurchaseSheetConfig } from "../../src/components/store/PurchaseSheet";
+const MochiMusicImg = require("../../assets/images/mochi/mochi-music.png");
+const MochiFreezeImg = require("../../assets/images/mochi/mochi-freeze.png");
 
 // ============================================
 // Store Screen
@@ -85,85 +85,107 @@ export default function StoreScreen() {
   // Handlers
   // ============================================
 
-  const handleBuyTrack = useCallback((trackId: string) => {
-    const track = BACKING_TRACKS.find((t) => t.id === trackId);
-    if (!track) return;
-    const success = buyTrack(trackId);
-    if (success) {
-      Alert.alert('Track Purchased!', `${track.name} is now your active backing track.`);
-    }
-  }, [buyTrack]);
-
-  const handleToggleDemo = useCallback(async (track: BackingTrackDef) => {
-    if (demoPlayingTrackId === track.id) {
-      await stopDemo();
-      setDemoPlayingTrackId(null);
-    } else {
-      await stopDemo();
-      setDemoPlayingTrackId(track.id);
-      await playDemo(track.asset, track.demoDurationMs, {
-        onComplete: () => {
-          if (mountedRef.current) {
-            setDemoPlayingTrackId(null);
-          }
-        },
-      });
-    }
-  }, [demoPlayingTrackId]);
-
-  const handlePurchasePack = useCallback(async (product: PurchasesStoreProduct) => {
-    if (purchaseInProgress) return;
-    setPurchaseInProgress(product.identifier);
-    try {
-      const result = await purchaseMochiPack(product);
-      if (mountedRef.current && result.success && result.amount) {
-        Alert.alert('Purchase Complete!', `You received ${result.amount.toLocaleString()} mochis!`);
+  const handleBuyTrack = useCallback(
+    (trackId: string) => {
+      const track = BACKING_TRACKS.find((t) => t.id === trackId);
+      if (!track) return;
+      const success = buyTrack(trackId);
+      if (success) {
+        Alert.alert("Track Purchased!", `${track.name} is now your active backing track.`);
       }
-    } catch {
-      if (mountedRef.current) {
-        Alert.alert('Purchase Failed', 'Something went wrong. Please try again.');
+    },
+    [buyTrack],
+  );
+
+  const handleToggleDemo = useCallback(
+    async (track: BackingTrackDef) => {
+      if (demoPlayingTrackId === track.id) {
+        await stopDemo();
+        setDemoPlayingTrackId(null);
+      } else {
+        await stopDemo();
+        setDemoPlayingTrackId(track.id);
+        await playDemo(track.asset, track.demoDurationMs, {
+          onComplete: () => {
+            if (mountedRef.current) {
+              setDemoPlayingTrackId(null);
+            }
+          },
+        });
       }
-    } finally {
-      if (mountedRef.current) setPurchaseInProgress(null);
-    }
-  }, [purchaseInProgress]);
+    },
+    [demoPlayingTrackId],
+  );
 
-  const handleInsufficientFunds = useCallback(async (itemPrice: number) => {
-    const deficit = itemPrice - totalMochis;
-    const sortedAmounts = Object.entries(MOCHI_PACK_AMOUNTS)
-      .sort(([, a], [, b]) => a - b);
+  const handlePurchasePack = useCallback(
+    async (product: PurchasesStoreProduct) => {
+      if (purchaseInProgress) return;
+      setPurchaseInProgress(product.identifier);
+      try {
+        const result = await purchaseMochiPack(product);
+        if (mountedRef.current && result.success && result.amount) {
+          Alert.alert(
+            "Purchase Complete!",
+            `You received ${result.amount.toLocaleString()} mochis!`,
+          );
+        }
+      } catch {
+        if (mountedRef.current) {
+          Alert.alert("Purchase Failed", "Something went wrong. Please try again.");
+        }
+      } finally {
+        if (mountedRef.current) setPurchaseInProgress(null);
+      }
+    },
+    [purchaseInProgress],
+  );
 
-    const targetPack = sortedAmounts.find(([, amount]) => amount >= deficit);
-    const packId = targetPack ? targetPack[0] : sortedAmounts[sortedAmounts.length - 1][0];
+  const handleInsufficientFunds = useCallback(
+    async (itemPrice: number) => {
+      const deficit = itemPrice - totalMochis;
+      const sortedAmounts = Object.entries(MOCHI_PACK_AMOUNTS).sort(([, a], [, b]) => a - b);
 
-    const packProducts = await getMochiPackProducts();
-    const product = packProducts.find((p) => p.identifier === packId);
-    if (!product) {
-      Alert.alert('Unavailable', 'Mochi packs are currently unavailable. Please try again later.');
-      return;
-    }
-    await handlePurchasePack(product);
-  }, [totalMochis, handlePurchasePack]);
+      const targetPack = sortedAmounts.find(([, amount]) => amount >= deficit);
+      const packId = targetPack ? targetPack[0] : sortedAmounts[sortedAmounts.length - 1][0];
+
+      const packProducts = await getMochiPackProducts();
+      const product = packProducts.find((p) => p.identifier === packId);
+      if (!product) {
+        Alert.alert(
+          "Unavailable",
+          "Mochi packs are currently unavailable. Please try again later.",
+        );
+        return;
+      }
+      await handlePurchasePack(product);
+    },
+    [totalMochis, handlePurchasePack],
+  );
 
   // Sheet openers
   const openStreakFreezeSheet = useCallback(
     (qty: 1 | 2 | 3) => {
-      playFeedback('tap');
+      playFeedback("tap");
       const cost = getStreakFreezeCost(qty);
       setSheetConfig({
-        image: <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} contentFit="contain" />,
-        title: 'Each streak freeze protects your streak for 1 missed day!',
+        image: (
+          <Image source={MochiFreezeImg} style={{ width: 140, height: 140 }} contentFit="contain" />
+        ),
+        title: "Each streak freeze protects your streak for 1 missed day!",
         price: cost,
-        currency: 'mochis',
+        currency: "mochis",
         buttonLabel: `Buy for ${cost}`,
         onConfirm: () => {
           const success = buyStreakFreezes(qty);
           if (success) {
             if (qty === 1) {
-              Alert.alert('Streak Freeze Purchased!', 'Your streak is protected for one missed day.');
+              Alert.alert(
+                "Streak Freeze Purchased!",
+                "Your streak is protected for one missed day.",
+              );
             } else {
               Alert.alert(
-                'Streak Freeze Purchased!',
+                "Streak Freeze Purchased!",
                 `${qty} streak freezes added. You're protected for ${qty} missed days.`,
               );
             }
@@ -175,39 +197,47 @@ export default function StoreScreen() {
     [buyStreakFreezes, handleInsufficientFunds],
   );
 
-  const openTrackSheet = useCallback((track: BackingTrackDef) => {
-    playFeedback('tap');
-    setSheetConfig({
-      image: <Image source={MochiMusicImg} style={{ width: 120, height: 120 }} contentFit="contain" />,
-      title: `Unlock ${track.name}?`,
-      price: track.cost,
-      currency: 'mochis',
-      buttonLabel: `Buy for ${track.cost}`,
-      onConfirm: () => handleBuyTrack(track.id),
-      onInsufficientFunds: () => handleInsufficientFunds(track.cost),
-    });
-  }, [handleBuyTrack, handleInsufficientFunds]);
+  const openTrackSheet = useCallback(
+    (track: BackingTrackDef) => {
+      playFeedback("tap");
+      setSheetConfig({
+        image: (
+          <Image source={MochiMusicImg} style={{ width: 120, height: 120 }} contentFit="contain" />
+        ),
+        title: `Unlock ${track.name}?`,
+        price: track.cost,
+        currency: "mochis",
+        buttonLabel: `Buy for ${track.cost}`,
+        onConfirm: () => handleBuyTrack(track.id),
+        onInsufficientFunds: () => handleInsufficientFunds(track.cost),
+      });
+    },
+    [handleBuyTrack, handleInsufficientFunds],
+  );
 
-  const openMochiPackSheet = useCallback((packId: MochiPackProductId, amount: number) => {
-    playFeedback('tap');
-    const product = products.find((p) => p.identifier === packId);
-    const priceLabel = product?.priceString ?? '---';
-    const heroSize = getMochiPackHeroSize(packId);
-    setSheetConfig({
-      image: (
-        <Image
-          source={MOCHI_PACK_IMAGE_SOURCES[packId]}
-          style={{ width: heroSize, height: heroSize }}
-          contentFit="contain"
-        />
-      ),
-      title: `Get ${amount.toLocaleString()} Mochis!`,
-      price: priceLabel,
-      currency: 'iap',
-      buttonLabel: product ? `Buy for ${priceLabel}` : 'Unavailable',
-      onConfirm: product ? () => handlePurchasePack(product) : () => {},
-    });
-  }, [products, handlePurchasePack]);
+  const openMochiPackSheet = useCallback(
+    (packId: MochiPackProductId, amount: number) => {
+      playFeedback("tap");
+      const product = products.find((p) => p.identifier === packId);
+      const priceLabel = product?.priceString ?? "---";
+      const heroSize = getMochiPackHeroSize(packId);
+      setSheetConfig({
+        image: (
+          <Image
+            source={MOCHI_PACK_IMAGE_SOURCES[packId]}
+            style={{ width: heroSize, height: heroSize }}
+            contentFit="contain"
+          />
+        ),
+        title: `Get ${amount.toLocaleString()} Mochis!`,
+        price: priceLabel,
+        currency: "iap",
+        buttonLabel: product ? `Buy for ${priceLabel}` : "Unavailable",
+        onConfirm: product ? () => handlePurchasePack(product) : () => {},
+      });
+    },
+    [products, handlePurchasePack],
+  );
 
   // ============================================
   // Render
@@ -220,7 +250,7 @@ export default function StoreScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       <ScreenBackground />
 
       <ScreenContent contentStyle={contentStyle}>
@@ -230,12 +260,12 @@ export default function StoreScreen() {
 
         <StoreItemRow
           icon={
-            <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '60' }]}>
+            <View style={[styles.iconCircle, { backgroundColor: c.accentLight + "60" }]}>
               <Ionicons name="star" size={22} color={c.accent} />
             </View>
           }
           title="Remove Ads"
-          subtitle={isPremium ? 'Premium active' : 'Upgrade to premium to remove ads'}
+          subtitle={isPremium ? "Premium active" : "Upgrade to premium to remove ads"}
           trailing={
             isPremium ? (
               <Ionicons name="checkmark-circle" size={24} color={c.accent} />
@@ -243,7 +273,14 @@ export default function StoreScreen() {
               <Feather name="chevron-right" size={20} color={c.textSecondary} />
             )
           }
-          onPress={isPremium ? undefined : async () => { playFeedback('tap'); await presentPaywallAlways(); }}
+          onPress={
+            isPremium
+              ? undefined
+              : async () => {
+                  playFeedback("tap");
+                  await presentPaywallAlways();
+                }
+          }
         />
 
         <SectionTitle>Streak Freeze</SectionTitle>
@@ -253,12 +290,12 @@ export default function StoreScreen() {
           const subtitle =
             index === 0 && (streakFreezesCount ?? 0) > 0
               ? `Protect your streak · You have ${streakFreezesCount}`
-              : 'Protect your streak for missed days';
+              : "Protect your streak for missed days";
           return (
             <StoreItemRow
               key={qty}
               icon={
-                <View style={[styles.iconCircle, { backgroundColor: '#E3F2FD' }]}>
+                <View style={[styles.iconCircle, { backgroundColor: "#E3F2FD" }]}>
                   <Ionicons name="snow" size={22} color="#42A5F5" />
                 </View>
               }
@@ -287,7 +324,10 @@ export default function StoreScreen() {
                 !isOwned && track.cost > 0
                   ? () => openTrackSheet(track)
                   : isOwned && !isActive
-                    ? () => { playFeedback('tap'); setActiveTrack(track.id); }
+                    ? () => {
+                        playFeedback("tap");
+                        setActiveTrack(track.id);
+                      }
                     : () => {}
               }
             />
@@ -299,13 +339,19 @@ export default function StoreScreen() {
         {MOCHI_PACK_PRODUCT_IDS.map((packId) => {
           const amount = MOCHI_PACK_AMOUNTS[packId];
           const product = products.find((p) => p.identifier === packId);
-          const priceLabel = productsLoading ? 'Loading…' : product?.priceString;
+          const priceLabel = productsLoading ? "Loading…" : product?.priceString;
 
           return (
             <StoreItemRow
               key={packId}
               icon={
-                <View style={[styles.iconCircle, styles.mochiPackIconTile, { backgroundColor: c.accentLight + '40' }]}>
+                <View
+                  style={[
+                    styles.iconCircle,
+                    styles.mochiPackIconTile,
+                    { backgroundColor: c.accentLight + "40" },
+                  ]}
+                >
                   <View style={styles.mochiPackIconImageInner}>
                     <Image
                       source={MOCHI_PACK_IMAGE_SOURCES[packId]}
@@ -317,14 +363,11 @@ export default function StoreScreen() {
               }
               title={`${amount.toLocaleString()} Mochis`}
               subtitle={priceLabel}
-              trailing={
-                <Feather name="chevron-right" size={20} color={c.textSecondary} />
-              }
+              trailing={<Feather name="chevron-right" size={20} color={c.textSecondary} />}
               onPress={() => openMochiPackSheet(packId, amount)}
             />
           );
         })}
-
       </ScreenContent>
 
       <ScreenHeader onHeightChange={setHeaderHeight} />
@@ -351,12 +394,12 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   mochiPackIconTile: {
     padding: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   mochiPackIconImageInner: {
     width: 28,
@@ -370,6 +413,4 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.semibold,
     fontSize: 13,
   },
-
-
 });

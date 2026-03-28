@@ -1,16 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, type LayoutChangeEvent, type ViewStyle } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
-import { useColors } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import type { CustomSkeuColors } from '../ui/Skeuomorphic';
-import { SkeuButton } from '../ui/Skeuomorphic';
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, StyleSheet, type LayoutChangeEvent, type ViewStyle } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
+import { useColors } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import type { CustomSkeuColors } from "../ui/Skeuomorphic";
+import { SkeuButton } from "../ui/Skeuomorphic";
 
 const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
@@ -56,16 +52,16 @@ export function LevelProgressPill({
 
   const skeuColors: CustomSkeuColors = {
     gradient: [c.cream, c.cream, c.cream] as readonly [string, string, string],
-    edge: borderColor + '99',
-    borderLight: 'rgba(255, 255, 255, 0.4)',
-    borderDark: borderColor + '99',
+    edge: borderColor + "99",
+    borderLight: "rgba(255, 255, 255, 0.4)",
+    borderDark: borderColor + "99",
     textColor,
   };
 
   const faceStyle: ViewStyle = {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 4,
     paddingLeft: 4,
     paddingRight: spacing.sm,
@@ -76,7 +72,7 @@ export function LevelProgressPill({
     width: ICON_CIRCLE_SIZE,
     height: ICON_CIRCLE_SIZE,
     borderRadius: ICON_CIRCLE_SIZE / 2,
-    backgroundColor: borderColor + '50',
+    backgroundColor: borderColor + "50",
   };
 
   return (
@@ -88,11 +84,8 @@ export function LevelProgressPill({
       contentStyle={faceStyle}
       accessibilityLabel={`Level ${level}, ${currentXP} of ${xpThreshold} XP`}
     >
-      <Animated.View
-        onLayout={handleLayout}
-        style={[styles.fillTrack]}
-      >
-        <Animated.View style={[styles.fill, { backgroundColor: borderColor + '30' }, fillStyle]} />
+      <Animated.View onLayout={handleLayout} style={[styles.fillTrack]}>
+        <Animated.View style={[styles.fill, { backgroundColor: borderColor + "30" }, fillStyle]} />
       </Animated.View>
 
       <View style={styles.leftGroup}>
@@ -111,29 +104,29 @@ export function LevelProgressPill({
 
 const styles = StyleSheet.create({
   container: {
-    overflow: 'visible',
+    overflow: "visible",
     borderRadius: borderRadius.full,
   },
   fillTrack: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: borderRadius.full,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   fill: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     bottom: 0,
     borderRadius: borderRadius.full,
   },
   leftGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
   },
   iconCircle: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   levelText: {
     fontFamily: fontFamilies.bold,

@@ -2,16 +2,16 @@
 // Generates a random UUID on first launch, persists it in AsyncStorage.
 // This becomes the user_id in Supabase user_streaks until real auth is added.
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from './storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { STORAGE_KEYS } from "./storage";
 
 let cachedDeviceId: string | null = null;
 
 /** Simple UUID v4 generator (no external dependency). */
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }

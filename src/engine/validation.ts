@@ -5,8 +5,8 @@
 //   Placement techniques (Level 1): User taps cell + enters number
 //   Elimination techniques (Level 2-4): User identifies pattern cells + elimination targets
 
-import { Position, positionKey } from './types';
-import { TechniqueResult } from './solver/types';
+import { Position, positionKey } from "./types";
+import { TechniqueResult } from "./solver/types";
 
 // ============================================
 // Types
@@ -22,14 +22,14 @@ export interface ValidationResult {
 
 /** User's selection for placement techniques (Naked/Hidden Single) */
 export interface PlacementSelection {
-  type: 'placement';
+  type: "placement";
   cell: Position;
   value: number;
 }
 
 /** User's selection for elimination techniques (Pairs, X-Wing, etc.) */
 export interface EliminationSelection {
-  type: 'elimination';
+  type: "elimination";
   patternCells: Position[];
   eliminationCells: Position[];
 }
@@ -64,21 +64,18 @@ function positionSetContainsAny(haystack: Position[], needles: Position[]): bool
 // ============================================
 
 /** Techniques where the user places a value */
-const PLACEMENT_TECHNIQUES = new Set([
-  'Naked Single',
-  'Hidden Single',
-]);
+const PLACEMENT_TECHNIQUES = new Set(["Naked Single", "Hidden Single"]);
 
 /** Techniques where the user identifies eliminations */
 const ELIMINATION_TECHNIQUES = new Set([
-  'Naked Pair',
-  'Hidden Pair',
-  'Pointing Pair',
-  'Box/Line Reduction',
-  'Naked Triple',
-  'X-Wing',
-  'Swordfish',
-  'XY-Wing',
+  "Naked Pair",
+  "Hidden Pair",
+  "Pointing Pair",
+  "Box/Line Reduction",
+  "Naked Triple",
+  "X-Wing",
+  "Swordfish",
+  "XY-Wing",
 ]);
 
 export function isPlacementTechnique(techniqueName: string): boolean {
@@ -109,7 +106,7 @@ export function validateSelection(
   solverResult: TechniqueResult,
   strict: boolean = false,
 ): ValidationResult {
-  if (selection.type === 'placement') {
+  if (selection.type === "placement") {
     return validatePlacement(selection, solverResult);
   } else {
     return validateElimination(selection, solverResult, strict);
@@ -131,7 +128,7 @@ export function validatePlacement(
       patternCorrect: false,
       eliminationCorrect: false,
       placementCorrect: false,
-      feedback: 'This technique produces a placement, but the solver found none.',
+      feedback: "This technique produces a placement, but the solver found none.",
     };
   }
 
@@ -142,7 +139,7 @@ export function validatePlacement(
 
   let feedback: string;
   if (correct) {
-    feedback = 'Correct! You found the right cell and value.';
+    feedback = "Correct! You found the right cell and value.";
   } else if (cellCorrect) {
     feedback = `Right cell, but the value should be ${expected.value}.`;
   } else if (valueCorrect) {
@@ -176,10 +173,7 @@ export function validateElimination(
   strict: boolean = false,
 ): ValidationResult {
   // Phase 1: Pattern cells
-  const patternCorrect = positionSetsEqual(
-    selection.patternCells,
-    solverResult.highlightCells,
-  );
+  const patternCorrect = positionSetsEqual(selection.patternCells, solverResult.highlightCells);
 
   // Phase 2: Elimination cells
   const expectedEliminationCells = solverResult.eliminations.map((e) => e.position);
@@ -187,10 +181,7 @@ export function validateElimination(
 
   if (strict) {
     // Strict: user must select ALL elimination targets
-    eliminationCorrect = positionSetsEqual(
-      selection.eliminationCells,
-      expectedEliminationCells,
-    );
+    eliminationCorrect = positionSetsEqual(selection.eliminationCells, expectedEliminationCells);
   } else {
     // Lenient: user must select at least one valid elimination target
     eliminationCorrect =
@@ -202,15 +193,15 @@ export function validateElimination(
 
   let feedback: string;
   if (correct) {
-    feedback = 'Correct! You identified the pattern and eliminations.';
+    feedback = "Correct! You identified the pattern and eliminations.";
   } else if (patternCorrect && !eliminationCorrect) {
-    feedback = 'You found the pattern cells! Now identify where candidates can be eliminated.';
+    feedback = "You found the pattern cells! Now identify where candidates can be eliminated.";
   } else if (!patternCorrect && eliminationCorrect) {
-    feedback = 'Good elimination targets, but the pattern cells are not quite right.';
+    feedback = "Good elimination targets, but the pattern cells are not quite right.";
   } else {
     const patternDesc = solverResult.highlightCells
       .map((p) => `R${p.row + 1}C${p.col + 1}`)
-      .join(', ');
+      .join(", ");
     feedback = `Look for the ${solverResult.techniqueName} pattern at: ${patternDesc}.`;
   }
 
@@ -242,7 +233,7 @@ export function validateAgainstMultipleInstances(
       patternCorrect: false,
       eliminationCorrect: false,
       placementCorrect: false,
-      feedback: 'No valid technique instances found in this puzzle.',
+      feedback: "No valid technique instances found in this puzzle.",
     };
   }
 

@@ -1,25 +1,19 @@
-import React, { useCallback, useMemo, useRef } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
+import React, { useCallback, useMemo, useRef } from "react";
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 
-import { colors, useColors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import { SkeuButton } from '../ui/Skeuomorphic';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
-import { usePlayerStreakStore } from '../../stores/playerStreakStore';
-import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
+import { colors, useColors } from "../../theme/colors";
+import { typography, fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import { SheetWrapper, type SheetWrapperRef } from "../ui/Sheet/SheetWrapper";
+import { usePlayerStreakStore } from "../../stores/playerStreakStore";
+import MochiPointIcon from "../../../assets/images/icons/mochi-point.svg";
 
 export interface PurchaseSheetConfig {
   image: React.ReactNode;
   title: string;
   price: number | string;
-  currency: 'mochis' | 'iap';
+  currency: "mochis" | "iap";
   buttonLabel: string;
   onConfirm: () => void | Promise<void>;
   onInsufficientFunds?: () => void | Promise<void>;
@@ -40,8 +34,8 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
 
   const { insufficientFunds } = useMemo(() => {
     if (!config) return { insufficientFunds: false };
-    const afford = config.currency === 'iap' || totalMochis >= (config.price as number);
-    return { insufficientFunds: config.currency === 'mochis' && !afford };
+    const afford = config.currency === "iap" || totalMochis >= (config.price as number);
+    return { insufficientFunds: config.currency === "mochis" && !afford };
   }, [config, totalMochis]);
 
   const handlePress = useCallback(() => {
@@ -61,35 +55,33 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
       ref={sheetRef}
       visible={visible}
       onDismiss={onDismiss}
-      containerStyle={{ backgroundColor: c.cream, alignItems: 'center' }}
+      containerStyle={{ backgroundColor: c.cream, alignItems: "center" }}
     >
-      {config.currency === 'mochis' && (
-        <View style={[styles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
+      {config.currency === "mochis" && (
+        <View style={[styles.balancePill, { backgroundColor: c.gridLine + "60" }]}>
           <MochiPointIcon width={21} height={21} />
           <Text style={[styles.balanceText, { color: c.textPrimary }]}>
             {totalMochis} / {config.price}
             {insufficientFunds && (
               <Text style={{ color: c.accent }}>
-                {' · Need '}{(config.price as number) - totalMochis}{' more'}
+                {" · Need "}
+                {(config.price as number) - totalMochis}
+                {" more"}
               </Text>
             )}
           </Text>
         </View>
       )}
 
-      {config.currency === 'iap' && (
-        <View style={[styles.balancePill, { backgroundColor: c.gridLine + '60' }]}>
-          <Text style={[styles.balanceText, { color: c.textPrimary }]}>
-            {config.price}
-          </Text>
+      {config.currency === "iap" && (
+        <View style={[styles.balancePill, { backgroundColor: c.gridLine + "60" }]}>
+          <Text style={[styles.balanceText, { color: c.textPrimary }]}>{config.price}</Text>
         </View>
       )}
 
       <View style={styles.imageContainer}>{config.image}</View>
 
-      <Text style={[styles.ctaText, { color: c.textPrimary }]}>
-        {config.title}
-      </Text>
+      <Text style={[styles.ctaText, { color: c.textPrimary }]}>{config.title}</Text>
 
       <SkeuButton
         onPress={handlePress}
@@ -98,7 +90,7 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
         disabled={loading}
         style={styles.buyButton}
         contentStyle={styles.buyButtonContent}
-        accessibilityLabel={insufficientFunds ? 'Get more mochis' : config.buttonLabel}
+        accessibilityLabel={insufficientFunds ? "Get more mochis" : config.buttonLabel}
       >
         {loading ? (
           <ActivityIndicator size="small" color={colors.white} />
@@ -107,7 +99,7 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
             <MochiPointIcon width={20} height={20} />
             <Text style={styles.buyButtonText}>Get Mochis</Text>
           </View>
-        ) : config.currency === 'mochis' ? (
+        ) : config.currency === "mochis" ? (
           <View style={styles.buttonRow}>
             <Text style={styles.buyButtonText}>Get for</Text>
             <MochiPointIcon width={20} height={20} />
@@ -127,9 +119,9 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
 
 const styles = StyleSheet.create({
   balancePill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
     gap: 6,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
@@ -143,29 +135,29 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 140,
     height: 140,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: spacing.xl,
   },
   ctaText: {
     ...typography.headline,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: spacing.xxl,
     paddingHorizontal: spacing.lg,
   },
   buyButton: {
-    width: '100%',
+    width: "100%",
   },
   buyButtonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing.sm,
     paddingVertical: spacing.md,
   },
   buttonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   buyButtonText: {

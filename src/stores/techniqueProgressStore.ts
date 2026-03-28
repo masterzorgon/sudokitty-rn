@@ -7,12 +7,12 @@
 //   - Completion status (demo + 3 finds)
 //   - Timestamps (ISO strings for clean serialization)
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
+import { subscribeWithSelector } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 
-import { TECHNIQUE_METADATA, isTechniqueLessonVisible } from '../data/techniqueMetadata';
+import { TECHNIQUE_METADATA, isTechniqueLessonVisible } from "../data/techniqueMetadata";
 
 // ============================================
 // Types
@@ -77,7 +77,7 @@ function deriveCompleted(progress: TechniqueProgress): boolean {
 // ============================================
 
 // Add to STORAGE_KEYS - we use a direct key here since storage.ts has a fixed set
-const TECHNIQUE_PROGRESS_KEY = '@sudokitty/technique_progress' as const;
+const TECHNIQUE_PROGRESS_KEY = "@sudokitty/technique_progress" as const;
 
 // ============================================
 // Store
@@ -133,7 +133,7 @@ export const useTechniqueProgressStore = create<
             });
           }
         } catch (error) {
-          console.error('[TechniqueProgress] Error loading state:', error);
+          console.error("[TechniqueProgress] Error loading state:", error);
           set((state) => {
             state.isLoaded = true;
           });
@@ -146,7 +146,7 @@ export const useTechniqueProgressStore = create<
           const { techniques } = get();
           await AsyncStorage.setItem(TECHNIQUE_PROGRESS_KEY, JSON.stringify(techniques));
         } catch (error) {
-          console.error('[TechniqueProgress] Error saving state:', error);
+          console.error("[TechniqueProgress] Error saving state:", error);
         }
       },
 
@@ -200,7 +200,6 @@ export const useTechniqueProgressStore = create<
           if (success) {
             progress.findSuccesses++;
             progress.findFailures = 0; // Reset consecutive failure counter
-
           } else {
             progress.findFailures++;
           }
@@ -242,7 +241,9 @@ export const useTechniqueProgressStore = create<
       // Count of completed techniques
       getCompletionCount: (): number => {
         const visibleTechniqueIds = new Set(
-          TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).map((t) => t.id),
+          TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).map(
+            (t) => t.id,
+          ),
         );
         return Object.values(get().techniques).filter(
           (p) => p.isCompleted && visibleTechniqueIds.has(p.techniqueId),
@@ -257,7 +258,9 @@ export const useTechniqueProgressStore = create<
       // Overall progress (0-1, only solver-backed techniques)
       getOverallProgress: (): number => {
         const visibleTechniqueIds = new Set(
-          TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).map((t) => t.id),
+          TECHNIQUE_METADATA.filter((t) => t.hasSolver && isTechniqueLessonVisible(t)).map(
+            (t) => t.id,
+          ),
         );
         const total = visibleTechniqueIds.size;
         if (total === 0) return 0;
@@ -274,8 +277,7 @@ export const useTechniqueProgressStore = create<
 // Selectors
 // ============================================
 
-export const useCurrentTechniqueId = () =>
-  useTechniqueProgressStore((s) => s.currentTechniqueId);
+export const useCurrentTechniqueId = () => useTechniqueProgressStore((s) => s.currentTechniqueId);
 
 // Stable empty-progress cache to avoid creating new objects in selectors
 // (returning a new object from a Zustand selector on every call causes infinite re-renders)
@@ -291,12 +293,14 @@ export const useTechniqueProgress = (techniqueId: string) =>
   useTechniqueProgressStore((s) => s.techniques[techniqueId] ?? getEmptyProgress(techniqueId));
 
 export const useCompletionCount = () =>
-  useTechniqueProgressStore((s) =>
-    Object.values(s.techniques).filter((p) => {
-      const metadata = TECHNIQUE_METADATA.find((t) => t.id === p.techniqueId);
-      return Boolean(metadata?.hasSolver && metadata && isTechniqueLessonVisible(metadata) && p.isCompleted);
-    }).length,
+  useTechniqueProgressStore(
+    (s) =>
+      Object.values(s.techniques).filter((p) => {
+        const metadata = TECHNIQUE_METADATA.find((t) => t.id === p.techniqueId);
+        return Boolean(
+          metadata?.hasSolver && metadata && isTechniqueLessonVisible(metadata) && p.isCompleted,
+        );
+      }).length,
   );
 
-export const useIsLoaded = () =>
-  useTechniqueProgressStore((s) => s.isLoaded);
+export const useIsLoaded = () => useTechniqueProgressStore((s) => s.isLoaded);

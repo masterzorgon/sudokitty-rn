@@ -2,20 +2,16 @@
 // Combines Skeu3D with press animation, haptics, and accessibility
 // This is the primary API for most button use cases
 
-import React from 'react';
-import { Pressable, ViewStyle } from 'react-native';
-import Animated from 'react-native-reanimated';
+import React from "react";
+import { Pressable, ViewStyle } from "react-native";
+import Animated from "react-native-reanimated";
 
-import {
-  SkeuVariant,
-  CustomSkeuColors,
-  SKEU_VARIANTS,
-} from '../../../theme/skeuomorphic';
-import { useSkeuomorphicPress } from '../../../hooks/useSkeuomorphicPress';
-import type { FeedbackId } from '../../../utils/feedback';
-import { CornerRadii } from './SkeuContext';
-import { Skeu3D } from './Skeu3D';
-import { SheenOverlay } from './SheenOverlay';
+import { SkeuVariant, CustomSkeuColors, SKEU_VARIANTS } from "../../../theme/skeuomorphic";
+import { useSkeuomorphicPress } from "../../../hooks/useSkeuomorphicPress";
+import type { FeedbackId } from "../../../utils/feedback";
+import { CornerRadii } from "./SkeuContext";
+import { Skeu3D } from "./Skeu3D";
+import { SheenOverlay } from "./SheenOverlay";
 
 export interface SkeuButtonProps {
   // Interaction
@@ -68,7 +64,7 @@ export function SkeuButton({
   disabled = false,
 
   // Appearance
-  variant = 'primary',
+  variant = "primary",
   customColors,
   borderRadius,
   cornerRadii,
@@ -77,7 +73,7 @@ export function SkeuButton({
   sheen = false,
 
   // Animation
-  feedbackId = 'tap',
+  feedbackId = "tap",
   disableAnimation = false,
 
   // Layout
@@ -98,7 +94,7 @@ export function SkeuButton({
     feedbackId,
   });
 
-  const effectiveVariant = disabled ? 'disabled' : variant;
+  const effectiveVariant = disabled ? "disabled" : variant;
 
   // Wrap content with animation if enabled
   const content = (
@@ -126,13 +122,7 @@ export function SkeuButton({
       testID={testID}
       style={style}
     >
-      {disableAnimation ? (
-        content
-      ) : (
-        <Animated.View style={animatedStyle}>
-          {content}
-        </Animated.View>
-      )}
+      {disableAnimation ? content : <Animated.View style={animatedStyle}>{content}</Animated.View>}
     </Pressable>
   );
 }

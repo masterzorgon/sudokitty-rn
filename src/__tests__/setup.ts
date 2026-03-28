@@ -1,26 +1,26 @@
 // Jest setup file for React Native Testing Library
 
 // Mock react-native-reanimated v4
-jest.mock('react-native-reanimated', () => {
+jest.mock("react-native-reanimated", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- Jest mock factory uses synchronous require
-  const Reanimated = require('react-native-reanimated/mock');
+  const Reanimated = require("react-native-reanimated/mock");
   Reanimated.default.call = () => {};
   return Reanimated;
 });
 
 // Mock core-haptics module
-jest.mock('../../modules/core-haptics', () => ({
+jest.mock("../../modules/core-haptics", () => ({
   supportsHaptics: false,
   play: jest.fn(),
 }));
 
 // Mock expo-linear-gradient
-jest.mock('expo-linear-gradient', () => ({
-  LinearGradient: 'LinearGradient',
+jest.mock("expo-linear-gradient", () => ({
+  LinearGradient: "LinearGradient",
 }));
 
 // Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () => ({
+jest.mock("@react-native-async-storage/async-storage", () => ({
   default: {
     getItem: jest.fn(() => Promise.resolve(null)),
     setItem: jest.fn(() => Promise.resolve()),
