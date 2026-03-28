@@ -3,15 +3,14 @@
 // that candidate can be eliminated from other cells in that box.
 // (This is the inverse of Pointing Pair)
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE, BOX_SIZE } from '../../../types';
+import { Position, BOARD_SIZE, BOX_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class BoxLineReduction extends BaseTechnique {
-  readonly name = 'Box/Line Reduction';
+  readonly name = "Box/Line Reduction";
   readonly level: TechniqueLevel = 2;
-  readonly description = 'Candidates in a row/column confined to one box eliminate from that box';
+  readonly description = "Candidates in a row/column confined to one box eliminate from that box";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Check each row
@@ -36,13 +35,10 @@ export class BoxLineReduction extends BaseTechnique {
   private checkRow(
     grid: CandidateGridInterface,
     row: number,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find all cells in this row that have this candidate
-    const cellsWithCandidate = grid.findCellsWithCandidate(
-      { type: 'row', index: row },
-      candidate
-    );
+    const cellsWithCandidate = grid.findCellsWithCandidate({ type: "row", index: row }, candidate);
 
     if (cellsWithCandidate.length < 2 || cellsWithCandidate.length > 3) {
       return null;
@@ -53,18 +49,18 @@ export class BoxLineReduction extends BaseTechnique {
     if (boxes.size !== 1) return null;
 
     const boxIndex = [...boxes][0];
-    return this.eliminateFromBox(grid, cellsWithCandidate, boxIndex, candidate, 'row', row);
+    return this.eliminateFromBox(grid, cellsWithCandidate, boxIndex, candidate, "row", row);
   }
 
   private checkColumn(
     grid: CandidateGridInterface,
     col: number,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find all cells in this column that have this candidate
     const cellsWithCandidate = grid.findCellsWithCandidate(
-      { type: 'column', index: col },
-      candidate
+      { type: "column", index: col },
+      candidate,
     );
 
     if (cellsWithCandidate.length < 2 || cellsWithCandidate.length > 3) {
@@ -76,7 +72,7 @@ export class BoxLineReduction extends BaseTechnique {
     if (boxes.size !== 1) return null;
 
     const boxIndex = [...boxes][0];
-    return this.eliminateFromBox(grid, cellsWithCandidate, boxIndex, candidate, 'column', col);
+    return this.eliminateFromBox(grid, cellsWithCandidate, boxIndex, candidate, "column", col);
   }
 
   private eliminateFromBox(
@@ -84,10 +80,10 @@ export class BoxLineReduction extends BaseTechnique {
     lineCells: Position[],
     boxIndex: number,
     candidate: number,
-    lineType: 'row' | 'column',
-    lineIndex: number
+    lineType: "row" | "column",
+    lineIndex: number,
   ): TechniqueResult | null {
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     // Get all cells in the box
     const boxStartRow = Math.floor(boxIndex / 3) * BOX_SIZE;
@@ -109,11 +105,11 @@ export class BoxLineReduction extends BaseTechnique {
     }
 
     if (eliminations.length > 0) {
-      const lineName = lineType === 'row' ? `row ${lineIndex + 1}` : `column ${lineIndex + 1}`;
+      const lineName = lineType === "row" ? `row ${lineIndex + 1}` : `column ${lineIndex + 1}`;
       return this.createEliminationResult(
         eliminations,
         `${candidate} in ${lineName} is confined to box ${boxIndex + 1}, eliminating from rest of box`,
-        lineCells
+        lineCells,
       );
     }
 

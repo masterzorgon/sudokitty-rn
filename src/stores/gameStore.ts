@@ -1,15 +1,12 @@
 // Core game state management with Zustand
 // Replaces iOS GameViewModel
 
-import { useMemo } from 'react';
-import { enableMapSet } from 'immer';
-import { create } from 'zustand';
-import { useShallow } from 'zustand/react/shallow';
-
-// Enable Immer's MapSet plugin to support Set in state
-enableMapSet();
-import { subscribeWithSelector } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
+import { useMemo } from "react";
+import { enableMapSet } from "immer";
+import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import { subscribeWithSelector } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 import {
   Cell,
   Position,
@@ -26,21 +23,17 @@ import {
   getBoxIndex,
   getRelatedPositions,
   positionKey,
-} from '../engine/types';
-import { generatePuzzle, generateDailyPuzzle } from '../engine/generator';
-import { SudokuSolver, Hint } from '../engine/solver';
-import { useSettingsStore } from './settingsStore';
-import {
-  getCachedGamePuzzle,
-  consumeAndRefillGamePuzzle,
-} from '../services/puzzleCacheService';
-import { handleGameWon, handleGameLost } from '../services/gameOutcomeHandler';
-import { recordGameCompletion } from '../services/gameCompletionService';
-import {
-  POINTS_PER_PLACEMENT,
-  UNIT_COMPLETION_BONUS,
-  getStreakMultiplier,
-} from '../constants/xp';
+} from "../engine/types";
+import { generatePuzzle, generateDailyPuzzle } from "../engine/generator";
+import { SudokuSolver, Hint } from "../engine/solver";
+import { useSettingsStore } from "./settingsStore";
+import { getCachedGamePuzzle, consumeAndRefillGamePuzzle } from "../services/puzzleCacheService";
+import { handleGameWon, handleGameLost } from "../services/gameOutcomeHandler";
+import { recordGameCompletion } from "../services/gameCompletionService";
+import { POINTS_PER_PLACEMENT, UNIT_COMPLETION_BONUS, getStreakMultiplier } from "../constants/xp";
+
+// Enable Immer's MapSet plugin to support Set in state
+enableMapSet();
 
 // Create empty cell
 const createCell = (
@@ -48,7 +41,7 @@ const createCell = (
   col: number,
   value: number | null,
   correctValue: number,
-  isGiven: boolean
+  isGiven: boolean,
 ): Cell => ({
   row,
   col,
@@ -66,15 +59,12 @@ const createEmptyBoard = (): Cell[][] => {
     .map((_, row) =>
       Array(BOARD_SIZE)
         .fill(null)
-        .map((_, col) => createCell(row, col, null, 0, false))
+        .map((_, col) => createCell(row, col, null, 0, false)),
     );
 };
 
 // Create board from puzzle and solution
-const createBoardFromPuzzle = (
-  puzzle: number[][],
-  solution: number[][]
-): Cell[][] => {
+const createBoardFromPuzzle = (puzzle: number[][], solution: number[][]): Cell[][] => {
   return puzzle.map((row, rowIndex) =>
     row.map((value, colIndex) =>
       createCell(
@@ -82,9 +72,9 @@ const createBoardFromPuzzle = (
         colIndex,
         value === 0 ? null : value,
         solution[rowIndex][colIndex],
-        value !== 0
-      )
-    )
+        value !== 0,
+      ),
+    ),
   );
 };
 
@@ -99,7 +89,7 @@ const createSnapshot = (board: Cell[][]): BoardSnapshot => ({
     row.map((cell) => ({
       value: cell.value,
       notes: Array.from(cell.notes),
-    }))
+    })),
   ),
 });
 
@@ -111,8 +101,7 @@ const restoreFromSnapshot = (board: Cell[][], snapshot: BoardSnapshot): void => 
       board[row][col].value = cellSnapshot.value;
       board[row][col].notes = new Set(cellSnapshot.notes);
       board[row][col].isValid =
-        cellSnapshot.value === null ||
-        cellSnapshot.value === board[row][col].correctValue;
+        cellSnapshot.value === null || cellSnapshot.value === board[row][col].correctValue;
     }
   }
 };
@@ -154,22 +143,18 @@ const isBoxComplete = (board: Cell[][], boxIndex: number): boolean => {
 };
 
 /** Row/col/box units completed by a placement at (row, col). */
-const collectCompletedUnits = (
-  board: Cell[][],
-  row: number,
-  col: number
-): CompletedUnit[] => {
+const collectCompletedUnits = (board: Cell[][], row: number, col: number): CompletedUnit[] => {
   const timestamp = Date.now();
   const units: CompletedUnit[] = [];
   const boxIndex = getBoxIndex(row, col);
   if (isRowComplete(board, row)) {
-    units.push({ type: 'row', index: row, epicenter: { row, col }, timestamp });
+    units.push({ type: "row", index: row, epicenter: { row, col }, timestamp });
   }
   if (isColumnComplete(board, col)) {
-    units.push({ type: 'column', index: col, epicenter: { row, col }, timestamp });
+    units.push({ type: "column", index: col, epicenter: { row, col }, timestamp });
   }
   if (isBoxComplete(board, boxIndex)) {
-    units.push({ type: 'box', index: boxIndex, epicenter: { row, col }, timestamp });
+    units.push({ type: "box", index: boxIndex, epicenter: { row, col }, timestamp });
   }
   return units;
 };
@@ -187,12 +172,7 @@ const isBoardComplete = (board: Cell[][]): boolean => {
 };
 
 // Remove note from related cells when number is placed
-const clearRelatedNotes = (
-  board: Cell[][],
-  row: number,
-  col: number,
-  num: number
-): void => {
+const clearRelatedNotes = (board: Cell[][], row: number, col: number, num: number): void => {
   const related = getRelatedPositions({ row, col });
   for (const pos of related) {
     board[pos.row][pos.col].notes.delete(num);
@@ -302,7 +282,7 @@ interface GameActions {
 // Initial state
 const initialState: GameState = {
   board: createEmptyBoard(),
-  difficulty: 'medium',
+  difficulty: "medium",
   selectedCell: null,
   highlightedNumber: null,
   isNotesMode: false,
@@ -311,7 +291,7 @@ const initialState: GameState = {
   paidHintsRemaining: 0,
   timeElapsed: 0,
   isTimerRunning: false,
-  gameStatus: 'idle',
+  gameStatus: "idle",
   history: [],
   historyIndex: -1,
   lastCompletedUnits: [],
@@ -363,7 +343,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.paidHintsRemaining = 0;
           state.timeElapsed = 0;
           state.isTimerRunning = false; // Timer starts after animations complete
-          state.gameStatus = 'playing';
+          state.gameStatus = "playing";
           state.history = [];
           state.historyIndex = -1;
           state.lastCompletedUnits = [];
@@ -395,7 +375,7 @@ export const useGameStore = create<GameState & GameActions>()(
           state.paidHintsRemaining = 0;
           state.timeElapsed = 0;
           state.isTimerRunning = false;
-          state.gameStatus = 'playing';
+          state.gameStatus = "playing";
           state.history = [];
           state.historyIndex = -1;
           state.lastCompletedUnits = [];
@@ -443,7 +423,7 @@ export const useGameStore = create<GameState & GameActions>()(
           isGameLost: false,
         };
 
-        if (!state.selectedCell || state.gameStatus !== 'playing') {
+        if (!state.selectedCell || state.gameStatus !== "playing") {
           return result;
         }
 
@@ -488,16 +468,14 @@ export const useGameStore = create<GameState & GameActions>()(
               // Only end game if mistake limit is enabled in settings
               const { unlimitedMistakes } = useSettingsStore.getState();
               if (!unlimitedMistakes && draft.mistakeCount >= MAX_MISTAKES) {
-                draft.gameStatus = 'lost';
+                draft.gameStatus = "lost";
                 draft.isTimerRunning = false;
                 result.isGameLost = true;
               }
             } else {
               // Correct answer (manual placement — hints use dismissHintModal after sheet)
               const streakMultiplier = getStreakMultiplier(draft.correctStreak);
-              const placementPoints = Math.round(
-                POINTS_PER_PLACEMENT * streakMultiplier,
-              );
+              const placementPoints = Math.round(POINTS_PER_PLACEMENT * streakMultiplier);
 
               // Remove this number from notes in related cells
               clearRelatedNotes(draft.board, row, col, num);
@@ -522,7 +500,7 @@ export const useGameStore = create<GameState & GameActions>()(
 
               // Check for win
               if (isBoardComplete(draft.board)) {
-                draft.gameStatus = 'won';
+                draft.gameStatus = "won";
                 draft.isTimerRunning = false;
                 result.isGameWon = true;
               }
@@ -536,7 +514,7 @@ export const useGameStore = create<GameState & GameActions>()(
       // Erase selected cell
       eraseCell: () => {
         const state = get();
-        if (!state.selectedCell || state.gameStatus !== 'playing') return;
+        if (!state.selectedCell || state.gameStatus !== "playing") return;
 
         const { row, col } = state.selectedCell;
         const cell = state.board[row][col];
@@ -572,7 +550,7 @@ export const useGameStore = create<GameState & GameActions>()(
       // Use a hint: try strategic placement first, fall back to random fill
       useHint: () => {
         const state = get();
-        if (state.gameStatus !== 'playing') return null;
+        if (state.gameStatus !== "playing") return null;
 
         const { unlimitedHints } = useSettingsStore.getState();
         const canUseFree = unlimitedHints || state.hintsUsed < MAX_HINTS;
@@ -583,9 +561,7 @@ export const useGameStore = create<GameState & GameActions>()(
         const usePaidSlot = !canUseFree;
 
         // Try to find a strategic placement hint via the solver
-        const puzzle: number[][] = state.board.map((row) =>
-          row.map((cell) => cell.value ?? 0)
-        );
+        const puzzle: number[][] = state.board.map((row) => row.map((cell) => cell.value ?? 0));
         const solver = new SudokuSolver({
           maxTechniqueLevel: 4,
           trackSteps: true,
@@ -642,11 +618,7 @@ export const useGameStore = create<GameState & GameActions>()(
 
           clearRelatedNotes(draft.board, randomCell.row, randomCell.col, correctValue);
 
-          const completedUnits = collectCompletedUnits(
-            draft.board,
-            randomCell.row,
-            randomCell.col,
-          );
+          const completedUnits = collectCompletedUnits(draft.board, randomCell.row, randomCell.col);
           const completionBonus = completedUnits.length * UNIT_COMPLETION_BONUS;
           const totalThisMove = POINTS_PER_PLACEMENT + completionBonus;
           draft.xpPerPlacement = totalThisMove;
@@ -657,7 +629,7 @@ export const useGameStore = create<GameState & GameActions>()(
           }
 
           if (isBoardComplete(draft.board)) {
-            draft.gameStatus = 'won';
+            draft.gameStatus = "won";
             draft.isTimerRunning = false;
           }
         });
@@ -668,12 +640,10 @@ export const useGameStore = create<GameState & GameActions>()(
       // Get a strategic hint using the solver (technique-based)
       getStrategicHint: () => {
         const state = get();
-        if (state.gameStatus !== 'playing') return null;
+        if (state.gameStatus !== "playing") return null;
 
         // Convert current board state to puzzle format (0 = empty)
-        const puzzle: number[][] = state.board.map((row) =>
-          row.map((cell) => cell.value ?? 0)
-        );
+        const puzzle: number[][] = state.board.map((row) => row.map((cell) => cell.value ?? 0));
 
         // Create solver with full technique arsenal
         const solver = new SudokuSolver({
@@ -718,7 +688,7 @@ export const useGameStore = create<GameState & GameActions>()(
           const hint = draft.lastHint;
           if (!hint) return;
 
-          if (draft.gameStatus !== 'playing') {
+          if (draft.gameStatus !== "playing") {
             draft.lastHint = null;
             draft.hintHighlightCells = [];
             return;
@@ -742,12 +712,7 @@ export const useGameStore = create<GameState & GameActions>()(
             draft.highlightedNumber = targetValue;
             draft.lastCorrectCell = targetCell;
 
-            clearRelatedNotes(
-              draft.board,
-              targetCell.row,
-              targetCell.col,
-              targetValue,
-            );
+            clearRelatedNotes(draft.board, targetCell.row, targetCell.col, targetValue);
 
             const completedUnits = collectCompletedUnits(
               draft.board,
@@ -764,7 +729,7 @@ export const useGameStore = create<GameState & GameActions>()(
             }
 
             if (isBoardComplete(draft.board)) {
-              draft.gameStatus = 'won';
+              draft.gameStatus = "won";
               draft.isTimerRunning = false;
             }
           }
@@ -808,7 +773,7 @@ export const useGameStore = create<GameState & GameActions>()(
       // Start timer (called after entrance animations complete)
       startTimer: () => {
         set((state) => {
-          if (state.gameStatus === 'playing' && !state.isTimerRunning) {
+          if (state.gameStatus === "playing" && !state.isTimerRunning) {
             state.isTimerRunning = true;
           }
         });
@@ -817,8 +782,8 @@ export const useGameStore = create<GameState & GameActions>()(
       // Pause game
       pauseGame: () => {
         set((state) => {
-          if (state.gameStatus === 'playing') {
-            state.gameStatus = 'paused';
+          if (state.gameStatus === "playing") {
+            state.gameStatus = "paused";
             state.isTimerRunning = false;
           }
         });
@@ -827,8 +792,8 @@ export const useGameStore = create<GameState & GameActions>()(
       // Resume game
       resumeGame: () => {
         set((state) => {
-          if (state.gameStatus === 'paused') {
-            state.gameStatus = 'playing';
+          if (state.gameStatus === "paused") {
+            state.gameStatus = "playing";
             state.isTimerRunning = true;
           }
         });
@@ -836,11 +801,11 @@ export const useGameStore = create<GameState & GameActions>()(
 
       continueGame: (): boolean => {
         const { continueCount, gameStatus } = get();
-        if (gameStatus !== 'lost' || continueCount >= MAX_CONTINUES) return false;
+        if (gameStatus !== "lost" || continueCount >= MAX_CONTINUES) return false;
 
         set((draft) => {
           draft.mistakeCount = MAX_MISTAKES - 1;
-          draft.gameStatus = 'playing';
+          draft.gameStatus = "playing";
           draft.isTimerRunning = true;
           draft.continueCount += 1;
         });
@@ -850,7 +815,7 @@ export const useGameStore = create<GameState & GameActions>()(
 
       canContinue: (): boolean => {
         const { continueCount, gameStatus } = get();
-        return gameStatus === 'lost' && continueCount < MAX_CONTINUES;
+        return gameStatus === "lost" && continueCount < MAX_CONTINUES;
       },
 
       debugDrainHints: () => {
@@ -863,7 +828,7 @@ export const useGameStore = create<GameState & GameActions>()(
       debugForceLose: () => {
         set((draft) => {
           draft.mistakeCount = MAX_MISTAKES;
-          draft.gameStatus = 'lost';
+          draft.gameStatus = "lost";
           draft.isTimerRunning = false;
         });
       },
@@ -880,7 +845,7 @@ export const useGameStore = create<GameState & GameActions>()(
               }
             }
           }
-          draft.gameStatus = 'won';
+          draft.gameStatus = "won";
           draft.isTimerRunning = false;
         });
       },
@@ -891,7 +856,7 @@ export const useGameStore = create<GameState & GameActions>()(
         set((draft) => {
           draft.lastCompletedUnits = [
             {
-              type: 'row',
+              type: "row",
               index: selectedCell.row,
               epicenter: selectedCell,
               timestamp: Date.now(),
@@ -920,16 +885,16 @@ export const useGameStore = create<GameState & GameActions>()(
 
         return total === 0 ? 0 : filled / total;
       },
-    }))
-  )
+    })),
+  ),
 );
 
 // Handle game outcome side effects (streaks, mochi, XP, stats)
 useGameStore.subscribe(
   (s) => s.gameStatus,
   (gameStatus) => {
-    if (gameStatus === 'won') handleGameWon();
-    if (gameStatus === 'lost') handleGameLost();
+    if (gameStatus === "won") handleGameWon();
+    if (gameStatus === "lost") handleGameLost();
   },
 );
 
@@ -937,12 +902,12 @@ useGameStore.subscribe(
 useGameStore.subscribe(
   (s) => s.gameStatus,
   (gameStatus) => {
-    if (gameStatus === 'won' || gameStatus === 'lost') {
+    if (gameStatus === "won" || gameStatus === "lost") {
       const { difficulty, timeElapsed, mistakeCount, hintsUsed } = useGameStore.getState();
       recordGameCompletion({
         difficulty,
         timeSeconds: timeElapsed,
-        won: gameStatus === 'won',
+        won: gameStatus === "won",
         mistakeCount,
         hintsUsed,
       });
@@ -985,31 +950,32 @@ export const useDifficulty = () => useGameStore((s) => s.difficulty);
 export const useCanContinue = () => useGameStore((s) => s.canContinue);
 
 // Progress selector - subscribes to board changes and computes progress
-export const useProgress = () => useGameStore((s) => {
-  let filled = 0;
-  let total = 0;
+export const useProgress = () =>
+  useGameStore((s) => {
+    let filled = 0;
+    let total = 0;
 
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    for (let col = 0; col < BOARD_SIZE; col++) {
-      const cell = s.board[row][col];
-      if (!cell.isGiven) {
-        total++;
-        if (cell.value === cell.correctValue) {
-          filled++;
+    for (let row = 0; row < BOARD_SIZE; row++) {
+      for (let col = 0; col < BOARD_SIZE; col++) {
+        const cell = s.board[row][col];
+        if (!cell.isGiven) {
+          total++;
+          if (cell.value === cell.correctValue) {
+            filled++;
+          }
         }
       }
     }
-  }
 
-  return total === 0 ? 0 : filled / total;
-});
+    return total === 0 ? 0 : filled / total;
+  });
 
 // Check if there's a resumable game (paused or playing with progress)
 export const useHasResumableGame = () => {
   const gameStatus = useGameStore((s) => s.gameStatus);
   const timeElapsed = useGameStore((s) => s.timeElapsed);
   // Game is resumable if it's paused, or if it's playing and has some progress
-  return gameStatus === 'paused' || (gameStatus === 'playing' && timeElapsed > 0);
+  return gameStatus === "paused" || (gameStatus === "playing" && timeElapsed > 0);
 };
 
 // Get resumable game info for display
@@ -1019,7 +985,7 @@ export const useResumableGameInfo = () => {
   const gameStatus = useGameStore((s) => s.gameStatus);
   const getProgress = useGameStore((s) => s.getProgress);
 
-  const hasResumable = gameStatus === 'paused' || (gameStatus === 'playing' && timeElapsed > 0);
+  const hasResumable = gameStatus === "paused" || (gameStatus === "playing" && timeElapsed > 0);
 
   if (!hasResumable) return null;
 
@@ -1066,6 +1032,6 @@ export const useRemainingCounts = (): number[] => {
         }
       }
       return counts.map((c) => 9 - c);
-    })
+    }),
   );
 };

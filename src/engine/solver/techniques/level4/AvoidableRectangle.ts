@@ -5,15 +5,14 @@
 // bivalue {A,B}, eliminate the value that would complete the deadly
 // pattern from the other unsolved corner.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class AvoidableRectangle extends BaseTechnique {
-  readonly name = 'Avoidable Rectangle';
+  readonly name = "Avoidable Rectangle";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Deadly rectangle with solved anchor cells';
+  readonly description = "Deadly rectangle with solved anchor cells";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Try all pairs of rows and columns to form potential rectangles
@@ -22,8 +21,10 @@ export class AvoidableRectangle extends BaseTechnique {
         for (let c1 = 0; c1 < BOARD_SIZE; c1++) {
           for (let c2 = c1 + 1; c2 < BOARD_SIZE; c2++) {
             const corners: Position[] = [
-              { row: r1, col: c1 }, { row: r1, col: c2 },
-              { row: r2, col: c1 }, { row: r2, col: c2 },
+              { row: r1, col: c1 },
+              { row: r1, col: c2 },
+              { row: r2, col: c1 },
+              { row: r2, col: c2 },
             ];
 
             // Must span exactly 2 boxes
@@ -46,7 +47,7 @@ export class AvoidableRectangle extends BaseTechnique {
     corners: Position[],
   ): TechniqueResult | null {
     // Classify corners as solved or unsolved
-    const solved: Array<{ pos: Position; value: number }> = [];
+    const solved: { pos: Position; value: number }[] = [];
     const unsolved: Position[] = [];
 
     for (const pos of corners) {
@@ -62,7 +63,8 @@ export class AvoidableRectangle extends BaseTechnique {
     if (solved.length !== 2 || unsolved.length !== 2) return null;
 
     // Solved corners must be on a diagonal (different rows and columns)
-    if (solved[0].pos.row === solved[1].pos.row || solved[0].pos.col === solved[1].pos.col) return null;
+    if (solved[0].pos.row === solved[1].pos.row || solved[0].pos.col === solved[1].pos.col)
+      return null;
 
     const valA = solved[0].value;
     const valB = solved[1].value;
@@ -94,7 +96,7 @@ export class AvoidableRectangle extends BaseTechnique {
 
       return this.createEliminationResult(
         [{ position: otherCorner, candidates: [dangerValue] }],
-        `Avoidable Rectangle Type 1: ${valA}/${valB} in ${corners.map((p) => this.formatPosition(p)).join(',')} => ${this.formatPosition(otherCorner)}<>${dangerValue}`,
+        `Avoidable Rectangle Type 1: ${valA}/${valB} in ${corners.map((p) => this.formatPosition(p)).join(",")} => ${this.formatPosition(otherCorner)}<>${dangerValue}`,
         corners,
       );
     }

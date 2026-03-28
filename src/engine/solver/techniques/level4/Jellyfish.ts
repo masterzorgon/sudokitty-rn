@@ -4,15 +4,14 @@
 // and those cells occupy exactly four columns, the candidate can be
 // eliminated from other cells in those columns (and vice versa).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class Jellyfish extends BaseTechnique {
-  readonly name = 'Jellyfish';
+  readonly name = "Jellyfish";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Four rows have a candidate in exactly the same four columns';
+  readonly description = "Four rows have a candidate in exactly the same four columns";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -31,11 +30,11 @@ export class Jellyfish extends BaseTechnique {
     candidate: number,
   ): TechniqueResult | null {
     // Find rows where the candidate appears in 2-4 cells
-    const eligibleRows: Array<{ row: number; cols: Set<number> }> = [];
+    const eligibleRows: { row: number; cols: Set<number> }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       const cellsWithCandidate = grid.findCellsWithCandidate(
-        { type: 'row', index: row },
+        { type: "row", index: row },
         candidate,
       );
 
@@ -73,7 +72,7 @@ export class Jellyfish extends BaseTechnique {
       }
 
       // Find eliminations in the 4 columns (outside the pattern rows)
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (const col of cols) {
         for (let row = 0; row < BOARD_SIZE; row++) {
@@ -90,7 +89,7 @@ export class Jellyfish extends BaseTechnique {
       if (eliminations.length > 0) {
         return this.createEliminationResult(
           eliminations,
-          `Jellyfish: ${candidate} in rows ${rows.map((r) => r + 1).join(', ')} aligns in columns ${cols.map((c) => c + 1).join(', ')}`,
+          `Jellyfish: ${candidate} in rows ${rows.map((r) => r + 1).join(", ")} aligns in columns ${cols.map((c) => c + 1).join(", ")}`,
           patternCells,
         );
       }
@@ -104,11 +103,11 @@ export class Jellyfish extends BaseTechnique {
     candidate: number,
   ): TechniqueResult | null {
     // Find columns where the candidate appears in 2-4 cells
-    const eligibleCols: Array<{ col: number; rows: Set<number> }> = [];
+    const eligibleCols: { col: number; rows: Set<number> }[] = [];
 
     for (let col = 0; col < BOARD_SIZE; col++) {
       const cellsWithCandidate = grid.findCellsWithCandidate(
-        { type: 'column', index: col },
+        { type: "column", index: col },
         candidate,
       );
 
@@ -146,7 +145,7 @@ export class Jellyfish extends BaseTechnique {
       }
 
       // Find eliminations in the 4 rows (outside the pattern columns)
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (const row of rows) {
         for (let col = 0; col < BOARD_SIZE; col++) {
@@ -163,7 +162,7 @@ export class Jellyfish extends BaseTechnique {
       if (eliminations.length > 0) {
         return this.createEliminationResult(
           eliminations,
-          `Jellyfish: ${candidate} in columns ${cols.map((c) => c + 1).join(', ')} aligns in rows ${rows.map((r) => r + 1).join(', ')}`,
+          `Jellyfish: ${candidate} in columns ${cols.map((c) => c + 1).join(", ")} aligns in rows ${rows.map((r) => r + 1).join(", ")}`,
           patternCells,
         );
       }

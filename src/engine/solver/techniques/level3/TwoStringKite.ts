@@ -4,21 +4,20 @@
 // The two remaining cells (endpoints) force an elimination: any cell
 // that sees both endpoints can have the candidate removed.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 interface ConjugatePair {
-  unitType: 'row' | 'column';
+  unitType: "row" | "column";
   unitIndex: number;
   cells: [Position, Position];
 }
 
 export class TwoStringKite extends BaseTechnique {
-  readonly name = '2-String Kite';
+  readonly name = "2-String Kite";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Row and column conjugate pairs linked through a shared box';
+  readonly description = "Row and column conjugate pairs linked through a shared box";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -30,15 +29,15 @@ export class TwoStringKite extends BaseTechnique {
 
   private findTwoStringKite(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Collect row conjugate pairs
     const rowPairs: ConjugatePair[] = [];
     for (let row = 0; row < BOARD_SIZE; row++) {
-      const cells = grid.findCellsWithCandidate({ type: 'row', index: row }, candidate);
+      const cells = grid.findCellsWithCandidate({ type: "row", index: row }, candidate);
       if (cells.length === 2) {
         rowPairs.push({
-          unitType: 'row',
+          unitType: "row",
           unitIndex: row,
           cells: [cells[0], cells[1]],
         });
@@ -48,10 +47,10 @@ export class TwoStringKite extends BaseTechnique {
     // Collect column conjugate pairs
     const colPairs: ConjugatePair[] = [];
     for (let col = 0; col < BOARD_SIZE; col++) {
-      const cells = grid.findCellsWithCandidate({ type: 'column', index: col }, candidate);
+      const cells = grid.findCellsWithCandidate({ type: "column", index: col }, candidate);
       if (cells.length === 2) {
         colPairs.push({
-          unitType: 'column',
+          unitType: "column",
           unitIndex: col,
           cells: [cells[0], cells[1]],
         });
@@ -71,7 +70,10 @@ export class TwoStringKite extends BaseTechnique {
             if (rowCell.row === colCell.row && rowCell.col === colCell.col) continue;
 
             // Check if they share a box (this is the connection)
-            if (grid.getBoxIndex(rowCell.row, rowCell.col) !== grid.getBoxIndex(colCell.row, colCell.col)) {
+            if (
+              grid.getBoxIndex(rowCell.row, rowCell.col) !==
+              grid.getBoxIndex(colCell.row, colCell.col)
+            ) {
               continue;
             }
 
@@ -80,10 +82,11 @@ export class TwoStringKite extends BaseTechnique {
             const colEndpoint = colPair.cells[1 - ci];
 
             // Skip if the endpoints are the same cell
-            if (rowEndpoint.row === colEndpoint.row && rowEndpoint.col === colEndpoint.col) continue;
+            if (rowEndpoint.row === colEndpoint.row && rowEndpoint.col === colEndpoint.col)
+              continue;
 
             // Find eliminations: cells that see both endpoints and have the candidate
-            const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+            const eliminations: { position: Position; candidates: number[] }[] = [];
 
             for (let row = 0; row < BOARD_SIZE; row++) {
               for (let col = 0; col < BOARD_SIZE; col++) {
@@ -119,7 +122,7 @@ export class TwoStringKite extends BaseTechnique {
               return this.createEliminationResult(
                 eliminations,
                 `2-String Kite: ${candidate} in row ${rowPair.unitIndex + 1} and column ${colPair.unitIndex + 1} connected in box ${grid.getBoxIndex(rowCell.row, rowCell.col) + 1}`,
-                highlightCells
+                highlightCells,
               );
             }
           }

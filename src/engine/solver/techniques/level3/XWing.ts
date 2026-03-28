@@ -3,15 +3,14 @@
 // and those cells are in the same two columns, the candidate can be
 // eliminated from other cells in those columns (and vice versa for columns/rows).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class XWing extends BaseTechnique {
-  readonly name = 'X-Wing';
+  readonly name = "X-Wing";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Two rows have a candidate in exactly the same two columns';
+  readonly description = "Two rows have a candidate in exactly the same two columns";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Check for row-based X-Wings (eliminate from columns)
@@ -26,17 +25,14 @@ export class XWing extends BaseTechnique {
     return null;
   }
 
-  private findRowXWing(
-    grid: CandidateGridInterface,
-    candidate: number
-  ): TechniqueResult | null {
+  private findRowXWing(grid: CandidateGridInterface, candidate: number): TechniqueResult | null {
     // Find rows where the candidate appears in exactly 2 cells
-    const rowsWithTwoCells: Array<{ row: number; cols: number[] }> = [];
+    const rowsWithTwoCells: { row: number; cols: number[] }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       const cellsWithCandidate = grid.findCellsWithCandidate(
-        { type: 'row', index: row },
-        candidate
+        { type: "row", index: row },
+        candidate,
       );
 
       if (cellsWithCandidate.length === 2) {
@@ -54,10 +50,7 @@ export class XWing extends BaseTechnique {
 
     for (const [rowInfo1, rowInfo2] of rowPairs) {
       // Check if they share the same columns
-      if (
-        rowInfo1.cols[0] !== rowInfo2.cols[0] ||
-        rowInfo1.cols[1] !== rowInfo2.cols[1]
-      ) {
+      if (rowInfo1.cols[0] !== rowInfo2.cols[0] || rowInfo1.cols[1] !== rowInfo2.cols[1]) {
         continue;
       }
 
@@ -74,7 +67,7 @@ export class XWing extends BaseTechnique {
         { row: row2, col: col2 },
       ];
 
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       // Eliminate from column 1 (except the X-Wing cells)
       for (let row = 0; row < BOARD_SIZE; row++) {
@@ -102,7 +95,7 @@ export class XWing extends BaseTechnique {
         return this.createEliminationResult(
           eliminations,
           `X-Wing: ${candidate} in rows ${row1 + 1} and ${row2 + 1} aligns in columns ${col1 + 1} and ${col2 + 1}`,
-          xWingCells
+          xWingCells,
         );
       }
     }
@@ -110,17 +103,14 @@ export class XWing extends BaseTechnique {
     return null;
   }
 
-  private findColumnXWing(
-    grid: CandidateGridInterface,
-    candidate: number
-  ): TechniqueResult | null {
+  private findColumnXWing(grid: CandidateGridInterface, candidate: number): TechniqueResult | null {
     // Find columns where the candidate appears in exactly 2 cells
-    const colsWithTwoCells: Array<{ col: number; rows: number[] }> = [];
+    const colsWithTwoCells: { col: number; rows: number[] }[] = [];
 
     for (let col = 0; col < BOARD_SIZE; col++) {
       const cellsWithCandidate = grid.findCellsWithCandidate(
-        { type: 'column', index: col },
-        candidate
+        { type: "column", index: col },
+        candidate,
       );
 
       if (cellsWithCandidate.length === 2) {
@@ -138,10 +128,7 @@ export class XWing extends BaseTechnique {
 
     for (const [colInfo1, colInfo2] of colPairs) {
       // Check if they share the same rows
-      if (
-        colInfo1.rows[0] !== colInfo2.rows[0] ||
-        colInfo1.rows[1] !== colInfo2.rows[1]
-      ) {
+      if (colInfo1.rows[0] !== colInfo2.rows[0] || colInfo1.rows[1] !== colInfo2.rows[1]) {
         continue;
       }
 
@@ -158,7 +145,7 @@ export class XWing extends BaseTechnique {
         { row: row2, col: col2 },
       ];
 
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       // Eliminate from row 1 (except the X-Wing cells)
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -186,7 +173,7 @@ export class XWing extends BaseTechnique {
         return this.createEliminationResult(
           eliminations,
           `X-Wing: ${candidate} in columns ${col1 + 1} and ${col2 + 1} aligns in rows ${row1 + 1} and ${row2 + 1}`,
-          xWingCells
+          xWingCells,
         );
       }
     }

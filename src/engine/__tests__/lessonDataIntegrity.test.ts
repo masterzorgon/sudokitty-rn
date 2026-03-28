@@ -15,10 +15,10 @@
  * - every highlighted/elimination/placement coordinate must be within 0..8
  */
 
-import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
-import { TECHNIQUE_METADATA } from '../../data/techniqueMetadata';
-import { TECHNIQUE_IDS, CuratedPuzzle } from '../techniqueGenerator';
-import { TechniqueLevel } from '../solver/types';
+import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
+import { TECHNIQUE_METADATA } from "../../data/techniqueMetadata";
+import { TECHNIQUE_IDS, CuratedPuzzle } from "../techniqueGenerator";
+import { TechniqueLevel } from "../solver/types";
 
 // ============================================
 // Structural Validation Helpers
@@ -59,7 +59,7 @@ function hasValidPuzzleValues(grid: number[][]): boolean {
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const v = grid[r][c];
-      if (typeof v !== 'number' || v < 0 || v > 9 || v !== Math.floor(v)) return false;
+      if (typeof v !== "number" || v < 0 || v > 9 || v !== Math.floor(v)) return false;
     }
   }
   return true;
@@ -69,7 +69,7 @@ function hasValidSolutionValues(grid: number[][]): boolean {
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       const v = grid[r][c];
-      if (typeof v !== 'number' || v < 1 || v > 9 || v !== Math.floor(v)) return false;
+      if (typeof v !== "number" || v < 1 || v > 9 || v !== Math.floor(v)) return false;
     }
   }
   return true;
@@ -147,7 +147,10 @@ function techniqueResultMatchesRegistry(
   const info = TECHNIQUE_IDS[techniqueId];
   if (!info) return { ok: false, message: `Unknown technique id: ${techniqueId}` };
   if (info.name !== techniqueName) {
-    return { ok: false, message: `Name mismatch: registry="${info.name}" stored="${techniqueName}"` };
+    return {
+      ok: false,
+      message: `Name mismatch: registry="${info.name}" stored="${techniqueName}"`,
+    };
   }
   if (info.level !== level) {
     return { ok: false, message: `Level mismatch: registry=${info.level} stored=${level}` };
@@ -159,7 +162,7 @@ function techniqueResultMatchesRegistry(
 // Structural Integrity Tests
 // ============================================
 
-describe('Lesson data integrity', () => {
+describe("Lesson data integrity", () => {
   const techniqueIds = Object.keys(CURATED_PUZZLE_BANK);
 
   for (const techniqueId of techniqueIds) {
@@ -172,40 +175,40 @@ describe('Lesson data integrity', () => {
     describe(`${info.name} (${techniqueId})`, () => {
       puzzles.forEach((curated, index) => {
         describe(`puzzle ${index}`, () => {
-          test('puzzle shape is valid (9x9)', () => {
+          test("puzzle shape is valid (9x9)", () => {
             expect(is9x9Grid(curated.puzzle)).toBe(true);
           });
 
-          test('solution shape is valid (9x9)', () => {
+          test("solution shape is valid (9x9)", () => {
             expect(is9x9Grid(curated.solution)).toBe(true);
           });
 
-          test('puzzle values are in 0..9', () => {
+          test("puzzle values are in 0..9", () => {
             expect(hasValidPuzzleValues(curated.puzzle)).toBe(true);
           });
 
-          test('solution values are in 1..9 (no zeros)', () => {
+          test("solution values are in 1..9 (no zeros)", () => {
             expect(hasValidSolutionValues(curated.solution)).toBe(true);
           });
 
-          test('puzzle givens do not violate sudoku rules', () => {
+          test("puzzle givens do not violate sudoku rules", () => {
             expect(puzzleGivensNoDuplicates(curated.puzzle)).toBe(true);
           });
 
-          test('solution is a complete valid sudoku grid', () => {
+          test("solution is a complete valid sudoku grid", () => {
             expect(solutionIsCompleteValidSudoku(curated.solution)).toBe(true);
           });
 
-          test('puzzle givens match stored solution', () => {
+          test("puzzle givens match stored solution", () => {
             expect(puzzleGivensMatchSolution(curated.puzzle, curated.solution)).toBe(true);
           });
 
-          test('solution is not a placeholder copy of puzzle', () => {
+          test("solution is not a placeholder copy of puzzle", () => {
             const hasZeros = curated.solution.some((row) => row.some((v) => v === 0));
             expect(hasZeros).toBe(false);
           });
 
-          test('stored technique result metadata matches technique registry', () => {
+          test("stored technique result metadata matches technique registry", () => {
             const result = techniqueResultMatchesRegistry(
               techniqueId,
               curated.techniqueResult.techniqueName,
@@ -215,7 +218,7 @@ describe('Lesson data integrity', () => {
             if (!result.ok) throw new Error(result.message);
           });
 
-          test('stored coordinates are in bounds', () => {
+          test("stored coordinates are in bounds", () => {
             const result = allCoordinatesInBounds(curated);
             expect(result.ok).toBe(true);
             if (!result.ok) throw new Error(result.message);
@@ -230,8 +233,8 @@ describe('Lesson data integrity', () => {
 // Registry Consistency
 // ============================================
 
-describe('Registry consistency', () => {
-  test('all curated bank keys exist in TECHNIQUE_IDS', () => {
+describe("Registry consistency", () => {
+  test("all curated bank keys exist in TECHNIQUE_IDS", () => {
     const bankKeys = Object.keys(CURATED_PUZZLE_BANK);
     const ids = Object.keys(TECHNIQUE_IDS);
     for (const key of bankKeys) {
@@ -239,7 +242,7 @@ describe('Registry consistency', () => {
     }
   });
 
-  test('all TECHNIQUE_IDS have matching TECHNIQUE_METADATA', () => {
+  test("all TECHNIQUE_IDS have matching TECHNIQUE_METADATA", () => {
     for (const [id, info] of Object.entries(TECHNIQUE_IDS)) {
       const meta = TECHNIQUE_METADATA.find((m) => m.id === id);
       expect(meta).toBeDefined();
@@ -250,18 +253,18 @@ describe('Registry consistency', () => {
     }
   });
 
-  test('inventory: techniques with empty curated arrays', () => {
+  test("inventory: techniques with empty curated arrays", () => {
     const empty: string[] = [];
     for (const [id, puzzles] of Object.entries(CURATED_PUZZLE_BANK)) {
       if (!puzzles || puzzles.length === 0) empty.push(id);
     }
     expect(empty).toBeDefined();
     if (empty.length > 0) {
-      console.log('Techniques with no curated puzzles:', empty.join(', '));
+      console.log("Techniques with no curated puzzles:", empty.join(", "));
     }
   });
 
-  test('repair inventory: categorized list of broken vs absent', () => {
+  test("repair inventory: categorized list of broken vs absent", () => {
     const empty = Object.entries(CURATED_PUZZLE_BANK)
       .filter(([, puzzles]) => !puzzles || puzzles.length === 0)
       .map(([id]) => id);
@@ -273,28 +276,30 @@ describe('Registry consistency', () => {
     expect(withContent.length).toBeGreaterThan(0);
 
     const REMOVED_INVALID = [
-      'turbot-fish',
-      'empty-rectangle',
-      'sue-de-coq',
-      'simple-colors',
-      'franken-fish',
-      'mutant-fish',
-      'multi-colors',
-      'forcing-chain',
-      'almost-locked-sets',
-      'siamese-fish',
+      "turbot-fish",
+      "empty-rectangle",
+      "sue-de-coq",
+      "simple-colors",
+      "franken-fish",
+      "mutant-fish",
+      "multi-colors",
+      "forcing-chain",
+      "almost-locked-sets",
+      "siamese-fish",
     ];
-    const ALREADY_EMPTY = ['templates', 'forcing-net', 'kraken-fish', 'brute-force'];
+    const ALREADY_EMPTY = ["templates", "forcing-net", "kraken-fish", "brute-force"];
 
     const removed = empty.filter((id) => REMOVED_INVALID.includes(id));
     const neverHad = empty.filter((id) => ALREADY_EMPTY.includes(id));
-    const otherEmpty = empty.filter((id) => !REMOVED_INVALID.includes(id) && !ALREADY_EMPTY.includes(id));
+    const otherEmpty = empty.filter(
+      (id) => !REMOVED_INVALID.includes(id) && !ALREADY_EMPTY.includes(id),
+    );
 
     expect(removed.length + neverHad.length + otherEmpty.length).toBe(empty.length);
   });
 
-  test('inventory: techniques with curated content', () => {
-    const withContent: Array<{ id: string; count: number }> = [];
+  test("inventory: techniques with curated content", () => {
+    const withContent: { id: string; count: number }[] = [];
     for (const [id, puzzles] of Object.entries(CURATED_PUZZLE_BANK)) {
       if (puzzles && puzzles.length > 0) {
         withContent.push({ id, count: puzzles.length });

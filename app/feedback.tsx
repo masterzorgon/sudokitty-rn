@@ -1,7 +1,7 @@
 // Feedback screen for user feedback submission
 // Includes dropdown reason selector, name, email, message, and Resend integration
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -14,31 +14,27 @@ import {
   ActivityIndicator,
   Modal,
   FlatList,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
-import Constants from 'expo-constants';
-import * as Device from 'expo-device';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
-import { Pressable } from 'react-native';
+  Pressable,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import Constants from "expo-constants";
+import * as Device from "expo-device";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated";
 
-import { colors, useColors } from '../src/theme/colors';
-import { typography } from '../src/theme/typography';
-import { spacing, borderRadius } from '../src/theme';
-import { BackButton } from '../src/components/ui/BackButton';
-import { BottomActionBar } from '../src/components/ui/Layout';
-import { SkeuButton, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
-import { playFeedback } from '../src/utils/feedback';
-import { trackFeedbackSubmitted } from '../src/utils/analytics';
-import { supabase } from '../src/lib/supabase';
+import { colors, useColors } from "../src/theme/colors";
+import { typography } from "../src/theme/typography";
+import { spacing, borderRadius } from "../src/theme";
+import { BackButton } from "../src/components/ui/BackButton";
+import { BottomActionBar } from "../src/components/ui/Layout";
+import { SkeuButton, SKEU_VARIANTS } from "../src/components/ui/Skeuomorphic";
+import { playFeedback } from "../src/utils/feedback";
+import { trackFeedbackSubmitted } from "../src/utils/analytics";
+import { supabase } from "../src/lib/supabase";
 
 // Feedback categories
-type FeedbackCategory = 'issue' | 'suggestion' | 'compliment' | 'other';
+type FeedbackCategory = "issue" | "suggestion" | "compliment" | "other";
 
 interface CategoryOption {
   id: FeedbackCategory;
@@ -46,10 +42,10 @@ interface CategoryOption {
 }
 
 const CATEGORIES: CategoryOption[] = [
-  { id: 'issue', label: 'Issue / bug' },
-  { id: 'suggestion', label: 'Suggestion' },
-  { id: 'compliment', label: 'Compliment' },
-  { id: 'other', label: 'Other' },
+  { id: "issue", label: "Issue / bug" },
+  { id: "suggestion", label: "Suggestion" },
+  { id: "compliment", label: "Compliment" },
+  { id: "other", label: "Other" },
 ];
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -80,12 +76,12 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
 
   const handlePress = () => {
     if (disabled) return;
-    playFeedback('tap');
+    playFeedback("tap");
     setIsOpen(true);
   };
 
   const handleSelect = (option: CategoryOption) => {
-    playFeedback('tap');
+    playFeedback("tap");
     onSelect(option.id);
     setIsOpen(false);
   };
@@ -104,7 +100,7 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
         disabled={disabled}
       >
         <Text style={[styles.dropdownText, !selectedOption && styles.dropdownPlaceholder]}>
-          {selectedOption?.label || 'Select a reason'}
+          {selectedOption?.label || "Select a reason"}
         </Text>
         <Feather name="chevron-down" size={20} color={colors.textSecondary} />
       </AnimatedPressable>
@@ -132,14 +128,12 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
                   <Text
                     style={[
                       styles.modalOptionText,
-                      item.id === value && { color: c.accent, fontFamily: 'Pally-Bold' },
+                      item.id === value && { color: c.accent, fontFamily: "Pally-Bold" },
                     ]}
                   >
                     {item.label}
                   </Text>
-                  {item.id === value && (
-                    <Feather name="check" size={20} color={c.accent} />
-                  )}
+                  {item.id === value && <Feather name="check" size={20} color={c.accent} />}
                 </Pressable>
               )}
             />
@@ -153,10 +147,10 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
 export default function FeedbackScreen() {
   const c = useColors();
   const router = useRouter();
-  const [category, setCategory] = useState<FeedbackCategory>('issue');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [category, setCategory] = useState<FeedbackCategory>("issue");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validate email format
@@ -166,21 +160,16 @@ export default function FeedbackScreen() {
     return emailRegex.test(emailStr.trim());
   };
 
-  const canSubmit =
-    message.trim().length > 10 &&
-    name.trim().length > 0 &&
-    isValidEmail(email);
+  const canSubmit = message.trim().length > 10 && name.trim().length > 0 && isValidEmail(email);
 
   const getDeviceInfo = useCallback(() => {
-    const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+    const appVersion = Constants.expoConfig?.version ?? "1.0.0";
     const buildNumber =
-      Constants.expoConfig?.ios?.buildNumber ??
-      Constants.expoConfig?.android?.versionCode ??
-      '1';
+      Constants.expoConfig?.ios?.buildNumber ?? Constants.expoConfig?.android?.versionCode ?? "1";
     const osName = Platform.OS;
     const osVersion = Platform.Version;
-    const deviceModel = Device.modelName ?? 'Unknown';
-    const deviceBrand = Device.brand ?? 'Unknown';
+    const deviceModel = Device.modelName ?? "Unknown";
+    const deviceBrand = Device.brand ?? "Unknown";
 
     return {
       appVersion,
@@ -196,7 +185,7 @@ export default function FeedbackScreen() {
     if (!canSubmit || isSubmitting) return;
 
     setIsSubmitting(true);
-    playFeedback('tapHeavy');
+    playFeedback("tapHeavy");
 
     const deviceInfo = getDeviceInfo();
 
@@ -211,7 +200,7 @@ export default function FeedbackScreen() {
       };
 
       // Send via Supabase Edge Function → Resend
-      const { error: fnError } = await supabase.functions.invoke('send-feedback', {
+      const { error: fnError } = await supabase.functions.invoke("send-feedback", {
         body: feedbackPayload,
       });
 
@@ -222,33 +211,31 @@ export default function FeedbackScreen() {
 
       // Success
       Alert.alert(
-        'Thank you!',
-        'Your feedback has been sent. We really appreciate you taking the time to help us improve!',
+        "Thank you!",
+        "Your feedback has been sent. We really appreciate you taking the time to help us improve!",
         [
           {
-            text: 'OK',
+            text: "OK",
             onPress: () => router.back(),
           },
-        ]
+        ],
       );
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
-      Alert.alert(
-        'Oops!',
-        'Something went wrong while sending your feedback. Please try again.',
-        [{ text: 'OK' }]
-      );
+      console.error("Failed to submit feedback:", error);
+      Alert.alert("Oops!", "Something went wrong while sending your feedback. Please try again.", [
+        { text: "OK" },
+      ]);
     } finally {
       setIsSubmitting(false);
     }
   }, [canSubmit, isSubmitting, category, name, email, message, getDeviceInfo, router]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         {/* Header */}
         <View style={styles.header}>
@@ -278,8 +265,7 @@ export default function FeedbackScreen() {
           {/* Email Input */}
           <View style={styles.section}>
             <Text style={styles.label}>
-              Email address{' '}
-              <Text style={styles.labelOptional}>(optional)</Text>
+              Email address <Text style={styles.labelOptional}>(optional)</Text>
             </Text>
             <TextInput
               style={[
@@ -316,22 +302,15 @@ export default function FeedbackScreen() {
               maxLength={2000}
               editable={!isSubmitting}
             />
-            <Text style={styles.charCount}>
-              {message.length} / 2000 characters
-            </Text>
+            <Text style={styles.charCount}>{message.length} / 2000 characters</Text>
           </View>
 
           {/* Device Info Note */}
           <View style={[styles.infoNote, { backgroundColor: c.cellSelected }]}>
-            <Feather
-              name="info"
-              size={16}
-              color={colors.textSecondary}
-              style={styles.infoIcon}
-            />
+            <Feather name="info" size={16} color={colors.textSecondary} style={styles.infoIcon} />
             <Text style={styles.infoText}>
-              We'll include device info (app version, OS) to help us understand
-              and fix any issues.
+              We&apos;ll include device info (app version, OS) to help us understand and fix any
+              issues.
             </Text>
           </View>
         </ScrollView>
@@ -346,7 +325,7 @@ export default function FeedbackScreen() {
           ) : (
             <SkeuButton
               onPress={handleSubmit}
-              variant={canSubmit ? 'primary' : 'disabled'}
+              variant={canSubmit ? "primary" : "disabled"}
               borderRadius={borderRadius.lg}
               disabled={!canSubmit}
               feedbackId="tapHeavy"
@@ -355,7 +334,12 @@ export default function FeedbackScreen() {
               testID="send-feedback-button"
               showHighlight={false}
             >
-              <Text style={[styles.ctaButtonLabel, { color: SKEU_VARIANTS[canSubmit ? 'primary' : 'disabled'].textColor }]}>
+              <Text
+                style={[
+                  styles.ctaButtonLabel,
+                  { color: SKEU_VARIANTS[canSubmit ? "primary" : "disabled"].textColor },
+                ]}
+              >
                 Send Feedback
               </Text>
             </SkeuButton>
@@ -374,9 +358,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
   },
@@ -405,13 +389,13 @@ const styles = StyleSheet.create({
   labelOptional: {
     ...typography.caption,
     color: colors.textLight,
-    fontFamily: 'Pally-Regular',
+    fontFamily: "Pally-Regular",
   },
   // Dropdown styles
   dropdown: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     backgroundColor: colors.cardBackground,
     borderRadius: borderRadius.md,
     padding: spacing.md,
@@ -427,18 +411,18 @@ const styles = StyleSheet.create({
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
     padding: spacing.xl,
   },
   modalContent: {
     backgroundColor: colors.cardBackground,
     borderRadius: borderRadius.lg,
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
     maxHeight: 400,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   modalTitle: {
     ...typography.headline,
@@ -448,9 +432,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.gridLine,
   },
   modalOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: spacing.lg,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.gridLine,
@@ -491,12 +475,12 @@ const styles = StyleSheet.create({
   charCount: {
     ...typography.small,
     color: colors.textLight,
-    textAlign: 'right',
+    textAlign: "right",
     marginTop: spacing.xs,
   },
   infoNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.lg,
@@ -515,9 +499,9 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
   },
   loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: spacing.lg,
     gap: spacing.sm,
   },
@@ -528,12 +512,12 @@ const styles = StyleSheet.create({
   ctaButtonContent: {
     paddingVertical: 15,
     paddingHorizontal: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   ctaButtonLabel: {
     ...typography.button,
-    fontFamily: 'Pally-Bold',
+    fontFamily: "Pally-Bold",
     fontSize: 17,
   },
 });

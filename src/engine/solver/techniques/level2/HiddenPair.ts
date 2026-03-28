@@ -2,23 +2,22 @@
 // When two candidates appear in only two cells of a unit,
 // all other candidates can be eliminated from those two cells.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class HiddenPair extends BaseTechnique {
-  readonly name = 'Hidden Pair';
+  readonly name = "Hidden Pair";
   readonly level: TechniqueLevel = 2;
-  readonly description = 'Two candidates appear in only two cells of a unit';
+  readonly description = "Two candidates appear in only two cells of a unit";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Check all units
     const units: Unit[] = [];
     for (let i = 0; i < BOARD_SIZE; i++) {
-      units.push({ type: 'row', index: i });
-      units.push({ type: 'column', index: i });
-      units.push({ type: 'box', index: i });
+      units.push({ type: "row", index: i });
+      units.push({ type: "column", index: i });
+      units.push({ type: "box", index: i });
     }
 
     for (const unit of units) {
@@ -29,10 +28,7 @@ export class HiddenPair extends BaseTechnique {
     return null;
   }
 
-  private findHiddenPairInUnit(
-    grid: CandidateGridInterface,
-    unit: Unit
-  ): TechniqueResult | null {
+  private findHiddenPairInUnit(grid: CandidateGridInterface, unit: Unit): TechniqueResult | null {
     // Find all candidates and their positions in this unit
     const candidatePositions: Map<number, Position[]> = new Map();
 
@@ -65,11 +61,11 @@ export class HiddenPair extends BaseTechnique {
       const pairCandidates = [cand1, cand2];
 
       // Find other candidates to eliminate from these two cells
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (const cell of [cell1, cell2]) {
         const otherCandidates = [...grid.getCandidates(cell.row, cell.col)].filter(
-          (c) => !pairCandidates.includes(c)
+          (c) => !pairCandidates.includes(c),
         );
         if (otherCandidates.length > 0) {
           eliminations.push({ position: cell, candidates: otherCandidates });
@@ -82,7 +78,7 @@ export class HiddenPair extends BaseTechnique {
         return this.createEliminationResult(
           eliminations,
           `${this.formatCandidates(pairCandidates)} form a hidden pair in ${this.formatPosition(cell1)} and ${this.formatPosition(cell2)} in ${unitName}`,
-          [cell1, cell2]
+          [cell1, cell2],
         );
       }
     }
@@ -102,11 +98,11 @@ export class HiddenPair extends BaseTechnique {
 
   private getUnitName(unit: Unit): string {
     switch (unit.type) {
-      case 'row':
+      case "row":
         return `row ${unit.index + 1}`;
-      case 'column':
+      case "column":
         return `column ${unit.index + 1}`;
-      case 'box':
+      case "box":
         return `box ${unit.index + 1}`;
     }
   }

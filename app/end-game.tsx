@@ -1,22 +1,21 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useCallback } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
-import { useColors } from '../src/theme/colors';
-import { typography, fontFamilies } from '../src/theme/typography';
-import { spacing, borderRadius } from '../src/theme';
-import { ConfettiCannon } from '../src/components/ui/ConfettiCannon';
-import { SkeuButton, SkeuCard, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
-import { ScreenBackground, BottomActionBar } from '../src/components/ui/Layout';
-import { showRewardedAd } from '../src/services/adService';
-import { showInterstitialIfReady } from '../src/services/adService';
-import { useGameStore } from '../src/stores/gameStore';
-import { useEffectivePremium } from '../src/stores/premiumStore';
-import { formatTime } from '../src/utils/formatTime';
-import { playFeedback } from '../src/utils/feedback';
+import { useColors } from "../src/theme/colors";
+import { typography, fontFamilies } from "../src/theme/typography";
+import { spacing, borderRadius } from "../src/theme";
+import { ConfettiCannon } from "../src/components/ui/ConfettiCannon";
+import { SkeuButton, SkeuCard, SKEU_VARIANTS } from "../src/components/ui/Skeuomorphic";
+import { ScreenBackground, BottomActionBar } from "../src/components/ui/Layout";
+import { showRewardedAd, showInterstitialIfReady } from "../src/services/adService";
+import { useGameStore } from "../src/stores/gameStore";
+import { useEffectivePremium } from "../src/stores/premiumStore";
+import { formatTime } from "../src/utils/formatTime";
+import { playFeedback } from "../src/utils/feedback";
 import {
   Difficulty,
   MAX_MISTAKES,
@@ -25,19 +24,25 @@ import {
   DAILY_DIFFICULTY_SCHEDULE,
   DAILY_MOCHI_POINTS,
   getTodayDateString,
-} from '../src/engine/types';
-import { DIFFICULTY_XP_MULTIPLIER } from '../src/constants/xp';
-import MochiPointIcon from '../assets/images/icons/mochi-point.svg';
+} from "../src/engine/types";
+import { DIFFICULTY_XP_MULTIPLIER } from "../src/constants/xp";
+import MochiPointIcon from "../assets/images/icons/mochi-point.svg";
 
-const MochiWowImg = require('../assets/images/mochi/mochi-wow.png');
-const MochiQuitImg = require('../assets/images/mochi/mochi-quit.png');
+const MochiWowImg = require("../assets/images/mochi/mochi-wow.png");
+const MochiQuitImg = require("../assets/images/mochi/mochi-quit.png");
 
 function formatXpMultiplier(mult: number): string {
   if (Number.isInteger(mult)) return String(mult);
   return String(mult);
 }
 
-function StatRow({ label, value, icon, iconComponent, iconColor }: {
+function StatRow({
+  label,
+  value,
+  icon,
+  iconComponent,
+  iconColor,
+}: {
   label: string;
   value: string;
   icon?: string;
@@ -48,7 +53,8 @@ function StatRow({ label, value, icon, iconComponent, iconColor }: {
   return (
     <View style={statStyles.row}>
       <View style={statStyles.labelRow}>
-        {iconComponent ?? (icon && <Ionicons name={icon as any} size={16} color={iconColor ?? c.textSecondary} />)}
+        {iconComponent ??
+          (icon && <Ionicons name={icon as any} size={16} color={iconColor ?? c.textSecondary} />)}
         <Text style={[statStyles.label, { color: c.textSecondary }]}>{label}</Text>
       </View>
       <Text style={[statStyles.value, { color: c.textPrimary }]}>{value}</Text>
@@ -61,18 +67,18 @@ export default function EndGameScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
-  const s = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
+  const s = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
 
-  const status = (s(params.status) || 'won') as 'won' | 'lost';
-  const difficulty = (s(params.difficulty) || 'easy') as Difficulty;
+  const status = (s(params.status) || "won") as "won" | "lost";
+  const difficulty = (s(params.difficulty) || "easy") as Difficulty;
   const timeElapsed = parseInt(s(params.timeElapsed), 10);
   const mistakeCount = parseInt(s(params.mistakeCount), 10);
   const hintsUsed = parseInt(s(params.hintsUsed), 10);
-  const isDaily = s(params.isDaily) === 'true';
+  const isDaily = s(params.isDaily) === "true";
   const rawXpEarned = parseInt(s(params.xpEarned), 10);
   const pointsThisGame = Number.isFinite(rawXpEarned) ? rawXpEarned : 0;
 
-  const isWon = status === 'won';
+  const isWon = status === "won";
   const canContinue = useGameStore((s) => s.canContinue);
   const continueGame = useGameStore((s) => s.continueGame);
   const resetGame = useGameStore((s) => s.resetGame);
@@ -90,9 +96,8 @@ export default function EndGameScreen() {
       ? DAILY_MOCHI_POINTS[difficulty]
       : calculateMochiReward(difficulty, timeElapsed)
     : 0;
-  const rewardBreakdown = isWon && !isDaily
-    ? calculateMochiRewardBreakdown(difficulty, timeElapsed)
-    : null;
+  const rewardBreakdown =
+    isWon && !isDaily ? calculateMochiRewardBreakdown(difficulty, timeElapsed) : null;
 
   const livesRemaining = MAX_MISTAKES - mistakeCount;
   const mochisCouldHaveWon = !isWon
@@ -104,7 +109,7 @@ export default function EndGameScreen() {
   const showContinue = !isWon && canContinue();
 
   const handleContinue = useCallback(async () => {
-    playFeedback('tap');
+    playFeedback("tap");
     const earned = await showRewardedAd();
     if (earned) {
       continueGame();
@@ -113,7 +118,7 @@ export default function EndGameScreen() {
   }, [continueGame, router]);
 
   const handlePlayAgain = useCallback(async () => {
-    playFeedback('tap');
+    playFeedback("tap");
     if (!isPremium) {
       await showInterstitialIfReady();
     }
@@ -127,13 +132,13 @@ export default function EndGameScreen() {
     }
     router.dismissAll();
     router.push({
-      pathname: '/game',
+      pathname: "/game",
       params: { difficulty, isDaily: String(isDaily) },
     });
   }, [difficulty, isDaily, isPremium, router]);
 
   const handleGoHome = useCallback(() => {
-    playFeedback('tap');
+    playFeedback("tap");
     resetGame();
     router.dismissAll();
   }, [resetGame, router]);
@@ -145,7 +150,7 @@ export default function EndGameScreen() {
       <View style={styles.content}>
         {/* Title */}
         <Text style={[styles.title, { color: c.textPrimary }]}>
-          {isWon ? 'Purrfect!' : 'Game Over'}
+          {isWon ? "Purrfect!" : "Game Over"}
         </Text>
 
         {/* Mochi Cat Image */}
@@ -218,57 +223,51 @@ export default function EndGameScreen() {
         {/* Action Buttons */}
         <BottomActionBar style={styles.actionsBar}>
           <View style={styles.actions}>
-          {showContinue && (
-            <SkeuButton
-              onPress={handleContinue}
-              variant="primary"
-              borderRadius={borderRadius.lg}
-              showHighlight={false}
-              style={styles.fullWidthBtn}
-              contentStyle={styles.btnContent}
-            >
-              <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
-                Watch Ad to Continue Game
-              </Text>
-            </SkeuButton>
-          )}
+            {showContinue && (
+              <SkeuButton
+                onPress={handleContinue}
+                variant="primary"
+                borderRadius={borderRadius.lg}
+                showHighlight={false}
+                style={styles.fullWidthBtn}
+                contentStyle={styles.btnContent}
+              >
+                <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
+                  Watch Ad to Continue Game
+                </Text>
+              </SkeuButton>
+            )}
 
-          {isDaily && isWon ? (
-            <SkeuButton
-              onPress={handleGoHome}
-              variant="secondary"
-              borderRadius={borderRadius.lg}
-              style={styles.fullWidthBtn}
-              contentStyle={styles.btnContent}
-            >
-              <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
-                Back to Daily
-              </Text>
-            </SkeuButton>
-          ) : (
-            <SkeuButton
-              onPress={handlePlayAgain}
-              variant="neutral"
-              borderRadius={borderRadius.lg}
-              style={styles.fullWidthBtn}
-              contentStyle={styles.btnContent}
-            >
-              <Text style={[styles.btnText, { color: SKEU_VARIANTS.neutral.textColor }]}>
-                New Game
-              </Text>
-            </SkeuButton>
-          )}
+            {isDaily && isWon ? (
+              <SkeuButton
+                onPress={handleGoHome}
+                variant="secondary"
+                borderRadius={borderRadius.lg}
+                style={styles.fullWidthBtn}
+                contentStyle={styles.btnContent}
+              >
+                <Text style={[styles.btnText, { color: SKEU_VARIANTS.secondary.textColor }]}>
+                  Back to Daily
+                </Text>
+              </SkeuButton>
+            ) : (
+              <SkeuButton
+                onPress={handlePlayAgain}
+                variant="neutral"
+                borderRadius={borderRadius.lg}
+                style={styles.fullWidthBtn}
+                contentStyle={styles.btnContent}
+              >
+                <Text style={[styles.btnText, { color: SKEU_VARIANTS.neutral.textColor }]}>
+                  New Game
+                </Text>
+              </SkeuButton>
+            )}
 
-          <Pressable
-            style={styles.returnHomeRow}
-            onPress={handleGoHome}
-            hitSlop={12}
-          >
-            <Ionicons name="arrow-back" size={22} color={c.textSecondary} />
-            <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>
-              Return Home
-            </Text>
-          </Pressable>
+            <Pressable style={styles.returnHomeRow} onPress={handleGoHome} hitSlop={12}>
+              <Ionicons name="arrow-back" size={22} color={c.textSecondary} />
+              <Text style={[styles.returnHomeText, { color: c.textSecondary }]}>Return Home</Text>
+            </Pressable>
           </View>
         </BottomActionBar>
       </View>
@@ -289,17 +288,17 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.largeTitle,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: spacing.md,
   },
   mochiImage: {
     width: 140,
     height: 140,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: spacing.xl,
   },
   statsCardOuter: {
-    width: '100%',
+    width: "100%",
   },
   statsCard: {
     padding: spacing.lg,
@@ -322,22 +321,22 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
   },
   fullWidthBtn: {
-    alignSelf: 'stretch',
-    width: '100%',
+    alignSelf: "stretch",
+    width: "100%",
   },
   btnContent: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   btnText: {
     ...typography.button,
   },
   returnHomeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: spacing.xs,
     paddingVertical: spacing.sm,
   },
@@ -349,14 +348,14 @@ const styles = StyleSheet.create({
 
 const statStyles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: spacing.sm,
   },
   labelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
     flexShrink: 0,
   },
@@ -370,6 +369,6 @@ const statStyles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     flexShrink: 1,
-    textAlign: 'right',
+    textAlign: "right",
   },
 });

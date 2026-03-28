@@ -8,12 +8,12 @@
  * - Stored placements match solver result (for placement techniques)
  */
 
-import { CandidateGrid } from '../solver/CandidateGrid';
-import { ALL_TECHNIQUES } from '../solver/techniques';
-import { TechniqueLevel, TechniqueResult, Elimination, Placement } from '../solver/types';
-import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
-import { TECHNIQUE_IDS, CuratedPuzzle } from '../techniqueGenerator';
-import { Position } from '../types';
+import { CandidateGrid } from "../solver/CandidateGrid";
+import { ALL_TECHNIQUES } from "../solver/techniques";
+import { TechniqueLevel, TechniqueResult, Elimination, Placement } from "../solver/types";
+import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
+import { TECHNIQUE_IDS, CuratedPuzzle } from "../techniqueGenerator";
+import { Position } from "../types";
 
 // ============================================
 // Technique Comparison Mode
@@ -21,46 +21,46 @@ import { Position } from '../types';
 // Strict: exact match (placement techniques, deterministic)
 // Lenient: stored ⊆ solver or overlap (fish, wings, etc. - solver may find different instance)
 
-const TECHNIQUE_COMPARISON_MODE: Record<string, 'strict' | 'lenient'> = {
-  'Naked Single': 'strict',
-  'Hidden Single': 'strict',
-  'Naked Pair': 'lenient',
-  'Hidden Pair': 'lenient',
-  'Pointing Pair': 'lenient',
-  'Box/Line Reduction': 'lenient',
-  'Naked Triple': 'lenient',
-  'Hidden Triple': 'lenient',
-  'X-Wing': 'lenient',
-  'Finned Fish': 'lenient',
-  'Skyscraper': 'lenient',
-  '2-String Kite': 'lenient',
-  'Turbot Fish': 'lenient',
-  'Empty Rectangle': 'lenient',
-  'Sue de Coq': 'lenient',
-  'Simple Colors': 'lenient',
-  'Swordfish': 'lenient',
-  'Jellyfish': 'lenient',
-  'XY-Wing': 'lenient',
-  'XYZ-Wing': 'lenient',
-  'WXYZ-Wing': 'lenient',
-  'Unique Rectangle': 'lenient',
-  'Avoidable Rectangle': 'lenient',
-  'BUG': 'lenient',
-  'Almost Locked Sets': 'lenient',
-  'Alternating Inference Chains': 'lenient',
-  'Franken Fish': 'lenient',
-  'Mutant Fish': 'lenient',
-  'Siamese Fish': 'lenient',
-  'Multi Colors': 'lenient',
-  'Templates': 'lenient',
-  'Forcing Chain': 'lenient',
-  'Forcing Net': 'lenient',
-  'Kraken Fish': 'lenient',
-  'Brute Force': 'lenient',
+const TECHNIQUE_COMPARISON_MODE: Record<string, "strict" | "lenient"> = {
+  "Naked Single": "strict",
+  "Hidden Single": "strict",
+  "Naked Pair": "lenient",
+  "Hidden Pair": "lenient",
+  "Pointing Pair": "lenient",
+  "Box/Line Reduction": "lenient",
+  "Naked Triple": "lenient",
+  "Hidden Triple": "lenient",
+  "X-Wing": "lenient",
+  "Finned Fish": "lenient",
+  Skyscraper: "lenient",
+  "2-String Kite": "lenient",
+  "Turbot Fish": "lenient",
+  "Empty Rectangle": "lenient",
+  "Sue de Coq": "lenient",
+  "Simple Colors": "lenient",
+  Swordfish: "lenient",
+  Jellyfish: "lenient",
+  "XY-Wing": "lenient",
+  "XYZ-Wing": "lenient",
+  "WXYZ-Wing": "lenient",
+  "Unique Rectangle": "lenient",
+  "Avoidable Rectangle": "lenient",
+  BUG: "lenient",
+  "Almost Locked Sets": "lenient",
+  "Alternating Inference Chains": "lenient",
+  "Franken Fish": "lenient",
+  "Mutant Fish": "lenient",
+  "Siamese Fish": "lenient",
+  "Multi Colors": "lenient",
+  Templates: "lenient",
+  "Forcing Chain": "lenient",
+  "Forcing Net": "lenient",
+  "Kraken Fish": "lenient",
+  "Brute Force": "lenient",
 };
 
-function getComparisonMode(techniqueName: string): 'strict' | 'lenient' {
-  return TECHNIQUE_COMPARISON_MODE[techniqueName] ?? 'lenient';
+function getComparisonMode(techniqueName: string): "strict" | "lenient" {
+  return TECHNIQUE_COMPARISON_MODE[techniqueName] ?? "lenient";
 }
 
 // ============================================
@@ -76,12 +76,12 @@ function toPosKey(p: PositionLike): string {
 function highlightCellsMatch(
   stored: PositionLike[],
   solver: Position[],
-  mode: 'strict' | 'lenient',
+  mode: "strict" | "lenient",
 ): boolean {
   const storedSet = new Set(stored.map(toPosKey));
   const solverSet = new Set(solver.map(toPosKey));
 
-  if (mode === 'strict') {
+  if (mode === "strict") {
     if (storedSet.size !== solverSet.size) return false;
     for (const k of storedSet) if (!solverSet.has(k)) return false;
     return true;
@@ -95,9 +95,9 @@ function highlightCellsMatch(
 }
 
 function eliminationSetsMatch(
-  stored: Array<{ position: PositionLike; candidates: number[] }>,
+  stored: { position: PositionLike; candidates: number[] }[],
   solver: Elimination[],
-  mode: 'strict' | 'lenient',
+  mode: "strict" | "lenient",
 ): boolean {
   const solverSet = new Set<string>();
   for (const e of solver) {
@@ -118,25 +118,23 @@ function eliminationSetsMatch(
 
   for (const k of storedSet) {
     if (!solverSet.has(k)) {
-      if (mode === 'strict') return false;
+      if (mode === "strict") return false;
       // Lenient: require at least one stored elimination in solver (overlap)
       const hasOverlap = stored.some((s) =>
-        s.candidates.some((c) =>
-          solverSet.has(`${s.position.row}-${s.position.col}-${c}`),
-        ),
+        s.candidates.some((c) => solverSet.has(`${s.position.row}-${s.position.col}-${c}`)),
       );
       return hasOverlap;
     }
   }
 
-  if (mode === 'strict') {
+  if (mode === "strict") {
     return storedSet.size === solverSet.size;
   }
   return true;
 }
 
 function placementSetsMatch(
-  stored: Array<{ position: PositionLike; value: number }>,
+  stored: { position: PositionLike; value: number }[],
   solver: Placement[],
 ): boolean {
   if (stored.length !== solver.length) return false;
@@ -150,10 +148,7 @@ function placementSetsMatch(
 // Solver Result Retrieval
 // ============================================
 
-function prepareGridForTechnique(
-  puzzle: number[][],
-  targetLevel: TechniqueLevel,
-): CandidateGrid {
+function prepareGridForTechnique(puzzle: number[][], targetLevel: TechniqueLevel): CandidateGrid {
   const grid = new CandidateGrid(puzzle);
   const simpler = ALL_TECHNIQUES.filter((t) => t.level < targetLevel);
 
@@ -201,7 +196,7 @@ function getSolverResult(
 // Tests
 // ============================================
 
-describe('Technique result verification (Phase 2)', () => {
+describe("Technique result verification (Phase 2)", () => {
   const techniqueIds = Object.keys(CURATED_PUZZLE_BANK);
 
   for (const techniqueId of techniqueIds) {
@@ -213,12 +208,8 @@ describe('Technique result verification (Phase 2)', () => {
     describe(`${info.name} (${techniqueId})`, () => {
       puzzles.forEach((curated: CuratedPuzzle, index: number) => {
         describe(`puzzle ${index}`, () => {
-          test('target technique applies at puzzle state', () => {
-            const solverResult = getSolverResult(
-              curated.puzzle,
-              info.name,
-              info.level,
-            );
+          test("target technique applies at puzzle state", () => {
+            const solverResult = getSolverResult(curated.puzzle, info.name, info.level);
             expect(solverResult).not.toBeNull();
             if (!solverResult) {
               throw new Error(
@@ -230,12 +221,8 @@ describe('Technique result verification (Phase 2)', () => {
             expect(solverResult.techniqueName).toBe(info.name);
           });
 
-          test('stored result matches solver result', () => {
-            const solverResult = getSolverResult(
-              curated.puzzle,
-              info.name,
-              info.level,
-            );
+          test("stored result matches solver result", () => {
+            const solverResult = getSolverResult(curated.puzzle, info.name, info.level);
             if (!solverResult) {
               throw new Error(
                 `[${techniqueId}] puzzle ${index}: cannot verify — solver could not find technique`,
@@ -256,7 +243,7 @@ describe('Technique result verification (Phase 2)', () => {
               mode,
             );
 
-            expect(highlightsOk || (mode === 'lenient' && eliminationsOk)).toBe(true);
+            expect(highlightsOk || (mode === "lenient" && eliminationsOk)).toBe(true);
 
             expect(eliminationsOk).toBe(true);
 

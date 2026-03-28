@@ -1,18 +1,18 @@
 // Techniques list screen - Browse and select techniques to learn
 // Grouped by difficulty: Beginner, Intermediate, Advanced, Expert
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { Feather, Ionicons } from "@expo/vector-icons";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 
-import { colors, useColors } from '../../src/theme/colors';
-import { typography } from '../../src/theme/typography';
-import { spacing, borderRadius } from '../../src/theme';
-import { BackButton } from '../../src/components/ui/BackButton';
-import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
+import { colors, useColors } from "../../src/theme/colors";
+import { typography } from "../../src/theme/typography";
+import { spacing, borderRadius } from "../../src/theme";
+import { BackButton } from "../../src/components/ui/BackButton";
+import { StoreItemRow } from "../../src/components/ui/StoreItemRow";
 import {
   getTechniquesGroupedByCategory,
   TechniqueMetadata,
@@ -20,17 +20,14 @@ import {
   CATEGORY_COLORS,
   TECHNIQUE_METADATA,
   isTechniqueLessonVisible,
-} from '../../src/data/techniqueMetadata';
-import {
-  useTechniqueProgress,
-  useCompletionCount,
-} from '../../src/stores/techniqueProgressStore';
-import { playFeedback } from '../../src/utils/feedback';
-import { trackPaywallOpened } from '../../src/utils/analytics';
-import { useEffectivePremium } from '../../src/stores/premiumStore';
-import { presentPaywall } from '../../src/lib/revenueCat';
-import { getTechniqueMetadata } from '../../src/data/techniqueMetadata';
-import { CTABannerCarousel } from '../../src/components/ui/CTABannerCarousel';
+  getTechniqueMetadata,
+} from "../../src/data/techniqueMetadata";
+import { useTechniqueProgress, useCompletionCount } from "../../src/stores/techniqueProgressStore";
+import { playFeedback } from "../../src/utils/feedback";
+import { trackPaywallOpened } from "../../src/utils/analytics";
+import { useEffectivePremium } from "../../src/stores/premiumStore";
+import { presentPaywall } from "../../src/lib/revenueCat";
+import { CTABannerCarousel } from "../../src/components/ui/CTABannerCarousel";
 
 // ============================================
 // Technique Card Component
@@ -57,9 +54,7 @@ function TechniqueCard({
     </View>
   );
 
-  const subtitle = !technique.hasSolver
-    ? 'Coming soon'
-    : technique.shortDescription;
+  const subtitle = !technique.hasSolver ? "Coming soon" : technique.shortDescription;
 
   const trailing = !technique.hasSolver ? (
     <View style={styles.trailingRow}>
@@ -75,9 +70,9 @@ function TechniqueCard({
           {[1, 2, 3].map((starNum) => (
             <Ionicons
               key={starNum}
-              name={starNum <= progress.findSuccesses ? 'star' : 'star-outline'}
+              name={starNum <= progress.findSuccesses ? "star" : "star-outline"}
               size={14}
-              color={starNum <= progress.findSuccesses ? '#FFD700' : c.textSecondary}
+              color={starNum <= progress.findSuccesses ? "#FFD700" : c.textSecondary}
             />
           ))}
         </View>
@@ -123,10 +118,7 @@ function CategorySection({
   const isEmpty = techniques.length === 0;
 
   return (
-    <Animated.View
-      entering={FadeIn.delay(sectionIndex * 60).duration(300)}
-      style={styles.section}
-    >
+    <Animated.View entering={FadeIn.delay(sectionIndex * 60).duration(300)} style={styles.section}>
       {/* Section header */}
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{category}</Text>
@@ -172,20 +164,20 @@ export default function TechniquesListScreen() {
     const meta = getTechniqueMetadata(techniqueId);
     // Gate level 3-4 techniques behind premium
     if (!isPremium && meta && meta.level >= 2) {
-      playFeedback('tap');
-      trackPaywallOpened('technique_card');
+      playFeedback("tap");
+      trackPaywallOpened("technique_card");
       await presentPaywall();
       return;
     }
-    playFeedback('tap');
+    playFeedback("tap");
     router.push({
-      pathname: '/techniques/[id]',
+      pathname: "/techniques/[id]",
       params: { id: techniqueId },
     });
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       {/* Header */}
       <View style={styles.header}>
         <BackButton />
@@ -204,7 +196,7 @@ export default function TechniquesListScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <CTABannerCarousel promos={['techniques']} />
+        <CTABannerCarousel promos={["techniques"]} />
 
         {groups.map((group, sectionIndex) => (
           <CategorySection
@@ -234,8 +226,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
@@ -244,7 +236,7 @@ const styles = StyleSheet.create({
   },
   headerCenter: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   headerTitle: {
     ...typography.headline,
@@ -280,16 +272,16 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   trailingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
   },
   starsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 2,
   },
   comingSoonPill: {
@@ -299,7 +291,7 @@ const styles = StyleSheet.create({
   },
   comingSoonText: {
     fontSize: 13,
-    fontFamily: 'Pally-Regular',
+    fontFamily: "Pally-Regular",
   },
   emptySection: {
     paddingVertical: spacing.sm,
@@ -307,8 +299,8 @@ const styles = StyleSheet.create({
   },
   emptySectionText: {
     fontSize: 12,
-    fontFamily: 'Pally-Medium',
+    fontFamily: "Pally-Medium",
     color: colors.textLight,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });

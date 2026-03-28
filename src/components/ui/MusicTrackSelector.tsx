@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
   PanResponder,
   type GestureResponderEvent,
   type PanResponderGestureState,
-} from 'react-native';
+} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,20 +13,26 @@ import Animated, {
   Easing,
   runOnJS,
   type SharedValue,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { BACKING_TRACKS, type BackingTrackDef } from '../../constants/backingTracks';
-import { useOwnedTracksStore } from '../../stores/ownedTracksStore';
-import { useMusicEnabled } from '../../stores/settingsStore';
-import * as musicCoordinator from '../../services/musicCoordinator';
-import { playFeedback } from '../../utils/feedback';
-import { spacing } from '../../theme';
-import { swipeGesture } from '../../theme/animations';
-import { MusicTrackCard } from './MusicTrackCard';
+import { BACKING_TRACKS, type BackingTrackDef } from "../../constants/backingTracks";
+import { useOwnedTracksStore } from "../../stores/ownedTracksStore";
+import { useMusicEnabled } from "../../stores/settingsStore";
+import * as musicCoordinator from "../../services/musicCoordinator";
+import { playFeedback } from "../../utils/feedback";
+import { spacing } from "../../theme";
+import { swipeGesture } from "../../theme/animations";
+import { MusicTrackCard } from "./MusicTrackCard";
 
 const PEEK_OFFSET = 8;
 const SCALE_STEP = 0.03;
-const { threshold: SWIPE_THRESHOLD, velocityThreshold: VELOCITY_THRESHOLD, offscreenX: OFFSCREEN_X, frictionPower: FRICTION_POWER, frictionScale: FRICTION_SCALE } = swipeGesture;
+const {
+  threshold: SWIPE_THRESHOLD,
+  velocityThreshold: VELOCITY_THRESHOLD,
+  offscreenX: OFFSCREEN_X,
+  frictionPower: FRICTION_POWER,
+  frictionScale: FRICTION_SCALE,
+} = swipeGesture;
 const RANK_ANIM_DURATION = 250;
 
 function StackedTrackCard({
@@ -120,6 +126,13 @@ export function MusicTrackSelector() {
   const [rotation, setRotation] = useState(initialRotation);
   const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
 
+  const rotatedTracks = useMemo(() => {
+    if (ownedTracks.length === 0) return [];
+    const arr = [...ownedTracks];
+    for (let i = 0; i < rotation % ownedTracks.length; i++) arr.push(arr.shift()!);
+    return arr;
+  }, [ownedTracks, rotation]);
+
   const dragX = useSharedValue(0);
   const rotationSV = useSharedValue(0);
   const swiping = useRef(false);
@@ -131,7 +144,7 @@ export function MusicTrackSelector() {
   }, []);
 
   const advanceState = useCallback(() => {
-    playFeedback('carouselSwipe');
+    playFeedback("carouselSwipe");
     setRotation((prev) => prev + 1);
     swiping.current = false;
   }, []);
@@ -144,41 +157,43 @@ export function MusicTrackSelector() {
     swiping.current = false;
   }, [dragX]);
 
-  const handleToggleDemo = useCallback((track: BackingTrackDef) => {
-    playFeedback('tap');
-    if (!musicEnabled) {
+  const handleToggleDemo = useCallback(
+    (track: BackingTrackDef) => {
+      playFeedback("tap");
+      if (!musicEnabled) {
+        if (demoPlayingTrackId === track.id) {
+          musicCoordinator.stopPreview();
+          setDemoPlayingTrackId(null);
+        }
+        return;
+      }
       if (demoPlayingTrackId === track.id) {
         musicCoordinator.stopPreview();
         setDemoPlayingTrackId(null);
+      } else {
+        musicCoordinator.startPreview(track.asset, track.demoDurationMs, {
+          onComplete: () => {
+            setDemoPlayingTrackId(null);
+          },
+        });
+        setDemoPlayingTrackId(track.id);
       }
-      return;
-    }
-    if (demoPlayingTrackId === track.id) {
+    },
+    [demoPlayingTrackId, musicEnabled],
+  );
+
+  const handleSelectTrack = useCallback(
+    (trackId: string) => {
+      playFeedback("tap");
       musicCoordinator.stopPreview();
       setDemoPlayingTrackId(null);
-    } else {
-      musicCoordinator.startPreview(track.asset, track.demoDurationMs, {
-        onComplete: () => {
-          setDemoPlayingTrackId(null);
-        },
-      });
-      setDemoPlayingTrackId(track.id);
-    }
-  }, [demoPlayingTrackId, musicEnabled]);
+      setActiveTrack(trackId);
+    },
+    [setActiveTrack],
+  );
 
-  const handleSelectTrack = useCallback((trackId: string) => {
-    playFeedback('tap');
-    musicCoordinator.stopPreview();
-    setDemoPlayingTrackId(null);
-    setActiveTrack(trackId);
-  }, [setActiveTrack]);
-
-  const horizontalSwipeActivated = (
-    _e: GestureResponderEvent,
-    gs: PanResponderGestureState,
-  ) =>
-    Math.abs(gs.dx) > 6 &&
-    Math.abs(gs.dx) > Math.abs(gs.dy) * 0.85;
+  const horizontalSwipeActivated = (_e: GestureResponderEvent, gs: PanResponderGestureState) =>
+    Math.abs(gs.dx) > 6 && Math.abs(gs.dx) > Math.abs(gs.dy) * 0.85;
 
   const panResponder = useRef(
     PanResponder.create({
@@ -193,8 +208,7 @@ export function MusicTrackSelector() {
         if (swiping.current) return;
 
         const shouldDismiss =
-          Math.abs(gs.dx) > SWIPE_THRESHOLD ||
-          Math.abs(gs.vx) > VELOCITY_THRESHOLD / 1000;
+          Math.abs(gs.dx) > SWIPE_THRESHOLD || Math.abs(gs.vx) > VELOCITY_THRESHOLD / 1000;
 
         if (shouldDismiss) {
           swiping.current = true;
@@ -203,7 +217,7 @@ export function MusicTrackSelector() {
             direction * OFFSCREEN_X,
             { duration: 200, easing: Easing.out(Easing.quad) },
             () => {
-              'worklet';
+              "worklet";
               rotationSV.value = rotationSV.value + 1;
               dragX.value = 0;
               runOnJS(advanceState)();
@@ -236,12 +250,6 @@ export function MusicTrackSelector() {
       </View>
     );
   }
-
-  const rotatedTracks = useMemo(() => {
-    const arr = [...ownedTracks];
-    for (let i = 0; i < rotation % ownedTracks.length; i++) arr.push(arr.shift()!);
-    return arr;
-  }, [ownedTracks, rotation]);
 
   const peekHeight = Math.min(ownedTracks.length - 1, 2) * PEEK_OFFSET;
 
@@ -277,10 +285,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   frontCard: {
-    position: 'relative',
+    position: "relative",
   },
   stackedCard: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     top: 0,

@@ -4,15 +4,14 @@
 // try each value, and check if the puzzle is solvable via recursive
 // backtracking. Returns a single placement.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class BruteForce extends BaseTechnique {
-  readonly name = 'Brute Force';
+  readonly name = "Brute Force";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Trial and error — try a value and backtrack if it fails';
+  readonly description = "Trial and error — try a value and backtrack if it fails";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Find the empty cell with the fewest candidates (MRV heuristic)
@@ -65,7 +64,7 @@ export class BruteForce extends BaseTechnique {
           bestCell,
           value,
           `Brute Force: ${value} in ${this.formatPosition(bestCell)} (trial and error)`,
-          [bestCell]
+          [bestCell],
         );
       }
     }
@@ -78,7 +77,7 @@ export class BruteForce extends BaseTechnique {
     candidates: Set<number>[][],
     row: number,
     col: number,
-    value: number
+    value: number,
   ): boolean {
     // Eliminate from same row, column, box
     for (let c = 0; c < BOARD_SIZE; c++) {
@@ -104,10 +103,7 @@ export class BruteForce extends BaseTechnique {
     return true;
   }
 
-  private solve(
-    values: (number | null)[][],
-    candidates: Set<number>[][]
-  ): boolean {
+  private solve(values: (number | null)[][], candidates: Set<number>[][]): boolean {
     // Find the empty cell with fewest candidates
     let bestRow = -1;
     let bestCol = -1;

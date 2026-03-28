@@ -7,15 +7,14 @@
 // - Wings may or may not see each other
 // Result: Z can be eliminated from any cell that sees both wings.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, setIntersection } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, setIntersection } from "../Technique";
 
 export class XYWing extends BaseTechnique {
-  readonly name = 'XY-Wing';
+  readonly name = "XY-Wing";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Three cells form a chain where the pivot eliminates a common candidate';
+  readonly description = "Three cells form a chain where the pivot eliminates a common candidate";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Find all cells with exactly 2 candidates (potential pivots and wings)
@@ -42,7 +41,7 @@ export class XYWing extends BaseTechnique {
   private findXYWingWithPivot(
     grid: CandidateGridInterface,
     pivot: Position,
-    biValueCells: Position[]
+    biValueCells: Position[],
   ): TechniqueResult | null {
     const pivotCandidates = [...grid.getCandidates(pivot.row, pivot.col)];
     if (pivotCandidates.length !== 2) return null;
@@ -52,8 +51,7 @@ export class XYWing extends BaseTechnique {
     // Find potential wings (bi-value cells that the pivot can see)
     const peers = grid.getPeers(pivot);
     const potentialWings = biValueCells.filter(
-      (cell) =>
-        cell.row !== pivot.row || cell.col !== pivot.col // Not the pivot
+      (cell) => cell.row !== pivot.row || cell.col !== pivot.col, // Not the pivot
     );
 
     // Find wings that share exactly one candidate with pivot
@@ -95,7 +93,7 @@ export class XYWing extends BaseTechnique {
     wingX: Position,
     wingY: Position,
     X: number,
-    Y: number
+    Y: number,
   ): TechniqueResult | null {
     // wingX has candidates {X, Z} for some Z
     // wingY has candidates {Y, Z} for the same Z
@@ -115,7 +113,7 @@ export class XYWing extends BaseTechnique {
     if (!wingYCandidates.has(Y) || !wingYCandidates.has(Z)) return null;
 
     // Find cells that see both wings and have Z as a candidate
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -143,7 +141,7 @@ export class XYWing extends BaseTechnique {
       return this.createEliminationResult(
         eliminations,
         `XY-Wing: Pivot ${this.formatPosition(pivot)} (${X},${Y}), wings ${this.formatPosition(wingX)} (${X},${Z}) and ${this.formatPosition(wingY)} (${Y},${Z}) eliminate ${Z}`,
-        [pivot, wingX, wingY]
+        [pivot, wingX, wingY],
       );
     }
 

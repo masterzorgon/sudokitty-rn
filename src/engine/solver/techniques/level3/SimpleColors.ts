@@ -6,25 +6,24 @@
 // 3. Color Wrap: two cells with the SAME color see each other → all cells with that color are false
 // 4. Color Trap: an UNCOLORED cell sees cells of BOTH colors → eliminate the candidate from it
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
-type Color = 'A' | 'B';
+type Color = "A" | "B";
 
 function posKey(p: Position): string {
   return `${p.row},${p.col}`;
 }
 
 function oppositeColor(c: Color): Color {
-  return c === 'A' ? 'B' : 'A';
+  return c === "A" ? "B" : "A";
 }
 
 export class SimpleColors extends BaseTechnique {
-  readonly name = 'Simple Colors';
+  readonly name = "Simple Colors";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Conjugate pair coloring to find contradictions';
+  readonly description = "Conjugate pair coloring to find contradictions";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -36,7 +35,7 @@ export class SimpleColors extends BaseTechnique {
 
   private findSimpleColors(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Build conjugate pair adjacency graph
     // Each cell maps to its conjugate partner(s)
@@ -56,7 +55,7 @@ export class SimpleColors extends BaseTechnique {
 
     // Build edges from conjugate pairs (houses with exactly 2 cells for this candidate)
     for (let i = 0; i < BOARD_SIZE; i++) {
-      for (const unitType of ['row', 'column', 'box'] as const) {
+      for (const unitType of ["row", "column", "box"] as const) {
         const cells = grid.findCellsWithCandidate({ type: unitType, index: i }, candidate);
         if (cells.length === 2) {
           const key0 = posKey(cells[0]);
@@ -90,14 +89,12 @@ export class SimpleColors extends BaseTechnique {
       // BFS to color this component
       const componentA: Position[] = [];
       const componentB: Position[] = [];
-      const queue: Array<{ pos: Position; color: Color }> = [
-        { pos: startCell, color: 'A' },
-      ];
-      colorMap.set(startKey, 'A');
+      const queue: { pos: Position; color: Color }[] = [{ pos: startCell, color: "A" }];
+      colorMap.set(startKey, "A");
 
       while (queue.length > 0) {
         const { pos, color } = queue.shift()!;
-        if (color === 'A') componentA.push(pos);
+        if (color === "A") componentA.push(pos);
         else componentB.push(pos);
         colored.push(pos);
 
@@ -116,7 +113,14 @@ export class SimpleColors extends BaseTechnique {
       if (wrapResult) return wrapResult;
 
       // Check Color Trap: uncolored cell sees both colors
-      const trapResult = this.checkColorTrap(grid, candidate, componentA, componentB, colorMap, allCandidateCells);
+      const trapResult = this.checkColorTrap(
+        grid,
+        candidate,
+        componentA,
+        componentB,
+        colorMap,
+        allCandidateCells,
+      );
       if (trapResult) return trapResult;
     }
 
@@ -132,9 +136,12 @@ export class SimpleColors extends BaseTechnique {
     candidate: number,
     componentA: Position[],
     componentB: Position[],
-    colorMap: Map<string, Color>
+    colorMap: Map<string, Color>,
   ): TechniqueResult | null {
-    for (const [component, color] of [[componentA, 'A'], [componentB, 'B']] as [Position[], Color][]) {
+    for (const [component, color] of [
+      [componentA, "A"],
+      [componentB, "B"],
+    ] as [Position[], Color][]) {
       for (let i = 0; i < component.length; i++) {
         for (let j = i + 1; j < component.length; j++) {
           if (this.seeEachOther(component[i], component[j], grid)) {
@@ -151,7 +158,7 @@ export class SimpleColors extends BaseTechnique {
               return this.createEliminationResult(
                 eliminations,
                 `Simple Colors (Color Wrap): ${candidate} — two color-${color} cells see each other`,
-                highlightCells
+                highlightCells,
               );
             }
           }
@@ -171,9 +178,9 @@ export class SimpleColors extends BaseTechnique {
     componentA: Position[],
     componentB: Position[],
     colorMap: Map<string, Color>,
-    allCandidateCells: Position[]
+    allCandidateCells: Position[],
   ): TechniqueResult | null {
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     for (const cell of allCandidateCells) {
       const key = posKey(cell);
@@ -195,7 +202,7 @@ export class SimpleColors extends BaseTechnique {
       return this.createEliminationResult(
         eliminations,
         `Simple Colors (Color Trap): ${candidate} — uncolored cells see both colors`,
-        highlightCells
+        highlightCells,
       );
     }
 

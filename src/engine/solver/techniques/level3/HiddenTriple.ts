@@ -3,23 +3,22 @@
 // all other candidates can be eliminated from those three cells.
 // Generalization of Hidden Pair from 2 → 3.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class HiddenTriple extends BaseTechnique {
-  readonly name = 'Hidden Triple';
+  readonly name = "Hidden Triple";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Three candidates appear in only three cells of a unit';
+  readonly description = "Three candidates appear in only three cells of a unit";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Check all 27 units (9 rows + 9 columns + 9 boxes)
     const units: Unit[] = [];
     for (let i = 0; i < BOARD_SIZE; i++) {
-      units.push({ type: 'row', index: i });
-      units.push({ type: 'column', index: i });
-      units.push({ type: 'box', index: i });
+      units.push({ type: "row", index: i });
+      units.push({ type: "column", index: i });
+      units.push({ type: "box", index: i });
     }
 
     for (const unit of units) {
@@ -30,10 +29,7 @@ export class HiddenTriple extends BaseTechnique {
     return null;
   }
 
-  private findHiddenTripleInUnit(
-    grid: CandidateGridInterface,
-    unit: Unit,
-  ): TechniqueResult | null {
+  private findHiddenTripleInUnit(grid: CandidateGridInterface, unit: Unit): TechniqueResult | null {
     // Find all candidates and their positions in this unit
     const candidatePositions: Map<number, Position[]> = new Map();
 
@@ -77,7 +73,7 @@ export class HiddenTriple extends BaseTechnique {
       const tripleCandidates = [cand1, cand2, cand3];
 
       // Find other candidates to eliminate from these three cells
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (const cell of allPositions) {
         const otherCandidates = [...grid.getCandidates(cell.row, cell.col)].filter(
@@ -104,11 +100,11 @@ export class HiddenTriple extends BaseTechnique {
 
   private getUnitName(unit: Unit): string {
     switch (unit.type) {
-      case 'row':
+      case "row":
         return `row ${unit.index + 1}`;
-      case 'column':
+      case "column":
         return `column ${unit.index + 1}`;
-      case 'box':
+      case "box":
         return `box ${unit.index + 1}`;
     }
   }

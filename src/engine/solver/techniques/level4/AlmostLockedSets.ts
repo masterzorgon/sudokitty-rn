@@ -5,10 +5,9 @@
 // in both A and B can be eliminated from cells that see all Z-positions
 // in both A and B.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from '../../types';
-import { BaseTechnique, setUnion, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from "../../types";
+import { BaseTechnique, setUnion, combinations } from "../Technique";
 
 interface ALSGroup {
   cells: Position[];
@@ -17,9 +16,9 @@ interface ALSGroup {
 }
 
 export class AlmostLockedSets extends BaseTechnique {
-  readonly name = 'Almost Locked Sets';
+  readonly name = "Almost Locked Sets";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'N cells with N+1 candidates linked by shared values';
+  readonly description = "N cells with N+1 candidates linked by shared values";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Step 1: Find all ALS groups across all units
@@ -42,9 +41,9 @@ export class AlmostLockedSets extends BaseTechnique {
     const units: Unit[] = [];
 
     for (let i = 0; i < BOARD_SIZE; i++) {
-      units.push({ type: 'row', index: i });
-      units.push({ type: 'column', index: i });
-      units.push({ type: 'box', index: i });
+      units.push({ type: "row", index: i });
+      units.push({ type: "column", index: i });
+      units.push({ type: "box", index: i });
     }
 
     for (const unit of units) {
@@ -77,7 +76,7 @@ export class AlmostLockedSets extends BaseTechnique {
       const key = als.cells
         .map((c) => `${c.row}-${c.col}`)
         .sort()
-        .join('|');
+        .join("|");
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
@@ -110,9 +109,7 @@ export class AlmostLockedSets extends BaseTechnique {
 
       if (xCellsA.length === 0 || xCellsB.length === 0) continue;
 
-      const isRestricted = xCellsA.every((a) =>
-        xCellsB.every((b) => this.isPeer(a, b)),
-      );
+      const isRestricted = xCellsA.every((a) => xCellsB.every((b) => this.isPeer(a, b)));
       if (!isRestricted) continue;
 
       // For each other shared candidate Z, find eliminations
@@ -127,7 +124,7 @@ export class AlmostLockedSets extends BaseTechnique {
         // Eliminate Z from cells that see ALL Z-positions in both A and B
         const allZCells = [...zCellsA, ...zCellsB];
         const allPatternCells = [...alsA.cells, ...alsB.cells];
-        const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+        const eliminations: { position: Position; candidates: number[] }[] = [];
 
         for (let row = 0; row < BOARD_SIZE; row++) {
           for (let col = 0; col < BOARD_SIZE; col++) {
@@ -142,8 +139,8 @@ export class AlmostLockedSets extends BaseTechnique {
         }
 
         if (eliminations.length > 0) {
-          const aCandStr = [...alsA.candidates].sort((a, b) => a - b).join(',');
-          const bCandStr = [...alsB.candidates].sort((a, b) => a - b).join(',');
+          const aCandStr = [...alsA.candidates].sort((a, b) => a - b).join(",");
+          const bCandStr = [...alsB.candidates].sort((a, b) => a - b).join(",");
           return this.createEliminationResult(
             eliminations,
             `ALS-XZ: A={${aCandStr}} B={${bCandStr}} X=${X} Z=${Z}`,

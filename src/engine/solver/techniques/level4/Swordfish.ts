@@ -4,15 +4,14 @@
 // and those cells occupy exactly three columns, the candidate can be
 // eliminated from other cells in those columns (and vice versa).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class Swordfish extends BaseTechnique {
-  readonly name = 'Swordfish';
+  readonly name = "Swordfish";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Three rows have a candidate in exactly the same three columns';
+  readonly description = "Three rows have a candidate in exactly the same three columns";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Check for row-based Swordfish (eliminate from columns)
@@ -29,15 +28,15 @@ export class Swordfish extends BaseTechnique {
 
   private findRowSwordfish(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find rows where the candidate appears in 2-3 cells
-    const eligibleRows: Array<{ row: number; cols: Set<number> }> = [];
+    const eligibleRows: { row: number; cols: Set<number> }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       const cellsWithCandidate = grid.findCellsWithCandidate(
-        { type: 'row', index: row },
-        candidate
+        { type: "row", index: row },
+        candidate,
       );
 
       if (cellsWithCandidate.length >= 2 && cellsWithCandidate.length <= 3) {
@@ -73,7 +72,7 @@ export class Swordfish extends BaseTechnique {
         }
       }
 
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       // Eliminate from all three columns (except the Swordfish cells)
       for (const col of cols) {
@@ -91,8 +90,8 @@ export class Swordfish extends BaseTechnique {
       if (eliminations.length > 0) {
         return this.createEliminationResult(
           eliminations,
-          `Swordfish: ${candidate} in rows ${rows.map((r) => r + 1).join(', ')} aligns in columns ${cols.map((c) => c + 1).join(', ')}`,
-          swordfishCells
+          `Swordfish: ${candidate} in rows ${rows.map((r) => r + 1).join(", ")} aligns in columns ${cols.map((c) => c + 1).join(", ")}`,
+          swordfishCells,
         );
       }
     }
@@ -102,15 +101,15 @@ export class Swordfish extends BaseTechnique {
 
   private findColumnSwordfish(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find columns where the candidate appears in 2-3 cells
-    const eligibleCols: Array<{ col: number; rows: Set<number> }> = [];
+    const eligibleCols: { col: number; rows: Set<number> }[] = [];
 
     for (let col = 0; col < BOARD_SIZE; col++) {
       const cellsWithCandidate = grid.findCellsWithCandidate(
-        { type: 'column', index: col },
-        candidate
+        { type: "column", index: col },
+        candidate,
       );
 
       if (cellsWithCandidate.length >= 2 && cellsWithCandidate.length <= 3) {
@@ -146,7 +145,7 @@ export class Swordfish extends BaseTechnique {
         }
       }
 
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       // Eliminate from all three rows (except the Swordfish cells)
       for (const row of rows) {
@@ -164,8 +163,8 @@ export class Swordfish extends BaseTechnique {
       if (eliminations.length > 0) {
         return this.createEliminationResult(
           eliminations,
-          `Swordfish: ${candidate} in columns ${cols.map((c) => c + 1).join(', ')} aligns in rows ${rows.map((r) => r + 1).join(', ')}`,
-          swordfishCells
+          `Swordfish: ${candidate} in columns ${cols.map((c) => c + 1).join(", ")} aligns in rows ${rows.map((r) => r + 1).join(", ")}`,
+          swordfishCells,
         );
       }
     }

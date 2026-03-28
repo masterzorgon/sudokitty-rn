@@ -3,9 +3,9 @@
  * Run: npx ts-node --project scripts/tsconfig.scripts.json scripts/fix-curated-solutions.ts
  */
 
-import { SudokuSolver } from '../src/engine/solver/SudokuSolver';
-import { CURATED_PUZZLE_BANK } from '../src/data/techniquePuzzleBank';
-import { CuratedPuzzle } from '../src/engine/techniqueGenerator';
+import { SudokuSolver } from "../src/engine/solver/SudokuSolver";
+import { CURATED_PUZZLE_BANK } from "../src/data/techniquePuzzleBank";
+import { CuratedPuzzle } from "../src/engine/techniqueGenerator";
 
 function hasValidSolution(grid: number[][]): boolean {
   for (let r = 0; r < 9; r++) {
@@ -22,7 +22,7 @@ function needsFix(curated: CuratedPuzzle): boolean {
 }
 
 const solver = new SudokuSolver({ maxTechniqueLevel: 4, trackSteps: false });
-const fixes: Array<{ techniqueId: string; index: number; solved: boolean }> = [];
+const fixes: { techniqueId: string; index: number; solved: boolean }[] = [];
 
 for (const [techniqueId, puzzles] of Object.entries(CURATED_PUZZLE_BANK)) {
   if (!puzzles || puzzles.length === 0) continue;

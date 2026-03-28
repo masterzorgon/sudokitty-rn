@@ -4,15 +4,15 @@
 // The two cells NOT in the shared column are the "endpoints."
 // Any cell that sees BOTH endpoints and has the candidate can have it eliminated.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class Skyscraper extends BaseTechnique {
-  readonly name = 'Skyscraper';
+  readonly name = "Skyscraper";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Two conjugate pairs sharing one column, with endpoints that force eliminations';
+  readonly description =
+    "Two conjugate pairs sharing one column, with endpoints that force eliminations";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -28,13 +28,13 @@ export class Skyscraper extends BaseTechnique {
 
   private findRowSkyscraper(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find rows where the candidate appears in exactly 2 cells (conjugate pairs)
-    const conjugatePairs: Array<{ row: number; cols: [number, number] }> = [];
+    const conjugatePairs: { row: number; cols: [number, number] }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
-      const cells = grid.findCellsWithCandidate({ type: 'row', index: row }, candidate);
+      const cells = grid.findCellsWithCandidate({ type: "row", index: row }, candidate);
       if (cells.length === 2) {
         conjugatePairs.push({
           row,
@@ -75,7 +75,7 @@ export class Skyscraper extends BaseTechnique {
       // The endpoints must be in the same band (top 3 rows, middle 3, bottom 3)
       // or at least be able to see common cells for eliminations to happen.
       // Find cells that can see BOTH endpoints and have the candidate.
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (let row = 0; row < BOARD_SIZE; row++) {
         for (let col = 0; col < BOARD_SIZE; col++) {
@@ -110,7 +110,7 @@ export class Skyscraper extends BaseTechnique {
         return this.createEliminationResult(
           eliminations,
           `Skyscraper: ${candidate} in rows ${pair1.row + 1} and ${pair2.row + 1} connected by column ${sharedCol + 1}`,
-          highlightCells
+          highlightCells,
         );
       }
     }
@@ -120,13 +120,13 @@ export class Skyscraper extends BaseTechnique {
 
   private findColumnSkyscraper(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find columns where the candidate appears in exactly 2 cells (conjugate pairs)
-    const conjugatePairs: Array<{ col: number; rows: [number, number] }> = [];
+    const conjugatePairs: { col: number; rows: [number, number] }[] = [];
 
     for (let col = 0; col < BOARD_SIZE; col++) {
-      const cells = grid.findCellsWithCandidate({ type: 'column', index: col }, candidate);
+      const cells = grid.findCellsWithCandidate({ type: "column", index: col }, candidate);
       if (cells.length === 2) {
         conjugatePairs.push({
           col,
@@ -160,7 +160,7 @@ export class Skyscraper extends BaseTechnique {
       const endpoint1: Position = { row: endpoint1Row, col: pair1.col };
       const endpoint2: Position = { row: endpoint2Row, col: pair2.col };
 
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (let row = 0; row < BOARD_SIZE; row++) {
         for (let col = 0; col < BOARD_SIZE; col++) {
@@ -189,7 +189,7 @@ export class Skyscraper extends BaseTechnique {
         return this.createEliminationResult(
           eliminations,
           `Skyscraper: ${candidate} in columns ${pair1.col + 1} and ${pair2.col + 1} connected by row ${sharedRow + 1}`,
-          highlightCells
+          highlightCells,
         );
       }
     }

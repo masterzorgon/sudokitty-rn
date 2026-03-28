@@ -8,15 +8,15 @@
 // Also covers "non-pivot" WXYZ-Wings where 4 cells collectively hold
 // exactly 4 candidates and share a restricted common candidate Z.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, setUnion, setIntersection, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, setUnion, setIntersection, combinations } from "../Technique";
 
 export class WXYZWing extends BaseTechnique {
-  readonly name = 'WXYZ-Wing';
+  readonly name = "WXYZ-Wing";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Four cells collectively holding four candidates with a shared elimination';
+  readonly description =
+    "Four cells collectively holding four candidates with a shared elimination";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Collect all unsolved cells with 2-4 candidates
@@ -82,7 +82,7 @@ export class WXYZWing extends BaseTechnique {
     for (const Z of intersection) {
       // All cells must see each other OR there must be a "restricted" configuration
       // For simplicity, eliminate Z from cells that see ALL cells in the pattern
-      const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+      const eliminations: { position: Position; candidates: number[] }[] = [];
 
       for (let row = 0; row < BOARD_SIZE; row++) {
         for (let col = 0; col < BOARD_SIZE; col++) {
@@ -97,7 +97,7 @@ export class WXYZWing extends BaseTechnique {
       }
 
       if (eliminations.length > 0) {
-        const candStr = [...union].sort((a, b) => a - b).join(',');
+        const candStr = [...union].sort((a, b) => a - b).join(",");
         return this.createEliminationResult(
           eliminations,
           `WXYZ-Wing: ${this.formatPositions(allCells)} with candidates ${candStr} eliminate ${Z}`,

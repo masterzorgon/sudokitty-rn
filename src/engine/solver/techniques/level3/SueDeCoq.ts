@@ -14,15 +14,14 @@
 //   VR and VB must be disjoint within V.
 //   Eliminate VB ∪ (V \ VR) from B \ (C ∪ CB), and VR ∪ (V \ VB) from R \ (C ∪ CR).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, combinations, setUnion, setIntersection } from '../Technique';
-import { BOARD_SIZE, BOX_SIZE } from '../../../types';
+import { Position, BOARD_SIZE, BOX_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, combinations, setUnion, setIntersection } from "../Technique";
 
 export class SueDeCoq extends BaseTechnique {
-  readonly name = 'Sue de Coq';
+  readonly name = "Sue de Coq";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Two-Sector Disjoint Subsets at a box/line intersection';
+  readonly description = "Two-Sector Disjoint Subsets at a box/line intersection";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Try each box
@@ -32,13 +31,25 @@ export class SueDeCoq extends BaseTechnique {
 
       // Try rows intersecting this box
       for (let r = boxStartRow; r < boxStartRow + BOX_SIZE; r++) {
-        const result = this.tryIntersection(grid, box, { type: 'row', index: r }, boxStartRow, boxStartCol);
+        const result = this.tryIntersection(
+          grid,
+          box,
+          { type: "row", index: r },
+          boxStartRow,
+          boxStartCol,
+        );
         if (result) return result;
       }
 
       // Try columns intersecting this box
       for (let c = boxStartCol; c < boxStartCol + BOX_SIZE; c++) {
-        const result = this.tryIntersection(grid, box, { type: 'column', index: c }, boxStartRow, boxStartCol);
+        const result = this.tryIntersection(
+          grid,
+          box,
+          { type: "column", index: c },
+          boxStartRow,
+          boxStartCol,
+        );
         if (result) return result;
       }
     }
@@ -49,15 +60,15 @@ export class SueDeCoq extends BaseTechnique {
   private tryIntersection(
     grid: CandidateGridInterface,
     box: number,
-    line: { type: 'row' | 'column'; index: number },
+    line: { type: "row" | "column"; index: number },
     boxStartRow: number,
-    boxStartCol: number
+    boxStartCol: number,
   ): TechniqueResult | null {
     // Find empty cells at the intersection of this box and this row/column
     const intersectionCells: Position[] = [];
     for (let i = 0; i < BOX_SIZE; i++) {
-      const row = line.type === 'row' ? line.index : boxStartRow + i;
-      const col = line.type === 'column' ? line.index : boxStartCol + i;
+      const row = line.type === "row" ? line.index : boxStartRow + i;
+      const col = line.type === "column" ? line.index : boxStartCol + i;
       if (grid.isEmpty(row, col)) {
         intersectionCells.push({ row, col });
       }
@@ -69,9 +80,10 @@ export class SueDeCoq extends BaseTechnique {
     // Try intersection sets of size 2 and 3
     const maxIntersectionSize = Math.min(intersectionCells.length, 3);
     for (let size = 2; size <= maxIntersectionSize; size++) {
-      const subsets = size === intersectionCells.length
-        ? [intersectionCells]
-        : combinations(intersectionCells, size);
+      const subsets =
+        size === intersectionCells.length
+          ? [intersectionCells]
+          : combinations(intersectionCells, size);
 
       for (const C of subsets) {
         const result = this.trySDC(grid, box, line, C, boxStartRow, boxStartCol);
@@ -85,10 +97,10 @@ export class SueDeCoq extends BaseTechnique {
   private trySDC(
     grid: CandidateGridInterface,
     box: number,
-    line: { type: 'row' | 'column'; index: number },
+    line: { type: "row" | "column"; index: number },
     C: Position[], // intersection cells
     boxStartRow: number,
-    boxStartCol: number
+    boxStartCol: number,
   ): TechniqueResult | null {
     // V = union of candidates in C
     const V = new Set<number>();
@@ -103,7 +115,7 @@ export class SueDeCoq extends BaseTechnique {
 
     // Collect candidate companion cells in the line (outside the box)
     const lineCandidates: Position[] = [];
-    if (line.type === 'row') {
+    if (line.type === "row") {
       for (let col = 0; col < BOARD_SIZE; col++) {
         if (col >= boxStartCol && col < boxStartCol + BOX_SIZE) continue;
         if (!grid.isEmpty(line.index, col)) continue;
@@ -122,8 +134,8 @@ export class SueDeCoq extends BaseTechnique {
     for (let r = boxStartRow; r < boxStartRow + BOX_SIZE; r++) {
       for (let c = boxStartCol; c < boxStartCol + BOX_SIZE; c++) {
         // Skip intersection cells
-        if (line.type === 'row' && r === line.index) continue;
-        if (line.type === 'column' && c === line.index) continue;
+        if (line.type === "row" && r === line.index) continue;
+        if (line.type === "column" && c === line.index) continue;
         if (!grid.isEmpty(r, c)) continue;
         boxCandidates.push({ row: r, col: c });
       }
@@ -206,7 +218,7 @@ export class SueDeCoq extends BaseTechnique {
             if (vrInV.size + vbInV.size < V.size - C.length) continue;
 
             // Compute eliminations
-            const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+            const eliminations: { position: Position; candidates: number[] }[] = [];
 
             // From rest of R (outside C and CR): eliminate VR ∪ (V \ VB)
             const vNotVB = new Set<number>();
@@ -222,9 +234,10 @@ export class SueDeCoq extends BaseTechnique {
             const cbSet = new Set(CB.map((p) => `${p.row},${p.col}`));
 
             // Eliminate from rest of line
-            const linePositions = line.type === 'row'
-              ? grid.getRowPositions(line.index)
-              : grid.getColumnPositions(line.index);
+            const linePositions =
+              line.type === "row"
+                ? grid.getRowPositions(line.index)
+                : grid.getColumnPositions(line.index);
 
             for (const pos of linePositions) {
               const key = `${pos.row},${pos.col}`;
@@ -269,12 +282,13 @@ export class SueDeCoq extends BaseTechnique {
             if (eliminations.length > 0) {
               const highlightCells: Position[] = [...C, ...CR, ...CB];
               const vArray = Array.from(V).sort((a, b) => a - b);
-              const lineType = line.type === 'row' ? `row ${line.index + 1}` : `column ${line.index + 1}`;
+              const lineType =
+                line.type === "row" ? `row ${line.index + 1}` : `column ${line.index + 1}`;
 
               return this.createEliminationResult(
                 eliminations,
-                `Sue de Coq: candidates {${vArray.join('')}} in ${lineType} and box ${box + 1}`,
-                highlightCells
+                `Sue de Coq: candidates {${vArray.join("")}} in ${lineType} and box ${box + 1}`,
+                highlightCells,
               );
             }
           }

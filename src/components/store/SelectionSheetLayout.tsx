@@ -1,17 +1,11 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  ActivityIndicator,
-  StyleSheet,
-} from 'react-native';
+import React, { forwardRef, useImperativeHandle, useRef } from "react";
+import { View, Text, Pressable, ActivityIndicator, StyleSheet } from "react-native";
 
-import { colors, useColors } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import { SkeuButton } from '../ui/Skeuomorphic';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
+import { colors, useColors } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import { SheetWrapper, type SheetWrapperRef } from "../ui/Sheet/SheetWrapper";
 
 export interface SelectionSheetLayoutRef {
   close: (callback?: () => void) => void;
@@ -20,7 +14,7 @@ export interface SelectionSheetLayoutRef {
 export interface SelectionSheetLayoutProps {
   visible: boolean;
   onDismiss: () => void;
-  pills: Array<{ icon: React.ReactNode; label: string }>;
+  pills: { icon: React.ReactNode; label: string }[];
   title: string;
   subtitle?: string;
   children: React.ReactNode;
@@ -58,9 +52,13 @@ export const SelectionSheetLayout = forwardRef<SelectionSheetLayoutRef, Selectio
     const c = useColors();
     const sheetRef = useRef<SheetWrapperRef>(null);
 
-    useImperativeHandle(ref, () => ({
-      close: (cb) => sheetRef.current?.close(cb),
-    }), []);
+    useImperativeHandle(
+      ref,
+      () => ({
+        close: (cb) => sheetRef.current?.close(cb),
+      }),
+      [],
+    );
 
     return (
       <SheetWrapper
@@ -72,7 +70,7 @@ export const SelectionSheetLayout = forwardRef<SelectionSheetLayoutRef, Selectio
         {/* Balance pills */}
         <View style={styles.pillRow}>
           {pills.map((pill, i) => (
-            <View key={i} style={[styles.pill, { backgroundColor: c.gridLine + '60' }]}>
+            <View key={i} style={[styles.pill, { backgroundColor: c.gridLine + "60" }]}>
               {pill.icon}
               <Text style={[styles.pillText, { color: c.textPrimary }]}>{pill.label}</Text>
             </View>
@@ -90,8 +88,10 @@ export const SelectionSheetLayout = forwardRef<SelectionSheetLayoutRef, Selectio
 
         {/* Action button */}
         <SkeuButton
-          onPress={insufficientFunds && onInsufficientFundsPress ? onInsufficientFundsPress : onButtonPress}
-          variant={buttonActive || insufficientFunds ? 'primary' : 'disabled'}
+          onPress={
+            insufficientFunds && onInsufficientFundsPress ? onInsufficientFundsPress : onButtonPress
+          }
+          variant={buttonActive || insufficientFunds ? "primary" : "disabled"}
           sheen={buttonActive || insufficientFunds}
           disabled={(!buttonActive && !insufficientFunds) || buttonLoading}
           borderRadius={borderRadius.lg}
@@ -121,8 +121,8 @@ export const SelectionSheetLayout = forwardRef<SelectionSheetLayoutRef, Selectio
 
 export const selectionSheetStyles = StyleSheet.create({
   buttonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   buttonText: {
@@ -133,19 +133,19 @@ export const selectionSheetStyles = StyleSheet.create({
   buttonSeparator: {
     fontFamily: fontFamilies.bold,
     fontSize: 16,
-    color: 'rgba(255,255,255,0.6)',
+    color: "rgba(255,255,255,0.6)",
   },
   iconCircle: {
     width: 48,
     height: 48,
     borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   /** Match store mochi tiles: 10px inset from tile edge */
   mochiPackIconTile: {
     padding: 10,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   mochiPackIconImageInner: {
     width: 28,
@@ -155,14 +155,14 @@ export const selectionSheetStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   pillRow: {
-    flexDirection: 'row',
-    alignSelf: 'center',
+    flexDirection: "row",
+    alignSelf: "center",
     gap: spacing.sm,
     marginBottom: spacing.lg,
   },
   pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     paddingHorizontal: spacing.md,
     paddingVertical: 6,
@@ -175,26 +175,26 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: fontFamilies.bold,
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: spacing.xs,
   },
   subtitle: {
     fontFamily: fontFamilies.regular,
     fontSize: 13,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: spacing.lg,
   },
   content: {
-    width: '100%',
+    width: "100%",
     marginBottom: spacing.md,
   },
   button: {
-    width: '100%',
+    width: "100%",
   },
   buttonContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: spacing.md,
   },
   inactiveText: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   noThanks: {
     marginTop: spacing.xl,
     paddingVertical: spacing.sm,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   noThanksText: {
     fontFamily: fontFamilies.bold,

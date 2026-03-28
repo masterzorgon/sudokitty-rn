@@ -5,15 +5,14 @@
 // template can have the candidate eliminated. A cell in ALL remaining
 // templates must contain the candidate (placement).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class Templates extends BaseTechnique {
-  readonly name = 'Templates';
+  readonly name = "Templates";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Enumerate all valid digit placements to find eliminations';
+  readonly description = "Enumerate all valid digit placements to find eliminations";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -25,7 +24,7 @@ export class Templates extends BaseTechnique {
 
   private findTemplateEliminations(
     grid: CandidateGridInterface,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // For each row, find columns where the candidate can go
     const possibleCols: number[][] = [];
@@ -106,8 +105,8 @@ export class Templates extends BaseTechnique {
     const totalTemplates = templates.length;
 
     // Check for eliminations: cell has candidate but is in NO template
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
-    const placements: Array<{ position: Position; value: number }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
+    const placements: { position: Position; value: number }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -133,8 +132,8 @@ export class Templates extends BaseTechnique {
     if (eliminations.length > 0) {
       return this.createEliminationResult(
         eliminations,
-        `Templates: ${candidate} — ${totalTemplates} valid templates, ${eliminations.length} elimination${eliminations.length !== 1 ? 's' : ''}`,
-        eliminations.map((e) => e.position)
+        `Templates: ${candidate} — ${totalTemplates} valid templates, ${eliminations.length} elimination${eliminations.length !== 1 ? "s" : ""}`,
+        eliminations.map((e) => e.position),
       );
     }
 
@@ -143,7 +142,7 @@ export class Templates extends BaseTechnique {
         placements[0].position,
         placements[0].value,
         `Templates: ${candidate} must go in ${this.formatPosition(placements[0].position)} (in all ${totalTemplates} templates)`,
-        placements.map((p) => p.position)
+        placements.map((p) => p.position),
       );
     }
 

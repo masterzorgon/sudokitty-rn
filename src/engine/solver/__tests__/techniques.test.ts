@@ -3,9 +3,9 @@
 //   - Positive: technique applies and produces correct result
 //   - Negative: technique returns null when puzzle doesn't require it
 
-import { CandidateGrid } from '../CandidateGrid';
-import { ALL_TECHNIQUES } from '../techniques';
+import { CandidateGrid } from "../CandidateGrid";
 import {
+  ALL_TECHNIQUES,
   NakedSingle,
   HiddenSingle,
   NakedPair,
@@ -37,15 +37,15 @@ import {
   MutantFish,
   SiameseFish,
   MultiColors,
-} from '../techniques';
-import { Templates } from '../techniques/level4/Templates';
-import { ForcingChain } from '../techniques/level4/ForcingChain';
-import { ForcingNet } from '../techniques/level4/ForcingNet';
-import { KrakenFish } from '../techniques/level4/KrakenFish';
-import { BruteForce } from '../techniques/level4/BruteForce';
-import { TechniqueResult, TechniqueLevel } from '../types';
-import { CURATED_PUZZLE_BANK } from '../../../data/techniquePuzzleBank';
-import { Position } from '../../types';
+} from "../techniques";
+import { Templates } from "../techniques/level4/Templates";
+import { ForcingChain } from "../techniques/level4/ForcingChain";
+import { ForcingNet } from "../techniques/level4/ForcingNet";
+import { KrakenFish } from "../techniques/level4/KrakenFish";
+import { BruteForce } from "../techniques/level4/BruteForce";
+import { TechniqueResult, TechniqueLevel } from "../types";
+import { CURATED_PUZZLE_BANK } from "../../../data/techniquePuzzleBank";
+import { Position } from "../../types";
 
 // ============================================
 // Helpers
@@ -55,10 +55,7 @@ import { Position } from '../../types';
  * Exhaust all techniques below `targetLevel` on the grid,
  * so the grid is ready for the target technique to apply.
  */
-function prepareGridForTechnique(
-  puzzle: number[][],
-  targetLevel: TechniqueLevel,
-): CandidateGrid {
+function prepareGridForTechnique(puzzle: number[][], targetLevel: TechniqueLevel): CandidateGrid {
   const grid = new CandidateGrid(puzzle);
   const simpler = ALL_TECHNIQUES.filter((t) => t.level < targetLevel);
 
@@ -114,22 +111,22 @@ const EASY_PUZZLE: number[][] = [
 // Level 1 — Beginner
 // ============================================
 
-describe('Naked Single', () => {
+describe("Naked Single", () => {
   const technique = new NakedSingle();
 
-  test('should find technique in an easy puzzle', () => {
+  test("should find technique in an easy puzzle", () => {
     const grid = new CandidateGrid(EASY_PUZZLE);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Naked Single');
+    expect(result!.techniqueName).toBe("Naked Single");
     expect(result!.level).toBe(1);
     expect(result!.placements).toHaveLength(1);
     expect(result!.placements[0].value).toBeGreaterThanOrEqual(1);
     expect(result!.placements[0].value).toBeLessThanOrEqual(9);
   });
 
-  test('should produce a valid placement', () => {
+  test("should produce a valid placement", () => {
     const grid = new CandidateGrid(EASY_PUZZLE);
     const result = technique.apply(grid);
     if (!result) return;
@@ -142,7 +139,7 @@ describe('Naked Single', () => {
     expect(grid.hasCandidate(row, col, value)).toBe(true);
   });
 
-  test('should return null on a fully solved grid', () => {
+  test("should return null on a fully solved grid", () => {
     // A fully solved grid has no empty cells → no naked singles
     const solved: number[][] = [
       [5, 3, 4, 6, 7, 8, 9, 1, 2],
@@ -161,20 +158,20 @@ describe('Naked Single', () => {
   });
 });
 
-describe('Hidden Single', () => {
+describe("Hidden Single", () => {
   const technique = new HiddenSingle();
 
-  test('should find technique in an easy puzzle', () => {
+  test("should find technique in an easy puzzle", () => {
     const grid = new CandidateGrid(EASY_PUZZLE);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Hidden Single');
+    expect(result!.techniqueName).toBe("Hidden Single");
     expect(result!.level).toBe(1);
     expect(result!.placements).toHaveLength(1);
   });
 
-  test('should produce a valid placement', () => {
+  test("should produce a valid placement", () => {
     const grid = new CandidateGrid(EASY_PUZZLE);
     const result = technique.apply(grid);
     if (!result) return;
@@ -187,7 +184,7 @@ describe('Hidden Single', () => {
     expect(grid.hasCandidate(row, col, value)).toBe(true);
   });
 
-  test('should return null on a fully solved grid', () => {
+  test("should return null on a fully solved grid", () => {
     const solved: number[][] = [
       [5, 3, 4, 6, 7, 8, 9, 1, 2],
       [6, 7, 2, 1, 9, 5, 3, 4, 8],
@@ -209,28 +206,30 @@ describe('Hidden Single', () => {
 // Level 2 — Intermediate (curated puzzles)
 // ============================================
 
-describe('Naked Pair', () => {
+describe("Naked Pair", () => {
   const technique = new NakedPair();
-  const curated = CURATED_PUZZLE_BANK['naked-pair']?.[0];
+  const curated = CURATED_PUZZLE_BANK["naked-pair"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Naked Pair');
+    expect(result!.techniqueName).toBe("Naked Pair");
     expect(result!.level).toBe(2);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct eliminations', () => {
+  test("should produce correct eliminations", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
     if (!result) return;
 
     // Highlight cells should match (pattern cells)
-    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(true);
+    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(
+      true,
+    );
 
     // At least one elimination should match the curated data
     const expectedPositions = new Set(
@@ -241,9 +240,9 @@ describe('Naked Pair', () => {
     expect(hasOverlap).toBe(true);
   });
 
-  test('should return null on puzzle requiring a different technique', () => {
+  test("should return null on puzzle requiring a different technique", () => {
     // Use hidden-pair puzzle — Naked Pair should not apply after exhausting Level 1
-    const otherCurated = CURATED_PUZZLE_BANK['hidden-pair']?.[0];
+    const otherCurated = CURATED_PUZZLE_BANK["hidden-pair"]?.[0];
     if (!otherCurated) return;
 
     const grid = prepareGridForTechnique(otherCurated.puzzle, 2);
@@ -257,80 +256,86 @@ describe('Naked Pair', () => {
     // is that the technique doesn't apply on the original snapshot
     // We test that the first applicable technique is NOT naked pair
     if (hpResult) {
-      expect(hpResult.techniqueName).not.toBe('Naked Pair');
+      expect(hpResult.techniqueName).not.toBe("Naked Pair");
     }
   });
 });
 
-describe('Hidden Pair', () => {
+describe("Hidden Pair", () => {
   const technique = new HiddenPair();
-  const curated = CURATED_PUZZLE_BANK['hidden-pair']?.[0];
+  const curated = CURATED_PUZZLE_BANK["hidden-pair"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Hidden Pair');
+    expect(result!.techniqueName).toBe("Hidden Pair");
     expect(result!.level).toBe(2);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct highlight cells', () => {
+  test("should produce correct highlight cells", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
     if (!result) return;
 
-    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(true);
+    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(
+      true,
+    );
   });
 });
 
-describe('Pointing Pair', () => {
+describe("Pointing Pair", () => {
   const technique = new PointingPair();
-  const curated = CURATED_PUZZLE_BANK['pointing-pair']?.[0];
+  const curated = CURATED_PUZZLE_BANK["pointing-pair"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Pointing Pair');
+    expect(result!.techniqueName).toBe("Pointing Pair");
     expect(result!.level).toBe(2);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct eliminations', () => {
+  test("should produce correct eliminations", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
     if (!result) return;
 
-    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(true);
+    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(
+      true,
+    );
   });
 });
 
-describe('Box/Line Reduction', () => {
+describe("Box/Line Reduction", () => {
   const technique = new BoxLineReduction();
-  const curated = CURATED_PUZZLE_BANK['box-line-reduction']?.[0];
+  const curated = CURATED_PUZZLE_BANK["box-line-reduction"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Box/Line Reduction');
+    expect(result!.techniqueName).toBe("Box/Line Reduction");
     expect(result!.level).toBe(2);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct eliminations', () => {
+  test("should produce correct eliminations", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 2);
     const result = technique.apply(grid);
     if (!result) return;
 
-    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(true);
+    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(
+      true,
+    );
   });
 });
 
@@ -338,22 +343,22 @@ describe('Box/Line Reduction', () => {
 // Level 3 — Advanced (curated puzzles)
 // ============================================
 
-describe('Naked Triple', () => {
+describe("Naked Triple", () => {
   const technique = new NakedTriple();
-  const curated = CURATED_PUZZLE_BANK['naked-triple']?.[0];
+  const curated = CURATED_PUZZLE_BANK["naked-triple"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 3);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Naked Triple');
+    expect(result!.techniqueName).toBe("Naked Triple");
     expect(result!.level).toBe(3);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct highlight cells', () => {
+  test("should produce correct highlight cells", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 3);
     const result = technique.apply(grid);
     if (!result) return;
@@ -362,7 +367,7 @@ describe('Naked Triple', () => {
     expect(result.highlightCells).toHaveLength(3);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     // An easy puzzle shouldn't need naked triples
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     const result = technique.apply(grid);
@@ -371,11 +376,11 @@ describe('Naked Triple', () => {
   });
 });
 
-describe('Hidden Triple', () => {
+describe("Hidden Triple", () => {
   const technique = new HiddenTriple();
-  const curated = CURATED_PUZZLE_BANK['hidden-triple']?.[0];
+  const curated = CURATED_PUZZLE_BANK["hidden-triple"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     // Try on the raw snapshot (curated puzzle is already at snapshot state)
     const rawGrid = new CandidateGrid(curated.puzzle);
@@ -386,12 +391,12 @@ describe('Hidden Triple', () => {
     }
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Hidden Triple');
+    expect(result!.techniqueName).toBe("Hidden Triple");
     expect(result!.level).toBe(3);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct highlight cells', () => {
+  test("should produce correct highlight cells", () => {
     const rawGrid = new CandidateGrid(curated.puzzle);
     let result = technique.apply(rawGrid);
     if (!result) {
@@ -404,36 +409,38 @@ describe('Hidden Triple', () => {
     expect(result.highlightCells).toHaveLength(3);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('X-Wing', () => {
+describe("X-Wing", () => {
   const technique = new XWing();
-  const curated = CURATED_PUZZLE_BANK['x-wing']?.[0];
+  const curated = CURATED_PUZZLE_BANK["x-wing"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 3);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('X-Wing');
+    expect(result!.techniqueName).toBe("X-Wing");
     expect(result!.level).toBe(3);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct highlight cells', () => {
+  test("should produce correct highlight cells", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 3);
     const result = technique.apply(grid);
     if (!result) return;
 
     // X-Wing has 4 highlight cells forming a rectangle
     expect(result.highlightCells).toHaveLength(4);
-    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(true);
+    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(
+      true,
+    );
   });
 });
 
@@ -441,44 +448,46 @@ describe('X-Wing', () => {
 // Level 4 — Expert (curated puzzles)
 // ============================================
 
-describe('Swordfish', () => {
+describe("Swordfish", () => {
   const technique = new Swordfish();
-  const curated = CURATED_PUZZLE_BANK['swordfish']?.[0];
+  const curated = CURATED_PUZZLE_BANK["swordfish"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = prepareGridForTechnique(curated.puzzle, 4);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Swordfish');
+    expect(result!.techniqueName).toBe("Swordfish");
     expect(result!.level).toBe(4);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct highlight cells', () => {
+  test("should produce correct highlight cells", () => {
     const grid = prepareGridForTechnique(curated.puzzle, 4);
     const result = technique.apply(grid);
     if (!result) return;
 
     // Swordfish has 4-6 highlight cells
     expect(result.highlightCells.length).toBeGreaterThanOrEqual(4);
-    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(true);
+    expect(positionSetsMatch(result.highlightCells, curated.techniqueResult.highlightCells)).toBe(
+      true,
+    );
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('XY-Wing', () => {
+describe("XY-Wing", () => {
   const technique = new XYWing();
-  const curated = CURATED_PUZZLE_BANK['xy-wing']?.[0];
+  const curated = CURATED_PUZZLE_BANK["xy-wing"]?.[0];
 
-  test('should find technique in at least one curated puzzle', () => {
-    const allCurated = CURATED_PUZZLE_BANK['xy-wing'] ?? [];
+  test("should find technique in at least one curated puzzle", () => {
+    const allCurated = CURATED_PUZZLE_BANK["xy-wing"] ?? [];
     expect(allCurated.length).toBeGreaterThan(0);
 
     let foundInAny = false;
@@ -487,7 +496,7 @@ describe('XY-Wing', () => {
       const gridRaw = new CandidateGrid(cp.puzzle);
       const resultRaw = technique.apply(gridRaw);
       if (resultRaw) {
-        expect(resultRaw.techniqueName).toBe('XY-Wing');
+        expect(resultRaw.techniqueName).toBe("XY-Wing");
         expect(resultRaw.level).toBe(4);
         expect(resultRaw.eliminations.length).toBeGreaterThan(0);
         foundInAny = true;
@@ -498,31 +507,30 @@ describe('XY-Wing', () => {
       const gridPrepped = prepareGridForTechnique(cp.puzzle, 4);
       const resultPrepped = technique.apply(gridPrepped);
       if (resultPrepped) {
-        expect(resultPrepped.techniqueName).toBe('XY-Wing');
+        expect(resultPrepped.techniqueName).toBe("XY-Wing");
         foundInAny = true;
         break;
       }
     }
     expect(foundInAny).toBe(true);
   });
-
 });
 
-describe('Jellyfish', () => {
+describe("Jellyfish", () => {
   const technique = new Jellyfish();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('XYZ-Wing', () => {
+describe("XYZ-Wing", () => {
   const technique = new XYZWing();
-  const curated = CURATED_PUZZLE_BANK['xyz-wing']?.[0];
+  const curated = CURATED_PUZZLE_BANK["xyz-wing"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
 
     const rawGrid = new CandidateGrid(curated.puzzle);
@@ -533,12 +541,12 @@ describe('XYZ-Wing', () => {
     }
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('XYZ-Wing');
+    expect(result!.techniqueName).toBe("XYZ-Wing");
     expect(result!.level).toBe(4);
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should produce correct highlight cells', () => {
+  test("should produce correct highlight cells", () => {
     const rawGrid = new CandidateGrid(curated.puzzle);
     let result = technique.apply(rawGrid);
     if (!result) {
@@ -551,7 +559,7 @@ describe('XYZ-Wing', () => {
     expect(result.highlightCells).toHaveLength(3);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
@@ -562,32 +570,32 @@ describe('XYZ-Wing', () => {
 // Tier 2 techniques (HoDoKu-verified curated puzzles)
 // ============================================
 
-describe('BUG', () => {
+describe("BUG", () => {
   const technique = new BUG();
-  const curated = CURATED_PUZZLE_BANK['bug']?.[0];
+  const curated = CURATED_PUZZLE_BANK["bug"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const grid = new CandidateGrid(curated.puzzle);
     const result = technique.apply(grid);
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('BUG');
+    expect(result!.techniqueName).toBe("BUG");
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('Unique Rectangle', () => {
+describe("Unique Rectangle", () => {
   const technique = new UniqueRectangle();
-  const curated = CURATED_PUZZLE_BANK['unique-rectangle']?.[0];
+  const curated = CURATED_PUZZLE_BANK["unique-rectangle"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const rawGrid = new CandidateGrid(curated.puzzle);
     let result = technique.apply(rawGrid);
@@ -597,32 +605,32 @@ describe('Unique Rectangle', () => {
     }
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Unique Rectangle');
+    expect(result!.techniqueName).toBe("Unique Rectangle");
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('Avoidable Rectangle', () => {
+describe("Avoidable Rectangle", () => {
   const technique = new AvoidableRectangle();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('Finned Fish', () => {
+describe("Finned Fish", () => {
   const technique = new FinnedFish();
-  const curated = CURATED_PUZZLE_BANK['finned-fish']?.[0];
+  const curated = CURATED_PUZZLE_BANK["finned-fish"]?.[0];
 
-  test('should find technique in curated puzzle', () => {
+  test("should find technique in curated puzzle", () => {
     expect(curated).toBeDefined();
     const rawGrid = new CandidateGrid(curated.puzzle);
     let result = technique.apply(rawGrid);
@@ -632,41 +640,41 @@ describe('Finned Fish', () => {
     }
 
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Finned Fish');
+    expect(result!.techniqueName).toBe("Finned Fish");
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('WXYZ-Wing', () => {
+describe("WXYZ-Wing", () => {
   const technique = new WXYZWing();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('Almost Locked Sets', () => {
+describe("Almost Locked Sets", () => {
   const technique = new AlmostLockedSets();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 });
 
-describe('AIC', () => {
+describe("AIC", () => {
   const technique = new AIC();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const result = technique.apply(grid);
     expect(result).toBeNull();
@@ -677,11 +685,11 @@ describe('AIC', () => {
 // New Level 3 — Single Digit Patterns
 // ============================================
 
-describe('Skyscraper', () => {
+describe("Skyscraper", () => {
   const technique = new Skyscraper();
-  const curated = CURATED_PUZZLE_BANK['skyscraper']?.[0];
+  const curated = CURATED_PUZZLE_BANK["skyscraper"]?.[0];
 
-  test('should find technique in generator-captured puzzle', () => {
+  test("should find technique in generator-captured puzzle", () => {
     expect(curated).toBeDefined();
     const rawGrid = new CandidateGrid(curated.puzzle);
     let result = technique.apply(rawGrid);
@@ -690,21 +698,21 @@ describe('Skyscraper', () => {
       result = technique.apply(grid);
     }
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('Skyscraper');
+    expect(result!.techniqueName).toBe("Skyscraper");
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('2-String Kite', () => {
+describe("2-String Kite", () => {
   const technique = new TwoStringKite();
-  const curated = CURATED_PUZZLE_BANK['two-string-kite']?.[0];
+  const curated = CURATED_PUZZLE_BANK["two-string-kite"]?.[0];
 
-  test('should find technique in generator-captured puzzle', () => {
+  test("should find technique in generator-captured puzzle", () => {
     expect(curated).toBeDefined();
     const rawGrid = new CandidateGrid(curated.puzzle);
     let result = technique.apply(rawGrid);
@@ -713,29 +721,29 @@ describe('2-String Kite', () => {
       result = technique.apply(grid);
     }
     expect(result).not.toBeNull();
-    expect(result!.techniqueName).toBe('2-String Kite');
+    expect(result!.techniqueName).toBe("2-String Kite");
     expect(result!.eliminations.length).toBeGreaterThan(0);
   });
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Turbot Fish', () => {
+describe("Turbot Fish", () => {
   const technique = new TurbotFish();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Empty Rectangle', () => {
+describe("Empty Rectangle", () => {
   const technique = new EmptyRectangle();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     expect(technique.apply(grid)).toBeNull();
   });
@@ -745,10 +753,10 @@ describe('Empty Rectangle', () => {
 // New Level 3 — Miscellaneous
 // ============================================
 
-describe('Sue de Coq', () => {
+describe("Sue de Coq", () => {
   const technique = new SueDeCoq();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     expect(technique.apply(grid)).toBeNull();
   });
@@ -758,10 +766,10 @@ describe('Sue de Coq', () => {
 // New Level 3 — Coloring
 // ============================================
 
-describe('Simple Colors', () => {
+describe("Simple Colors", () => {
   const technique = new SimpleColors();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     expect(technique.apply(grid)).toBeNull();
   });
@@ -771,28 +779,28 @@ describe('Simple Colors', () => {
 // New Level 4 — Complex Fish
 // ============================================
 
-describe('Franken Fish', () => {
+describe("Franken Fish", () => {
   const technique = new FrankenFish();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Mutant Fish', () => {
+describe("Mutant Fish", () => {
   const technique = new MutantFish();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Siamese Fish', () => {
+describe("Siamese Fish", () => {
   const technique = new SiameseFish();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
@@ -802,10 +810,10 @@ describe('Siamese Fish', () => {
 // New Level 4 — Coloring
 // ============================================
 
-describe('Multi Colors', () => {
+describe("Multi Colors", () => {
   const technique = new MultiColors();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
@@ -815,58 +823,58 @@ describe('Multi Colors', () => {
 // New Level 4 — Last Resort
 // ============================================
 
-describe('Templates', () => {
+describe("Templates", () => {
   const technique = new Templates();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Forcing Chain', () => {
+describe("Forcing Chain", () => {
   const technique = new ForcingChain();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Forcing Net', () => {
+describe("Forcing Net", () => {
   const technique = new ForcingNet();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Kraken Fish', () => {
+describe("Kraken Fish", () => {
   const technique = new KrakenFish();
 
-  test('should return null on Level 1 puzzle', () => {
+  test("should return null on Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     expect(technique.apply(grid)).toBeNull();
   });
 });
 
-describe('Brute Force', () => {
+describe("Brute Force", () => {
   const technique = new BruteForce();
 
-  test('should find a placement on an unsolved puzzle', () => {
+  test("should find a placement on an unsolved puzzle", () => {
     // Use a grid that still has empty cells after exhausting other techniques
     const grid = new CandidateGrid(EASY_PUZZLE);
     const result = technique.apply(grid);
     if (result) {
-      expect(result.techniqueName).toBe('Brute Force');
+      expect(result.techniqueName).toBe("Brute Force");
       expect(result.placements).toHaveLength(1);
       expect(result.placements[0].value).toBeGreaterThanOrEqual(1);
       expect(result.placements[0].value).toBeLessThanOrEqual(9);
     }
   });
 
-  test('should return null on a fully solved grid', () => {
+  test("should return null on a fully solved grid", () => {
     const solved: number[][] = [
       [5, 3, 4, 6, 7, 8, 9, 1, 2],
       [6, 7, 2, 1, 9, 5, 3, 4, 8],
@@ -887,9 +895,9 @@ describe('Brute Force', () => {
 // Cross-technique negative tests
 // ============================================
 
-describe('Negative cases — technique does not apply', () => {
-  test('NakedPair should not apply on a naked-triple curated puzzle', () => {
-    const curated = CURATED_PUZZLE_BANK['naked-triple']?.[0];
+describe("Negative cases — technique does not apply", () => {
+  test("NakedPair should not apply on a naked-triple curated puzzle", () => {
+    const curated = CURATED_PUZZLE_BANK["naked-triple"]?.[0];
     if (!curated) return;
 
     const grid = prepareGridForTechnique(curated.puzzle, 2);
@@ -902,32 +910,32 @@ describe('Negative cases — technique does not apply', () => {
     // the grid can be advanced further before the triple applies.
     // This is an informational test — we just verify no crash.
     if (result) {
-      expect(result.techniqueName).toBe('Naked Pair');
+      expect(result.techniqueName).toBe("Naked Pair");
     }
   });
 
-  test('Swordfish should not apply on a Level 1 puzzle', () => {
+  test("Swordfish should not apply on a Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const technique = new Swordfish();
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 
-  test('XWing should not apply on a Level 1 puzzle', () => {
+  test("XWing should not apply on a Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     const technique = new XWing();
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 
-  test('XYWing should not apply on a Level 1 puzzle', () => {
+  test("XYWing should not apply on a Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 4);
     const technique = new XYWing();
     const result = technique.apply(grid);
     expect(result).toBeNull();
   });
 
-  test('NakedTriple should not apply on a Level 1 puzzle', () => {
+  test("NakedTriple should not apply on a Level 1 puzzle", () => {
     const grid = prepareGridForTechnique(EASY_PUZZLE, 3);
     const technique = new NakedTriple();
     const result = technique.apply(grid);

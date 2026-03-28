@@ -4,10 +4,9 @@
 // This covers patterns NOT already handled by Skyscraper or 2-String Kite,
 // such as box-box, box-row, and box-column connections.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 interface ConjugatePair {
   unit: Unit;
@@ -15,9 +14,9 @@ interface ConjugatePair {
 }
 
 export class TurbotFish extends BaseTechnique {
-  readonly name = 'Turbot Fish';
+  readonly name = "Turbot Fish";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'Two conjugate pairs connected by a weak link form a chain';
+  readonly description = "Two conjugate pairs connected by a weak link form a chain";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -27,30 +26,27 @@ export class TurbotFish extends BaseTechnique {
     return null;
   }
 
-  private findTurbotFish(
-    grid: CandidateGridInterface,
-    candidate: number
-  ): TechniqueResult | null {
+  private findTurbotFish(grid: CandidateGridInterface, candidate: number): TechniqueResult | null {
     // Collect ALL conjugate pairs (rows, columns, boxes)
     const pairs: ConjugatePair[] = [];
 
     for (let i = 0; i < BOARD_SIZE; i++) {
       // Row conjugate pairs
-      const rowCells = grid.findCellsWithCandidate({ type: 'row', index: i }, candidate);
+      const rowCells = grid.findCellsWithCandidate({ type: "row", index: i }, candidate);
       if (rowCells.length === 2) {
-        pairs.push({ unit: { type: 'row', index: i }, cells: [rowCells[0], rowCells[1]] });
+        pairs.push({ unit: { type: "row", index: i }, cells: [rowCells[0], rowCells[1]] });
       }
 
       // Column conjugate pairs
-      const colCells = grid.findCellsWithCandidate({ type: 'column', index: i }, candidate);
+      const colCells = grid.findCellsWithCandidate({ type: "column", index: i }, candidate);
       if (colCells.length === 2) {
-        pairs.push({ unit: { type: 'column', index: i }, cells: [colCells[0], colCells[1]] });
+        pairs.push({ unit: { type: "column", index: i }, cells: [colCells[0], colCells[1]] });
       }
 
       // Box conjugate pairs
-      const boxCells = grid.findCellsWithCandidate({ type: 'box', index: i }, candidate);
+      const boxCells = grid.findCellsWithCandidate({ type: "box", index: i }, candidate);
       if (boxCells.length === 2) {
-        pairs.push({ unit: { type: 'box', index: i }, cells: [boxCells[0], boxCells[1]] });
+        pairs.push({ unit: { type: "box", index: i }, cells: [boxCells[0], boxCells[1]] });
       }
     }
 
@@ -66,14 +62,15 @@ export class TurbotFish extends BaseTechnique {
         if (pair1.unit.type === pair2.unit.type && pair1.unit.index === pair2.unit.index) continue;
 
         // Skip Skyscraper patterns (both row-row or both column-column)
-        if (pair1.unit.type === 'row' && pair2.unit.type === 'row') continue;
-        if (pair1.unit.type === 'column' && pair2.unit.type === 'column') continue;
+        if (pair1.unit.type === "row" && pair2.unit.type === "row") continue;
+        if (pair1.unit.type === "column" && pair2.unit.type === "column") continue;
 
         // Skip 2-String Kite patterns (row-column)
         if (
-          (pair1.unit.type === 'row' && pair2.unit.type === 'column') ||
-          (pair1.unit.type === 'column' && pair2.unit.type === 'row')
-        ) continue;
+          (pair1.unit.type === "row" && pair2.unit.type === "column") ||
+          (pair1.unit.type === "column" && pair2.unit.type === "row")
+        )
+          continue;
 
         // Now we're looking at patterns involving at least one box pair.
         // Find a weak link: two cells (one from each pair) that see each other
@@ -96,7 +93,7 @@ export class TurbotFish extends BaseTechnique {
             if (endpoint1.row === endpoint2.row && endpoint1.col === endpoint2.col) continue;
 
             // Find eliminations: cells that see both endpoints
-            const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+            const eliminations: { position: Position; candidates: number[] }[] = [];
 
             for (let row = 0; row < BOARD_SIZE; row++) {
               for (let col = 0; col < BOARD_SIZE; col++) {
@@ -109,10 +106,7 @@ export class TurbotFish extends BaseTechnique {
                 if (!grid.isEmpty(row, col)) continue;
                 if (!grid.hasCandidate(row, col, candidate)) continue;
 
-                if (
-                  this.sees(row, col, endpoint1, grid) &&
-                  this.sees(row, col, endpoint2, grid)
-                ) {
+                if (this.sees(row, col, endpoint1, grid) && this.sees(row, col, endpoint2, grid)) {
                   eliminations.push({
                     position: { row, col },
                     candidates: [candidate],
@@ -132,7 +126,7 @@ export class TurbotFish extends BaseTechnique {
               return this.createEliminationResult(
                 eliminations,
                 `Turbot Fish: ${candidate} chain through ${pair1.unit.type} ${pair1.unit.index + 1} and ${pair2.unit.type} ${pair2.unit.index + 1}`,
-                highlightCells
+                highlightCells,
               );
             }
           }

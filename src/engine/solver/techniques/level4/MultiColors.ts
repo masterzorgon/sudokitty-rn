@@ -12,10 +12,9 @@
 //   one of the 1b cells must be false. Since all 1b cells share truth value, ALL 1b cells
 //   are false. Eliminate the candidate from all 1b cells.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 type Color = 0 | 1; // 0 = "a", 1 = "b" within a pair
 
@@ -28,9 +27,9 @@ function posKey(p: Position): string {
 }
 
 export class MultiColors extends BaseTechnique {
-  readonly name = 'Multi Colors';
+  readonly name = "Multi Colors";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Multiple conjugate pair colorings to find contradictions';
+  readonly description = "Multiple conjugate pair colorings to find contradictions";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -40,10 +39,7 @@ export class MultiColors extends BaseTechnique {
     return null;
   }
 
-  private findMultiColors(
-    grid: CandidateGridInterface,
-    candidate: number
-  ): TechniqueResult | null {
+  private findMultiColors(grid: CandidateGridInterface, candidate: number): TechniqueResult | null {
     // Build conjugate pair graph
     const adjacency = new Map<string, Position[]>();
     const allCells: Position[] = [];
@@ -57,7 +53,7 @@ export class MultiColors extends BaseTechnique {
     }
 
     for (let i = 0; i < BOARD_SIZE; i++) {
-      for (const unitType of ['row', 'column', 'box'] as const) {
+      for (const unitType of ["row", "column", "box"] as const) {
         const cells = grid.findCellsWithCandidate({ type: unitType, index: i }, candidate);
         if (cells.length === 2) {
           const key0 = posKey(cells[0]);
@@ -83,7 +79,7 @@ export class MultiColors extends BaseTechnique {
 
       // BFS to color this component
       const component: [Position[], Position[]] = [[], []];
-      const queue: Array<{ pos: Position; color: Color }> = [{ pos: cell, color: 0 }];
+      const queue: { pos: Position; color: Color }[] = [{ pos: cell, color: 0 }];
       const localColorMap = new Map<string, Color>();
       localColorMap.set(key, 0);
 
@@ -144,7 +140,7 @@ export class MultiColors extends BaseTechnique {
     grid: CandidateGridInterface,
     candidate: number,
     pair1: ColorPair,
-    pair2: ColorPair
+    pair2: ColorPair,
   ): TechniqueResult | null {
     // Check all color combinations between the two pairs
     for (const c1 of [0, 1] as Color[]) {
@@ -169,7 +165,7 @@ export class MultiColors extends BaseTechnique {
               ...pair2.cells[1].map(posKey),
             ]);
 
-            const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+            const eliminations: { position: Position; candidates: number[] }[] = [];
 
             for (let row = 0; row < BOARD_SIZE; row++) {
               for (let col = 0; col < BOARD_SIZE; col++) {
@@ -178,8 +174,12 @@ export class MultiColors extends BaseTechnique {
                 const key = posKey({ row, col });
                 if (allPairCells.has(key)) continue;
 
-                const seesGroup1 = mustBeTrue1.some((p) => this.seeEachOther({ row, col }, p, grid));
-                const seesGroup2 = mustBeTrue2.some((p) => this.seeEachOther({ row, col }, p, grid));
+                const seesGroup1 = mustBeTrue1.some((p) =>
+                  this.seeEachOther({ row, col }, p, grid),
+                );
+                const seesGroup2 = mustBeTrue2.some((p) =>
+                  this.seeEachOther({ row, col }, p, grid),
+                );
 
                 if (seesGroup1 && seesGroup2) {
                   eliminations.push({
@@ -192,13 +192,15 @@ export class MultiColors extends BaseTechnique {
 
             if (eliminations.length > 0) {
               const highlightCells = [
-                ...pair1.cells[0], ...pair1.cells[1],
-                ...pair2.cells[0], ...pair2.cells[1],
+                ...pair1.cells[0],
+                ...pair1.cells[1],
+                ...pair2.cells[0],
+                ...pair2.cells[1],
               ];
               return this.createEliminationResult(
                 eliminations,
                 `Multi Colors (Type 1): ${candidate} — two color pairs linked by weak link`,
-                highlightCells
+                highlightCells,
               );
             }
           }
@@ -219,7 +221,7 @@ export class MultiColors extends BaseTechnique {
     grid: CandidateGridInterface,
     candidate: number,
     pair1: ColorPair,
-    pair2: ColorPair
+    pair2: ColorPair,
   ): TechniqueResult | null {
     for (const targetColor of [0, 1] as Color[]) {
       const targetCells = pair1.cells[targetColor];
@@ -227,10 +229,10 @@ export class MultiColors extends BaseTechnique {
       // Check if any targetColor cell sees a pair2 color-a cell
       // AND any targetColor cell sees a pair2 color-b cell
       const seesColor2a = targetCells.some((tc) =>
-        pair2.cells[0].some((p2) => this.seeEachOther(tc, p2, grid))
+        pair2.cells[0].some((p2) => this.seeEachOther(tc, p2, grid)),
       );
       const seesColor2b = targetCells.some((tc) =>
-        pair2.cells[1].some((p2) => this.seeEachOther(tc, p2, grid))
+        pair2.cells[1].some((p2) => this.seeEachOther(tc, p2, grid)),
       );
 
       if (seesColor2a && seesColor2b) {
@@ -244,14 +246,16 @@ export class MultiColors extends BaseTechnique {
 
         if (eliminations.length > 0) {
           const highlightCells = [
-            ...pair1.cells[0], ...pair1.cells[1],
-            ...pair2.cells[0], ...pair2.cells[1],
+            ...pair1.cells[0],
+            ...pair1.cells[1],
+            ...pair2.cells[0],
+            ...pair2.cells[1],
           ];
-          const colorName = targetColor === 0 ? 'a' : 'b';
+          const colorName = targetColor === 0 ? "a" : "b";
           return this.createEliminationResult(
             eliminations,
             `Multi Colors (Type 2): ${candidate} — color 1${colorName} sees both colors of pair 2`,
-            highlightCells
+            highlightCells,
           );
         }
       }

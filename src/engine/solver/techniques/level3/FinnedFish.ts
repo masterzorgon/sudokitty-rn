@@ -4,15 +4,14 @@
 // cover column AND the fin cell (must be peers of the fin and
 // in a cover column, but not in a base row).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 export class FinnedFish extends BaseTechnique {
-  readonly name = 'Finned Fish';
+  readonly name = "Finned Fish";
   readonly level: TechniqueLevel = 3;
-  readonly description = 'X-Wing with an extra candidate fin cell';
+  readonly description = "X-Wing with an extra candidate fin cell";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     for (let candidate = 1; candidate <= 9; candidate++) {
@@ -30,10 +29,10 @@ export class FinnedFish extends BaseTechnique {
     candidate: number,
   ): TechniqueResult | null {
     // Collect rows where candidate appears in 2-3 cells
-    const eligibleRows: Array<{ row: number; cols: number[] }> = [];
+    const eligibleRows: { row: number; cols: number[] }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
-      const cells = grid.findCellsWithCandidate({ type: 'row', index: row }, candidate);
+      const cells = grid.findCellsWithCandidate({ type: "row", index: row }, candidate);
       if (cells.length >= 2 && cells.length <= 3) {
         eligibleRows.push({ row, cols: cells.map((c) => c.col) });
       }
@@ -78,7 +77,7 @@ export class FinnedFish extends BaseTechnique {
 
         // Eliminations: cells in the base columns that see the fin
         // A cell sees the fin if it's in the same box as the fin
-        const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+        const eliminations: { position: Position; candidates: number[] }[] = [];
 
         for (const col of base.cols) {
           for (let row = 0; row < BOARD_SIZE; row++) {
@@ -99,7 +98,7 @@ export class FinnedFish extends BaseTechnique {
         if (eliminations.length > 0) {
           return this.createEliminationResult(
             eliminations,
-            `Finned X-Wing: ${candidate} in rows ${base.row + 1},${finned.row + 1} columns ${base.cols.map((c) => c + 1).join(',')} fin at ${this.formatPosition(finPos)}`,
+            `Finned X-Wing: ${candidate} in rows ${base.row + 1},${finned.row + 1} columns ${base.cols.map((c) => c + 1).join(",")} fin at ${this.formatPosition(finPos)}`,
             highlightCells,
           );
         }
@@ -114,10 +113,10 @@ export class FinnedFish extends BaseTechnique {
     candidate: number,
   ): TechniqueResult | null {
     // Collect columns where candidate appears in 2-3 cells
-    const eligibleCols: Array<{ col: number; rows: number[] }> = [];
+    const eligibleCols: { col: number; rows: number[] }[] = [];
 
     for (let col = 0; col < BOARD_SIZE; col++) {
-      const cells = grid.findCellsWithCandidate({ type: 'column', index: col }, candidate);
+      const cells = grid.findCellsWithCandidate({ type: "column", index: col }, candidate);
       if (cells.length >= 2 && cells.length <= 3) {
         eligibleCols.push({ col, rows: cells.map((c) => c.row) });
       }
@@ -155,7 +154,7 @@ export class FinnedFish extends BaseTechnique {
           finPos,
         ];
 
-        const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+        const eliminations: { position: Position; candidates: number[] }[] = [];
 
         for (const row of base.rows) {
           for (let col = 0; col < BOARD_SIZE; col++) {
@@ -175,7 +174,7 @@ export class FinnedFish extends BaseTechnique {
         if (eliminations.length > 0) {
           return this.createEliminationResult(
             eliminations,
-            `Finned X-Wing: ${candidate} in columns ${base.col + 1},${finned.col + 1} rows ${base.rows.map((r) => r + 1).join(',')} fin at ${this.formatPosition(finPos)}`,
+            `Finned X-Wing: ${candidate} in columns ${base.col + 1},${finned.col + 1} rows ${base.rows.map((r) => r + 1).join(",")} fin at ${this.formatPosition(finPos)}`,
             highlightCells,
           );
         }

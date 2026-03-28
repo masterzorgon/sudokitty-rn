@@ -11,10 +11,9 @@
 // in different cells. That candidate can be eliminated from cells that see
 // both endpoints.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Unit } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 // A node in the link graph: a specific candidate in a specific cell
 interface LinkNode {
@@ -27,13 +26,13 @@ interface LinkNode {
 interface Link {
   from: LinkNode;
   to: LinkNode;
-  type: 'strong' | 'weak';
+  type: "strong" | "weak";
 }
 
 export class AIC extends BaseTechnique {
-  readonly name = 'Alternating Inference Chains';
+  readonly name = "Alternating Inference Chains";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Chains of strong and weak links between candidates';
+  readonly description = "Chains of strong and weak links between candidates";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Step 1: Build link graph
@@ -70,9 +69,11 @@ export class AIC extends BaseTechnique {
     return null;
   }
 
-  private buildGraph(
-    grid: CandidateGridInterface,
-  ): { nodes: LinkNode[]; strongLinks: Link[]; weakLinks: Link[] } {
+  private buildGraph(grid: CandidateGridInterface): {
+    nodes: LinkNode[];
+    strongLinks: Link[];
+    weakLinks: Link[];
+  } {
     const nodes: LinkNode[] = [];
     const nodeMap = new Map<string, LinkNode>();
 
@@ -105,7 +106,7 @@ export class AIC extends BaseTechnique {
           const n1 = nodeMap.get(`${row}-${col}-${cands[0]}`);
           const n2 = nodeMap.get(`${row}-${col}-${cands[1]}`);
           if (n1 && n2) {
-            strongLinks.push({ from: n1, to: n2, type: 'strong' });
+            strongLinks.push({ from: n1, to: n2, type: "strong" });
           }
         }
       }
@@ -114,9 +115,9 @@ export class AIC extends BaseTechnique {
     // Bilocal strong links: candidate appears in exactly 2 cells in a unit
     const units: Unit[] = [];
     for (let i = 0; i < BOARD_SIZE; i++) {
-      units.push({ type: 'row', index: i });
-      units.push({ type: 'column', index: i });
-      units.push({ type: 'box', index: i });
+      units.push({ type: "row", index: i });
+      units.push({ type: "column", index: i });
+      units.push({ type: "box", index: i });
     }
 
     for (const unit of units) {
@@ -126,7 +127,7 @@ export class AIC extends BaseTechnique {
           const n1 = nodeMap.get(`${cells[0].row}-${cells[0].col}-${cand}`);
           const n2 = nodeMap.get(`${cells[1].row}-${cells[1].col}-${cand}`);
           if (n1 && n2) {
-            strongLinks.push({ from: n1, to: n2, type: 'strong' });
+            strongLinks.push({ from: n1, to: n2, type: "strong" });
           }
         }
       }
@@ -148,7 +149,7 @@ export class AIC extends BaseTechnique {
               const n1 = nodeMap.get(`${cells[i].row}-${cells[i].col}-${cand}`);
               const n2 = nodeMap.get(`${cells[j].row}-${cells[j].col}-${cand}`);
               if (n1 && n2 && !strongSet.has(`${n1.id}|${n2.id}`)) {
-                weakLinks.push({ from: n1, to: n2, type: 'weak' });
+                weakLinks.push({ from: n1, to: n2, type: "weak" });
               }
             }
           }
@@ -167,7 +168,7 @@ export class AIC extends BaseTechnique {
               const n1 = nodeMap.get(`${row}-${col}-${cands[i]}`);
               const n2 = nodeMap.get(`${row}-${col}-${cands[j]}`);
               if (n1 && n2) {
-                weakLinks.push({ from: n1, to: n2, type: 'weak' });
+                weakLinks.push({ from: n1, to: n2, type: "weak" });
               }
             }
           }
@@ -191,7 +192,7 @@ export class AIC extends BaseTechnique {
 
     interface BFSState {
       node: LinkNode;
-      nextLink: 'strong' | 'weak';
+      nextLink: "strong" | "weak";
       path: LinkNode[];
     }
 
@@ -202,7 +203,7 @@ export class AIC extends BaseTechnique {
     for (const next of strongAdj.get(startNode.id) ?? []) {
       queue.push({
         node: next,
-        nextLink: 'weak', // after strong, need weak
+        nextLink: "weak", // after strong, need weak
         path: [startNode, next],
       });
     }
@@ -219,7 +220,7 @@ export class AIC extends BaseTechnique {
       if (visited.has(stateKey)) continue;
       visited.add(stateKey);
 
-      if (nextLink === 'strong') {
+      if (nextLink === "strong") {
         // Follow strong links
         for (const next of strongAdj.get(node.id) ?? []) {
           if (path.some((p) => p.id === next.id)) continue;
@@ -237,7 +238,7 @@ export class AIC extends BaseTechnique {
 
           queue.push({
             node: next,
-            nextLink: 'weak',
+            nextLink: "weak",
             path: [...path, next],
           });
         }
@@ -248,7 +249,7 @@ export class AIC extends BaseTechnique {
 
           queue.push({
             node: next,
-            nextLink: 'strong',
+            nextLink: "strong",
             path: [...path, next],
           });
         }
@@ -259,7 +260,7 @@ export class AIC extends BaseTechnique {
 
           queue.push({
             node: next,
-            nextLink: 'strong',
+            nextLink: "strong",
             path: [...path, next],
           });
         }
@@ -276,7 +277,7 @@ export class AIC extends BaseTechnique {
     path: LinkNode[],
   ): TechniqueResult | null {
     const candidate = startNode.candidate;
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     // Eliminate candidate from cells that see both endpoints
     for (let row = 0; row < BOARD_SIZE; row++) {
@@ -302,12 +303,10 @@ export class AIC extends BaseTechnique {
     // Build explanation from path
     const chainStr = path
       .map((n) => `${this.formatPosition({ row: n.row, col: n.col })}(${n.candidate})`)
-      .join('-');
+      .join("-");
 
     const highlightCells = [
-      ...new Map(
-        path.map((n) => [`${n.row}-${n.col}`, { row: n.row, col: n.col }]),
-      ).values(),
+      ...new Map(path.map((n) => [`${n.row}-${n.col}`, { row: n.row, col: n.col }])).values(),
     ];
 
     return this.createEliminationResult(

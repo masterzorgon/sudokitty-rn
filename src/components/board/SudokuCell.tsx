@@ -1,8 +1,8 @@
 // Individual Sudoku cell component with optional animations
 // Props-driven: works for both the main game (full animations) and technique practice (static)
 
-import React, { useEffect, memo } from 'react';
-import { Pressable, StyleSheet, Text, View, Dimensions } from 'react-native';
+import React, { useEffect, memo } from "react";
+import { Pressable, StyleSheet, Text, View, Dimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -11,14 +11,14 @@ import Animated, {
   withSequence,
   withTiming,
   interpolateColor,
-} from 'react-native-reanimated';
-import { colors, useColors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
-import { springConfigs, timingConfigs } from '../../theme/animations';
-import { positionKey, type CellAnimationState } from '../../engine/types';
-import { useBoardAnimationsForCell } from '../../hooks/useBoardAnimations';
+} from "react-native-reanimated";
+import { colors, useColors } from "../../theme/colors";
+import { typography, fontFamilies } from "../../theme/typography";
+import { springConfigs, timingConfigs } from "../../theme/animations";
+import { positionKey, type CellAnimationState } from "../../engine/types";
+import { useBoardAnimationsForCell } from "../../hooks/useBoardAnimations";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 // Grid spans full screen width (edge-to-edge) for the main game
 export const CELL_SIZE = SCREEN_WIDTH / 9;
 export const COMPACT_CELL_SIZE = 36;
@@ -62,181 +62,178 @@ const NotesGrid = memo(({ notes, cellSize }: { notes: Set<number>; cellSize: num
   </View>
 ));
 
-export const SudokuCell = memo(({
-  row,
-  col,
-  value,
-  isGiven,
-  isValid,
-  notes,
-  isSelected,
-  isRelated,
-  isHighlighted,
-  isSecondaryHighlight,
-  isInAltBox,
-  onPress,
-  animateValues = true,
-  compact = false,
-  completionAnimations: completionAnimationsProp,
-}: SudokuCellProps) => {
-  const c = useColors();
-  const cellSize = compact ? COMPACT_CELL_SIZE : CELL_SIZE;
-  const displayValue = value === 0 ? null : value;
+NotesGrid.displayName = "NotesGrid";
 
-  // Subscribe to completion animations from store (main game) or use prop (technique practice)
-  const key = positionKey({ row, col });
-  const completionAnimationsFromStore = useBoardAnimationsForCell(key);
-  const completionAnimations =
-    completionAnimationsProp ?? completionAnimationsFromStore;
+export const SudokuCell = memo(
+  ({
+    row,
+    col,
+    value,
+    isGiven,
+    isValid,
+    notes,
+    isSelected,
+    isRelated,
+    isHighlighted,
+    isSecondaryHighlight,
+    isInAltBox,
+    onPress,
+    animateValues = true,
+    compact = false,
+    completionAnimations: completionAnimationsProp,
+  }: SudokuCellProps) => {
+    const c = useColors();
+    const cellSize = compact ? COMPACT_CELL_SIZE : CELL_SIZE;
+    const displayValue = value === 0 ? null : value;
 
-  // Animation shared values. Initialize backgroundProgress from props to avoid flash on resume:
-  // first frame shows correct highlight state instead of default then effect-update.
-  const initialBackground = isSecondaryHighlight
-    ? 0.6
-    : isSelected
-      ? 1
-      : isRelated
-        ? 0.4
-        : isHighlighted
-          ? 0.25
-          : 0;
-  const glowOpacity = useSharedValue(0);
-  const backgroundProgress = useSharedValue(initialBackground);
+    // Subscribe to completion animations from store (main game) or use prop (technique practice)
+    const key = positionKey({ row, col });
+    const completionAnimationsFromStore = useBoardAnimationsForCell(key);
+    const completionAnimations = completionAnimationsProp ?? completionAnimationsFromStore;
 
-  // Wave completion animation shared value
-  const waveGlow = useSharedValue(0);
+    // Animation shared values. Initialize backgroundProgress from props to avoid flash on resume:
+    // first frame shows correct highlight state instead of default then effect-update.
+    const initialBackground = isSecondaryHighlight
+      ? 0.6
+      : isSelected
+        ? 1
+        : isRelated
+          ? 0.4
+          : isHighlighted
+            ? 0.25
+            : 0;
+    const glowOpacity = useSharedValue(0);
+    const backgroundProgress = useSharedValue(initialBackground);
 
-  // Single-edge border strategy: each cell only draws right + bottom borders.
-  // The board container provides the outer frame (top, left, right, bottom).
-  const isLastCol = col === 8;
-  const isLastRow = row === 8;
-  const isRightBoxBorder = (col + 1) % 3 === 0 && !isLastCol;
-  const isBottomBoxBorder = (row + 1) % 3 === 0 && !isLastRow;
+    // Wave completion animation shared value
+    const waveGlow = useSharedValue(0);
 
-  const borderStyle = {
-    borderRightWidth: isLastCol ? 0 : isRightBoxBorder ? 2 : 1,
-    borderBottomWidth: isLastRow ? 0 : isBottomBoxBorder ? 2 : 1,
-    borderRightColor: isRightBoxBorder ? colors.gridLineBold : colors.gridLine,
-    borderBottomColor: isBottomBoxBorder ? colors.gridLineBold : colors.gridLine,
-  };
+    // Single-edge border strategy: each cell only draws right + bottom borders.
+    // The board container provides the outer frame (top, left, right, bottom).
+    const isLastCol = col === 8;
+    const isLastRow = row === 8;
+    const isRightBoxBorder = (col + 1) % 3 === 0 && !isLastCol;
+    const isBottomBoxBorder = (row + 1) % 3 === 0 && !isLastRow;
 
-  // Base background color depends on checkerboard box
-  const baseBackground = isInAltBox ? c.cellBackgroundAlt : colors.cellBackground;
+    const borderStyle = {
+      borderRightWidth: isLastCol ? 0 : isRightBoxBorder ? 2 : 1,
+      borderBottomWidth: isLastRow ? 0 : isBottomBoxBorder ? 2 : 1,
+      borderRightColor: isRightBoxBorder ? colors.gridLineBold : colors.gridLine,
+      borderBottomColor: isBottomBoxBorder ? colors.gridLineBold : colors.gridLine,
+    };
 
-  // Update background animation when selection state changes
-  useEffect(() => {
-    if (isSecondaryHighlight) {
-      // Secondary highlight (elimination) gets a distinct progress value
-      backgroundProgress.value = animateValues
-        ? withSpring(0.6, springConfigs.default)
-        : 0.6;
-    } else {
-      const targetValue = isSelected ? 1 : isRelated ? 0.4 : isHighlighted ? 0.25 : 0;
-      backgroundProgress.value = targetValue;
-    }
-  }, [isSelected, isRelated, isHighlighted, isSecondaryHighlight, animateValues]);
+    // Base background color depends on checkerboard box
+    const baseBackground = isInAltBox ? c.cellBackgroundAlt : colors.cellBackground;
 
-  // Trigger glow effect on correct input (game mode only)
-  useEffect(() => {
-    if (!animateValues) return;
-    if (displayValue && !isGiven && isValid) {
-      glowOpacity.value = withSequence(
-        withTiming(1, timingConfigs.glowIn),
-        withTiming(0, timingConfigs.glowOut),
+    // Update background animation when selection state changes
+    useEffect(() => {
+      if (isSecondaryHighlight) {
+        // Secondary highlight (elimination) gets a distinct progress value
+        backgroundProgress.value = animateValues ? withSpring(0.6, springConfigs.default) : 0.6;
+      } else {
+        const targetValue = isSelected ? 1 : isRelated ? 0.4 : isHighlighted ? 0.25 : 0;
+        backgroundProgress.value = targetValue;
+      }
+    }, [isSelected, isRelated, isHighlighted, isSecondaryHighlight, animateValues]);
+
+    // Trigger glow effect on correct input (game mode only)
+    useEffect(() => {
+      if (!animateValues) return;
+      if (displayValue && !isGiven && isValid) {
+        glowOpacity.value = withSequence(
+          withTiming(1, timingConfigs.glowIn),
+          withTiming(0, timingConfigs.glowOut),
+        );
+      }
+    }, [displayValue, isValid, animateValues]);
+
+    // Trigger completion wave animation entirely on the UI thread via withDelay.
+    // When overlapping units complete (e.g. row + column), use the earliest delay.
+    useEffect(() => {
+      if (!completionAnimations?.length || !animateValues) return;
+
+      const minDelay = Math.min(...completionAnimations.map((a) => a.delay));
+      waveGlow.value = withDelay(
+        minDelay,
+        withSequence(withTiming(1, timingConfigs.wave), withTiming(0, timingConfigs.waveFade)),
       );
-    }
-  }, [displayValue, isValid, animateValues]);
+    }, [completionAnimations, animateValues]);
 
-  // Trigger completion wave animation entirely on the UI thread via withDelay.
-  // When overlapping units complete (e.g. row + column), use the earliest delay.
-  useEffect(() => {
-    if (!completionAnimations?.length || !animateValues) return;
+    const highlightColor = animateValues ? c.cellHighlighted : c.techniqueHighlight;
+    const secondaryColor = animateValues ? `${colors.coral}26` : c.techniqueHighlightSecondary;
 
-    const minDelay = Math.min(...completionAnimations.map((a) => a.delay));
-    waveGlow.value = withDelay(
-      minDelay,
-      withSequence(
-        withTiming(1, timingConfigs.wave),
-        withTiming(0, timingConfigs.waveFade),
-      ),
+    const animatedBackgroundStyle = useAnimatedStyle(() => {
+      const backgroundColor = interpolateColor(
+        backgroundProgress.value,
+        [0, 0.25, 0.4, 0.6, 1],
+        [baseBackground, highlightColor, c.cellHighlighted, secondaryColor, c.cellSelected],
+      );
+      return { backgroundColor };
+    });
+
+    const animatedGlowStyle = useAnimatedStyle(() => ({
+      opacity: glowOpacity.value,
+    }));
+
+    const animatedWaveGlowStyle = useAnimatedStyle(() => ({
+      opacity: waveGlow.value,
+    }));
+
+    const handlePress = onPress ? () => onPress(row, col) : undefined;
+
+    return (
+      <AnimatedPressable
+        onPress={handlePress}
+        disabled={!onPress}
+        style={[staticStyles.cell, { width: cellSize, height: cellSize }, borderStyle]}
+      >
+        {/* Background layer */}
+        <Animated.View style={[staticStyles.background, animatedBackgroundStyle]} />
+
+        {/* Glow effect layer for correct answers */}
+        {animateValues && <Animated.View style={[staticStyles.glow, animatedGlowStyle]} />}
+
+        {/* Wave glow effect layer for completion animations */}
+        {animateValues && (
+          <Animated.View
+            style={[
+              staticStyles.waveGlow,
+              { backgroundColor: `${c.accent}4D` },
+              animatedWaveGlowStyle,
+            ]}
+          />
+        )}
+
+        {/* Error background */}
+        {!isValid && displayValue && <View style={staticStyles.errorBackground} />}
+
+        {/* Content */}
+        {displayValue ? (
+          <Text
+            style={[
+              compact ? staticStyles.compactValue : staticStyles.value,
+              isGiven ? staticStyles.givenValue : staticStyles.userValue,
+              !isValid && staticStyles.errorValue,
+              isHighlighted && !isSecondaryHighlight && { color: c.accent },
+              isSecondaryHighlight && { color: c.coral },
+            ]}
+          >
+            {displayValue}
+          </Text>
+        ) : notes.size > 0 ? (
+          <NotesGrid notes={notes} cellSize={cellSize} />
+        ) : null}
+      </AnimatedPressable>
     );
-  }, [completionAnimations, animateValues]);
+  },
+);
 
-
-  const highlightColor = animateValues ? c.cellHighlighted : c.techniqueHighlight;
-  const secondaryColor = animateValues ? `${colors.coral}26` : c.techniqueHighlightSecondary;
-
-  const animatedBackgroundStyle = useAnimatedStyle(() => {
-    const backgroundColor = interpolateColor(
-      backgroundProgress.value,
-      [0, 0.25, 0.4, 0.6, 1],
-      [
-        baseBackground,
-        highlightColor,
-        c.cellHighlighted,
-        secondaryColor,
-        c.cellSelected,
-      ],
-    );
-    return { backgroundColor };
-  });
-
-  const animatedGlowStyle = useAnimatedStyle(() => ({
-    opacity: glowOpacity.value,
-  }));
-
-  const animatedWaveGlowStyle = useAnimatedStyle(() => ({
-    opacity: waveGlow.value,
-  }));
-
-  const handlePress = onPress ? () => onPress(row, col) : undefined;
-
-  return (
-    <AnimatedPressable
-      onPress={handlePress}
-      disabled={!onPress}
-      style={[
-        staticStyles.cell,
-        { width: cellSize, height: cellSize },
-        borderStyle,
-      ]}
-    >
-      {/* Background layer */}
-      <Animated.View style={[staticStyles.background, animatedBackgroundStyle]} />
-
-      {/* Glow effect layer for correct answers */}
-      {animateValues && <Animated.View style={[staticStyles.glow, animatedGlowStyle]} />}
-
-      {/* Wave glow effect layer for completion animations */}
-      {animateValues && <Animated.View style={[staticStyles.waveGlow, { backgroundColor: `${c.accent}4D` }, animatedWaveGlowStyle]} />}
-
-      {/* Error background */}
-      {!isValid && displayValue && <View style={staticStyles.errorBackground} />}
-
-      {/* Content */}
-      {displayValue ? (
-        <Text
-          style={[
-            compact ? staticStyles.compactValue : staticStyles.value,
-            isGiven ? staticStyles.givenValue : staticStyles.userValue,
-            !isValid && staticStyles.errorValue,
-            isHighlighted && !isSecondaryHighlight && { color: c.accent },
-            isSecondaryHighlight && { color: c.coral },
-          ]}
-        >
-          {displayValue}
-        </Text>
-      ) : notes.size > 0 ? (
-        <NotesGrid notes={notes} cellSize={cellSize} />
-      ) : null}
-    </AnimatedPressable>
-  );
-});
+SudokuCell.displayName = "SudokuCell";
 
 const staticStyles = StyleSheet.create({
   cell: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -273,15 +270,15 @@ const staticStyles = StyleSheet.create({
 
 const noteStyles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    width: '100%',
-    height: '100%',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    width: "100%",
+    height: "100%",
     padding: 1,
   },
   note: {
-    width: '33.33%',
-    height: '33.33%',
+    width: "33.33%",
+    height: "33.33%",
     ...typography.cellNotes,
     color: colors.noteText,
   },

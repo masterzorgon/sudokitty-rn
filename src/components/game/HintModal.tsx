@@ -1,15 +1,15 @@
-import React, { useMemo, useRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useMemo, useRef } from "react";
+import { View, Text, StyleSheet } from "react-native";
 
-import { useColors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import { useLastHint, useGameStore } from '../../stores/gameStore';
-import { SheetWrapper, type SheetWrapperRef } from '../ui/Sheet/SheetWrapper';
-import { SkeuButton } from '../ui/Skeuomorphic';
-import { MiniBoard, sliceBox, sliceColumn, sliceRow } from '../board';
-import type { SudokuCellData } from '../board';
-import { positionKey } from '../../engine/types';
+import { useColors } from "../../theme/colors";
+import { typography, fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import { useLastHint, useGameStore } from "../../stores/gameStore";
+import { SheetWrapper, type SheetWrapperRef } from "../ui/Sheet/SheetWrapper";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import { MiniBoard, sliceBox, sliceColumn, sliceRow } from "../board";
+import type { SudokuCellData } from "../board";
+import { positionKey } from "../../engine/types";
 
 export function HintModal() {
   const lastHint = useLastHint();
@@ -35,16 +35,8 @@ export function HintModal() {
       lastHint.targetCell.row,
       lastHint.targetCell.col,
     );
-    const columnBands = sliceColumn(
-      cellData,
-      lastHint.targetCell.row,
-      lastHint.targetCell.col,
-    );
-    const rowBands = sliceRow(
-      cellData,
-      lastHint.targetCell.row,
-      lastHint.targetCell.col,
-    );
+    const columnBands = sliceColumn(cellData, lastHint.targetCell.row, lastHint.targetCell.col);
+    const rowBands = sliceRow(cellData, lastHint.targetCell.row, lastHint.targetCell.col);
     const highlightSet = new Set(lastHint.highlightCells.map(positionKey));
 
     return { box, localRow, localCol, startRow, startCol, columnBands, rowBands, highlightSet };
@@ -67,17 +59,17 @@ export function HintModal() {
       {/* Centered header: badge → technique name → mochi hint */}
       <View style={styles.header}>
         {lastHint.category && (
-          <View style={[styles.badge, { backgroundColor: (lastHint.categoryColor ?? c.accent) + '20' }]}>
+          <View
+            style={[styles.badge, { backgroundColor: (lastHint.categoryColor ?? c.accent) + "20" }]}
+          >
             <Text style={[styles.badgeText, { color: lastHint.categoryColor ?? c.accent }]}>
               {lastHint.category}
             </Text>
           </View>
         )}
-        <Text style={[styles.title, { color: c.textPrimary }]}>
-          {lastHint.techniqueName}
-        </Text>
+        <Text style={[styles.title, { color: c.textPrimary }]}>{lastHint.techniqueName}</Text>
         <Text style={[styles.mochiHint, { color: c.textSecondary }]}>
-          "{lastHint.mochiHint}"
+          &ldquo;{lastHint.mochiHint}&rdquo;
         </Text>
       </View>
 
@@ -138,7 +130,7 @@ export function HintModal() {
       {/* In your puzzle */}
       <View style={styles.section}>
         <Text style={[styles.sectionLabel, { color: c.accent }]}>IN YOUR PUZZLE</Text>
-        <View style={[styles.puzzleHintBox, { backgroundColor: c.gridLine + '30' }]}>
+        <View style={[styles.puzzleHintBox, { backgroundColor: c.gridLine + "30" }]}>
           <Text style={[styles.puzzleHintText, { color: c.textPrimary }]}>
             {lastHint.explanation}
           </Text>
@@ -164,7 +156,7 @@ export function HintModal() {
 
 const styles = StyleSheet.create({
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: spacing.xs,
     marginBottom: spacing.lg,
   },
@@ -176,26 +168,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 1,
     marginBottom: spacing.xs,
-    textAlign: 'center',
+    textAlign: "center",
   },
   contextRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-end",
     gap: spacing.md,
     marginBottom: spacing.lg,
   },
   contextGroup: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   stripsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
   },
   title: {
     ...typography.title,
-    textAlign: 'center',
+    textAlign: "center",
   },
   badge: {
     paddingHorizontal: spacing.sm + 2,
@@ -210,9 +202,9 @@ const styles = StyleSheet.create({
   mochiHint: {
     fontFamily: fontFamilies.medium,
     fontSize: 14,
-    fontStyle: 'italic',
+    fontStyle: "italic",
     lineHeight: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   section: {
     marginBottom: spacing.lg,
@@ -239,18 +231,18 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
   button: {
-    width: '100%',
+    width: "100%",
     marginTop: spacing.xs,
   },
   buttonContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: spacing.md,
   },
   buttonText: {
     fontFamily: fontFamilies.bold,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     letterSpacing: 0.5,
   },
 });

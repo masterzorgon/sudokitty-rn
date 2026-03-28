@@ -8,12 +8,12 @@
 //   4. If target technique not found, retry (up to budget)
 //   5. On failure, fall back to curated puzzle bank
 
-import { GeneratedPuzzle } from './types';
-import { SudokuSolver, TechniqueLevel, TechniqueResult, Hint, getMochiHint } from './solver';
-import { CandidateGrid } from './solver/CandidateGrid';
-import { ALL_TECHNIQUES } from './solver/techniques';
-import { generatePuzzle } from './generator';
-import { transformCuratedPuzzle } from './puzzleTransform';
+import { GeneratedPuzzle } from "./types";
+import { SudokuSolver, TechniqueLevel, TechniqueResult, Hint, getMochiHint } from "./solver";
+import { CandidateGrid } from "./solver/CandidateGrid";
+import { ALL_TECHNIQUES } from "./solver/techniques";
+import { generatePuzzle } from "./generator";
+import { transformCuratedPuzzle } from "./puzzleTransform";
 
 // ============================================
 // Types
@@ -32,8 +32,8 @@ export interface TechniqueGenerationResult {
   hint?: Hint;
   attemptsTaken: number;
   timeMs: number;
-  source: 'generated' | 'curated' | 'cached';
-  error?: 'TIMEOUT' | 'MAX_RETRIES' | 'NO_CURATED';
+  source: "generated" | "curated" | "cached";
+  error?: "TIMEOUT" | "MAX_RETRIES" | "NO_CURATED";
 }
 
 export interface TechniqueInfo {
@@ -44,41 +44,45 @@ export interface TechniqueInfo {
 
 // Map technique names to IDs
 export const TECHNIQUE_IDS: Record<string, TechniqueInfo> = {
-  'naked-single': { id: 'naked-single', name: 'Naked Single', level: 1 },
-  'hidden-single': { id: 'hidden-single', name: 'Hidden Single', level: 1 },
-  'naked-pair': { id: 'naked-pair', name: 'Naked Pair', level: 2 },
-  'hidden-pair': { id: 'hidden-pair', name: 'Hidden Pair', level: 2 },
-  'pointing-pair': { id: 'pointing-pair', name: 'Pointing Pair', level: 2 },
-  'box-line-reduction': { id: 'box-line-reduction', name: 'Box/Line Reduction', level: 2 },
-  'naked-triple': { id: 'naked-triple', name: 'Naked Triple', level: 3 },
-  'hidden-triple': { id: 'hidden-triple', name: 'Hidden Triple', level: 3 },
-  'x-wing': { id: 'x-wing', name: 'X-Wing', level: 3 },
-  'finned-fish': { id: 'finned-fish', name: 'Finned Fish', level: 3 },
-  'skyscraper': { id: 'skyscraper', name: 'Skyscraper', level: 3 },
-  'two-string-kite': { id: 'two-string-kite', name: '2-String Kite', level: 3 },
-  'turbot-fish': { id: 'turbot-fish', name: 'Turbot Fish', level: 3 },
-  'empty-rectangle': { id: 'empty-rectangle', name: 'Empty Rectangle', level: 3 },
-  'sue-de-coq': { id: 'sue-de-coq', name: 'Sue de Coq', level: 3 },
-  'simple-colors': { id: 'simple-colors', name: 'Simple Colors', level: 3 },
-  'swordfish': { id: 'swordfish', name: 'Swordfish', level: 4 },
-  'jellyfish': { id: 'jellyfish', name: 'Jellyfish', level: 4 },
-  'xy-wing': { id: 'xy-wing', name: 'XY-Wing', level: 4 },
-  'xyz-wing': { id: 'xyz-wing', name: 'XYZ-Wing', level: 4 },
-  'wxyz-wing': { id: 'wxyz-wing', name: 'WXYZ-Wing', level: 4 },
-  'unique-rectangle': { id: 'unique-rectangle', name: 'Unique Rectangle', level: 4 },
-  'avoidable-rectangle': { id: 'avoidable-rectangle', name: 'Avoidable Rectangle', level: 4 },
-  'bug': { id: 'bug', name: 'BUG', level: 4 },
-  'almost-locked-sets': { id: 'almost-locked-sets', name: 'Almost Locked Sets', level: 4 },
-  'alternating-inference-chains': { id: 'alternating-inference-chains', name: 'Alternating Inference Chains', level: 4 },
-  'franken-fish': { id: 'franken-fish', name: 'Franken Fish', level: 4 },
-  'mutant-fish': { id: 'mutant-fish', name: 'Mutant Fish', level: 4 },
-  'siamese-fish': { id: 'siamese-fish', name: 'Siamese Fish', level: 4 },
-  'multi-colors': { id: 'multi-colors', name: 'Multi Colors', level: 4 },
-  'templates': { id: 'templates', name: 'Templates', level: 4 },
-  'forcing-chain': { id: 'forcing-chain', name: 'Forcing Chain', level: 4 },
-  'forcing-net': { id: 'forcing-net', name: 'Forcing Net', level: 4 },
-  'kraken-fish': { id: 'kraken-fish', name: 'Kraken Fish', level: 4 },
-  'brute-force': { id: 'brute-force', name: 'Brute Force', level: 4 },
+  "naked-single": { id: "naked-single", name: "Naked Single", level: 1 },
+  "hidden-single": { id: "hidden-single", name: "Hidden Single", level: 1 },
+  "naked-pair": { id: "naked-pair", name: "Naked Pair", level: 2 },
+  "hidden-pair": { id: "hidden-pair", name: "Hidden Pair", level: 2 },
+  "pointing-pair": { id: "pointing-pair", name: "Pointing Pair", level: 2 },
+  "box-line-reduction": { id: "box-line-reduction", name: "Box/Line Reduction", level: 2 },
+  "naked-triple": { id: "naked-triple", name: "Naked Triple", level: 3 },
+  "hidden-triple": { id: "hidden-triple", name: "Hidden Triple", level: 3 },
+  "x-wing": { id: "x-wing", name: "X-Wing", level: 3 },
+  "finned-fish": { id: "finned-fish", name: "Finned Fish", level: 3 },
+  skyscraper: { id: "skyscraper", name: "Skyscraper", level: 3 },
+  "two-string-kite": { id: "two-string-kite", name: "2-String Kite", level: 3 },
+  "turbot-fish": { id: "turbot-fish", name: "Turbot Fish", level: 3 },
+  "empty-rectangle": { id: "empty-rectangle", name: "Empty Rectangle", level: 3 },
+  "sue-de-coq": { id: "sue-de-coq", name: "Sue de Coq", level: 3 },
+  "simple-colors": { id: "simple-colors", name: "Simple Colors", level: 3 },
+  swordfish: { id: "swordfish", name: "Swordfish", level: 4 },
+  jellyfish: { id: "jellyfish", name: "Jellyfish", level: 4 },
+  "xy-wing": { id: "xy-wing", name: "XY-Wing", level: 4 },
+  "xyz-wing": { id: "xyz-wing", name: "XYZ-Wing", level: 4 },
+  "wxyz-wing": { id: "wxyz-wing", name: "WXYZ-Wing", level: 4 },
+  "unique-rectangle": { id: "unique-rectangle", name: "Unique Rectangle", level: 4 },
+  "avoidable-rectangle": { id: "avoidable-rectangle", name: "Avoidable Rectangle", level: 4 },
+  bug: { id: "bug", name: "BUG", level: 4 },
+  "almost-locked-sets": { id: "almost-locked-sets", name: "Almost Locked Sets", level: 4 },
+  "alternating-inference-chains": {
+    id: "alternating-inference-chains",
+    name: "Alternating Inference Chains",
+    level: 4,
+  },
+  "franken-fish": { id: "franken-fish", name: "Franken Fish", level: 4 },
+  "mutant-fish": { id: "mutant-fish", name: "Mutant Fish", level: 4 },
+  "siamese-fish": { id: "siamese-fish", name: "Siamese Fish", level: 4 },
+  "multi-colors": { id: "multi-colors", name: "Multi Colors", level: 4 },
+  templates: { id: "templates", name: "Templates", level: 4 },
+  "forcing-chain": { id: "forcing-chain", name: "Forcing Chain", level: 4 },
+  "forcing-net": { id: "forcing-net", name: "Forcing Net", level: 4 },
+  "kraken-fish": { id: "kraken-fish", name: "Kraken Fish", level: 4 },
+  "brute-force": { id: "brute-force", name: "Brute Force", level: 4 },
 };
 
 // Reverse lookup: technique name -> technique ID
@@ -98,11 +102,11 @@ const DEFAULT_CONFIG: GenerationConfig = {
 
 // Per-level difficulty mappings for puzzle generation
 // We generate puzzles at the level that requires the target technique
-const LEVEL_TO_DIFFICULTY: Record<TechniqueLevel, 'easy' | 'medium' | 'hard' | 'expert'> = {
-  1: 'easy',
-  2: 'medium',
-  3: 'hard',
-  4: 'expert',
+const LEVEL_TO_DIFFICULTY: Record<TechniqueLevel, "easy" | "medium" | "hard" | "expert"> = {
+  1: "easy",
+  2: "medium",
+  3: "hard",
+  4: "expert",
 };
 
 // ============================================
@@ -129,8 +133,8 @@ export function generatePuzzleForTechnique(
       success: false,
       attemptsTaken: 0,
       timeMs: 0,
-      source: 'generated',
-      error: 'MAX_RETRIES',
+      source: "generated",
+      error: "MAX_RETRIES",
     };
   }
 
@@ -146,8 +150,8 @@ export function generatePuzzleForTechnique(
         success: false,
         attemptsTaken: attempts,
         timeMs: elapsed,
-        source: 'generated',
-        error: 'TIMEOUT',
+        source: "generated",
+        error: "TIMEOUT",
       };
     }
 
@@ -166,9 +170,7 @@ export function generatePuzzleForTechnique(
     if (!solveResult.solved) continue;
 
     // Find the first step that uses the target technique
-    const targetStep = solveResult.steps.find(
-      (step) => step.techniqueName === info.name,
-    );
+    const targetStep = solveResult.steps.find((step) => step.techniqueName === info.name);
 
     if (!targetStep) continue;
 
@@ -194,7 +196,7 @@ export function generatePuzzleForTechnique(
       hint: techniqueResultToHint(snapshotResult.techniqueResult),
       attemptsTaken: attempts,
       timeMs: elapsed2,
-      source: 'generated',
+      source: "generated",
     };
   }
 
@@ -203,8 +205,8 @@ export function generatePuzzleForTechnique(
     success: false,
     attemptsTaken: attempts,
     timeMs: elapsed,
-    source: 'generated',
-    error: 'MAX_RETRIES',
+    source: "generated",
+    error: "MAX_RETRIES",
   };
 }
 
@@ -333,9 +335,9 @@ export interface CuratedPuzzle {
     techniqueName: string;
     level: TechniqueLevel;
     explanation: string;
-    highlightCells: Array<{ row: number; col: number }>;
-    eliminations: Array<{ position: { row: number; col: number }; candidates: number[] }>;
-    placements: Array<{ position: { row: number; col: number }; value: number }>;
+    highlightCells: { row: number; col: number }[];
+    eliminations: { position: { row: number; col: number }; candidates: number[] }[];
+    placements: { position: { row: number; col: number }; value: number }[];
   };
 }
 
@@ -359,12 +361,13 @@ export function getCuratedPuzzle(
       success: false,
       attemptsTaken: 0,
       timeMs: 0,
-      source: 'curated',
-      error: 'NO_CURATED',
+      source: "curated",
+      error: "NO_CURATED",
     };
   }
 
-  const idx = index !== undefined ? index % puzzles.length : Math.floor(Math.random() * puzzles.length);
+  const idx =
+    index !== undefined ? index % puzzles.length : Math.floor(Math.random() * puzzles.length);
   const curated = puzzles[idx];
 
   // Apply random isomorphic transformation for variety
@@ -378,7 +381,7 @@ export function getCuratedPuzzle(
     hint: techniqueResultToHint(transformed.techniqueResult as TechniqueResult),
     attemptsTaken: 0,
     timeMs: 0,
-    source: 'curated',
+    source: "curated",
   };
 }
 

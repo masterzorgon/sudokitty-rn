@@ -7,15 +7,14 @@
 // BUG state. It's identified as the candidate that appears an odd
 // number of times in its row, column, and box among unsolved cells.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class BUG extends BaseTechnique {
-  readonly name = 'BUG';
+  readonly name = "BUG";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'All unsolved cells are bivalue except one with three candidates';
+  readonly description = "All unsolved cells are bivalue except one with three candidates";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     let triValueCell: Position | null = null;
@@ -66,10 +65,19 @@ export class BUG extends BaseTechnique {
   ): number | null {
     for (const candidate of candidates) {
       // Count how many times this candidate appears in the cell's row, column, and box
-      const rowCount = grid.findCellsWithCandidate({ type: 'row', index: cell.row }, candidate).length;
-      const colCount = grid.findCellsWithCandidate({ type: 'column', index: cell.col }, candidate).length;
+      const rowCount = grid.findCellsWithCandidate(
+        { type: "row", index: cell.row },
+        candidate,
+      ).length;
+      const colCount = grid.findCellsWithCandidate(
+        { type: "column", index: cell.col },
+        candidate,
+      ).length;
       const boxIndex = Math.floor(cell.row / 3) * 3 + Math.floor(cell.col / 3);
-      const boxCount = grid.findCellsWithCandidate({ type: 'box', index: boxIndex }, candidate).length;
+      const boxCount = grid.findCellsWithCandidate(
+        { type: "box", index: boxIndex },
+        candidate,
+      ).length;
 
       // The extra candidate appears an odd number of times in all three units
       if (rowCount % 2 === 1 && colCount % 2 === 1 && boxCount % 2 === 1) {

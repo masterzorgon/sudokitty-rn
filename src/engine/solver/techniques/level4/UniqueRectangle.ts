@@ -4,19 +4,18 @@
 // those 2 candidates (or the puzzle would have multiple solutions).
 // Eliminate the 2 rectangle candidates from the 4th corner.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class UniqueRectangle extends BaseTechnique {
-  readonly name = 'Unique Rectangle';
+  readonly name = "Unique Rectangle";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Four cells forming a deadly rectangle pattern';
+  readonly description = "Four cells forming a deadly rectangle pattern";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Find all bivalue cells
-    const bivalueCells: Array<{ pos: Position; cands: number[] }> = [];
+    const bivalueCells: { pos: Position; cands: number[] }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -30,9 +29,9 @@ export class UniqueRectangle extends BaseTechnique {
     }
 
     // Group bivalue cells by their candidate pair
-    const groups: Map<string, Array<{ pos: Position; cands: number[] }>> = new Map();
+    const groups: Map<string, { pos: Position; cands: number[] }[]> = new Map();
     for (const cell of bivalueCells) {
-      const key = cell.cands.join(',');
+      const key = cell.cands.join(",");
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(cell);
     }
@@ -59,7 +58,7 @@ export class UniqueRectangle extends BaseTechnique {
 
   private tryRectangle(
     grid: CandidateGridInterface,
-    three: Array<{ pos: Position; cands: number[] }>,
+    three: { pos: Position; cands: number[] }[],
     cand1: number,
     cand2: number,
   ): TechniqueResult | null {
@@ -94,16 +93,14 @@ export class UniqueRectangle extends BaseTechnique {
 
     // Check that rectangle spans exactly 2 boxes
     const boxes = new Set(
-      [...positions, fourthCorner].map(
-        (p) => Math.floor(p.row / 3) * 3 + Math.floor(p.col / 3),
-      ),
+      [...positions, fourthCorner].map((p) => Math.floor(p.row / 3) * 3 + Math.floor(p.col / 3)),
     );
     if (boxes.size !== 2) return null;
 
     // Eliminate the rectangle candidates from the fourth corner
     return this.createEliminationResult(
       [{ position: fourthCorner, candidates: [cand1, cand2] }],
-      `Uniqueness Test 1: ${cand1}/${cand2} in ${positions.map((p) => this.formatPosition(p)).join(',')},${this.formatPosition(fourthCorner)} => ${this.formatPosition(fourthCorner)}<>${cand1}, ${this.formatPosition(fourthCorner)}<>${cand2}`,
+      `Uniqueness Test 1: ${cand1}/${cand2} in ${positions.map((p) => this.formatPosition(p)).join(",")},${this.formatPosition(fourthCorner)} => ${this.formatPosition(fourthCorner)}<>${cand1}, ${this.formatPosition(fourthCorner)}<>${cand2}`,
       [...positions, fourthCorner],
     );
   }

@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import React, { useEffect, useRef, useCallback, useState } from "react";
+import { View, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 import {
   AnimatedGameView,
@@ -11,19 +11,19 @@ import {
   GameMascot,
   GameSettingsModal,
   HintModal,
-} from '../src/components/game';
-import { NumberPad, ActionButtons } from '../src/components/controls';
-import { useGameStore } from '../src/stores/gameStore';
-import { useGameMascotMessage, useBackgroundMusic } from '../src/hooks';
-import { useColors } from '../src/theme/colors';
-import { spacing } from '../src/theme';
-import { startGameAnimations } from '../src/theme/animations';
-import { GAME_LAYOUT } from '../src/constants/layout';
-import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../src/engine/types';
-import { playFeedback } from '../src/utils/feedback';
-import { loadSfx, unloadSfx } from '../src/services/sfxService';
-import { showRewardedAd } from '../src/services/adService';
-import { useIsPremium } from '../src/stores/premiumStore';
+} from "../src/components/game";
+import { NumberPad, ActionButtons } from "../src/components/controls";
+import { useGameStore } from "../src/stores/gameStore";
+import { useGameMascotMessage, useBackgroundMusic } from "../src/hooks";
+import { useColors } from "../src/theme/colors";
+import { spacing } from "../src/theme";
+import { startGameAnimations } from "../src/theme/animations";
+import { GAME_LAYOUT } from "../src/constants/layout";
+import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from "../src/engine/types";
+import { playFeedback } from "../src/utils/feedback";
+import { loadSfx, unloadSfx } from "../src/services/sfxService";
+import { showRewardedAd } from "../src/services/adService";
+import { useIsPremium } from "../src/stores/premiumStore";
 
 export default function GameScreen() {
   const c = useColors();
@@ -34,7 +34,7 @@ export default function GameScreen() {
     seed?: string;
   }>();
 
-  const isDaily = params.isDaily === 'true';
+  const isDaily = params.isDaily === "true";
   const difficulty = params.difficulty;
 
   const gameStatus = useGameStore((s) => s.gameStatus);
@@ -71,13 +71,13 @@ export default function GameScreen() {
       let skipNewGame = false;
       if (isDaily) {
         skipNewGame =
-          st.gameStatus === 'playing' &&
+          st.gameStatus === "playing" &&
           st.isDaily &&
           st.difficulty === dailyDifficulty &&
           st.getProgress() === 0;
       } else {
         skipNewGame =
-          st.gameStatus === 'playing' &&
+          st.gameStatus === "playing" &&
           !st.isDaily &&
           st.difficulty === difficulty &&
           st.getProgress() === 0;
@@ -98,7 +98,7 @@ export default function GameScreen() {
 
   useEffect(() => {
     const currentStatus = useGameStore.getState().gameStatus;
-    if ((currentStatus === 'won' || currentStatus === 'lost') && !navigatedToEndGame.current) {
+    if ((currentStatus === "won" || currentStatus === "lost") && !navigatedToEndGame.current) {
       navigatedToEndGame.current = true;
       const {
         difficulty: d,
@@ -122,28 +122,28 @@ export default function GameScreen() {
         xpEarned: String(xpEarnedThisGame),
       };
 
-      if (currentStatus === 'won') {
-        router.replace({ pathname: '/end-game', params: endGameParams });
+      if (currentStatus === "won") {
+        router.replace({ pathname: "/end-game", params: endGameParams });
       } else {
-        router.push({ pathname: '/end-game', params: endGameParams });
+        router.push({ pathname: "/end-game", params: endGameParams });
       }
-    } else if (currentStatus === 'playing') {
+    } else if (currentStatus === "playing") {
       navigatedToEndGame.current = false;
     }
   }, [gameStatus, isDaily, router]);
 
   const handleGoBack = useCallback(() => {
-    playFeedback('tap');
-    if (gameStatus === 'playing') {
+    playFeedback("tap");
+    if (gameStatus === "playing") {
       pauseGame();
     }
     router.back();
   }, [gameStatus, pauseGame, router]);
 
   const openSettingsModal = useCallback(() => {
-    playFeedback('tap');
-    wasPausedBeforeModal.current = gameStatus === 'paused';
-    if (gameStatus === 'playing') {
+    playFeedback("tap");
+    wasPausedBeforeModal.current = gameStatus === "paused";
+    if (gameStatus === "playing") {
       pauseGame();
     }
     setIsSettingsModalVisible(true);
@@ -151,7 +151,7 @@ export default function GameScreen() {
 
   const closeSettingsModal = useCallback(() => {
     setIsSettingsModalVisible(false);
-    if (!wasPausedBeforeModal.current && gameStatus === 'paused') {
+    if (!wasPausedBeforeModal.current && gameStatus === "paused") {
       resumeGame();
     }
   }, [gameStatus, resumeGame]);
@@ -159,9 +159,9 @@ export default function GameScreen() {
   const handleHintUnavailable = useCallback(async () => {
     const earned = await showRewardedAd();
     if (!earned) return;
-    const { addPaidHints, useHint } = useGameStore.getState();
+    const { addPaidHints, useHint: applyHint } = useGameStore.getState();
     addPaidHints(1);
-    useHint();
+    applyHint();
   }, []);
 
   return (
@@ -185,21 +185,18 @@ export default function GameScreen() {
       <View style={styles.bottomZone}>
         <View style={styles.controlsContainer}>
           <Animated.View entering={FadeIn.duration(startGameAnimations.controlsFadeIn.duration)}>
-            <ActionButtons
-              onHintUnavailable={!isPremium ? handleHintUnavailable : undefined}
-            />
+            <ActionButtons onHintUnavailable={!isPremium ? handleHintUnavailable : undefined} />
           </Animated.View>
 
-          <Animated.View entering={FadeIn.delay(100).duration(startGameAnimations.controlsFadeIn.duration)}>
+          <Animated.View
+            entering={FadeIn.delay(100).duration(startGameAnimations.controlsFadeIn.duration)}
+          >
             <NumberPad />
           </Animated.View>
         </View>
       </View>
 
-      <GameSettingsModal
-        visible={isSettingsModalVisible}
-        onClose={closeSettingsModal}
-      />
+      <GameSettingsModal visible={isSettingsModalVisible} onClose={closeSettingsModal} />
 
       <HintModal />
     </SafeAreaView>
@@ -217,19 +214,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mascotZone: {
-    width: '100%',
-    maxWidth: '80%',
-    alignSelf: 'center',
+    width: "100%",
+    maxWidth: "80%",
+    alignSelf: "center",
   },
   gridContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   bottomZone: {
     paddingTop: spacing.xxl + spacing.sm,
     paddingBottom: spacing.md,
   },
   controlsContainer: {
-    width: '100%',
+    width: "100%",
     gap: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },

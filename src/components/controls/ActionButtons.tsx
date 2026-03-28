@@ -1,18 +1,18 @@
 // Action buttons: Undo, Erase, Notes, Hint
 // Skeuomorphic 3D styling using SkeuButton
 
-import React, { memo } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { memo } from "react";
+import { View, StyleSheet, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import { useGameStore, useCanUseHint } from '../../stores/gameStore';
-import { useUnlimitedHints } from '../../stores/settingsStore';
-import { useEffectivePremium } from '../../stores/premiumStore';
-import { MAX_HINTS } from '../../engine/types';
-import { colors } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { SkeuButton } from '../ui/Skeuomorphic';
-import { BUTTON_HEIGHT, BUTTON_RADIUS, whiteSkeuColorsSecondary } from './constants';
+import { useGameStore, useCanUseHint } from "../../stores/gameStore";
+import { useUnlimitedHints } from "../../stores/settingsStore";
+import { useEffectivePremium } from "../../stores/premiumStore";
+import { MAX_HINTS } from "../../engine/types";
+import { colors } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import { BUTTON_HEIGHT, BUTTON_RADIUS, whiteSkeuColorsSecondary } from "./constants";
 
 const whiteColors = whiteSkeuColorsSecondary;
 
@@ -22,59 +22,57 @@ interface ActionButtonProps {
   onPress: () => void;
   isActive?: boolean;
   disabled?: boolean;
-  feedbackId?: 'erase' | 'notesToggle' | 'hint';
+  feedbackId?: "erase" | "notesToggle" | "hint";
   /** Small circular badge over top-right of icon (e.g. hint count / "Ad") */
   badge?: string;
   /** Horizontal inset for badge (negative = overlap past icon edge); e.g. -14 for "Ad", -10 for "1" */
   badgeInsetRight?: number;
 }
 
-const ActionButton = memo(({
-  icon,
-  label,
-  onPress,
-  isActive = false,
-  disabled = false,
-  feedbackId,
-  badge,
-  badgeInsetRight = -10,
-}: ActionButtonProps) => {
-  const iconColor = disabled
-    ? colors.textLight
-    : isActive
-    ? colors.white
-    : colors.textSecondary;
+const ActionButton = memo(
+  ({
+    icon,
+    label,
+    onPress,
+    isActive = false,
+    disabled = false,
+    feedbackId,
+    badge,
+    badgeInsetRight = -10,
+  }: ActionButtonProps) => {
+    const iconColor = disabled ? colors.textLight : isActive ? colors.white : colors.textSecondary;
 
-  return (
-    <View style={styles.buttonWrapper}>
-      <SkeuButton
-        onPress={onPress}
-        variant={isActive ? 'primary' : 'secondary'}
-        customColors={isActive ? undefined : whiteColors}
-        borderRadius={BUTTON_RADIUS}
-        showHighlight={false}
-        disabled={disabled}
-        feedbackId={feedbackId}
-        contentStyle={styles.buttonFace}
-        accessibilityLabel={`${label} button`}
-      >
-        <View style={styles.iconWithBadge}>
-          <Ionicons name={icon} size={24} color={iconColor} />
-          {badge != null && badge !== '' && (
-            <View style={[styles.hintBadge, { right: badgeInsetRight }]}>
-              <Text style={[styles.hintBadgeText, badge === '∞' && styles.hintBadgeTextInfinity]}>
-                {badge}
-              </Text>
-            </View>
-          )}
-        </View>
-        <Text style={[styles.label, isActive && styles.labelActive]}>
-          {label}
-        </Text>
-      </SkeuButton>
-    </View>
-  );
-});
+    return (
+      <View style={styles.buttonWrapper}>
+        <SkeuButton
+          onPress={onPress}
+          variant={isActive ? "primary" : "secondary"}
+          customColors={isActive ? undefined : whiteColors}
+          borderRadius={BUTTON_RADIUS}
+          showHighlight={false}
+          disabled={disabled}
+          feedbackId={feedbackId}
+          contentStyle={styles.buttonFace}
+          accessibilityLabel={`${label} button`}
+        >
+          <View style={styles.iconWithBadge}>
+            <Ionicons name={icon} size={24} color={iconColor} />
+            {badge != null && badge !== "" && (
+              <View style={[styles.hintBadge, { right: badgeInsetRight }]}>
+                <Text style={[styles.hintBadgeText, badge === "∞" && styles.hintBadgeTextInfinity]}>
+                  {badge}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text style={[styles.label, isActive && styles.labelActive]}>{label}</Text>
+        </SkeuButton>
+      </View>
+    );
+  },
+);
+
+ActionButton.displayName = "ActionButton";
 
 interface ActionButtonsProps {
   onHintUnavailable?: () => void;
@@ -86,7 +84,7 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
   const eraseCell = useGameStore((s) => s.eraseCell);
   const toggleNotesMode = useGameStore((s) => s.toggleNotesMode);
   const isNotesMode = useGameStore((s) => s.isNotesMode);
-  const useHint = useGameStore((s) => s.useHint);
+  const applyHint = useGameStore((s) => s.useHint);
   const hintsUsed = useGameStore((s) => s.hintsUsed);
   const paidHintsRemaining = useGameStore((s) => s.paidHintsRemaining);
   const gameStatus = useGameStore((s) => s.gameStatus);
@@ -94,30 +92,23 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
   const unlimitedHints = useUnlimitedHints();
   const isPremium = useEffectivePremium();
 
-  const isPlaying = gameStatus === 'playing';
+  const isPlaying = gameStatus === "playing";
 
-  const hintsRemaining =
-    Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining;
+  const hintsRemaining = Math.max(MAX_HINTS - hintsUsed, 0) + paidHintsRemaining;
   const hintBadgeContent =
-    isPremium && unlimitedHints
-      ? '∞'
-      : hintsRemaining > 0
-        ? String(hintsRemaining)
-        : 'Ad';
+    isPremium && unlimitedHints ? "∞" : hintsRemaining > 0 ? String(hintsRemaining) : "Ad";
 
-  const hintBadgeInsetRight = hintBadgeContent === 'Ad' ? -14 : -10;
+  const hintBadgeInsetRight = hintBadgeContent === "Ad" ? -14 : -10;
 
   const handleHintPress = () => {
     if (canUseHint) {
-      useHint();
+      applyHint();
     } else {
       onHintUnavailable?.();
     }
   };
 
-  const hintDisabled = onHintUnavailable
-    ? !isPlaying
-    : !isPlaying || !canUseHint;
+  const hintDisabled = onHintUnavailable ? !isPlaying : !isPlaying || !canUseHint;
 
   return (
     <View style={styles.container}>
@@ -135,7 +126,7 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
         feedbackId="erase"
       />
       <ActionButton
-        icon={isNotesMode ? 'pencil' : 'pencil-outline'}
+        icon={isNotesMode ? "pencil" : "pencil-outline"}
         label="Notes"
         onPress={toggleNotesMode}
         isActive={isNotesMode}
@@ -155,9 +146,11 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
   );
 });
 
+ActionButtons.displayName = "ActionButtons";
+
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 4, // Reduced to make buttons ~5% wider
     // No marginBottom - spacing controlled by parent container gap
   },
@@ -165,25 +158,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconWithBadge: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
   },
   hintBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: -4,
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#8a7878',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#8a7878",
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 4,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: "#FFFFFF",
   },
   hintBadgeText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 10,
     fontFamily: fontFamilies.bold,
     lineHeight: 13,
@@ -194,8 +187,8 @@ const styles = StyleSheet.create({
   },
   buttonFace: {
     height: BUTTON_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 2,
   },
   label: {

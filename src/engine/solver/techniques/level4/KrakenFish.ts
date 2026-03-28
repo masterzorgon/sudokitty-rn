@@ -10,7 +10,7 @@
 // Type 2: For each base candidate in a cover set (plus fins), build chains
 //   that all converge on the same conclusion.
 
-import { Position } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
 import {
   CandidateGridInterface,
   TechniqueResult,
@@ -18,9 +18,8 @@ import {
   Elimination,
   Unit,
   UnitType,
-} from '../../types';
-import { BaseTechnique, combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+} from "../../types";
+import { BaseTechnique, combinations } from "../Technique";
 
 const MAX_CHAIN_DEPTH = 12;
 
@@ -37,9 +36,9 @@ function sees(a: Position, b: Position): boolean {
 }
 
 export class KrakenFish extends BaseTechnique {
-  readonly name = 'Kraken Fish';
+  readonly name = "Kraken Fish";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Fish patterns enhanced with chains to prove eliminations';
+  readonly description = "Fish patterns enhanced with chains to prove eliminations";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Type 1: Find finned fish where eliminations don't see all fins,
@@ -52,12 +51,12 @@ export class KrakenFish extends BaseTechnique {
     return null;
   }
 
-  private findKrakenType1(
-    grid: CandidateGridInterface,
-    candidate: number
-  ): TechniqueResult | null {
+  private findKrakenType1(grid: CandidateGridInterface, candidate: number): TechniqueResult | null {
     // Find basic fish patterns (rows as base, columns as cover) with fins
-    for (const [baseType, coverType] of [['row', 'column'], ['column', 'row']] as [UnitType, UnitType][]) {
+    for (const [baseType, coverType] of [
+      ["row", "column"],
+      ["column", "row"],
+    ] as [UnitType, UnitType][]) {
       for (let size = 2; size <= 3; size++) {
         const result = this.tryKrakenFish(grid, candidate, baseType, coverType, size);
         if (result) return result;
@@ -71,10 +70,10 @@ export class KrakenFish extends BaseTechnique {
     candidate: number,
     baseType: UnitType,
     coverType: UnitType,
-    size: number
+    size: number,
   ): TechniqueResult | null {
     // Find base units with 2+ cells containing the candidate
-    const validBases: Array<{ unit: Unit; cells: Position[] }> = [];
+    const validBases: { unit: Unit; cells: Position[] }[] = [];
     for (let i = 0; i < BOARD_SIZE; i++) {
       const cells = grid.findCellsWithCandidate({ type: baseType, index: i }, candidate);
       if (cells.length >= 2 && cells.length <= size + 2) {
@@ -96,7 +95,7 @@ export class KrakenFish extends BaseTechnique {
       // Find cover indices used by base cells
       const coverIndices = new Set<number>();
       for (const cell of allBaseCells) {
-        const idx = coverType === 'column' ? cell.col : cell.row;
+        const idx = coverType === "column" ? cell.col : cell.row;
         coverIndices.add(idx);
       }
 
@@ -113,7 +112,7 @@ export class KrakenFish extends BaseTechnique {
         const fins: Position[] = [];
         const coveredBaseCells: Position[] = [];
         for (const cell of allBaseCells) {
-          const idx = coverType === 'column' ? cell.col : cell.row;
+          const idx = coverType === "column" ? cell.col : cell.row;
           if (coverSet.has(idx)) {
             coveredBaseCells.push(cell);
           } else {
@@ -127,7 +126,10 @@ export class KrakenFish extends BaseTechnique {
         const baseCellKeys = new Set(allBaseCells.map(posKey));
         const possibleElims: Position[] = [];
         for (const coverIdx of coverIdxs) {
-          const cells = grid.findCellsWithCandidate({ type: coverType, index: coverIdx }, candidate);
+          const cells = grid.findCellsWithCandidate(
+            { type: coverType, index: coverIdx },
+            candidate,
+          );
           for (const cell of cells) {
             if (!baseCellKeys.has(posKey(cell))) {
               possibleElims.push(cell);
@@ -158,7 +160,7 @@ export class KrakenFish extends BaseTechnique {
             return this.createEliminationResult(
               [{ position: elimTarget, candidates: [candidate] }],
               `Kraken Fish: ${candidate} — finned fish with chain proof from fins`,
-              highlightCells
+              highlightCells,
             );
           }
         }
@@ -177,7 +179,7 @@ export class KrakenFish extends BaseTechnique {
     grid: CandidateGridInterface,
     fin: Position,
     elimTarget: Position,
-    candidate: number
+    candidate: number,
   ): boolean {
     // Clone state and propagate from fin being true
     const candidateState: Set<number>[][] = [];
@@ -192,7 +194,7 @@ export class KrakenFish extends BaseTechnique {
     }
 
     // Place candidate at fin
-    const queue: Array<{ row: number; col: number; value: number }> = [
+    const queue: { row: number; col: number; value: number }[] = [
       { row: fin.row, col: fin.col, value: candidate },
     ];
     let depth = 0;
@@ -219,7 +221,10 @@ export class KrakenFish extends BaseTechnique {
           }
 
           // Naked single cascade
-          if (candidateState[peer.row][peer.col].size === 1 && valueState[peer.row][peer.col] === null) {
+          if (
+            candidateState[peer.row][peer.col].size === 1 &&
+            valueState[peer.row][peer.col] === null
+          ) {
             const lastValue = Array.from(candidateState[peer.row][peer.col])[0];
             queue.push({ row: peer.row, col: peer.col, value: lastValue });
           }

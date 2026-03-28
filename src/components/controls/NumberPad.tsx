@@ -1,15 +1,15 @@
 // Number pad for inputting numbers 1-9
 // Single row layout with skeuomorphic 3D styling
 
-import React, { memo, useCallback } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import React, { memo, useCallback } from "react";
+import { View, StyleSheet, Text } from "react-native";
 
-import { useGameStore, useRemainingCounts } from '../../stores/gameStore';
-import { colors } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { playFeedback } from '../../utils/feedback';
-import { SkeuButton } from '../ui/Skeuomorphic';
-import { BUTTON_HEIGHT, BUTTON_GAP, BUTTON_RADIUS, whiteSkeuColorsPrimary } from './constants';
+import { useGameStore, useRemainingCounts } from "../../stores/gameStore";
+import { colors } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { playFeedback } from "../../utils/feedback";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import { BUTTON_HEIGHT, BUTTON_GAP, BUTTON_RADIUS, whiteSkeuColorsPrimary } from "./constants";
 
 const whiteColors = whiteSkeuColorsPrimary;
 
@@ -46,41 +46,47 @@ const RemainingDots = memo(({ count }: { count: number }) => {
   );
 });
 
-const NumberButton = memo(({ number, onPress, isHighlighted, remaining, disabled = false }: NumberButtonProps) => {
-  const handlePress = useCallback(() => {
-    onPress(number);
-  }, [number, onPress]);
+RemainingDots.displayName = "RemainingDots";
 
-  return (
-    <View style={styles.buttonWrapper}>
-      <SkeuButton
-        onPress={handlePress}
-        variant={isHighlighted && !disabled ? 'primary' : 'secondary'}
-        customColors={isHighlighted && !disabled ? undefined : whiteColors}
-        borderRadius={BUTTON_RADIUS}
-        showHighlight={false}
-        disabled={disabled}
-        contentStyle={styles.buttonFace}
-        accessibilityLabel={
-          remaining === 0
-            ? `Number ${number}, all placed`
-            : `Number ${number}, ${remaining} remaining`
-        }
-      >
-        <Text
-          style={[
-            styles.buttonText,
-            isHighlighted && !disabled && styles.buttonTextHighlighted,
-            disabled && styles.buttonTextMuted,
-          ]}
+const NumberButton = memo(
+  ({ number, onPress, isHighlighted, remaining, disabled = false }: NumberButtonProps) => {
+    const handlePress = useCallback(() => {
+      onPress(number);
+    }, [number, onPress]);
+
+    return (
+      <View style={styles.buttonWrapper}>
+        <SkeuButton
+          onPress={handlePress}
+          variant={isHighlighted && !disabled ? "primary" : "secondary"}
+          customColors={isHighlighted && !disabled ? undefined : whiteColors}
+          borderRadius={BUTTON_RADIUS}
+          showHighlight={false}
+          disabled={disabled}
+          contentStyle={styles.buttonFace}
+          accessibilityLabel={
+            remaining === 0
+              ? `Number ${number}, all placed`
+              : `Number ${number}, ${remaining} remaining`
+          }
         >
-          {number}
-        </Text>
-      </SkeuButton>
-      <RemainingDots count={remaining} />
-    </View>
-  );
-});
+          <Text
+            style={[
+              styles.buttonText,
+              isHighlighted && !disabled && styles.buttonTextHighlighted,
+              disabled && styles.buttonTextMuted,
+            ]}
+          >
+            {number}
+          </Text>
+        </SkeuButton>
+        <RemainingDots count={remaining} />
+      </View>
+    );
+  },
+);
+
+NumberButton.displayName = "NumberButton";
 
 export const NumberPad = memo(() => {
   const inputNumber = useGameStore((s) => s.inputNumber);
@@ -91,29 +97,28 @@ export const NumberPad = memo(() => {
 
   const handleNumberPress = useCallback(
     (num: number) => {
-      if (gameStatus !== 'playing') return;
+      if (gameStatus !== "playing") return;
       if (remainingCounts[num] === 0) return;
       // Notes mode: subtle pencil-mark haptic
       if (isNotesMode) {
         inputNumber(num);
-        playFeedback('pencilMark');
+        playFeedback("pencilMark");
         return;
       }
       const result = inputNumber(num);
       // Priority: gameWon > gameLost > unitComplete > correct > mistake
-      if (result.isGameWon) playFeedback('gameWon');
-      else if (result.isGameLost) playFeedback('gameLost');
-      else if (result.completedUnits.length > 0) playFeedback('unitComplete');
-      else if (result.isCorrect) playFeedback('correct');
-      else if (!result.isCorrect && result.completedUnits.length === 0)
-        playFeedback('mistake');
+      if (result.isGameWon) playFeedback("gameWon");
+      else if (result.isGameLost) playFeedback("gameLost");
+      else if (result.completedUnits.length > 0) playFeedback("unitComplete");
+      else if (result.isCorrect) playFeedback("correct");
+      else if (!result.isCorrect && result.completedUnits.length === 0) playFeedback("mistake");
     },
-    [gameStatus, inputNumber, remainingCounts, isNotesMode]
+    [gameStatus, inputNumber, remainingCounts, isNotesMode],
   );
 
   // Mute entire pad only when not in an active in-session state (playing or paused).
   // Paused (e.g. settings open) still blocks input via handleNumberPress, but keeps visuals.
-  const padDisabled = gameStatus !== 'playing' && gameStatus !== 'paused';
+  const padDisabled = gameStatus !== "playing" && gameStatus !== "paused";
 
   return (
     <View style={styles.container}>
@@ -131,9 +136,11 @@ export const NumberPad = memo(() => {
   );
 });
 
+NumberPad.displayName = "NumberPad";
+
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: BUTTON_GAP,
   },
   buttonWrapper: {
@@ -141,8 +148,8 @@ const styles = StyleSheet.create({
   },
   buttonFace: {
     height: BUTTON_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
     fontSize: 24,
@@ -157,14 +164,14 @@ const styles = StyleSheet.create({
     opacity: 0.55,
   },
   dotsContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
     minHeight: 6,
     gap: 3,
   },
   dotsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: 3,
   },
   dot: {

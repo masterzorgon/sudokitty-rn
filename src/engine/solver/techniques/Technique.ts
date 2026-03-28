@@ -1,7 +1,7 @@
 // Base Technique interface and helper utilities
 
-import { Position } from '../../types';
-import { Technique, TechniqueResult, TechniqueLevel, CandidateGridInterface } from '../types';
+import { Position } from "../../types";
+import { Technique, TechniqueResult, TechniqueLevel, CandidateGridInterface } from "../types";
 
 /**
  * Base class for implementing techniques.
@@ -21,7 +21,7 @@ export abstract class BaseTechnique implements Technique {
     position: Position,
     value: number,
     explanation: string,
-    highlightCells: Position[] = [position]
+    highlightCells: Position[] = [position],
   ): TechniqueResult {
     return {
       techniqueName: this.name,
@@ -37,9 +37,9 @@ export abstract class BaseTechnique implements Technique {
    * Helper to create an elimination result.
    */
   protected createEliminationResult(
-    eliminations: Array<{ position: Position; candidates: number[] }>,
+    eliminations: { position: Position; candidates: number[] }[],
     explanation: string,
-    highlightCells: Position[]
+    highlightCells: Position[],
   ): TechniqueResult {
     return {
       techniqueName: this.name,
@@ -62,14 +62,14 @@ export abstract class BaseTechnique implements Technique {
    * Format multiple positions for display.
    */
   protected formatPositions(positions: Position[]): string {
-    return positions.map((p) => this.formatPosition(p)).join(', ');
+    return positions.map((p) => this.formatPosition(p)).join(", ");
   }
 
   /**
    * Format candidates for display.
    */
   protected formatCandidates(candidates: number[]): string {
-    return candidates.sort((a, b) => a - b).join(', ');
+    return candidates.sort((a, b) => a - b).join(", ");
   }
 }
 

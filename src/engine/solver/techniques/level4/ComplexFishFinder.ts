@@ -3,10 +3,9 @@
 // Supports boxes as base/cover sets, exo fins, endo fins, and cannibalistic eliminations.
 // Used by FrankenFish, MutantFish, and SiameseFish technique classes.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, Unit, UnitType, Elimination } from '../../types';
-import { combinations } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, Unit, UnitType, Elimination } from "../../types";
+import { combinations } from "../Technique";
 
 // ============================================
 // Types
@@ -17,13 +16,13 @@ export interface FishResult {
   size: number; // 2 = X-Wing, 3 = Swordfish, 4 = Jellyfish
   baseSets: Unit[];
   coverSets: Unit[];
-  baseCells: Position[];   // all cells with candidate in base sets
-  fins: Position[];        // exo + endo fins
+  baseCells: Position[]; // all cells with candidate in base sets
+  fins: Position[]; // exo + endo fins
   eliminations: Elimination[];
   isCannibalistic: boolean;
 }
 
-type FishType = 'franken' | 'mutant' | null;
+type FishType = "franken" | "mutant" | null;
 
 // ============================================
 // Helpers
@@ -57,9 +56,9 @@ function classifyFish(baseSets: Unit[], coverSets: Unit[]): FishType {
   const coverTypes = new Set(coverSets.map((u) => u.type));
   const allTypes = new Set([...baseTypes, ...coverTypes]);
 
-  const hasBox = allTypes.has('box');
-  const baseHasRowAndCol = baseTypes.has('row') && baseTypes.has('column');
-  const coverHasRowAndCol = coverTypes.has('row') && coverTypes.has('column');
+  const hasBox = allTypes.has("box");
+  const baseHasRowAndCol = baseTypes.has("row") && baseTypes.has("column");
+  const coverHasRowAndCol = coverTypes.has("row") && coverTypes.has("column");
 
   // Basic fish: only rows/columns, no boxes, no mixing
   if (!hasBox && !baseHasRowAndCol && !coverHasRowAndCol) {
@@ -68,12 +67,12 @@ function classifyFish(baseSets: Unit[], coverSets: Unit[]): FishType {
 
   // Mutant: rows AND columns mixed in base or cover sets
   if (baseHasRowAndCol || coverHasRowAndCol) {
-    return 'mutant';
+    return "mutant";
   }
 
   // Franken: at least one box, but no row+column mixing
   if (hasBox) {
-    return 'franken';
+    return "franken";
   }
 
   return null;
@@ -98,12 +97,12 @@ export function findComplexFish(
   candidate: number,
   sizes: number[],
   maxFins: number,
-  targetType: 'franken' | 'mutant',
+  targetType: "franken" | "mutant",
 ): FishResult | null {
   // Collect all houses that contain 2+ cells with the candidate
   const validHouses: Unit[] = [];
   for (let i = 0; i < BOARD_SIZE; i++) {
-    for (const type of ['row', 'column', 'box'] as UnitType[]) {
+    for (const type of ["row", "column", "box"] as UnitType[]) {
       const cells = grid.findCellsWithCandidate({ type, index: i }, candidate);
       if (cells.length >= 2) {
         validHouses.push({ type, index: i });
@@ -116,10 +115,7 @@ export function findComplexFish(
   // Pre-compute cells per house
   const houseCells = new Map<string, Position[]>();
   for (const house of validHouses) {
-    houseCells.set(
-      unitKey(house),
-      grid.findCellsWithCandidate(house, candidate),
-    );
+    houseCells.set(unitKey(house), grid.findCellsWithCandidate(house, candidate));
   }
 
   for (const size of sizes) {
@@ -280,7 +276,7 @@ export function findAllComplexFish(
 
   const validHouses: Unit[] = [];
   for (let i = 0; i < BOARD_SIZE; i++) {
-    for (const type of ['row', 'column', 'box'] as UnitType[]) {
+    for (const type of ["row", "column", "box"] as UnitType[]) {
       const cells = grid.findCellsWithCandidate({ type, index: i }, candidate);
       if (cells.length >= 2) {
         validHouses.push({ type, index: i });
@@ -292,10 +288,7 @@ export function findAllComplexFish(
 
   const houseCells = new Map<string, Position[]>();
   for (const house of validHouses) {
-    houseCells.set(
-      unitKey(house),
-      grid.findCellsWithCandidate(house, candidate),
-    );
+    houseCells.set(unitKey(house), grid.findCellsWithCandidate(house, candidate));
   }
 
   for (const size of sizes) {

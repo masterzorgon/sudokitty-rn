@@ -5,22 +5,19 @@
 //   - Target technique applies at the snapshot state
 //   - Technique result matches stored result
 
-import { SudokuSolver } from '../solver/SudokuSolver';
-import { CandidateGrid } from '../solver/CandidateGrid';
-import { ALL_TECHNIQUES } from '../solver/techniques';
-import { TechniqueLevel } from '../solver/types';
-import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
-import { TECHNIQUE_IDS } from '../techniqueGenerator';
-import { Position } from '../types';
+import { SudokuSolver } from "../solver/SudokuSolver";
+import { CandidateGrid } from "../solver/CandidateGrid";
+import { ALL_TECHNIQUES } from "../solver/techniques";
+import { TechniqueLevel } from "../solver/types";
+import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
+import { TECHNIQUE_IDS } from "../techniqueGenerator";
+import { Position } from "../types";
 
 // ============================================
 // Helpers
 // ============================================
 
-function prepareGridForTechnique(
-  puzzle: number[][],
-  targetLevel: TechniqueLevel,
-): CandidateGrid {
+function prepareGridForTechnique(puzzle: number[][], targetLevel: TechniqueLevel): CandidateGrid {
   const grid = new CandidateGrid(puzzle);
   const simpler = ALL_TECHNIQUES.filter((t) => t.level < targetLevel);
 
@@ -48,7 +45,7 @@ function prepareGridForTechnique(
   return grid;
 }
 
-function positionSetsMatch(a: Position[], b: Array<{ row: number; col: number }>): boolean {
+function positionSetsMatch(a: Position[], b: { row: number; col: number }[]): boolean {
   if (a.length !== b.length) return false;
   const setA = new Set(a.map((p) => `${p.row}-${p.col}`));
   const setB = new Set(b.map((p) => `${p.row}-${p.col}`));
@@ -62,7 +59,7 @@ function positionSetsMatch(a: Position[], b: Array<{ row: number; col: number }>
 // Tests
 // ============================================
 
-describe('Curated puzzle bank', () => {
+describe("Curated puzzle bank", () => {
   const techniqueIds = Object.keys(CURATED_PUZZLE_BANK);
 
   for (const techniqueId of techniqueIds) {
@@ -74,7 +71,7 @@ describe('Curated puzzle bank', () => {
     describe(`${info.name} (${techniqueId})`, () => {
       puzzles.forEach((curated, index) => {
         describe(`puzzle ${index}`, () => {
-          test('is solvable', () => {
+          test("is solvable", () => {
             const solver = new SudokuSolver({
               maxTechniqueLevel: 4,
               trackSteps: false,
@@ -83,7 +80,7 @@ describe('Curated puzzle bank', () => {
             expect(result.solved).toBe(true);
           });
 
-          test('stored solution matches solver solution', () => {
+          test("stored solution matches solver solution", () => {
             const solver = new SudokuSolver({
               maxTechniqueLevel: 4,
               trackSteps: false,
@@ -99,10 +96,8 @@ describe('Curated puzzle bank', () => {
             }
           });
 
-          test('technique applies at snapshot state', () => {
-            const targetTechniques = ALL_TECHNIQUES.filter(
-              (t) => t.name === info.name,
-            );
+          test("technique applies at snapshot state", () => {
+            const targetTechniques = ALL_TECHNIQUES.filter((t) => t.name === info.name);
             expect(targetTechniques.length).toBeGreaterThan(0);
 
             // Try on the raw snapshot first (curated puzzles are snapshots)
@@ -134,10 +129,8 @@ describe('Curated puzzle bank', () => {
             expect(solveResult.solved).toBe(true);
           });
 
-          test('technique result has valid highlight cells', () => {
-            const targetTechniques = ALL_TECHNIQUES.filter(
-              (t) => t.name === info.name,
-            );
+          test("technique result has valid highlight cells", () => {
+            const targetTechniques = ALL_TECHNIQUES.filter((t) => t.name === info.name);
 
             // Try raw snapshot first, then prepared
             const rawGrid = new CandidateGrid(curated.puzzle);
@@ -159,10 +152,8 @@ describe('Curated puzzle bank', () => {
             }
           });
 
-          test('technique result has eliminations/placements', () => {
-            const targetTechniques = ALL_TECHNIQUES.filter(
-              (t) => t.name === info.name,
-            );
+          test("technique result has eliminations/placements", () => {
+            const targetTechniques = ALL_TECHNIQUES.filter((t) => t.name === info.name);
 
             // Try raw snapshot first, then prepared
             const rawGrid = new CandidateGrid(curated.puzzle);
@@ -177,9 +168,7 @@ describe('Curated puzzle bank', () => {
             expect(result.eliminations.length).toBeGreaterThanOrEqual(
               curated.techniqueResult.eliminations.length > 0 ? 1 : 0,
             );
-            expect(result.placements.length).toBe(
-              curated.techniqueResult.placements.length,
-            );
+            expect(result.placements.length).toBe(curated.techniqueResult.placements.length);
           });
         });
       });

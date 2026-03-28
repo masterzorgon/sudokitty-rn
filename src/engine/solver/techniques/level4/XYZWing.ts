@@ -7,15 +7,15 @@
 // Result: Z can be eliminated from any cell that sees all three cells
 //         (pivot AND both wings).
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique, setIntersection } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique, setIntersection } from "../Technique";
 
 export class XYZWing extends BaseTechnique {
-  readonly name = 'XYZ-Wing';
+  readonly name = "XYZ-Wing";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Three cells form a chain where a three-candidate pivot eliminates a common candidate';
+  readonly description =
+    "Three cells form a chain where a three-candidate pivot eliminates a common candidate";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Find all cells with exactly 3 candidates (potential pivots)
@@ -109,7 +109,7 @@ export class XYZWing extends BaseTechnique {
     B: number,
   ): TechniqueResult | null {
     // Z can be eliminated from cells that see ALL three cells (pivot + both wings)
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
@@ -140,7 +140,7 @@ export class XYZWing extends BaseTechnique {
 
       return this.createEliminationResult(
         eliminations,
-        `XYZ-Wing: Pivot ${this.formatPosition(pivot)} (${pivotCands.join(',')}), wings ${this.formatPosition(wing1)} (${wing1Cands.join(',')}) and ${this.formatPosition(wing2)} (${wing2Cands.join(',')}) eliminate ${Z}`,
+        `XYZ-Wing: Pivot ${this.formatPosition(pivot)} (${pivotCands.join(",")}), wings ${this.formatPosition(wing1)} (${wing1Cands.join(",")}) and ${this.formatPosition(wing2)} (${wing2Cands.join(",")}) eliminate ${Z}`,
         [pivot, wing1, wing2],
       );
     }

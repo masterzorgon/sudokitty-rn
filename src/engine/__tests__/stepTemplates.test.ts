@@ -5,16 +5,16 @@
 //   - Fallback rendering for unknown techniques
 //   - All solver-backed techniques have Mochi hints
 
+import { renderSteps, getStepCount, TECHNIQUE_STEP_TEMPLATES } from "../../data/techniqueSteps";
+import { TECHNIQUE_METADATA } from "../../data/techniqueMetadata";
 import {
-  renderSteps,
-  getStepCount,
-  TECHNIQUE_STEP_TEMPLATES,
-} from '../../data/techniqueSteps';
-import { TECHNIQUE_METADATA } from '../../data/techniqueMetadata';
-import { MOCHI_TECHNIQUE_HINTS, getMochiHint } from '../solver/types';
-import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
-import { TechniqueResult, TechniqueLevel } from '../solver/types';
-import { TECHNIQUE_IDS } from '../techniqueGenerator';
+  MOCHI_TECHNIQUE_HINTS,
+  getMochiHint,
+  TechniqueResult,
+  TechniqueLevel,
+} from "../solver/types";
+import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
+import { TECHNIQUE_IDS } from "../techniqueGenerator";
 
 // ============================================
 // Helpers
@@ -43,11 +43,11 @@ function createLevel1Result(techniqueName: string): TechniqueResult {
 // Step Template Rendering
 // ============================================
 
-describe('Step templates', () => {
+describe("Step templates", () => {
   // Level 1 — no curated puzzles, use synthetic results
-  describe('Naked Single', () => {
-    test('templates render without crashing', () => {
-      const result = createLevel1Result('Naked Single');
+  describe("Naked Single", () => {
+    test("templates render without crashing", () => {
+      const result = createLevel1Result("Naked Single");
       const steps = renderSteps(result);
 
       expect(steps.length).toBeGreaterThan(0);
@@ -59,12 +59,12 @@ describe('Step templates', () => {
     });
   });
 
-  describe('Hidden Single', () => {
-    test('templates render without crashing', () => {
+  describe("Hidden Single", () => {
+    test("templates render without crashing", () => {
       const result: TechniqueResult = {
-        techniqueName: 'Hidden Single',
+        techniqueName: "Hidden Single",
         level: 1 as TechniqueLevel,
-        explanation: '5 can only go in R3C6 in row 3',
+        explanation: "5 can only go in R3C6 in row 3",
         highlightCells: [{ row: 2, col: 5 }],
         eliminations: [],
         placements: [{ position: { row: 2, col: 5 }, value: 5 }],
@@ -81,14 +81,14 @@ describe('Step templates', () => {
 
   // Level 2-4 — use curated puzzle data
   const curatedTechniques = [
-    'naked-pair',
-    'hidden-pair',
-    'pointing-pair',
-    'box-line-reduction',
-    'naked-triple',
-    'x-wing',
-    'swordfish',
-    'xy-wing',
+    "naked-pair",
+    "hidden-pair",
+    "pointing-pair",
+    "box-line-reduction",
+    "naked-triple",
+    "x-wing",
+    "swordfish",
+    "xy-wing",
   ];
 
   for (const techniqueId of curatedTechniques) {
@@ -96,7 +96,7 @@ describe('Step templates', () => {
     if (!info) continue;
 
     describe(info.name, () => {
-      test('templates render without crashing', () => {
+      test("templates render without crashing", () => {
         const result = getTestResult(techniqueId);
         if (!result) return;
 
@@ -111,7 +111,7 @@ describe('Step templates', () => {
         }
       });
 
-      test('step count matches template count', () => {
+      test("step count matches template count", () => {
         const templates = TECHNIQUE_STEP_TEMPLATES[info.name];
         if (!templates) return;
 
@@ -125,12 +125,12 @@ describe('Step templates', () => {
 // Fallback Rendering
 // ============================================
 
-describe('Fallback rendering', () => {
-  test('renders for unknown technique', () => {
+describe("Fallback rendering", () => {
+  test("renders for unknown technique", () => {
     const fakeResult: TechniqueResult = {
-      techniqueName: 'Unknown Technique',
+      techniqueName: "Unknown Technique",
       level: 4 as TechniqueLevel,
-      explanation: 'Some explanation',
+      explanation: "Some explanation",
       highlightCells: [{ row: 0, col: 0 }],
       eliminations: [],
       placements: [],
@@ -138,7 +138,7 @@ describe('Fallback rendering', () => {
     const steps = renderSteps(fakeResult);
 
     expect(steps).toHaveLength(1);
-    expect(steps[0].text).toBe('Some explanation');
+    expect(steps[0].text).toBe("Some explanation");
     expect(steps[0].highlightCells).toEqual([{ row: 0, col: 0 }]);
   });
 });
@@ -147,23 +147,23 @@ describe('Fallback rendering', () => {
 // getStepCount
 // ============================================
 
-describe('getStepCount', () => {
-  test('returns 3 for Naked Single', () => {
-    expect(getStepCount('Naked Single')).toBe(3);
+describe("getStepCount", () => {
+  test("returns 3 for Naked Single", () => {
+    expect(getStepCount("Naked Single")).toBe(3);
   });
 
-  test('returns 3 for Hidden Single', () => {
-    expect(getStepCount('Hidden Single')).toBe(3);
+  test("returns 3 for Hidden Single", () => {
+    expect(getStepCount("Hidden Single")).toBe(3);
   });
 
-  test('returns correct count for all registered templates', () => {
+  test("returns correct count for all registered templates", () => {
     for (const [name, templates] of Object.entries(TECHNIQUE_STEP_TEMPLATES)) {
       expect(getStepCount(name)).toBe(templates.length);
     }
   });
 
-  test('returns 1 for unknown technique (fallback)', () => {
-    expect(getStepCount('Unknown')).toBe(1);
+  test("returns 1 for unknown technique (fallback)", () => {
+    expect(getStepCount("Unknown")).toBe(1);
   });
 });
 
@@ -171,8 +171,8 @@ describe('getStepCount', () => {
 // Mochi Hints
 // ============================================
 
-describe('Mochi hints', () => {
-  test('all solver-backed techniques have Mochi hints', () => {
+describe("Mochi hints", () => {
+  test("all solver-backed techniques have Mochi hints", () => {
     const solverTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver);
 
     for (const technique of solverTechniques) {
@@ -182,19 +182,19 @@ describe('Mochi hints', () => {
     }
   });
 
-  test('getMochiHint returns a string for each solver-backed technique', () => {
+  test("getMochiHint returns a string for each solver-backed technique", () => {
     const solverTechniques = TECHNIQUE_METADATA.filter((t) => t.hasSolver);
 
     for (const technique of solverTechniques) {
       const hint = getMochiHint(technique.name);
-      expect(typeof hint).toBe('string');
+      expect(typeof hint).toBe("string");
       expect(hint.length).toBeGreaterThan(0);
     }
   });
 
-  test('getMochiHint returns fallback for unknown technique', () => {
-    const hint = getMochiHint('Totally Unknown');
-    expect(typeof hint).toBe('string');
-    expect(hint).toContain('Totally Unknown');
+  test("getMochiHint returns fallback for unknown technique", () => {
+    const hint = getMochiHint("Totally Unknown");
+    expect(typeof hint).toBe("string");
+    expect(hint).toContain("Totally Unknown");
   });
 });

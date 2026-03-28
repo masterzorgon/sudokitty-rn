@@ -2,15 +2,15 @@
 // When a candidate in a box appears only in cells that share a row or column,
 // that candidate can be eliminated from other cells in that row or column.
 
-import { Position } from '../../../types';
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 export class PointingPair extends BaseTechnique {
-  readonly name = 'Pointing Pair';
+  readonly name = "Pointing Pair";
   readonly level: TechniqueLevel = 2;
-  readonly description = 'Candidates in a box aligned in a row/column eliminate from that row/column';
+  readonly description =
+    "Candidates in a box aligned in a row/column eliminate from that row/column";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // Check each box
@@ -28,12 +28,12 @@ export class PointingPair extends BaseTechnique {
   private findPointingPair(
     grid: CandidateGridInterface,
     boxIndex: number,
-    candidate: number
+    candidate: number,
   ): TechniqueResult | null {
     // Find all cells in this box that have this candidate
     const cellsWithCandidate = grid.findCellsWithCandidate(
-      { type: 'box', index: boxIndex },
-      candidate
+      { type: "box", index: boxIndex },
+      candidate,
     );
 
     // Need at least 2 cells to form a pointing pair
@@ -63,9 +63,9 @@ export class PointingPair extends BaseTechnique {
     pointingCells: Position[],
     row: number,
     candidate: number,
-    boxIndex: number
+    boxIndex: number,
   ): TechniqueResult | null {
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     // Find cells in the same row but different box
     for (let col = 0; col < BOARD_SIZE; col++) {
@@ -84,7 +84,7 @@ export class PointingPair extends BaseTechnique {
       return this.createEliminationResult(
         eliminations,
         `${candidate} in box ${boxIndex + 1} is confined to row ${row + 1}, eliminating from rest of row`,
-        pointingCells
+        pointingCells,
       );
     }
 
@@ -96,9 +96,9 @@ export class PointingPair extends BaseTechnique {
     pointingCells: Position[],
     col: number,
     candidate: number,
-    boxIndex: number
+    boxIndex: number,
   ): TechniqueResult | null {
-    const eliminations: Array<{ position: Position; candidates: number[] }> = [];
+    const eliminations: { position: Position; candidates: number[] }[] = [];
 
     // Find cells in the same column but different box
     for (let row = 0; row < BOARD_SIZE; row++) {
@@ -117,7 +117,7 @@ export class PointingPair extends BaseTechnique {
       return this.createEliminationResult(
         eliminations,
         `${candidate} in box ${boxIndex + 1} is confined to column ${col + 1}, eliminating from rest of column`,
-        pointingCells
+        pointingCells,
       );
     }
 

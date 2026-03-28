@@ -7,15 +7,9 @@
 //
 // Same verity/contradiction logic as Forcing Chain but with branching.
 
-import { Position } from '../../../types';
-import {
-  CandidateGridInterface,
-  TechniqueResult,
-  TechniqueLevel,
-  Elimination,
-} from '../../types';
-import { BaseTechnique } from '../Technique';
-import { BOARD_SIZE } from '../../../types';
+import { Position, BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Elimination } from "../../types";
+import { BaseTechnique } from "../Technique";
 
 const MAX_DEPTH = 20;
 const MAX_BRANCHES = 3;
@@ -31,9 +25,9 @@ interface NetResult {
 }
 
 export class ForcingNet extends BaseTechnique {
-  readonly name = 'Forcing Net';
+  readonly name = "Forcing Net";
   readonly level: TechniqueLevel = 4;
-  readonly description = 'Branching implication networks that force conclusions';
+  readonly description = "Branching implication networks that force conclusions";
 
   apply(grid: CandidateGridInterface): TechniqueResult | null {
     // For each cell with 2-3 candidates, propagate with branching
@@ -55,7 +49,7 @@ export class ForcingNet extends BaseTechnique {
     grid: CandidateGridInterface,
     row: number,
     col: number,
-    candidates: number[]
+    candidates: number[],
   ): TechniqueResult | null {
     const results: NetResult[] = [];
 
@@ -66,7 +60,7 @@ export class ForcingNet extends BaseTechnique {
         return this.createEliminationResult(
           [{ position: { row, col }, candidates: [candidate] }],
           `Forcing Net (Contradiction): ${candidate} in ${this.formatPosition({ row, col })} leads to contradiction`,
-          [{ row, col }]
+          [{ row, col }],
         );
       }
 
@@ -78,12 +72,15 @@ export class ForcingNet extends BaseTechnique {
       for (const [key, value] of results[0].placements) {
         const inAll = results.every((r) => r.placements.get(key) === value);
         if (inAll) {
-          const [pRow, pCol] = key.split(',').map(Number);
+          const [pRow, pCol] = key.split(",").map(Number);
           return this.createPlacementResult(
             { row: pRow, col: pCol },
             value,
             `Forcing Net (Verity): all candidates in ${this.formatPosition({ row, col })} lead to ${this.formatPosition({ row: pRow, col: pCol })}=${value}`,
-            [{ row, col }, { row: pRow, col: pCol }]
+            [
+              { row, col },
+              { row: pRow, col: pCol },
+            ],
           );
         }
       }
@@ -96,11 +93,14 @@ export class ForcingNet extends BaseTechnique {
             return elims && elims.has(cand);
           });
           if (inAll) {
-            const [eRow, eCol] = key.split(',').map(Number);
+            const [eRow, eCol] = key.split(",").map(Number);
             return this.createEliminationResult(
               [{ position: { row: eRow, col: eCol }, candidates: [cand] }],
               `Forcing Net (Verity): all candidates in ${this.formatPosition({ row, col })} lead to elimination`,
-              [{ row, col }, { row: eRow, col: eCol }]
+              [
+                { row, col },
+                { row: eRow, col: eCol },
+              ],
             );
           }
         }
@@ -119,7 +119,7 @@ export class ForcingNet extends BaseTechnique {
     startRow: number,
     startCol: number,
     startValue: number,
-    branchDepth: number
+    branchDepth: number,
   ): NetResult {
     const placements = new Map<string, number>();
     const eliminations = new Map<string, Set<number>>();
@@ -137,7 +137,7 @@ export class ForcingNet extends BaseTechnique {
       }
     }
 
-    const queue: Array<{ row: number; col: number; value: number }> = [
+    const queue: { row: number; col: number; value: number }[] = [
       { row: startRow, col: startCol, value: startValue },
     ];
     let depth = 0;
@@ -175,12 +175,18 @@ export class ForcingNet extends BaseTechnique {
           if (!eliminations.has(pKey)) eliminations.set(pKey, new Set());
           eliminations.get(pKey)!.add(value);
 
-          if (candidateState[peer.row][peer.col].size === 0 && valueState[peer.row][peer.col] === null) {
+          if (
+            candidateState[peer.row][peer.col].size === 0 &&
+            valueState[peer.row][peer.col] === null
+          ) {
             contradiction = true;
             break;
           }
 
-          if (candidateState[peer.row][peer.col].size === 1 && valueState[peer.row][peer.col] === null) {
+          if (
+            candidateState[peer.row][peer.col].size === 1 &&
+            valueState[peer.row][peer.col] === null
+          ) {
             const lastValue = Array.from(candidateState[peer.row][peer.col])[0];
             queue.push({ row: peer.row, col: peer.col, value: lastValue });
           }
@@ -193,14 +199,26 @@ export class ForcingNet extends BaseTechnique {
             branchDepth < MAX_BRANCHES
           ) {
             const branchCands = Array.from(candidateState[peer.row][peer.col]);
-            const branch1 = this.propagateNet(grid, peer.row, peer.col, branchCands[0], branchDepth + 1);
-            const branch2 = this.propagateNet(grid, peer.row, peer.col, branchCands[1], branchDepth + 1);
+            const branch1 = this.propagateNet(
+              grid,
+              peer.row,
+              peer.col,
+              branchCands[0],
+              branchDepth + 1,
+            );
+            const branch2 = this.propagateNet(
+              grid,
+              peer.row,
+              peer.col,
+              branchCands[1],
+              branchDepth + 1,
+            );
 
             // If both branches agree on a placement, add it to the queue
             if (!branch1.contradiction && !branch2.contradiction) {
               for (const [bKey, bValue] of branch1.placements) {
                 if (branch2.placements.get(bKey) === bValue && !placements.has(bKey)) {
-                  const [bRow, bCol] = bKey.split(',').map(Number);
+                  const [bRow, bCol] = bKey.split(",").map(Number);
                   queue.push({ row: bRow, col: bCol, value: bValue });
                 }
               }
@@ -208,7 +226,7 @@ export class ForcingNet extends BaseTechnique {
               for (const [bKey, bCands] of branch1.eliminations) {
                 for (const bCand of bCands) {
                   if (branch2.eliminations.get(bKey)?.has(bCand)) {
-                    const [bRow, bCol] = bKey.split(',').map(Number);
+                    const [bRow, bCol] = bKey.split(",").map(Number);
                     if (candidateState[bRow][bCol].has(bCand)) {
                       candidateState[bRow][bCol].delete(bCand);
                       if (!eliminations.has(bKey)) eliminations.set(bKey, new Set());
