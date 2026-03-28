@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import {
   runOnJS,
@@ -6,15 +6,14 @@ import {
   useFrameCallback,
   useSharedValue,
   type FrameInfo,
-  type SharedValue,
 } from 'react-native-reanimated';
-import { Canvas, Group, RoundedRect } from '@shopify/react-native-skia';
+import { Canvas, Picture, Skia } from '@shopify/react-native-skia';
 
 import { useColors } from '../../theme/colors';
 import { delays, durations } from '../../theme/animations';
 
-const DEFAULT_COUNT = 90;
-const NUM_WAVES = 6;
+const DEFAULT_COUNT = 60;
+const NUM_WAVES = 4;
 const FALL_SPEED = 0.7;
 const GRAVITY = 380 * FALL_SPEED;
 const ELASTICITY = 0.6;
@@ -137,7 +136,7 @@ function buildInitialPieces(count: number, screenW: number): ConfettoState[] {
 
     const leftCannon = i % 2 === 0;
     const spawnX = (leftCannon ? screenW * 0.15 : screenW * 0.85) + randomRange(-20, 20);
-    const spawnY = -20;
+    const spawnY = randomRange(-28, 4);
 
     const w = randomRange(6, 10);
     const h = randomRange(10, 16);
@@ -146,7 +145,7 @@ function buildInitialPieces(count: number, screenW: number): ConfettoState[] {
       x: spawnX,
       y: spawnY,
       xVel: randomRange(-75, 75),
-      yVel: randomRange(-420 * FALL_SPEED, -280 * FALL_SPEED),
+      yVel: randomRange(-220 * FALL_SPEED, 160),
       rotation: randomRange(0, Math.PI * 2),
       rotVel: randomRange(-2, 2),
       flipAngle: randomRange(0, Math.PI * 2),
@@ -161,55 +160,6 @@ function buildInitialPieces(count: number, screenW: number): ConfettoState[] {
   return pieces;
 }
 
-
-interface ConfettoPieceProps {
-  index: number;
-  state: SharedValue<ConfettoState[]>;
-  tick: SharedValue<number>;
-  color: string;
-}
-
-function ConfettoPiece({ index, state, tick, color }: ConfettoPieceProps) {
-  const w = useDerivedValue(() => {
-    tick.value;
-    return state.value[index].w;
-  });
-  const h = useDerivedValue(() => {
-    tick.value;
-    return state.value[index].h;
-  });
-
-  const transform = useDerivedValue(() => {
-    tick.value;
-    const s = state.value[index];
-    const sx = Math.cos(s.flipAngle);
-    const scaleX = Math.abs(sx) < 0.08 ? (sx >= 0 ? 0.08 : -0.08) : sx;
-    return [
-      { translateX: s.x },
-      { translateY: s.y },
-      { rotateZ: s.rotation },
-      { scaleX },
-    ];
-  });
-
-  const opacity = useDerivedValue(() => {
-    tick.value;
-    return state.value[index].dead ? 0 : 1;
-  });
-
-  const origin = useDerivedValue(() => {
-    tick.value;
-    const s = state.value[index];
-    return { x: s.w / 2, y: s.h / 2 };
-  });
-
-  return (
-    <Group transform={transform} origin={origin} opacity={opacity}>
-      <RoundedRect x={0} y={0} width={w} height={h} r={2} color={color} />
-    </Group>
-  );
-}
-
 export interface ConfettiCannonProps {
   count?: number;
   onComplete?: () => void;
@@ -219,7 +169,14 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
   const c = useColors();
   const { width, height } = useWindowDimensions();
 
-  const colorList = useMemo(() => buildAccentHueColors(count, c.accent as string), [count, c.accent]);
+  const colorHexList = useMemo(
+    () => buildAccentHueColors(count, c.accent as string),
+    [count, c.accent],
+  );
+  const colorsRef = useSharedValue(colorHexList);
+  useLayoutEffect(() => {
+    colorsRef.value = colorHexList;
+  }, [colorHexList, colorsRef]);
 
   const state = useSharedValue<ConfettoState[]>(buildInitialPieces(count, width));
   const screenW = useSharedValue(width);
@@ -311,34 +268,62 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
     [finishAndNotify, state, screenW, screenH, totalElapsed, finished, tick],
   );
 
-  const frameCallback = useFrameCallback(physicsStep, false);
+  const frameCallback = useFrameCallback(physicsStep, true);
   frameCallbackRef.current = frameCallback;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     screenW.value = width;
     screenH.value = height;
   }, [width, height, screenW, screenH]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     state.value = buildInitialPieces(count, width);
     totalElapsed.value = 0;
     finished.value = false;
     tick.value = 0;
   }, [count, width, height, state, totalElapsed, finished, tick]);
 
-  useEffect(() => {
-    frameCallback.setActive(true);
-    return () => {
-      frameCallback.setActive(false);
-    };
-  }, [frameCallback]);
+  // Single derived value — replaces 90 ConfettoPiece components × 5 useDerivedValue each.
+  // Records all pieces into one Skia Picture per frame on the UI thread.
+  const picture = useDerivedValue(() => {
+    'worklet';
+    tick.value;
+    const pieces = state.value;
+    const sw = screenW.value;
+    const sh = screenH.value;
+    const colors = colorsRef.value;
+
+    const rec = Skia.PictureRecorder();
+    const canvas = rec.beginRecording(Skia.XYWHRect(0, 0, sw, sh));
+    const paint = Skia.Paint();
+
+    for (let i = 0; i < pieces.length; i++) {
+      const p = pieces[i];
+      if (p.dead || p.delay > 0) continue;
+
+      paint.setColor(Skia.Color(colors[i % colors.length]));
+
+      canvas.save();
+      canvas.translate(p.x + p.w / 2, p.y + p.h / 2);
+      canvas.rotate((p.rotation * 180) / Math.PI, 0, 0);
+      const sx = Math.cos(p.flipAngle);
+      const scaleX = Math.abs(sx) < 0.08 ? (sx >= 0 ? 0.08 : -0.08) : sx;
+      canvas.scale(scaleX, 1);
+      canvas.translate(-p.w / 2, -p.h / 2);
+      canvas.drawRRect(
+        Skia.RRectXY(Skia.XYWHRect(0, 0, p.w, p.h), 2, 2),
+        paint,
+      );
+      canvas.restore();
+    }
+
+    return rec.finishRecordingAsPicture();
+  });
 
   return (
     <View style={styles.overlay} pointerEvents="none">
       <Canvas style={{ width, height }}>
-        {colorList.map((color, index) => (
-          <ConfettoPiece key={index} index={index} state={state} tick={tick} color={color} />
-        ))}
+        <Picture picture={picture} />
       </Canvas>
     </View>
   );

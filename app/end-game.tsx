@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -59,6 +59,7 @@ function StatRow({ label, value, icon, iconComponent, iconColor }: {
 
 export default function EndGameScreen() {
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams();
   const s = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
@@ -139,7 +140,7 @@ export default function EndGameScreen() {
   }, [resetGame, router]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>
+    <View style={[styles.container, { backgroundColor: c.cream, paddingTop: insets.top }]}>
       <ScreenBackground showBottom={false} />
 
       <View style={styles.content}>
@@ -274,7 +275,7 @@ export default function EndGameScreen() {
       </View>
 
       {isWon && <ConfettiCannon />}
-    </SafeAreaView>
+    </View>
   );
 }
 

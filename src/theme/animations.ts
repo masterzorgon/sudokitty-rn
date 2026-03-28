@@ -125,9 +125,9 @@ export const delays = {
   // Staggered list items
   listItem: 50,
 
-  // Confetti spawn delay range
+  // Confetti spawn delay range (ms) — keep max small so burst starts immediately
   confettiMin: 0,
-  confettiMax: 500,
+  confettiMax: 0,
 };
 
 // Start Game Animation Flow Timings (matching reference animation-demos)
