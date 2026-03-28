@@ -28,7 +28,7 @@ const MESSAGE_DURATION_MS = 4500;
 
 const EVENT_CONFIG = {
   gameStart: {
-    messages: ["Good luck!", "Let's do this!", "You've got this!"],
+    messages: ['Good luck!', "Best of luck!", "Let's do this!", "You've got this!"],
     probability: 1.0,
     duration: 4500,
   },
@@ -134,13 +134,13 @@ export function useGameMascotMessage(): string | null {
   useEffect(() => {
     const prevState = prevStateRef.current;
 
-    // New game started from won/lost — clear persisted speech bubble
+    // New game after win/loss — replace persisted bubble with a fresh good-luck line
     if (prevState?.gameStatus && ['won', 'lost'].includes(prevState.gameStatus) && gameStatus === 'playing') {
       if (dismissTimerRef.current) {
         clearTimeout(dismissTimerRef.current);
         dismissTimerRef.current = null;
       }
-      setMessage(null);
+      tryShowMessage('gameStart');
     }
 
     // Game just started (first render with playing status)
