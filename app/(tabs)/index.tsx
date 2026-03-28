@@ -22,38 +22,14 @@ import { MOCHI_PACK_AMOUNTS, type MochiPackProductId } from "../../src/constants
 
 const MochiFreezeImg = require("../../assets/images/mochi/mochi-freeze.png");
 
-// MARK: - Constants
-
-// Estimate header height to avoid layout jolt: insets.top + spacing.sm + pill row
 const ESTIMATED_HEADER_CONTENT_HEIGHT = 50;
-
-// Nav bar height estimate: paddingV (14) * 2 + content (~24) = ~52px
-// Nav bar bottomOffset: 16px
-// Gap above nav bar: 20px
 const CTA_BOTTOM_OFFSET = 16 + 52 + 20; // 88px from safe area bottom
-
-// MARK: - Component
 
 export default function HomeScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [headerHeight, setHeaderHeight] = useState(ESTIMATED_HEADER_CONTENT_HEIGHT);
-  // #region agent log
-  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-    body: JSON.stringify({
-      sessionId: "f71351",
-      location: "index.tsx:render",
-      message: "Home render",
-      data: { headerHeight, insetsTop: insets.top, timestamp: Date.now() },
-      timestamp: Date.now(),
-      runId: "post-fix",
-      hypothesisId: "A",
-    }),
-  }).catch(() => {});
-  // #endregion
 
   // Store hooks
   const currentStreak = useCurrentStreak();
@@ -75,9 +51,6 @@ export default function HomeScreen() {
     }
   }, []);
 
-  // Economy migration + loadState + daily bonus now run during splash in _layout.tsx
-
-  // Show reignite sheet when streak is lost
   const handleInsufficientFunds = useCallback(
     async (itemPrice: number) => {
       const deficit = itemPrice - totalMochis;
@@ -118,8 +91,6 @@ export default function HomeScreen() {
     }
   }, [streakLostInfo, reigniteStreak, handleInsufficientFunds]);
 
-  // Welcome message now pre-fetched during splash in _layout.tsx
-
   const handleTechniquesPress = () => {
     playFeedback("tap");
     router.push("/techniques");
@@ -129,8 +100,6 @@ export default function HomeScreen() {
     playFeedback("tap");
     router.push("/(tabs)/stats");
   };
-
-  // MARK: - Render
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
@@ -190,8 +159,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
-// MARK: - Styles
 
 const styles = StyleSheet.create({
   container: {

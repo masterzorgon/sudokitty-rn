@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, StyleSheet, Alert, InteractionManager, type LayoutChangeEvent } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { View, StyleSheet, Alert } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, Feather } from "@expo/vector-icons";
@@ -41,10 +40,6 @@ import { PurchaseSheet, type PurchaseSheetConfig } from "../../src/components/st
 const MochiMusicImg = require("../../assets/images/mochi/mochi-music.png");
 const MochiFreezeImg = require("../../assets/images/mochi/mochi-freeze.png");
 
-// ============================================
-// Store Screen
-// ============================================
-
 export default function StoreScreen() {
   const c = useColors();
   const isPremium = useEffectivePremium();
@@ -81,10 +76,6 @@ export default function StoreScreen() {
       stopDemo();
     };
   }, [loadProducts]);
-
-  // ============================================
-  // Handlers
-  // ============================================
 
   const handleBuyTrack = useCallback(
     (trackId: string) => {
@@ -240,109 +231,14 @@ export default function StoreScreen() {
     [products, handlePurchasePack],
   );
 
-  // ============================================
-  // Render
-  // ============================================
-
   const [headerHeight, setHeaderHeight] = useState(50);
-  const storeFocusSeq = useRef(0);
-  useFocusEffect(
-    useCallback(() => {
-      const seq = ++storeFocusSeq.current;
-      const t0 = Date.now();
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-        body: JSON.stringify({
-          sessionId: "f71351",
-          location: "store.tsx:focus",
-          message: "store tab focused",
-          data: { seq, phase: "focus", timestamp: t0 },
-          timestamp: t0,
-          hypothesisId: "H",
-        }),
-      }).catch(() => {});
-      // #endregion
-      const handle = InteractionManager.runAfterInteractions(() => {
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-          body: JSON.stringify({
-            sessionId: "f71351",
-            location: "store.tsx:afterInteractions",
-            message: "after interactions",
-            data: { seq, msAfterFocus: Date.now() - t0, timestamp: Date.now() },
-            timestamp: Date.now(),
-            hypothesisId: "H",
-          }),
-        }).catch(() => {});
-        // #endregion
-      });
-      return () => {
-        handle.cancel();
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-          body: JSON.stringify({
-            sessionId: "f71351",
-            location: "store.tsx:blur",
-            message: "store tab blurred",
-            data: { seq, timestamp: Date.now() },
-            timestamp: Date.now(),
-            hypothesisId: "H",
-          }),
-        }).catch(() => {});
-        // #endregion
-      };
-    }, []),
-  );
-  // #region agent log
-  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-    body: JSON.stringify({
-      sessionId: "f71351",
-      location: "store.tsx:render",
-      message: "Store render",
-      data: { headerHeight, timestamp: Date.now() },
-      timestamp: Date.now(),
-      runId: "post-fix",
-      hypothesisId: "A,B",
-    }),
-  }).catch(() => {});
-  // #endregion
   const contentStyle = useMemo(
     () => ({ ...styles.content, paddingTop: headerHeight }),
     [headerHeight],
   );
 
-  const handleStoreRootLayout = useCallback((e: LayoutChangeEvent) => {
-    const { height, y } = e.nativeEvent.layout;
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-      body: JSON.stringify({
-        sessionId: "f71351",
-        location: "store.tsx:rootLayout",
-        message: "SafeAreaView onLayout",
-        data: { height, y, timestamp: Date.now() },
-        timestamp: Date.now(),
-        hypothesisId: "H",
-      }),
-    }).catch(() => {});
-    // #endregion
-  }, []);
-
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: c.cream }]}
-      edges={["top"]}
-      onLayout={handleStoreRootLayout}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       <ScreenBackground />
 
       <ScreenContent contentStyle={contentStyle} style={{ marginTop: 20 }}>

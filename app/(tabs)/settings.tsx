@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, View, Linking, Alert, Pressable, type LayoutChangeEvent } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import React, { useCallback, useMemo, useState } from "react";
+import { StyleSheet, View, Linking, Alert, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "../../src/theme/colors";
@@ -46,34 +45,6 @@ const PRIVACY_URL = "https://example.com/privacy"; // TODO: Replace with actual 
 export default function SettingsScreen() {
   const router = useRouter();
   const c = useColors();
-  const insets = useSafeAreaInsets();
-  const prevInsetsRef = useRef(insets);
-  useEffect(() => {
-    const p = prevInsetsRef.current;
-    if (p.top !== insets.top || p.bottom !== insets.bottom) {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-        body: JSON.stringify({
-          sessionId: "f71351",
-          location: "settings.tsx:insets",
-          message: "insets changed",
-          data: {
-            prevTop: p.top,
-            nextTop: insets.top,
-            prevBottom: p.bottom,
-            nextBottom: insets.bottom,
-            timestamp: Date.now(),
-          },
-          timestamp: Date.now(),
-          hypothesisId: "E",
-        }),
-      }).catch(() => {});
-      // #endregion
-      prevInsetsRef.current = insets;
-    }
-  }, [insets]);
 
   // Settings state
   const unlimitedMistakes = useUnlimitedMistakes();
@@ -169,89 +140,13 @@ export default function SettingsScreen() {
   }, [resetGame, resetDailyChallenge, resetStats]);
 
   const [headerHeight, setHeaderHeight] = useState(50);
-  useFocusEffect(
-    useCallback(() => {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-        body: JSON.stringify({
-          sessionId: "f71351",
-          location: "settings.tsx:focus",
-          message: "settings tab focused",
-          data: {
-            insetsTop: insets.top,
-            insetsBottom: insets.bottom,
-            headerHeight,
-            timestamp: Date.now(),
-          },
-          timestamp: Date.now(),
-          hypothesisId: "E,F",
-        }),
-      }).catch(() => {});
-      // #endregion
-      return () => {
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-          body: JSON.stringify({
-            sessionId: "f71351",
-            location: "settings.tsx:blur",
-            message: "settings tab blurred",
-            data: { timestamp: Date.now() },
-            timestamp: Date.now(),
-            hypothesisId: "F",
-          }),
-        }).catch(() => {});
-        // #endregion
-      };
-    }, [insets.top, insets.bottom, headerHeight]),
-  );
-  // #region agent log
-  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-    body: JSON.stringify({
-      sessionId: "f71351",
-      location: "settings.tsx:render",
-      message: "Settings render",
-      data: { headerHeight, insetsTop: insets.top, timestamp: Date.now() },
-      timestamp: Date.now(),
-      runId: "post-fix",
-      hypothesisId: "A,B",
-    }),
-  }).catch(() => {});
-  // #endregion
   const contentStyle = useMemo(
     () => ({ ...styles.scrollContent, paddingTop: headerHeight }),
     [headerHeight],
   );
 
-  const handleRootLayout = useCallback((e: LayoutChangeEvent) => {
-    const { height, y } = e.nativeEvent.layout;
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
-      body: JSON.stringify({
-        sessionId: "f71351",
-        location: "settings.tsx:rootLayout",
-        message: "SafeAreaView onLayout",
-        data: { height, y, timestamp: Date.now() },
-        timestamp: Date.now(),
-        hypothesisId: "G",
-      }),
-    }).catch(() => {});
-    // #endregion
-  }, []);
-
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: c.cream }]}
-      edges={["top"]}
-      onLayout={handleRootLayout}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       <ScreenBackground />
       <ScreenContent contentStyle={contentStyle} style={{ marginTop: 20 }}>
         <CTABannerCarousel promos={["rate"]} />
