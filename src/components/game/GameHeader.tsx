@@ -10,7 +10,6 @@ import { MAX_MISTAKES } from '../../engine/types';
 import { RollingTime, RollingNumber } from '../ui';
 import { CELL_SIZE } from '../board/SudokuCell';
 
-
 interface IconIndicatorProps {
   used: number;
   total: number;
@@ -55,7 +54,6 @@ export const GameHeader = () => {
 
   return (
     <View style={styles.container}>
-      {/* Section 1: Time */}
       <View style={[styles.section, styles.sectionDivider]}>
         {timerEnabled && (
           <RollingTime
@@ -66,8 +64,6 @@ export const GameHeader = () => {
           />
         )}
       </View>
-
-      {/* Section 2: Lives (Mistakes) */}
       <View style={[styles.section, styles.sectionDivider]}>
         {unlimitedMistakes ? (
           <Text style={[styles.infinityIcon, { color: colors.textSecondary }]}>∞</Text>
@@ -81,8 +77,6 @@ export const GameHeader = () => {
           />
         )}
       </View>
-
-      {/* Section 3: XP earned — badge (theme primary) + rolling total */}
       <View style={styles.section}>
         <View style={styles.xpRow}>
           <RollingNumber
@@ -138,7 +132,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    // borderWidth: 1,
   },
   xpBadge: {
     flexDirection: 'row',

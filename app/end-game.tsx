@@ -32,7 +32,6 @@ import MochiPointIcon from '../assets/images/icons/mochi-point.svg';
 const MochiWowImg = require('../assets/images/mochi/mochi-wow.png');
 const MochiQuitImg = require('../assets/images/mochi/mochi-quit.png');
 
-/** Display multiplier without trailing .0 for whole numbers (e.g. 1.5, 2, 1). */
 function formatXpMultiplier(mult: number): string {
   if (Number.isInteger(mult)) return String(mult);
   return String(mult);

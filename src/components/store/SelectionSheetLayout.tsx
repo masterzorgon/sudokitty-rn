@@ -142,6 +142,15 @@ export const selectionSheetStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  /** Match store mochi tiles: 10px inset from tile edge */
+  mochiPackIconTile: {
+    padding: 10,
+    overflow: 'hidden',
+  },
+  mochiPackIconImageInner: {
+    width: 28,
+    height: 28,
+  },
 });
 
 const styles = StyleSheet.create({

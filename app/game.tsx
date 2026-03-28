@@ -1,6 +1,3 @@
-// Game screen - active game view with back navigation
-// Separate from tabs for clean navigation experience
-
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -49,18 +46,14 @@ export default function GameScreen() {
   const isPremium = useIsPremium();
   const navigatedToEndGame = useRef(false);
 
-  // Settings modal state
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
   const wasPausedBeforeModal = useRef(false);
 
-  // Mascot message hook
   const mascotMessage = useGameMascotMessage();
 
-  // Background music
   useBackgroundMusic();
 
-  // SFX lifecycle: load on mount, unload on unmount
   useEffect(() => {
     loadSfx();
     return () => {
@@ -68,7 +61,6 @@ export default function GameScreen() {
     };
   }, []);
 
-  // Initialize game on mount
   useEffect(() => {
     if (difficulty) {
       const st = useGameStore.getState();
@@ -104,7 +96,6 @@ export default function GameScreen() {
     }
   }, []);
 
-  // Navigate to end-game screen when game ends
   useEffect(() => {
     const currentStatus = useGameStore.getState().gameStatus;
     if ((currentStatus === 'won' || currentStatus === 'lost') && !navigatedToEndGame.current) {
@@ -141,17 +132,14 @@ export default function GameScreen() {
     }
   }, [gameStatus, isDaily, router]);
 
-  // Handle back button - pause game instead of resetting
   const handleGoBack = useCallback(() => {
     playFeedback('tap');
-    // Only pause if game is still in progress
     if (gameStatus === 'playing') {
       pauseGame();
     }
     router.back();
   }, [gameStatus, pauseGame, router]);
 
-  // Settings modal handlers with pause state preservation
   const openSettingsModal = useCallback(() => {
     playFeedback('tap');
     wasPausedBeforeModal.current = gameStatus === 'paused';
@@ -163,13 +151,11 @@ export default function GameScreen() {
 
   const closeSettingsModal = useCallback(() => {
     setIsSettingsModalVisible(false);
-    // Only resume if game wasn't already paused before opening modal
     if (!wasPausedBeforeModal.current && gameStatus === 'paused') {
       resumeGame();
     }
   }, [gameStatus, resumeGame]);
 
-  /** Non-premium: no free hints left — show rewarded ad, then grant + use hint (no confirmation sheet). */
   const handleHintUnavailable = useCallback(async () => {
     const earned = await showRewardedAd();
     if (!earned) return;
@@ -180,28 +166,22 @@ export default function GameScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
-      {/* TOP ZONE - Progress bar with back button and settings */}
       <View style={styles.topZone}>
         <ProgressBar onBack={handleGoBack} onSettingsPress={openSettingsModal} />
       </View>
 
-      {/* Flex spacer to push mascot+grid down toward controls */}
       <View style={styles.flexSpacer} />
 
-      {/* MASCOT ZONE - Cat with contextual speech bubble (directly above stats bar) */}
       <View style={styles.mascotZone}>
         <GameMascot message={mascotMessage} />
       </View>
 
-      {/* STATS BAR - Time | Mistakes | Hints (directly below mascot, above grid) */}
       <GameHeader />
 
-      {/* GRID ZONE - Game board (edge-to-edge) */}
       <View style={styles.gridContainer}>
         <AnimatedGameView animateEntrance={!!difficulty} />
       </View>
 
-      {/* BOTTOM ZONE - Controls */}
       <View style={styles.bottomZone}>
         <View style={styles.controlsContainer}>
           <Animated.View entering={FadeIn.duration(startGameAnimations.controlsFadeIn.duration)}>
@@ -216,13 +196,11 @@ export default function GameScreen() {
         </View>
       </View>
 
-      {/* Settings modal */}
       <GameSettingsModal
         visible={isSettingsModalVisible}
         onClose={closeSettingsModal}
       />
 
-      {/* Hint explanation modal */}
       <HintModal />
     </SafeAreaView>
   );
@@ -244,7 +222,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   gridContainer: {
-    // NO horizontal padding - grid spans edge-to-edge
     alignItems: 'center',
   },
   bottomZone: {

@@ -67,7 +67,6 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
   return { h: h * 360, s, l };
 }
 
-/** H: 0–360, S/L: 0–1 — W3C-style conversion */
 function hslToRgb(h: number, s: number, l: number): { r: number; g: number; b: number } {
   const hn = (((h % 360) + 360) % 360) / 360;
   const a = s * Math.min(l, 1 - l);
@@ -87,7 +86,6 @@ function rgbToHex(r: number, g: number, b: number): string {
   return `#${to(r)}${to(g)}${to(b)}`;
 }
 
-/** Distinct hues around the theme primary accent (same family, varied tints) */
 function buildAccentHueColors(count: number, accentHex: string): string[] {
   const { r, g, b } = parseHexColor(accentHex);
   const { h: baseH, s: baseS, l: baseL } = rgbToHsl(r, g, b);
@@ -283,8 +281,6 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
     tick.value = 0;
   }, [count, width, height, state, totalElapsed, finished, tick]);
 
-  // Single derived value — replaces 90 ConfettoPiece components × 5 useDerivedValue each.
-  // Records all pieces into one Skia Picture per frame on the UI thread.
   const picture = useDerivedValue(() => {
     'worklet';
     tick.value;

@@ -30,7 +30,6 @@ export const STREAK_FREEZE_PACK_OPTIONS = [
 // ============================================
 
 export const MOCHI_PACK_PRODUCT_IDS = [
-  'mochis_100',
   'mochis_500',
   'mochis_1200',
   'mochis_3000',
@@ -39,7 +38,6 @@ export const MOCHI_PACK_PRODUCT_IDS = [
 export type MochiPackProductId = (typeof MOCHI_PACK_PRODUCT_IDS)[number];
 
 export const MOCHI_PACK_AMOUNTS: Record<MochiPackProductId, number> = {
-  mochis_100: 100,
   mochis_500: 500,
   mochis_1200: 1200,
   mochis_3000: 3000,

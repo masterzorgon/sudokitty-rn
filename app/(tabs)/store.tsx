@@ -21,13 +21,16 @@ import { useEffectivePremium } from '../../src/stores/premiumStore';
 import { useOwnedTracksStore } from '../../src/stores/ownedTracksStore';
 import { BACKING_TRACKS, type BackingTrackDef } from '../../src/constants/backingTracks';
 import {
-  MOCHIS_COST,
   MOCHI_PACK_AMOUNTS,
   MOCHI_PACK_PRODUCT_IDS,
   getStreakFreezeCost,
   STREAK_FREEZE_PACK_OPTIONS,
   type MochiPackProductId,
 } from '../../src/constants/economy';
+import {
+  MOCHI_PACK_IMAGE_SOURCES,
+  getMochiPackHeroSize,
+} from '../../src/constants/mochiPackImages';
 import { getMochiPackProducts, purchaseMochiPack, presentPaywallAlways } from '../../src/lib/revenueCat';
 import { playDemo, stopDemo } from '../../src/services/trackDemoService';
 import { playFeedback } from '../../src/utils/feedback';
@@ -36,10 +39,8 @@ import { StoreItemRow } from '../../src/components/ui/StoreItemRow';
 import { MusicTrackCard } from '../../src/components/ui/MusicTrackCard';
 import { MochiPricePill } from '../../src/components/ui/MochiPricePill';
 import { PurchaseSheet, type PurchaseSheetConfig } from '../../src/components/store/PurchaseSheet';
-import MochiPointIcon from '../../assets/images/icons/mochi-point.svg';
 const MochiMusicImg = require('../../assets/images/mochi/mochi-music.png');
 const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
-const MochiMochisImg = require('../../assets/images/mochi/mochi-mochis.png');
 
 // ============================================
 // Store Screen
@@ -194,8 +195,15 @@ export default function StoreScreen() {
     playFeedback('tap');
     const product = products.find((p) => p.identifier === packId);
     const priceLabel = product?.priceString ?? '---';
+    const heroSize = getMochiPackHeroSize(packId);
     setSheetConfig({
-      image: <Image source={MochiMochisImg} style={{ width: 200, height: 200 }} contentFit="contain" />,
+      image: (
+        <Image
+          source={MOCHI_PACK_IMAGE_SOURCES[packId]}
+          style={{ width: heroSize, height: heroSize }}
+          contentFit="contain"
+        />
+      ),
       title: `Get ${amount.toLocaleString()} Mochis!`,
       price: priceLabel,
       currency: 'iap',
@@ -297,8 +305,14 @@ export default function StoreScreen() {
             <StoreItemRow
               key={packId}
               icon={
-                <View style={[styles.iconCircle, { backgroundColor: c.accentLight + '40' }]}>
-                  <MochiPointIcon width={22} height={22} />
+                <View style={[styles.iconCircle, styles.mochiPackIconTile, { backgroundColor: c.accentLight + '40' }]}>
+                  <View style={styles.mochiPackIconImageInner}>
+                    <Image
+                      source={MOCHI_PACK_IMAGE_SOURCES[packId]}
+                      style={StyleSheet.absoluteFillObject}
+                      contentFit="contain"
+                    />
+                  </View>
                 </View>
               }
               title={`${amount.toLocaleString()} Mochis`}
@@ -324,16 +338,6 @@ export default function StoreScreen() {
   );
 }
 
-
-// ============================================
-// Banner Styles
-// ============================================
-
-
-// ============================================
-// Styles
-// ============================================
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -349,6 +353,14 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  mochiPackIconTile: {
+    padding: 10,
+    overflow: 'hidden',
+  },
+  mochiPackIconImageInner: {
+    width: 28,
+    height: 28,
   },
   smallBtn: {
     paddingHorizontal: spacing.md,

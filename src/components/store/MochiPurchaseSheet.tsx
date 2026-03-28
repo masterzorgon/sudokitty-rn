@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import type { PurchasesStoreProduct } from 'react-native-purchases';
 
@@ -12,6 +13,7 @@ import {
   MOCHI_PACK_AMOUNTS,
   type MochiPackProductId,
 } from '../../constants/economy';
+import { MOCHI_PACK_IMAGE_SOURCES } from '../../constants/mochiPackImages';
 import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
 import {
   SelectionSheetLayout,
@@ -108,8 +110,14 @@ export function MochiPurchaseSheet({ visible, onDismiss }: MochiPurchaseSheetPro
             <StoreItemRow
               key={packId}
               icon={
-                <View style={[ss.iconCircle, { backgroundColor: c.accentLight + '40' }]}>
-                  <MochiPointIcon width={22} height={22} />
+                <View style={[ss.iconCircle, ss.mochiPackIconTile, { backgroundColor: c.accentLight + '40' }]}>
+                  <View style={ss.mochiPackIconImageInner}>
+                    <Image
+                      source={MOCHI_PACK_IMAGE_SOURCES[packId]}
+                      style={StyleSheet.absoluteFillObject}
+                      contentFit="contain"
+                    />
+                  </View>
                 </View>
               }
               title={`${amount.toLocaleString()} Mochis`}
