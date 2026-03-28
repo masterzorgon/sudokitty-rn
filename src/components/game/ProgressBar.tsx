@@ -48,6 +48,8 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
   const c = useColors();
   const progress = useProgress();
   const percentage = Math.round(progress * 100);
+  /** Narrow digit strip (1–3 slots) keeps the value next to “%” instead of a wide odometer gap */
+  const percentMaxDigits = percentage >= 100 ? 3 : percentage >= 10 ? 2 : 1;
 
   // Animated progress value for smooth transitions
   const animatedProgress = useSharedValue(percentage);
@@ -194,7 +196,7 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
           fontSize={20}
           color={colors.textLight}
           textStyle={typography.caption}
-          maxDigits={3}
+          maxDigits={percentMaxDigits}
           digitsAlign="end"
         />
         <Text style={styles.percentSign}>%</Text>
@@ -270,9 +272,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'flex-end',
-    // Fixed width sized to "100%" at fontSize 20: 3 digits × 13px + 2px gap + ~12px for '%'
-    width: 56,
     gap: 2,
+    flexShrink: 0,
+    minWidth: 36,
   },
   percentSign: {
     ...typography.caption,

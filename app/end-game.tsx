@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '../src/theme/colors';
 import { typography, fontFamilies } from '../src/theme/typography';
 import { spacing, borderRadius } from '../src/theme';
+import { ConfettiCannon } from '../src/components/ui/ConfettiCannon';
 import { SkeuButton, SkeuCard, SKEU_VARIANTS } from '../src/components/ui/Skeuomorphic';
 import { ScreenBackground, BottomActionBar } from '../src/components/ui/Layout';
 import { showRewardedAd } from '../src/services/adService';
@@ -261,6 +262,8 @@ export default function EndGameScreen() {
           </View>
         </BottomActionBar>
       </View>
+
+      {isWon && <ConfettiCannon />}
     </SafeAreaView>
   );
 }
