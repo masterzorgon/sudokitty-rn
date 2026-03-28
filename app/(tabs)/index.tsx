@@ -1,7 +1,7 @@
 // Home screen - Landing page with mochi cat mascot and animated greeting
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Image, StyleSheet, Alert } from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -14,7 +14,6 @@ import {
   usePlayerStreakStore,
   useCurrentStreak,
 } from '../../src/stores/playerStreakStore';
-import { getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../../src/engine/types';
 import {
   MochiCat,
   TechniquesCTA,
@@ -116,25 +115,6 @@ export default function HomeScreen() {
   const handleStreakPress = () => {
     playFeedback('tap');
     router.push('/(tabs)/stats');
-  };
-
-  const handleDailyChallengePress = () => {
-    playFeedback('tap');
-    const store = usePlayerStreakStore.getState();
-    const today = getTodayDateString();
-    if (store.lastCompletedDate === today) {
-      Alert.alert(
-        'Daily Challenge',
-        "You've already completed today's puzzle. Come back tomorrow!",
-      );
-      return;
-    }
-    const dayOfWeek = new Date().getDay();
-    const dailyDifficulty = DAILY_DIFFICULTY_SCHEDULE[dayOfWeek];
-    router.push({
-      pathname: '/game',
-      params: { difficulty: dailyDifficulty, isDaily: 'true' },
-    });
   };
 
   // MARK: - Render

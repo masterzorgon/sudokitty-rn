@@ -37,7 +37,7 @@ export class UniqueRectangle extends BaseTechnique {
     }
 
     // For each group with 3+ cells sharing the same pair, try to form rectangles
-    for (const [key, cells] of groups) {
+    for (const [, cells] of groups) {
       if (cells.length < 3) continue;
       const [cand1, cand2] = cells[0].cands;
 

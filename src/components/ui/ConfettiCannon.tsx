@@ -283,7 +283,7 @@ export function ConfettiCannon({ count = DEFAULT_COUNT, onComplete }: ConfettiCa
 
   const picture = useDerivedValue(() => {
     'worklet';
-    tick.value;
+    void tick.value;
     const pieces = state.value;
     const sw = screenW.value;
     const sh = screenH.value;

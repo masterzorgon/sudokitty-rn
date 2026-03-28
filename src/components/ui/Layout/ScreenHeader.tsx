@@ -34,7 +34,6 @@ export function ScreenHeader({ style, onHeightChange }: ScreenHeaderProps) {
   const [mochiSheetVisible, setMochiSheetVisible] = useState(false);
   const [freezeSheetVisible, setFreezeSheetVisible] = useState(false);
 
-  const goToStore = () => { playFeedback('tap'); router.push('/store'); };
   const goToStats = () => { playFeedback('tap'); router.push('/(tabs)/stats'); };
   const openMochiSheet = () => { playFeedback('tap'); setMochiSheetVisible(true); };
   const openFreezeSheet = () => { playFeedback('tap'); setFreezeSheetVisible(true); };

@@ -262,6 +262,21 @@ export default function FeedbackScreen() {
             />
           </View>
 
+          {/* Name */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Your name</Text>
+            <TextInput
+              style={styles.textInputSingle}
+              placeholder="How should we call you?"
+              placeholderTextColor={colors.textLight}
+              value={name}
+              onChangeText={setName}
+              maxLength={120}
+              editable={!isSubmitting}
+              autoCapitalize="words"
+            />
+          </View>
+
           {/* Email Input */}
           <View style={styles.section}>
             <Text style={styles.label}>

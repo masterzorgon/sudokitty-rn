@@ -1,8 +1,5 @@
 // Progress bar component - displays game completion progress
-// Shows a capsule-shaped bar with fill based on cells completed
-// Uses animated rolling numbers for percentage display
-
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, Text, Pressable, LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -85,17 +82,22 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
   );
 
   // Particle pool referencing the shared values
-  const particles = useMemo(() => [
-    { x: p0x, y: p0y, opacity: p0opacity, radius: 2.5, color: particleColors[0] },
-    { x: p1x, y: p1y, opacity: p1opacity, radius: 3.0, color: particleColors[1] },
-    { x: p2x, y: p2y, opacity: p2opacity, radius: 2.2, color: particleColors[2] },
-    { x: p3x, y: p3y, opacity: p3opacity, radius: 2.8, color: particleColors[3] },
-    { x: p4x, y: p4y, opacity: p4opacity, radius: 2.4, color: particleColors[0] },
-    { x: p5x, y: p5y, opacity: p5opacity, radius: 3.2, color: particleColors[1] },
-  ], [particleColors]);
+  const particles = useMemo(
+    () => [
+      { x: p0x, y: p0y, opacity: p0opacity, radius: 2.5, color: particleColors[0] },
+      { x: p1x, y: p1y, opacity: p1opacity, radius: 3.0, color: particleColors[1] },
+      { x: p2x, y: p2y, opacity: p2opacity, radius: 2.2, color: particleColors[2] },
+      { x: p3x, y: p3y, opacity: p3opacity, radius: 2.8, color: particleColors[3] },
+      { x: p4x, y: p4y, opacity: p4opacity, radius: 2.4, color: particleColors[0] },
+      { x: p5x, y: p5y, opacity: p5opacity, radius: 3.2, color: particleColors[1] },
+    ],
+    // SharedValue refs are stable for the component lifetime; only theme colors change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- particle SVs intentionally omitted
+    [particleColors],
+  );
 
   // Spawn particles in a radial spray from the right edge of the progress fill
-  const spawnParticles = () => {
+  const spawnParticles = useCallback(() => {
     const barHeight = GAME_LAYOUT.PROGRESS_BAR_HEIGHT;
     const fillWidth = (percentage / 100) * barWidth.current;
     const startX = fillWidth - 5;
@@ -132,7 +134,7 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
         p.opacity.value = withTiming(0, { duration: 400 });
       }, delay);
     });
-  };
+  }, [percentage, particles]);
 
   // Update animated value when percentage changes
   useEffect(() => {
@@ -146,7 +148,7 @@ export const ProgressBar = ({ onBack, onSettingsPress }: ProgressBarProps) => {
       spawnParticles();
     }
     prevPercentage.current = percentage;
-  }, [percentage]);
+  }, [percentage, animatedProgress, spawnParticles]);
 
   // Animated style for the fill width
   const animatedFillStyle = useAnimatedStyle(() => ({

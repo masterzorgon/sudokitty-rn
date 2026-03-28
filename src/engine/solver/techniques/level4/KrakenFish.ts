@@ -15,7 +15,6 @@ import {
   CandidateGridInterface,
   TechniqueResult,
   TechniqueLevel,
-  Elimination,
   Unit,
   UnitType,
 } from "../../types";

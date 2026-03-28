@@ -134,7 +134,14 @@ export const SudokuCell = memo(
         const targetValue = isSelected ? 1 : isRelated ? 0.4 : isHighlighted ? 0.25 : 0;
         backgroundProgress.value = targetValue;
       }
-    }, [isSelected, isRelated, isHighlighted, isSecondaryHighlight, animateValues]);
+    }, [
+      isSelected,
+      isRelated,
+      isHighlighted,
+      isSecondaryHighlight,
+      animateValues,
+      backgroundProgress,
+    ]);
 
     // Trigger glow effect on correct input (game mode only)
     useEffect(() => {
@@ -145,7 +152,7 @@ export const SudokuCell = memo(
           withTiming(0, timingConfigs.glowOut),
         );
       }
-    }, [displayValue, isValid, animateValues]);
+    }, [displayValue, isValid, animateValues, glowOpacity, isGiven]);
 
     // Trigger completion wave animation entirely on the UI thread via withDelay.
     // When overlapping units complete (e.g. row + column), use the earliest delay.
@@ -157,7 +164,7 @@ export const SudokuCell = memo(
         minDelay,
         withSequence(withTiming(1, timingConfigs.wave), withTiming(0, timingConfigs.waveFade)),
       );
-    }, [completionAnimations, animateValues]);
+    }, [completionAnimations, animateValues, waveGlow]);
 
     const highlightColor = animateValues ? c.cellHighlighted : c.techniqueHighlight;
     const secondaryColor = animateValues ? `${colors.coral}26` : c.techniqueHighlightSecondary;

@@ -1,6 +1,5 @@
 // SudokuSolver - Main solver orchestrator using technique-based solving
 
-import { BOARD_SIZE } from '../types';
 import { CandidateGrid } from './CandidateGrid';
 import {
   Technique,
@@ -11,7 +10,7 @@ import {
   Hint,
   getMochiHint,
 } from './types';
-import { getTechniquesUpToLevel, ALL_TECHNIQUES } from './techniques';
+import { getTechniquesUpToLevel } from './techniques';
 import { getTechniqueMetadataByName } from '../../data/techniqueMetadata';
 
 const DEFAULT_CONFIG: Required<SolverConfig> = {

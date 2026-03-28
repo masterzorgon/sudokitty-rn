@@ -134,10 +134,6 @@ const AnimatedDigit = memo(({
 
   const flattenedTextStyle = useMemo(() => StyleSheet.flatten(textStyle), [textStyle]);
 
-  // Calculate the vertical padding needed to center text within fixed height
-  // This ensures consistent baseline across all digits
-  const verticalPadding = (height - fontSize) / 2;
-
   return (
     <Animated.View
       style={[

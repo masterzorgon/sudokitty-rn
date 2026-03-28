@@ -18,8 +18,6 @@
 import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
 import { TECHNIQUE_METADATA } from "../../data/techniqueMetadata";
 import { TECHNIQUE_IDS, CuratedPuzzle } from "../techniqueGenerator";
-import { TechniqueLevel } from "../solver/types";
-
 // ============================================
 // Structural Validation Helpers
 // ============================================
@@ -27,10 +25,6 @@ import { TechniqueLevel } from "../solver/types";
 function is9x9Grid(grid: unknown): grid is number[][] {
   if (!Array.isArray(grid) || grid.length !== 9) return false;
   return grid.every((row) => Array.isArray(row) && row.length === 9);
-}
-
-function getBoxIndex(row: number, col: number): number {
-  return Math.floor(row / 3) * 3 + Math.floor(col / 3);
 }
 
 function getBoxDigits(grid: number[][], boxIndex: number): number[] {

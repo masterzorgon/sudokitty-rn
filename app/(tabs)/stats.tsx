@@ -11,7 +11,10 @@ import { ScreenBackground, ScreenContent, ScreenHeader } from '../../src/compone
 export default function StatsScreen() {
   const c = useColors();
   const [headerHeight, setHeaderHeight] = useState(0);
-  const contentStyle = useMemo(() => ({ ...styles.scrollContent, paddingTop: 70 }), [headerHeight]);
+  const contentStyle = useMemo(
+    () => ({ ...styles.scrollContent, paddingTop: headerHeight > 0 ? headerHeight : 70 }),
+    [headerHeight],
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>

@@ -10,7 +10,6 @@ import {
   SkeuVariant,
   CustomSkeuColors,
   SKEU_VARIANTS,
-  useThemedSkeuVariants,
 } from '../../../theme/skeuomorphic';
 import { useSkeuomorphicPress } from '../../../hooks/useSkeuomorphicPress';
 import type { FeedbackId } from '../../../utils/feedback';
@@ -99,9 +98,7 @@ export function SkeuButton({
     feedbackId,
   });
 
-  const themedVariants = useThemedSkeuVariants();
   const effectiveVariant = disabled ? 'disabled' : variant;
-  const textColor = customColors?.textColor ?? themedVariants[effectiveVariant].textColor;
 
   // Wrap content with animation if enabled
   const content = (

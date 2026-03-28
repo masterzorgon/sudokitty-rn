@@ -38,10 +38,10 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
 
   const visible = config !== null;
 
-  const { canAfford, insufficientFunds } = useMemo(() => {
-    if (!config) return { canAfford: true, insufficientFunds: false };
+  const { insufficientFunds } = useMemo(() => {
+    if (!config) return { insufficientFunds: false };
     const afford = config.currency === 'iap' || totalMochis >= (config.price as number);
-    return { canAfford: afford, insufficientFunds: config.currency === 'mochis' && !afford };
+    return { insufficientFunds: config.currency === 'mochis' && !afford };
   }, [config, totalMochis]);
 
   const handlePress = useCallback(() => {

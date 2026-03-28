@@ -31,7 +31,7 @@ export async function getDeviceId(): Promise<string> {
     }
     cachedDeviceId = id;
     return id;
-  } catch (err) {
+  } catch {
     // Fallback: generate a transient ID (won't persist across restarts)
     const fallback = generateUUID();
     cachedDeviceId = fallback;

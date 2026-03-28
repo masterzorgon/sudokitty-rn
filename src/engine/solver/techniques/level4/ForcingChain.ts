@@ -13,7 +13,6 @@ import {
   TechniqueResult,
   TechniqueLevel,
   Elimination,
-  Placement,
 } from "../../types";
 import { BaseTechnique } from "../Technique";
 

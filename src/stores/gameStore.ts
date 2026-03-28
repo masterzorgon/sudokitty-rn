@@ -13,7 +13,6 @@ import {
   Difficulty,
   GameStatus,
   CompletedUnit,
-  MoveRecord,
   InputResult,
   BOARD_SIZE,
   BOX_SIZE,
@@ -1004,7 +1003,7 @@ export const useRelatedCells = (): Set<string> => {
   return useMemo(() => {
     if (!selectedCell) return EMPTY_RELATED_SET;
     return new Set(getRelatedPositions(selectedCell).map(positionKey));
-  }, [selectedCell?.row, selectedCell?.col]);
+  }, [selectedCell]);
 };
 
 // Hint selectors

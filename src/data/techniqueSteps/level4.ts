@@ -1,5 +1,5 @@
 import { StepTemplate } from './types';
-import { formatPos, formatPositions, extractNumber } from './helpers';
+import { formatPos, extractNumber } from './helpers';
 
 export const swordfishSteps: StepTemplate[] = [
   {
@@ -54,7 +54,7 @@ export const jellyfishSteps: StepTemplate[] = [
 export const xyWingSteps: StepTemplate[] = [
   {
     getText: (result) => {
-      const [pivot, wing1, wing2] = result.highlightCells;
+      const [pivot] = result.highlightCells;
       return `Find the pivot cell at ${formatPos(pivot)}. It has exactly two candidates.`;
     },
     getHighlightCells: (result) => [result.highlightCells[0]],
@@ -62,7 +62,7 @@ export const xyWingSteps: StepTemplate[] = [
   },
   {
     getText: (result) => {
-      const [pivot, wing1, wing2] = result.highlightCells;
+      const [, wing1, wing2] = result.highlightCells;
       return `The pivot sees two wing cells: ${formatPos(wing1)} and ${formatPos(wing2)}. Each wing shares one candidate with the pivot and they share a common candidate between them.`;
     },
     getHighlightCells: (result) => result.highlightCells,
@@ -87,7 +87,7 @@ export const xyzWingSteps: StepTemplate[] = [
   },
   {
     getText: (result) => {
-      const [pivot, wing1, wing2] = result.highlightCells;
+      const [, wing1, wing2] = result.highlightCells;
       return `The pivot sees two wing cells: ${formatPos(wing1)} and ${formatPos(wing2)}. Each wing has two candidates, sharing one with the pivot and one common candidate (Z) between them.`;
     },
     getHighlightCells: (result) => result.highlightCells,

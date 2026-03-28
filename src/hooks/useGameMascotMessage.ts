@@ -182,6 +182,7 @@ export function useGameMascotMessage(): string | null {
     
     // Update previous state ref
     prevStateRef.current = currentState;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- ref snapshot pattern; tryShowMessage not stable each render
   }, [gameStatus, mistakeCount, hintsUsed, lastCorrectCell]);
 
   // Cleanup timer on unmount

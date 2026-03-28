@@ -32,7 +32,7 @@ export async function getRandomWelcomeMessage(): Promise<string> {
     await AsyncStorage.setItem(STORAGE_KEY, newMessage);
     
     return newMessage;
-  } catch (error) {
+  } catch {
     // Fallback to random message if storage fails
     return WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)];
   }

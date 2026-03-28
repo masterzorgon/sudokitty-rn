@@ -1,6 +1,6 @@
 // Test utilities for React Native Testing Library
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react-native';
 
 /**

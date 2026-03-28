@@ -49,7 +49,6 @@ export class XYWing extends BaseTechnique {
     const [X, Y] = pivotCandidates;
 
     // Find potential wings (bi-value cells that the pivot can see)
-    const peers = grid.getPeers(pivot);
     const potentialWings = biValueCells.filter(
       (cell) => cell.row !== pivot.row || cell.col !== pivot.col, // Not the pivot
     );

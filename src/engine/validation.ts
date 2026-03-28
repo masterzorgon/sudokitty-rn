@@ -6,7 +6,7 @@
 //   Elimination techniques (Level 2-4): User identifies pattern cells + elimination targets
 
 import { Position, positionKey } from './types';
-import { TechniqueResult, TechniqueLevel } from './solver/types';
+import { TechniqueResult } from './solver/types';
 
 // ============================================
 // Types

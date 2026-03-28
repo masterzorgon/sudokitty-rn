@@ -7,7 +7,7 @@ import Animated from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { colors } from '../../../theme/colors';
-import { typography, fontFamilies } from '../../../theme/typography';
+import { fontFamilies } from '../../../theme/typography';
 
 type PointerDirection = 'up' | 'down' | 'left' | 'right';
 

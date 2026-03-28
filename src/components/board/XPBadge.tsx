@@ -2,7 +2,7 @@
 // Animates: entry (scale + opacity) → hold → exit (translate up + fade out).
 
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -67,7 +67,7 @@ export function XPBadge({ row, col, xp, eventKey }: XPBadgeProps) {
         easing: Easing.out(Easing.quad),
       }),
     );
-  }, [row, col, xp, eventKey]);
+  }, [row, col, xp, eventKey, opacity, scale, translateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }, { translateY: translateY.value }],

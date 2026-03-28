@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { Ionicons, Feather } from '@expo/vector-icons';
 import type { PurchasesStoreProduct } from 'react-native-purchases';
 
@@ -47,7 +46,6 @@ const MochiFreezeImg = require('../../assets/images/mochi/mochi-freeze.png');
 
 export default function StoreScreen() {
   const c = useColors();
-  const router = useRouter();
   const isPremium = useEffectivePremium();
   const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
   const streakFreezesCount = usePlayerStreakStore((s) => s.streakFreezesCount);
@@ -66,15 +64,6 @@ export default function StoreScreen() {
 
   const mountedRef = useRef(true);
 
-  useEffect(() => {
-    mountedRef.current = true;
-    loadProducts();
-    return () => {
-      mountedRef.current = false;
-      stopDemo();
-    };
-  }, []);
-
   const loadProducts = useCallback(async () => {
     setProductsLoading(true);
     const result = await getMochiPackProducts();
@@ -82,6 +71,15 @@ export default function StoreScreen() {
     setProducts(result);
     setProductsLoading(false);
   }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    loadProducts();
+    return () => {
+      mountedRef.current = false;
+      stopDemo();
+    };
+  }, [loadProducts]);
 
   // ============================================
   // Handlers
@@ -216,7 +214,10 @@ export default function StoreScreen() {
   // ============================================
 
   const [headerHeight, setHeaderHeight] = useState(0);
-  const contentStyle = useMemo(() => ({ ...styles.content, paddingTop: 70 }), [headerHeight]);
+  const contentStyle = useMemo(
+    () => ({ ...styles.content, paddingTop: headerHeight > 0 ? headerHeight : 70 }),
+    [headerHeight],
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>

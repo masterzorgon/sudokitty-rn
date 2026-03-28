@@ -11,7 +11,6 @@ import { ALL_TECHNIQUES } from "../solver/techniques";
 import { TechniqueLevel } from "../solver/types";
 import { CURATED_PUZZLE_BANK } from "../../data/techniquePuzzleBank";
 import { TECHNIQUE_IDS } from "../techniqueGenerator";
-import { Position } from "../types";
 
 // ============================================
 // Helpers
@@ -43,16 +42,6 @@ function prepareGridForTechnique(puzzle: number[][], targetLevel: TechniqueLevel
     }
   }
   return grid;
-}
-
-function positionSetsMatch(a: Position[], b: { row: number; col: number }[]): boolean {
-  if (a.length !== b.length) return false;
-  const setA = new Set(a.map((p) => `${p.row}-${p.col}`));
-  const setB = new Set(b.map((p) => `${p.row}-${p.col}`));
-  for (const key of setA) {
-    if (!setB.has(key)) return false;
-  }
-  return true;
 }
 
 // ============================================

@@ -51,7 +51,6 @@ export class Skyscraper extends BaseTechnique {
     for (const [pair1, pair2] of pairs) {
       // Check if they share exactly ONE column (not both — that would be an X-Wing)
       const shared: number[] = [];
-      const endpoints: Position[] = [];
 
       for (const c1 of pair1.cols) {
         for (const c2 of pair2.cols) {
@@ -95,11 +94,6 @@ export class Skyscraper extends BaseTechnique {
       }
 
       if (eliminations.length > 0) {
-        const baseCells: Position[] = [
-          { row: pair1.row, col: sharedCol },
-          { row: pair2.row, col: sharedCol },
-        ];
-
         const highlightCells: Position[] = [
           { row: pair1.row, col: pair1.cols[0] },
           { row: pair1.row, col: pair1.cols[1] },

@@ -22,7 +22,7 @@ export function AnimatedStepDot({ state }: { state: StepDotState }) {
   useEffect(() => {
     const target = state === 'active' ? 1 : state === 'completed' ? 2 : 0;
     progress.value = withTiming(target, STEP_DOT_TIMING);
-  }, [state]);
+  }, [state, progress]);
 
   const animatedStyle = useAnimatedStyle(() => {
     // Width: 8px for pending/completed, 20px for active

@@ -12,7 +12,6 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-import { storage, STORAGE_KEYS } from '../utils/storage';
 import { TECHNIQUE_METADATA, isTechniqueLessonVisible } from '../data/techniqueMetadata';
 
 // ============================================

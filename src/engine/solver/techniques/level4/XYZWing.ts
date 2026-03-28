@@ -9,7 +9,7 @@
 
 import { Position, BOARD_SIZE } from "../../../types";
 import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
-import { BaseTechnique, setIntersection } from "../Technique";
+import { BaseTechnique } from "../Technique";
 
 export class XYZWing extends BaseTechnique {
   readonly name = "XYZ-Wing";

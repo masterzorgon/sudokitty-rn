@@ -43,7 +43,7 @@ import { ForcingChain } from "../techniques/level4/ForcingChain";
 import { ForcingNet } from "../techniques/level4/ForcingNet";
 import { KrakenFish } from "../techniques/level4/KrakenFish";
 import { BruteForce } from "../techniques/level4/BruteForce";
-import { TechniqueResult, TechniqueLevel } from "../types";
+import { TechniqueLevel } from "../types";
 import { CURATED_PUZZLE_BANK } from "../../../data/techniquePuzzleBank";
 import { Position } from "../../types";
 
@@ -484,7 +484,6 @@ describe("Swordfish", () => {
 
 describe("XY-Wing", () => {
   const technique = new XYWing();
-  const curated = CURATED_PUZZLE_BANK["xy-wing"]?.[0];
 
   test("should find technique in at least one curated puzzle", () => {
     const allCurated = CURATED_PUZZLE_BANK["xy-wing"] ?? [];

@@ -193,7 +193,7 @@ export function useTechniquePractice() {
         setStatusOverride('error');
       },
     );
-  }, [techniqueId, loadPuzzleAsync, sequence]);
+  }, [loadPuzzleAsync, sequence]);
 
   // Initial load
   useEffect(() => {
@@ -204,7 +204,7 @@ export function useTechniquePractice() {
     } else if (techniqueId && metadata && !metadata.hasSolver) {
       setStatusOverride('coming-soon');
     }
-  }, [techniqueId, isPremium]);
+  }, [techniqueId, isPremium, generatePuzzle, metadata]);
 
   // Load practice puzzle when entering practice phase
   useEffect(() => {
@@ -268,13 +268,21 @@ export function useTechniquePractice() {
     } else if (findPhase === 'pattern') {
       setPatternCells((prev) => {
         const next = new Set(prev);
-        next.has(key) ? next.delete(key) : next.add(key);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
         return next;
       });
     } else {
       setEliminationCells((prev) => {
         const next = new Set(prev);
-        next.has(key) ? next.delete(key) : next.add(key);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
         return next;
       });
     }

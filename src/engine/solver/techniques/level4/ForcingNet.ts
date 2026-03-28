@@ -7,8 +7,8 @@
 //
 // Same verity/contradiction logic as Forcing Chain but with branching.
 
-import { Position, BOARD_SIZE } from "../../../types";
-import { CandidateGridInterface, TechniqueResult, TechniqueLevel, Elimination } from "../../types";
+import { BOARD_SIZE } from "../../../types";
+import { CandidateGridInterface, TechniqueResult, TechniqueLevel } from "../../types";
 import { BaseTechnique } from "../Technique";
 
 const MAX_DEPTH = 20;

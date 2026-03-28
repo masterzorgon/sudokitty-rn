@@ -8,7 +8,6 @@
 //   4. If target technique not found, retry (up to budget)
 //   5. On failure, fall back to curated puzzle bank
 
-import { GeneratedPuzzle } from "./types";
 import { SudokuSolver, TechniqueLevel, TechniqueResult, Hint, getMochiHint } from "./solver";
 import { CandidateGrid } from "./solver/CandidateGrid";
 import { ALL_TECHNIQUES } from "./solver/techniques";

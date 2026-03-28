@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View, Linking, Alert, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import Constants from 'expo-constants';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '../../src/theme/colors';
 import { PALETTES, THEME_NAMES } from '../../src/theme/palettes';
@@ -143,7 +142,10 @@ export default function SettingsScreen() {
   }, [resetGame, resetDailyChallenge, resetStats]);
 
   const [headerHeight, setHeaderHeight] = useState(0);
-  const contentStyle = useMemo(() => ({ ...styles.scrollContent, paddingTop: 70 }), [headerHeight]);
+  const contentStyle = useMemo(
+    () => ({ ...styles.scrollContent, paddingTop: headerHeight > 0 ? headerHeight : 70 }),
+    [headerHeight],
+  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={['top']}>

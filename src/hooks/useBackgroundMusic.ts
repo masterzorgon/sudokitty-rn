@@ -44,7 +44,7 @@ export function useBackgroundMusic() {
       audioService.unload();
     }
     prevMusicEnabled.current = musicEnabled;
-  }, [musicEnabled]);
+  }, [musicEnabled, activeTrackId]);
 
   // Sync coordinator on input changes
   useEffect(() => {

@@ -9,17 +9,16 @@
 import {
   generatePuzzleForTechnique,
   generateWithFallback,
-  benchmarkTechnique,
   benchmarkAllTechniques,
-  findAllTechniqueInstances,
   TECHNIQUE_IDS,
-  TechniqueGenerationResult,
   GenerationConfig,
 } from '../techniqueGenerator';
 import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
 import { TECHNIQUE_METADATA } from '../../data/techniqueMetadata';
 import { SudokuSolver } from '../solver/SudokuSolver';
 import { CandidateGrid } from '../solver/CandidateGrid';
+import { NakedSingle } from '../solver/techniques/level1/NakedSingle';
+import { HiddenSingle } from '../solver/techniques/level1/HiddenSingle';
 
 // ============================================
 // Spike: Individual Technique Generation
@@ -183,7 +182,7 @@ describe('Technique Generator - Validation', () => {
 
     // Verify the technique actually applies to the returned puzzle
     const grid = new CandidateGrid(result.puzzle);
-    const nakedSingle = new (require('../solver/techniques/level1/NakedSingle').NakedSingle)();
+    const nakedSingle = new NakedSingle();
     const applied = nakedSingle.apply(grid);
 
     expect(applied).not.toBeNull();
@@ -202,7 +201,7 @@ describe('Technique Generator - Validation', () => {
 
     // Verify on the actual grid
     const grid = new CandidateGrid(result.puzzle);
-    const hiddenSingle = new (require('../solver/techniques/level1/HiddenSingle').HiddenSingle)();
+    const hiddenSingle = new HiddenSingle();
     const applied = hiddenSingle.apply(grid);
 
     expect(applied).not.toBeNull();

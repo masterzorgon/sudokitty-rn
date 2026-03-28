@@ -85,7 +85,7 @@ export function DemoPlayButton({
       progressSV.value = 0;
       frameCallback.setActive(false);
     }
-  }, [isPlaying, durationMs, frameCallback]);
+  }, [isPlaying, durationMs, frameCallback, durationMsSV, isPlayingSV, originReadySV, progressSV]);
 
   const animatedRectProps = useAnimatedProps(() => {
     'worklet';

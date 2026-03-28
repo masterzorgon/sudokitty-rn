@@ -2,6 +2,7 @@
 
 // Mock react-native-reanimated v4
 jest.mock('react-native-reanimated', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports -- Jest mock factory uses synchronous require
   const Reanimated = require('react-native-reanimated/mock');
   Reanimated.default.call = () => {};
   return Reanimated;

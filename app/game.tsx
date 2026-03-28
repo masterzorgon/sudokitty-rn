@@ -94,7 +94,7 @@ export default function GameScreen() {
         startTimer();
       }, startGameAnimations.controlsDelay);
     }
-  }, []);
+  }, [difficulty, isDaily, newDailyGame, newGame, startTimer]);
 
   useEffect(() => {
     const currentStatus = useGameStore.getState().gameStatus;

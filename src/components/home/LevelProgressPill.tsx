@@ -48,7 +48,7 @@ export function LevelProgressPill({
       damping: 20,
       stiffness: 120,
     });
-  }, [progressFraction, pillWidth]);
+  }, [progressFraction, pillWidth, animatedWidth]);
 
   const fillStyle = useAnimatedStyle(() => ({
     width: animatedWidth.value,

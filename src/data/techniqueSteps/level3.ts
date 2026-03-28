@@ -254,7 +254,6 @@ export const sueDeCoqSteps: StepTemplate[] = [
 export const simpleColorsSteps: StepTemplate[] = [
   {
     getText: (result) => {
-      const isWrap = result.explanation.includes('Wrap');
       const num = extractSDPCandidate(result.explanation);
       return `Focus on candidate ${num ?? 'a number'}. Color conjugate pairs with two alternating colors along connected chains.`;
     },

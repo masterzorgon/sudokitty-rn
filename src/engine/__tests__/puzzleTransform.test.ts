@@ -11,14 +11,11 @@ import {
   transformCuratedPuzzle,
   randomTransform,
   identityTransform,
-  mapPosition,
   mapDigit,
   PuzzleTransform,
 } from '../puzzleTransform';
 import { validateBoard } from '../generator';
 import { CURATED_PUZZLE_BANK } from '../../data/techniquePuzzleBank';
-import { CandidateGrid } from '../solver/CandidateGrid';
-import { ALL_TECHNIQUES } from '../solver/techniques';
 import { BOARD_SIZE } from '../types';
 
 // ============================================

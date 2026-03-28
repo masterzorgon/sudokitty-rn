@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 import {
   useSettingsStore,
-  useHapticsEnabled,
   useUnlimitedMistakes,
   useUnlimitedHints,
 } from '../../stores/settingsStore';
@@ -49,11 +48,9 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
   const c = useColors();
   const isPremium = useEffectivePremium();
 
-  const hapticsEnabled = useHapticsEnabled();
   const unlimitedMistakes = useUnlimitedMistakes();
   const unlimitedHints = useUnlimitedHints();
 
-  const setHapticsEnabled = useSettingsStore((s) => s.setHapticsEnabled);
   const setUnlimitedMistakes = useSettingsStore((s) => s.setUnlimitedMistakes);
   const setUnlimitedHints = useSettingsStore((s) => s.setUnlimitedHints);
 
