@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useImperativeHandle, forwardRef, useMemo } from 'react';
+import { useEffect, useCallback, useImperativeHandle, forwardRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -15,6 +15,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   runOnJS,
+  interpolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 
 import { colors, useColors } from '../../../theme/colors';
@@ -53,17 +55,21 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
     const c = useColors();
     const { height: screenHeight } = useWindowDimensions();
     const translateY = useSharedValue(screenHeight);
+    const overlayOpacity = useSharedValue(0);
 
     useEffect(() => {
       if (visible) {
         translateY.value = withTiming(0, { duration: 250 });
+        overlayOpacity.value = withTiming(1, { duration: 200 });
       } else {
         translateY.value = screenHeight;
+        overlayOpacity.value = 0;
       }
-    }, [visible, translateY, screenHeight]);
+    }, [visible, translateY, overlayOpacity, screenHeight]);
 
     const animateOut = useCallback(
       (cb?: () => void) => {
+        overlayOpacity.value = withTiming(0, { duration: 250 });
         translateY.value = withTiming(screenHeight, { duration: 250 }, () => {
           if (cb) {
             runOnJS(cb)();
@@ -72,7 +78,7 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
           }
         });
       },
-      [translateY, screenHeight, onDismiss],
+      [translateY, overlayOpacity, screenHeight, onDismiss],
     );
 
     useImperativeHandle(ref, () => ({ close: animateOut }), [animateOut]);
@@ -85,23 +91,35 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
             gs.dy > 8 && Math.abs(gs.dy) > Math.abs(gs.dx) * 1.5,
           onPanResponderMove: (_, gs) => {
             translateY.value = Math.max(0, gs.dy);
+            overlayOpacity.value = interpolate(
+              gs.dy,
+              [0, screenHeight],
+              [1, 0],
+              Extrapolation.CLAMP,
+            );
           },
           onPanResponderRelease: (_, gs) => {
             if (gs.dy > DISMISS_DISTANCE || gs.vy > DISMISS_VELOCITY) {
               animateOut();
             } else {
               translateY.value = withTiming(0, { duration: 200 });
+              overlayOpacity.value = withTiming(1, { duration: 200 });
             }
           },
           onPanResponderTerminate: () => {
             translateY.value = withTiming(0, { duration: 200 });
+            overlayOpacity.value = withTiming(1, { duration: 200 });
           },
         }),
-      [translateY, animateOut],
+      [translateY, overlayOpacity, screenHeight, animateOut],
     );
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateY: translateY.value }],
+    }));
+
+    const overlayAnimatedStyle = useAnimatedStyle(() => ({
+      opacity: overlayOpacity.value,
     }));
 
     const handleTapOutside = dismissOnTapOutside ? () => animateOut() : undefined;
@@ -125,15 +143,17 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(
 
     const overlayInner =
       blurBackground ? (
-        <BlurView intensity={60} tint="dark" style={styles.overlay}>
-          <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
-          {sheetContent}
-        </BlurView>
+        <Animated.View style={[StyleSheet.absoluteFill, overlayAnimatedStyle]}>
+          <BlurView intensity={60} tint="dark" style={styles.overlay}>
+            <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+            {sheetContent}
+          </BlurView>
+        </Animated.View>
       ) : (
-        <View style={[styles.overlay, styles.dimOverlay]}>
+        <Animated.View style={[styles.overlay, styles.dimOverlay, overlayAnimatedStyle]}>
           <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
           {sheetContent}
-        </View>
+        </Animated.View>
       );
 
     if (embedded) {
@@ -178,7 +198,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: borderRadius.xl,
     paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 20, // clears iOS home indicator (~34pt) plus standard spacing
+    paddingBottom: spacing.xl + 20,
     overflow: 'hidden',
   },
   sheetGradient: {
