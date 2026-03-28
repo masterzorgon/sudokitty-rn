@@ -2,7 +2,7 @@
 // Separate from tabs for clean navigation experience
 
 import React, { useEffect, useRef, useCallback, useState } from 'react';
-import { View, StyleSheet, Text, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -223,25 +223,6 @@ export default function GameScreen() {
         visible={hintAdSheetVisible}
         onClose={() => setHintAdSheetVisible(false)}
       />
-
-      {__DEV__ && gameStatus === 'playing' && (
-        <View style={styles.devTools} pointerEvents="box-none">
-          <View style={styles.devToolsRow}>
-            <Pressable
-              style={({ pressed }) => [styles.devButton, pressed && styles.devButtonPressed]}
-              onPress={() => useGameStore.getState().debugForceLose()}
-            >
-              <Text style={styles.devButtonText}>Lose</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.devButton, styles.devButtonWin, pressed && styles.devButtonPressed]}
-              onPress={() => useGameStore.getState().debugForceWin()}
-            >
-              <Text style={styles.devButtonText}>Win</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -273,38 +254,5 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: spacing.md,
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
-  },
-  devTools: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 96,
-    alignItems: 'center',
-    zIndex: 100,
-  },
-  devToolsRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  devButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-  },
-  devButtonWin: {
-    backgroundColor: 'rgba(120,200,140,0.45)',
-  },
-  devButtonPressed: {
-    opacity: 0.75,
-  },
-  devButtonText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
   },
 });
