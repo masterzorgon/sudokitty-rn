@@ -14,7 +14,6 @@ import {
   GameMascot,
   GameSettingsModal,
   HintModal,
-  HintAdSheet,
 } from '../src/components/game';
 import { NumberPad, ActionButtons } from '../src/components/controls';
 import { useGameStore } from '../src/stores/gameStore';
@@ -26,6 +25,7 @@ import { GAME_LAYOUT } from '../src/constants/layout';
 import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from '../src/engine/types';
 import { playFeedback } from '../src/utils/feedback';
 import { loadSfx, unloadSfx } from '../src/services/sfxService';
+import { showRewardedAd } from '../src/services/adService';
 import { useIsPremium } from '../src/stores/premiumStore';
 
 export default function GameScreen() {
@@ -52,8 +52,6 @@ export default function GameScreen() {
   // Settings modal state
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
-  // Hint ad sheet state
-  const [hintAdSheetVisible, setHintAdSheetVisible] = useState(false);
   const wasPausedBeforeModal = useRef(false);
 
   // Mascot message hook
@@ -171,6 +169,15 @@ export default function GameScreen() {
     }
   }, [gameStatus, resumeGame]);
 
+  /** Non-premium: no free hints left — show rewarded ad, then grant + use hint (no confirmation sheet). */
+  const handleHintUnavailable = useCallback(async () => {
+    const earned = await showRewardedAd();
+    if (!earned) return;
+    const { addPaidHints, useHint } = useGameStore.getState();
+    addPaidHints(1);
+    useHint();
+  }, []);
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]}>
       {/* TOP ZONE - Progress bar with back button and settings */}
@@ -199,7 +206,7 @@ export default function GameScreen() {
         <View style={styles.controlsContainer}>
           <Animated.View entering={FadeIn.duration(startGameAnimations.controlsFadeIn.duration)}>
             <ActionButtons
-              onHintUnavailable={!isPremium ? () => setHintAdSheetVisible(true) : undefined}
+              onHintUnavailable={!isPremium ? handleHintUnavailable : undefined}
             />
           </Animated.View>
 
@@ -217,12 +224,6 @@ export default function GameScreen() {
 
       {/* Hint explanation modal */}
       <HintModal />
-
-      {/* Hint ad sheet for non-premium users */}
-      <HintAdSheet
-        visible={hintAdSheetVisible}
-        onClose={() => setHintAdSheetVisible(false)}
-      />
     </SafeAreaView>
   );
 }

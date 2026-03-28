@@ -5,4 +5,3 @@ export { ProgressBar } from './ProgressBar';
 export { GameMascot } from './GameMascot';
 export { GameSettingsModal } from './GameSettingsModal';
 export { HintModal } from './HintModal';
-export { HintAdSheet } from './HintAdSheet';

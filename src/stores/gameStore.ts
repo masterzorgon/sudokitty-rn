@@ -577,7 +577,7 @@ export const useGameStore = create<GameState & GameActions>()(
         const { unlimitedHints } = useSettingsStore.getState();
         const canUseFree = unlimitedHints || state.hintsUsed < MAX_HINTS;
         if (!canUseFree && state.paidHintsRemaining <= 0) {
-          return null; // Caller shows HintAdSheet for ad-based hint
+          return null; // Caller runs rewarded ad then addPaidHints + useHint
         }
 
         const usePaidSlot = !canUseFree;
