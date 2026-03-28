@@ -1,84 +1,84 @@
 // Sudokitty color system
 // Static neutrals + dynamic accent palette via useColors() hook
 
-import { useMemo } from 'react';
-import { useColorTheme } from '../stores/settingsStore';
-import { PALETTES, type ColorPalette } from './palettes';
+import { useMemo } from "react";
+import { useColorTheme } from "../stores/settingsStore";
+import { PALETTES, type ColorPalette } from "./palettes";
 
 // Neutral colors that stay constant across all themes
 export const colors = {
   // Pure white (shared reference for '#FFFFFF' throughout the codebase)
-  white: '#FFFFFF',
+  white: "#FFFFFF",
 
   // Accent colors (non-theme, always available)
-  coral: '#FF5C50',
-  mint: '#7CC9A8',
-  butter: '#FFD84D',
-  lavender: '#E8D5E8',
+  coral: "#FF5C50",
+  mint: "#7CC9A8",
+  butter: "#FFD84D",
+  lavender: "#E8D5E8",
 
   // Feature-specific accent colors
-  hintGold: '#F5C542',   // Hint bulb icon fill
-  freezeBlue: '#5DADE2', // Streak freeze activity calendar cells
-  progressBarBg: '#e8e5e9', // Progress bar empty track background
+  hintGold: "#F5C542", // Hint bulb icon fill
+  freezeBlue: "#5DADE2", // Streak freeze activity calendar cells
+  progressBarBg: "#e8e5e9", // Progress bar empty track background
 
   // Text colors
-  textPrimary: '#5D4E4E',
-  textSecondary: '#8B7878',
-  textLight: '#B0A0A0',
+  textPrimary: "#5D4E4E",
+  textSecondary: "#8B7878",
+  textLight: "#B0A0A0",
 
   // Cell colors (neutral)
-  cellBackground: '#FFFFFF',
-  cellError: '#FFF0F0',
+  cellBackground: "#FFFFFF",
+  cellError: "#FFF0F0",
 
   // Grid colors
-  gridLine: '#D8CCC8',
-  gridLineBold: '#C0B0AC',
-  boxBorder: '#B8A8A4',
+  gridLine: "#D8CCC8",
+  gridLineBold: "#C0B0AC",
+  boxBorder: "#B8A8A4",
 
-  // Note text
-  noteText: '#8A7A72',
+  // Note text (pencil marks in cells — darker for legibility at small size)
+  noteText: "#5D4E4E",
 
   // Error text
-  errorText: '#E85A5A',
+  errorText: "#E85A5A",
 
   // Given number text
-  givenText: '#4A3C3C',
+  givenText: "#4A3C3C",
 
   // User entry text
-  userEntryText: '#6B5858',
+  userEntryText: "#6B5858",
 
   // Tab bar
-  tabBarBackground: '#FFFFFF',
-  tabBarInactive: '#B0A0A0',
+  tabBarBackground: "#FFFFFF",
+  tabBarInactive: "#B0A0A0",
 
   // Floating nav bar
-  navInactive: '#9CA3AF',
+  navInactive: "#9CA3AF",
 
   // Overlay
-  overlayBackground: 'rgba(0, 0, 0, 0.5)',
+  overlayBackground: "rgba(0, 0, 0, 0.5)",
 
   // Card
-  cardBackground: '#FFFFFF',
-  cardBorder: '#F0E8E8',
+  cardBackground: "#FFFFFF",
+  cardBorder: "#F0E8E8",
 
   // Board card
-  boardBackground: '#FEFEFE',
+  boardBackground: "#FEFEFE",
 
   // Button (neutral variants)
-  buttonSecondary: '#FFFFFF',
-  buttonDisabled: '#E0D8D8',
+  buttonSecondary: "#FFFFFF",
+  buttonDisabled: "#E0D8D8",
 
   // CTA (neutral variants)
-  ctaSuccessFace: '#B8E6D0',
-  ctaSuccessEdge: '#8FCDB5',
-  ctaSuccessHighlight: '#D0F0E0',
-  ctaDisabledFace: '#E8E0E0',
-  ctaDisabledEdge: '#D0C8C8',
-  ctaTextDark: '#4A3728',
+  ctaSuccessFace: "#B8E6D0",
+  ctaSuccessEdge: "#8FCDB5",
+  ctaSuccessHighlight: "#D0F0E0",
+  ctaDisabledFace: "#E8E0E0",
+  ctaDisabledEdge: "#D0C8C8",
+  ctaTextDark: "#4A3728",
 
   // NumberPad (neutral)
-  numberPadText: '#4A3728',
-  numberPadError: '#FFE5E5',
+  numberPadText: "#4A3728",
+  numberPadError: "#FFE5E5",
 } as const;
 
 export type NeutralColors = typeof colors;
@@ -89,4 +89,4 @@ export function useColors(): FullColors {
   return useMemo(() => ({ ...colors, ...PALETTES[theme] }), [theme]);
 }
 
-export type { ColorPalette, ThemeName } from './palettes';
+export type { ColorPalette, ThemeName } from "./palettes";

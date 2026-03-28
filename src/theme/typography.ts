@@ -2,23 +2,23 @@
 // Uses Pally - a soft, rounded display font
 // Perfect for the cute, friendly aesthetic of the app
 
-import { TextStyle } from 'react-native';
+import { TextStyle } from "react-native";
 
 // Font family names - Pally with different weights
 // Each weight requires its own font file (OTF doesn't support weight variants)
 export const fontFamilies = {
-  regular: 'Pally-Regular',
-  medium: 'Pally-Medium',
-  semibold: 'Pally-Bold',  // Pally has no Semibold; use Bold as closest match
-  bold: 'Pally-Bold',
+  regular: "Pally-Regular",
+  medium: "Pally-Medium",
+  semibold: "Pally-Bold", // Pally has no Semibold; use Bold as closest match
+  bold: "Pally-Bold",
 };
 
 // Font weights mapping (for reference, actual weight is determined by fontFamily)
 export const fontWeights = {
-  regular: '400' as const,
-  medium: '500' as const,
-  semibold: '600' as const,
-  bold: '700' as const,
+  regular: "400" as const,
+  medium: "500" as const,
+  semibold: "600" as const,
+  bold: "700" as const,
 };
 
 // Font sizes
@@ -31,7 +31,7 @@ export const fontSizes = {
   title: 24,
   largeTitle: 32,
   cell: 24, // Slightly larger for better presence
-  notes: 9,
+  notes: 10,
 };
 
 // Pre-defined text styles using Open Runde font family
@@ -85,24 +85,24 @@ export const typography: Record<string, TextStyle> = {
   cellValue: {
     fontFamily: fontFamilies.medium,
     fontSize: fontSizes.cell,
-    textAlign: 'center',
+    textAlign: "center",
     letterSpacing: 0.5,
   },
   cellNotes: {
-    fontFamily: fontFamilies.regular,
+    fontFamily: fontFamilies.medium,
     fontSize: fontSizes.notes,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   // Button text
   button: {
     fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.body,
-    textAlign: 'center',
+    textAlign: "center",
   },
   buttonSmall: {
     fontFamily: fontFamilies.semibold,
     fontSize: fontSizes.caption,
-    textAlign: 'center',
+    textAlign: "center",
   },
 };
