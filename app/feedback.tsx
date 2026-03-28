@@ -1,7 +1,7 @@
 // Feedback screen for user feedback submission
 // Includes dropdown reason selector, name, email, message, and Resend integration
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -31,7 +31,48 @@ import { BottomActionBar } from "../src/components/ui/Layout";
 import { SkeuButton, SKEU_VARIANTS } from "../src/components/ui/Skeuomorphic";
 import { playFeedback } from "../src/utils/feedback";
 import { trackFeedbackSubmitted } from "../src/utils/analytics";
+import {
+  FunctionsFetchError,
+  FunctionsHttpError,
+  FunctionsRelayError,
+} from "@supabase/supabase-js";
 import { supabase } from "../src/lib/supabase";
+
+/** Maps Edge Function invoke errors to short, user-facing copy. */
+async function messageFromFeedbackInvokeError(error: unknown): Promise<string> {
+  if (error instanceof FunctionsFetchError) {
+    return "Couldn't reach the server. Check your connection and try again.";
+  }
+  if (error instanceof FunctionsRelayError) {
+    return "Couldn't reach the server. Please try again in a moment.";
+  }
+  if (error instanceof FunctionsHttpError) {
+    const res = error.context as Response;
+    const contentType = res.headers.get("Content-Type") ?? "";
+    if (contentType.includes("application/json")) {
+      try {
+        const body = (await res.json()) as { error?: string };
+        if (typeof body?.error === "string" && body.error.length > 0) {
+          return body.error;
+        }
+      } catch {
+        // use status fallbacks below
+      }
+    }
+    const status = res.status;
+    if (status === 400) {
+      return "Something was wrong with your request. Check the form and try again.";
+    }
+    if (status >= 500) {
+      return "We couldn't send your feedback right now. Please try again in a moment.";
+    }
+    return "Something went wrong while sending your feedback. Please try again.";
+  }
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Something went wrong while sending your feedback. Please try again.";
+}
 
 // Feedback categories
 type FeedbackCategory = "issue" | "suggestion" | "compliment" | "other";
@@ -63,6 +104,10 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
   const c = useColors();
   const [isOpen, setIsOpen] = useState(false);
   const scale = useSharedValue(1);
+
+  useEffect(() => {
+    if (disabled) setIsOpen(false);
+  }, [disabled]);
 
   const selectedOption = options.find((o) => o.id === value);
 
@@ -147,6 +192,7 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
 export default function FeedbackScreen() {
   const c = useColors();
   const router = useRouter();
+  const submitLockRef = useRef(false);
   const [category, setCategory] = useState<FeedbackCategory>("issue");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -182,8 +228,8 @@ export default function FeedbackScreen() {
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!canSubmit || isSubmitting) return;
-
+    if (!canSubmit || submitLockRef.current) return;
+    submitLockRef.current = true;
     setIsSubmitting(true);
     playFeedback("tapHeavy");
 
@@ -199,17 +245,28 @@ export default function FeedbackScreen() {
         timestamp: new Date().toISOString(),
       };
 
-      // Send via Supabase Edge Function → Resend
-      const { error: fnError } = await supabase.functions.invoke("send-feedback", {
+      const { data, error: fnError } = await supabase.functions.invoke("send-feedback", {
         body: feedbackPayload,
       });
 
-      if (fnError) throw fnError;
+      if (fnError) {
+        const msg = await messageFromFeedbackInvokeError(fnError);
+        Alert.alert("Couldn't send feedback", msg, [{ text: "OK" }]);
+        return;
+      }
 
-      // Track analytics event
+      const payload = data as { success?: boolean; error?: string } | null;
+      if (payload?.success === false) {
+        const msg =
+          typeof payload.error === "string" && payload.error.length > 0
+            ? payload.error
+            : "Something went wrong while sending your feedback. Please try again.";
+        Alert.alert("Couldn't send feedback", msg, [{ text: "OK" }]);
+        return;
+      }
+
       trackFeedbackSubmitted(category);
 
-      // Success
       Alert.alert(
         "Thank you!",
         "Your feedback has been sent. We really appreciate you taking the time to help us improve!",
@@ -222,13 +279,13 @@ export default function FeedbackScreen() {
       );
     } catch (error) {
       console.error("Failed to submit feedback:", error);
-      Alert.alert("Oops!", "Something went wrong while sending your feedback. Please try again.", [
-        { text: "OK" },
-      ]);
+      const msg = await messageFromFeedbackInvokeError(error);
+      Alert.alert("Couldn't send feedback", msg, [{ text: "OK" }]);
     } finally {
+      submitLockRef.current = false;
       setIsSubmitting(false);
     }
-  }, [canSubmit, isSubmitting, category, name, email, message, getDeviceInfo, router]);
+  }, [canSubmit, category, name, email, message, getDeviceInfo, router]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
@@ -239,7 +296,7 @@ export default function FeedbackScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <BackButton />
+          <BackButton disabled={isSubmitting} />
           <Text style={styles.title}>Send Feedback</Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -330,35 +387,37 @@ export default function FeedbackScreen() {
           </View>
         </ScrollView>
 
-        {/* Submit Button */}
+        {/* Submit Button — same SkeuButton shell while loading (disabled + spinner inside) */}
         <BottomActionBar style={styles.footer}>
-          {isSubmitting ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator color={c.accent} />
-              <Text style={styles.loadingText}>Sending…</Text>
-            </View>
-          ) : (
+          <View accessibilityState={{ busy: isSubmitting }}>
             <SkeuButton
               onPress={handleSubmit}
-              variant={canSubmit ? "primary" : "disabled"}
+              variant={isSubmitting || !canSubmit ? "disabled" : "primary"}
               borderRadius={borderRadius.lg}
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               feedbackId="tapHeavy"
               contentStyle={styles.ctaButtonContent}
-              accessibilityLabel="Send Feedback"
+              accessibilityLabel={isSubmitting ? "Sending feedback" : "Send Feedback"}
               testID="send-feedback-button"
               showHighlight={false}
             >
-              <Text
-                style={[
-                  styles.ctaButtonLabel,
-                  { color: SKEU_VARIANTS[canSubmit ? "primary" : "disabled"].textColor },
-                ]}
-              >
-                Send Feedback
-              </Text>
+              {isSubmitting ? (
+                <View style={styles.ctaLoadingInner}>
+                  <ActivityIndicator color={c.accent} />
+                  <Text style={styles.loadingText}>Sending…</Text>
+                </View>
+              ) : (
+                <Text
+                  style={[
+                    styles.ctaButtonLabel,
+                    { color: SKEU_VARIANTS[canSubmit ? "primary" : "disabled"].textColor },
+                  ]}
+                >
+                  Send Feedback
+                </Text>
+              )}
             </SkeuButton>
-          )}
+          </View>
         </BottomActionBar>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -513,11 +572,10 @@ const styles = StyleSheet.create({
   footer: {
     paddingTop: spacing.md,
   },
-  loadingContainer: {
+  ctaLoadingInner: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: spacing.lg,
     gap: spacing.sm,
   },
   loadingText: {

@@ -49,9 +49,26 @@ export function ScreenHeader({ style, onHeightChange }: ScreenHeaderProps) {
 
   const handleContentLayout = useCallback(
     (e: LayoutChangeEvent) => {
-      onHeightChange?.(e.nativeEvent.layout.height);
+      const h = e.nativeEvent.layout.height;
+      const adjusted = h - insets.top;
+      // #region agent log
+      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
+        body: JSON.stringify({
+          sessionId: "f71351",
+          location: "ScreenHeader.tsx:onLayout",
+          message: "ScreenHeader onLayout fired",
+          data: { measuredHeight: h, adjusted, insetsTop: insets.top, timestamp: Date.now() },
+          timestamp: Date.now(),
+          runId: "post-fix",
+          hypothesisId: "A,B",
+        }),
+      }).catch(() => {});
+      // #endregion
+      onHeightChange?.(adjusted);
     },
-    [onHeightChange],
+    [onHeightChange, insets.top],
   );
 
   return (

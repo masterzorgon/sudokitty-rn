@@ -87,6 +87,7 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
         onPress={handlePress}
         variant="primary"
         borderRadius={borderRadius.lg}
+        sheen={!loading}
         disabled={loading}
         style={styles.buyButton}
         contentStyle={styles.buyButtonContent}

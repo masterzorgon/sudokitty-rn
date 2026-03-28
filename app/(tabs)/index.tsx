@@ -38,8 +38,22 @@ export default function HomeScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  // Estimate header height to avoid layout jolt: insets.top + spacing.sm + pill row
-  const [headerHeight, setHeaderHeight] = useState(insets.top + ESTIMATED_HEADER_CONTENT_HEIGHT);
+  const [headerHeight, setHeaderHeight] = useState(ESTIMATED_HEADER_CONTENT_HEIGHT);
+  // #region agent log
+  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "f71351" },
+    body: JSON.stringify({
+      sessionId: "f71351",
+      location: "index.tsx:render",
+      message: "Home render",
+      data: { headerHeight, insetsTop: insets.top, timestamp: Date.now() },
+      timestamp: Date.now(),
+      runId: "post-fix",
+      hypothesisId: "A",
+    }),
+  }).catch(() => {});
+  // #endregion
 
   // Store hooks
   const currentStreak = useCurrentStreak();

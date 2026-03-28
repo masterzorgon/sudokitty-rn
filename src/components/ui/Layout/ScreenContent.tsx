@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, type ViewStyle } from 'react-native';
+import React from "react";
+import { View, ScrollView, StyleSheet, Platform, type ViewStyle } from "react-native";
 
-import { SCREEN_PADDING } from '../../../theme';
+import { SCREEN_PADDING } from "../../../theme";
 
 interface ScreenContentProps {
   children: React.ReactNode;
@@ -25,17 +25,15 @@ export function ScreenContent({
         style={[styles.scroll, style]}
         contentContainerStyle={[styles.content, contentStyle]}
         showsVerticalScrollIndicator={false}
+        /** Avoid iOS re-applying safe-area content insets when an off-screen tab becomes visible (jerky jump). Safe area is already handled by SafeAreaView + header padding on tab screens. */
+        contentInsetAdjustmentBehavior={Platform.OS === "ios" ? "never" : undefined}
       >
         {children}
       </ScrollView>
     );
   }
 
-  return (
-    <View style={[styles.content, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.content, style]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({

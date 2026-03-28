@@ -1,9 +1,9 @@
-import React from 'react';
-import { Tabs, useRouter } from 'expo-router';
+import React from "react";
+import { Tabs, useRouter } from "expo-router";
 
-import { SplitNavBar, SecondaryTab } from '@/src/components/ui/SplitNavBar';
-import { useGameStore } from '@/src/stores/gameStore';
-import { Difficulty } from '@/src/engine/types';
+import { SplitNavBar, SecondaryTab } from "@/src/components/ui/SplitNavBar";
+import { useGameStore } from "@/src/stores/gameStore";
+import { Difficulty } from "@/src/engine/types";
 
 export default function TabLayout() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function TabLayout() {
   // Handle new game - navigate to game screen with difficulty
   const handleNewGame = (difficulty: Difficulty) => {
     router.push({
-      pathname: '/game',
+      pathname: "/game",
       params: { difficulty },
     });
   };
@@ -21,7 +21,7 @@ export default function TabLayout() {
   // Handle resume - resume existing game and navigate
   const handleResume = () => {
     resumeGame();
-    router.push('/game');
+    router.push("/game");
   };
 
   // Handle quit game - clear game state without navigating
@@ -33,24 +33,33 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: { display: 'none' },
+        tabBarStyle: { display: "none" },
         lazy: false,
+        /**
+         * detachInactiveScreens: false forces react-native-screens to use a JS fallback (display:none
+         * on inactive tabs) — toggling to flex on focus causes a visible layout jump. Keep default true.
+         * @see https://github.com/software-mansion/react-native-screens/blob/main/src/components/Screen.tsx
+         */
+        freezeOnBlur: false,
       }}
       tabBar={(props) => {
         // Map route name to SecondaryTab, filtering out 'daily'
         const routeName = props.state.routes[props.state.index].name;
         // Default to 'index' if current route isn't a secondary tab
         const activeTab: SecondaryTab =
-          routeName === 'index' || routeName === 'store' || routeName === 'settings' || routeName === 'stats'
+          routeName === "index" ||
+          routeName === "store" ||
+          routeName === "settings" ||
+          routeName === "stats"
             ? routeName
-            : 'index';
+            : "index";
 
         return (
           <SplitNavBar
             activeTab={activeTab}
             onTabPress={(tab) => {
               const event = props.navigation.emit({
-                type: 'tabPress',
+                type: "tabPress",
                 target: tab,
                 canPreventDefault: true,
               });
