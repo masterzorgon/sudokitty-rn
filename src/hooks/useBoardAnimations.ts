@@ -3,13 +3,13 @@
 // Cells subscribe individually via useBoardAnimationsForCell so only
 // affected cells re-render when animations change.
 
-import { useEffect, useRef, useState } from 'react';
-import { useGameStore } from '../stores/gameStore';
+import { useEffect, useRef, useState } from "react";
+import { useGameStore } from "../stores/gameStore";
 import {
   setBoardAnimations,
   getBoardAnimations,
   subscribeToCellAnimations,
-} from '../stores/boardAnimationStore';
+} from "../stores/boardAnimationStore";
 import {
   Position,
   CompletedUnit,
@@ -17,8 +17,8 @@ import {
   BOARD_SIZE,
   BOX_SIZE,
   positionKey,
-} from '../engine/types';
-import { delays, durations } from '../theme/animations';
+} from "../engine/types";
+import { delays, durations } from "../theme/animations";
 
 // ============================================
 // Constants
@@ -36,18 +36,17 @@ const CLEAR_BUFFER = 200; // Extra buffer before clearing animation state
 function computeDelay(
   epicenter: Position,
   target: Position,
-  type: 'row' | 'column' | 'box',
+  type: "row" | "column" | "box",
 ): number {
   switch (type) {
-    case 'row':
+    case "row":
       return Math.abs(target.col - epicenter.col) * DELAY_PER_CELL;
-    case 'column':
+    case "column":
       return Math.abs(target.row - epicenter.row) * DELAY_PER_CELL;
-    case 'box':
+    case "box":
       // Manhattan distance within the box
       return (
-        (Math.abs(target.row - epicenter.row) +
-          Math.abs(target.col - epicenter.col)) *
+        (Math.abs(target.row - epicenter.row) + Math.abs(target.col - epicenter.col)) *
         DELAY_PER_CELL
       );
   }
@@ -58,17 +57,17 @@ function getAffectedCells(unit: CompletedUnit): Position[] {
   const cells: Position[] = [];
 
   switch (unit.type) {
-    case 'row':
+    case "row":
       for (let col = 0; col < BOARD_SIZE; col++) {
         cells.push({ row: unit.index, col });
       }
       break;
-    case 'column':
+    case "column":
       for (let row = 0; row < BOARD_SIZE; row++) {
         cells.push({ row, col: unit.index });
       }
       break;
-    case 'box': {
+    case "box": {
       const boxStartRow = Math.floor(unit.index / 3) * BOX_SIZE;
       const boxStartCol = (unit.index % 3) * BOX_SIZE;
       for (let r = 0; r < BOX_SIZE; r++) {
@@ -129,6 +128,16 @@ export function useBoardAnimationsSync(): void {
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastBatchIdRef = useRef<number>(0);
 
+  // On mount, align ref with any persisted lastCompletedUnits (e.g. resume). The ref
+  // resets when this layer unmounts; the game store keeps lastCompletedUnits, so without
+  // seeding we would replay the completion wave on every re-entry to the game screen.
+  useEffect(() => {
+    const units = useGameStore.getState().lastCompletedUnits;
+    if (units.length > 0) {
+      lastBatchIdRef.current = units[0].timestamp;
+    }
+  }, []);
+
   useEffect(() => {
     if (clearTimerRef.current) {
       clearTimeout(clearTimerRef.current);
@@ -141,7 +150,9 @@ export function useBoardAnimationsSync(): void {
     }
 
     const batchId = lastCompletedUnits[0].timestamp;
-    if (batchId === lastBatchIdRef.current) return;
+    if (batchId === lastBatchIdRef.current) {
+      return;
+    }
     lastBatchIdRef.current = batchId;
 
     const map = buildAnimationMap(lastCompletedUnits, batchId);
@@ -166,11 +177,9 @@ export function useBoardAnimationsSync(): void {
  * Subscribe to completion animations for a single cell. Only this cell re-renders
  * when its animation state changes, not the full board.
  */
-export function useBoardAnimationsForCell(
-  key: string
-): CellAnimationState[] | undefined {
-  const [animations, setAnimations] = useState<CellAnimationState[] | undefined>(
-    () => getBoardAnimations().get(key)
+export function useBoardAnimationsForCell(key: string): CellAnimationState[] | undefined {
+  const [animations, setAnimations] = useState<CellAnimationState[] | undefined>(() =>
+    getBoardAnimations().get(key),
   );
 
   useEffect(() => {
