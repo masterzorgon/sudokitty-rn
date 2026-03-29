@@ -26,6 +26,7 @@ import {
   getTodayDateString,
 } from "../src/engine/types";
 import { DIFFICULTY_XP_MULTIPLIER } from "../src/constants/xp";
+import { shareVictoryOutcome } from "../src/constants/share";
 import MochiPointIcon from "../assets/images/icons/mochi-point.svg";
 
 const MochiWowImg = require("../assets/images/mochi/mochi-wow.png");
@@ -143,6 +144,11 @@ export default function EndGameScreen() {
     router.dismissAll();
   }, [resetGame, router]);
 
+  const handleShareVictory = useCallback(async () => {
+    playFeedback("tap");
+    await shareVictoryOutcome(difficulty, isDaily);
+  }, [difficulty, isDaily]);
+
   return (
     <View style={[styles.container, { backgroundColor: c.cream, paddingTop: insets.top }]}>
       <ScreenBackground showBottom={false} />
@@ -234,6 +240,21 @@ export default function EndGameScreen() {
               >
                 <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
                   Watch Ad to Continue Game
+                </Text>
+              </SkeuButton>
+            )}
+
+            {isWon && (
+              <SkeuButton
+                onPress={handleShareVictory}
+                variant="primary"
+                borderRadius={borderRadius.lg}
+                style={styles.fullWidthBtn}
+                contentStyle={styles.btnContent}
+                accessibilityLabel="Share victory"
+              >
+                <Text style={[styles.btnText, { color: SKEU_VARIANTS.primary.textColor }]}>
+                  Share Victory
                 </Text>
               </SkeuButton>
             )}

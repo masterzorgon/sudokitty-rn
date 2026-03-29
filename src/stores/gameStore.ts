@@ -280,8 +280,6 @@ interface GameActions {
 
   // Debug (DEV only)
   debugDrainHints: () => void;
-  debugForceLose: () => void;
-  debugForceWin: () => void;
   debugTriggerAnimation: () => void;
 }
 
@@ -843,38 +841,15 @@ export const useGameStore = create<GameState & GameActions>()(
       },
 
       debugDrainHints: () => {
+        if (!__DEV__) return;
         set((draft) => {
           draft.hintsUsed = MAX_HINTS;
           draft.paidHintsRemaining = 0;
         });
       },
 
-      debugForceLose: () => {
-        set((draft) => {
-          draft.mistakeCount = MAX_MISTAKES;
-          draft.gameStatus = "lost";
-          draft.isTimerRunning = false;
-        });
-      },
-
-      debugForceWin: () => {
-        set((draft) => {
-          for (let row = 0; row < BOARD_SIZE; row++) {
-            for (let col = 0; col < BOARD_SIZE; col++) {
-              const cell = draft.board[row][col];
-              if (cell.value !== cell.correctValue) {
-                cell.value = cell.correctValue;
-                cell.isValid = true;
-                cell.notes.clear();
-              }
-            }
-          }
-          draft.gameStatus = "won";
-          draft.isTimerRunning = false;
-        });
-      },
-
       debugTriggerAnimation: () => {
+        if (!__DEV__) return;
         const { selectedCell } = get();
         if (!selectedCell) return;
         set((draft) => {
