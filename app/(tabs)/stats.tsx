@@ -17,7 +17,7 @@ export default function StatsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
       <ScreenBackground />
-      <ScreenContent contentStyle={contentStyle}>
+      <ScreenContent contentStyle={contentStyle} style={{ marginTop: 20 }}>
         <StatsOverview />
 
         <View style={{ height: 40 }} />
