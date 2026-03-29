@@ -72,7 +72,7 @@ async function messageFromFeedbackInvokeError(error: unknown): Promise<string> {
 }
 
 // Feedback categories
-type FeedbackCategory = "issue" | "suggestion" | "compliment" | "other";
+type FeedbackCategory = "bug" | "suggestion" | "compliment" | "other";
 
 interface CategoryOption {
   id: FeedbackCategory;
@@ -80,7 +80,7 @@ interface CategoryOption {
 }
 
 const CATEGORIES: CategoryOption[] = [
-  { id: "issue", label: "Issue / bug" },
+  { id: "bug", label: "Issue / bug" },
   { id: "suggestion", label: "Suggestion" },
   { id: "compliment", label: "Compliment" },
   { id: "other", label: "Other" },
@@ -190,8 +190,7 @@ export default function FeedbackScreen() {
   const c = useColors();
   const router = useRouter();
   const submitLockRef = useRef(false);
-  const [category, setCategory] = useState<FeedbackCategory>("issue");
-  const [name, setName] = useState("");
+  const [category, setCategory] = useState<FeedbackCategory>("bug");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,7 +202,7 @@ export default function FeedbackScreen() {
     return emailRegex.test(emailStr.trim());
   };
 
-  const canSubmit = message.trim().length > 10 && name.trim().length > 0 && isValidEmail(email);
+  const canSubmit = message.trim().length > 10 && isValidEmail(email);
 
   const getDeviceInfo = useCallback(() => {
     const appVersion = Constants.expoConfig?.version ?? "1.0.0";
@@ -235,7 +234,6 @@ export default function FeedbackScreen() {
     try {
       const feedbackPayload = {
         category,
-        name: name.trim(),
         email: email.trim() || undefined,
         message: message.trim(),
         deviceInfo,
@@ -282,7 +280,7 @@ export default function FeedbackScreen() {
       submitLockRef.current = false;
       setIsSubmitting(false);
     }
-  }, [canSubmit, category, name, email, message, getDeviceInfo, router]);
+  }, [canSubmit, category, email, message, getDeviceInfo, router]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
@@ -313,21 +311,6 @@ export default function FeedbackScreen() {
               options={CATEGORIES}
               onSelect={setCategory}
               disabled={isSubmitting}
-            />
-          </View>
-
-          {/* Name */}
-          <View style={styles.section}>
-            <Text style={styles.label}>Your name</Text>
-            <TextInput
-              style={styles.textInputSingle}
-              placeholder="How should we call you?"
-              placeholderTextColor={colors.textLight}
-              value={name}
-              onChangeText={setName}
-              maxLength={120}
-              editable={!isSubmitting}
-              autoCapitalize="words"
             />
           </View>
 

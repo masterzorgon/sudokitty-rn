@@ -1,12 +1,8 @@
-// Supabase Edge Function: send-feedback
-// Receives feedback from the app and sends a formatted email via Resend.
-// The Resend API key is stored as a Supabase secret (never in the client).
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
-const SUPPORT_EMAIL = Deno.env.get("SUPPORT_EMAIL") || "hello@sudokitty.com";
-const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Sudokitty Feedback <feedback@sudokitty.app>";
+const SUPPORT_EMAIL = "hello@sudokitty.com";
+const FROM_EMAIL = "Sudokitty Feedback <feedback@sudokitty.com>";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,24 +20,31 @@ serve(async (req) => {
   }
 
   try {
-    const { category, name, email, message, deviceInfo, timestamp } = await req.json();
+    const { category, email, message, deviceInfo, timestamp } = await req.json();
 
     // Validate required fields
-    if (!message || !name || !category) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: category, name, message" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    if (!message || !category) {
+      return new Response(JSON.stringify({ error: "Missing required fields: category, message" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+
+    const emailTrimmed = typeof email === "string" && email.trim().length > 0 ? email.trim() : "";
+    const senderLabel = emailTrimmed || "No email provided";
+    const subjectFrom = emailTrimmed || "anonymous";
 
     // Format HTML email
     const categoryLabel =
-      {
-        issue: "Issue / Bug",
-        suggestion: "Suggestion",
-        compliment: "Compliment",
-        other: "Other",
-      }[category] || category;
+      (
+        {
+          bug: "Issue / Bug",
+          issue: "Issue / Bug", // legacy client id
+          suggestion: "Suggestion",
+          compliment: "Compliment",
+          other: "Other",
+        } as Record<string, string>
+      )[category as string] || category;
 
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -50,7 +53,7 @@ serve(async (req) => {
           
           <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
             <p style="margin: 0 0 8px 0; color: #8B7878; font-size: 13px;">FROM</p>
-            <p style="margin: 0; color: #5D4E4E; font-size: 15px; font-weight: 600;">${name}${email ? ` &lt;${email}&gt;` : ""}</p>
+            <p style="margin: 0; color: #5D4E4E; font-size: 15px; font-weight: 600;">${senderLabel}</p>
           </div>
 
           <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
@@ -81,8 +84,8 @@ serve(async (req) => {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: SUPPORT_EMAIL,
-        reply_to: email || undefined,
-        subject: `[${categoryLabel}] Feedback from ${name}`,
+        reply_to: emailTrimmed || undefined,
+        subject: `[${categoryLabel}] Feedback from ${subjectFrom}`,
         html,
       }),
     });
