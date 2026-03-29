@@ -1,6 +1,6 @@
-import * as session from './audioSessionManager';
+import * as session from "./audioSessionManager";
 
-let Audio: typeof import('expo-av').Audio | null = null;
+let Audio: typeof import("expo-av").Audio | null = null;
 
 let demoSound: any | null = null;
 let progressInterval: ReturnType<typeof setInterval> | null = null;
@@ -15,7 +15,7 @@ const BASE_VOLUME = 0.5;
 async function ensureAudio(): Promise<boolean> {
   if (!Audio) {
     try {
-      const av = await import('expo-av');
+      const av = await import("expo-av");
       Audio = av.Audio;
       return true;
     } catch {
@@ -68,8 +68,12 @@ export async function playDemo(
       const wasSound = demoSound;
       clearTimers();
       if (wasSound) {
-        try { await wasSound.setVolumeAsync(0); } catch {}
-        try { await wasSound.unloadAsync(); } catch {}
+        try {
+          await wasSound.setVolumeAsync(0);
+        } catch {}
+        try {
+          await wasSound.unloadAsync();
+        } catch {}
       }
       demoSound = null;
       await session.release();
@@ -90,7 +94,9 @@ function startFade(remainingMs: number) {
   fadeInterval = setInterval(() => {
     currentVolume = Math.max(0, currentVolume - volumeStep);
     if (demoSound) {
-      try { demoSound.setStatusAsync({ volume: currentVolume }); } catch {}
+      try {
+        demoSound.setStatusAsync({ volume: currentVolume });
+      } catch {}
     }
     if (currentVolume <= 0 && fadeInterval) {
       clearInterval(fadeInterval);
@@ -100,16 +106,45 @@ function startFade(remainingMs: number) {
 }
 
 function clearTimers() {
-  if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
-  if (fadeInterval) { clearInterval(fadeInterval); fadeInterval = null; }
-  if (endTimeout) { clearTimeout(endTimeout); endTimeout = null; }
+  if (progressInterval) {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  }
+  if (fadeInterval) {
+    clearInterval(fadeInterval);
+    fadeInterval = null;
+  }
+  if (endTimeout) {
+    clearTimeout(endTimeout);
+    endTimeout = null;
+  }
+}
+
+/**
+ * Best-effort instant mute (no unload). Used before backgrounding / emergency mute.
+ */
+export async function muteNow(): Promise<void> {
+  if (!demoSound) return;
+  try {
+    await demoSound.setVolumeAsync(0);
+  } catch {
+    /* best-effort */
+  }
 }
 
 export async function stopDemo(): Promise<void> {
   clearTimers();
   if (demoSound) {
-    try { await demoSound.setVolumeAsync(0); } catch {}
-    try { await demoSound.unloadAsync(); } catch {}
+    try {
+      await demoSound.setVolumeAsync(0);
+    } catch {
+      /* best-effort */
+    }
+    try {
+      await demoSound.unloadAsync();
+    } catch {
+      /* ignore */
+    }
     demoSound = null;
     await session.release();
   }

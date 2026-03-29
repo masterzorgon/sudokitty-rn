@@ -3,13 +3,13 @@
 // deactivates when the last consumer releases. Prevents pops
 // caused by an always-active session being torn down by iOS.
 
-let Audio: typeof import('expo-av').Audio | null = null;
-let InterruptionModeIOS: typeof import('expo-av').InterruptionModeIOS | null = null;
+let Audio: typeof import("expo-av").Audio | null = null;
+let InterruptionModeIOS: typeof import("expo-av").InterruptionModeIOS | null = null;
 
 async function ensureModule(): Promise<boolean> {
   if (!Audio) {
     try {
-      const av = await import('expo-av');
+      const av = await import("expo-av");
       Audio = av.Audio;
       InterruptionModeIOS = av.InterruptionModeIOS;
       return true;
@@ -22,12 +22,20 @@ async function ensureModule(): Promise<boolean> {
 
 let refCount = 0;
 let sessionActive = false;
+let releaseDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+const RELEASE_DEBOUNCE_MS = 150;
 
 /**
  * Acquire the audio session. Activates iOS audio hardware on first call.
  * Each acquire must be balanced by a release.
  */
 export async function acquire(): Promise<void> {
+  if (releaseDebounceTimer) {
+    clearTimeout(releaseDebounceTimer);
+    releaseDebounceTimer = null;
+  }
+
   refCount += 1;
   if (sessionActive) return;
 
@@ -41,16 +49,11 @@ export async function acquire(): Promise<void> {
     });
     sessionActive = true;
   } catch (error) {
-    console.warn('[audioSession] Failed to activate:', error);
+    console.warn("[audioSession] Failed to activate:", error);
   }
 }
 
-/**
- * Release the audio session. Deactivates when refCount reaches 0.
- * Deactivation silences the audio hardware cleanly (no pop).
- */
-export async function release(): Promise<void> {
-  refCount = Math.max(0, refCount - 1);
+async function deactivateSessionIfIdle(): Promise<void> {
   if (refCount > 0 || !sessionActive) return;
 
   if (!(await ensureModule()) || !Audio || !InterruptionModeIOS) return;
@@ -63,8 +66,29 @@ export async function release(): Promise<void> {
     });
     sessionActive = false;
   } catch (error) {
-    console.warn('[audioSession] Failed to deactivate:', error);
+    console.warn("[audioSession] Failed to deactivate:", error);
   }
+}
+
+/**
+ * Release the audio session. Deactivates when refCount reaches 0 (debounced).
+ * Debouncing absorbs rapid acquire/release cycles (e.g. hydration flicker).
+ */
+export async function release(): Promise<void> {
+  refCount = Math.max(0, refCount - 1);
+  if (refCount > 0) return;
+
+  if (!sessionActive) return;
+
+  if (releaseDebounceTimer) {
+    clearTimeout(releaseDebounceTimer);
+    releaseDebounceTimer = null;
+  }
+
+  releaseDebounceTimer = setTimeout(() => {
+    releaseDebounceTimer = null;
+    void deactivateSessionIfIdle();
+  }, RELEASE_DEBOUNCE_MS);
 }
 
 export function isActive(): boolean {

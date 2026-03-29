@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef, useState } from "react";
 import { View, StatusBar, AppState, AppStateStatus } from "react-native";
+import { muteAllAudio } from "../src/services/audioEmergencyMute";
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
 import "react-native-reanimated";
 
@@ -97,6 +98,9 @@ function RootLayoutNav() {
 
   useEffect(() => {
     const handleAppStateChange = (state: AppStateStatus) => {
+      if (state === "inactive" || state === "background") {
+        void muteAllAudio();
+      }
       if (state === "active") {
         const now = Date.now();
         if (now - lastPrefetchRef.current > PREFETCH_COOLDOWN_MS) {

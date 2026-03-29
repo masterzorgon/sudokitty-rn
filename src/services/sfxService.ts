@@ -3,7 +3,7 @@
 // Guarded: only loads when soundsEnabled is true. No load = no audio session = no pops.
 // Uses audioSessionManager for ref-counted session lifecycle.
 
-import { useSettingsStore } from "../stores/settingsStore";
+import { useSettingsStore, waitForSettingsHydration } from "../stores/settingsStore";
 import * as session from "./audioSessionManager";
 
 let Audio: typeof import("expo-av").Audio | null = null;
@@ -42,6 +42,7 @@ let unloadInFlight: Promise<void> | null = null;
  * Skipped when soundsEnabled is false — no audio session activation.
  */
 export async function loadSfx(): Promise<void> {
+  await waitForSettingsHydration();
   if (unloadInFlight) await unloadInFlight;
   if (loaded) return;
   if (!useSettingsStore.getState().soundsEnabled) return;
@@ -95,6 +96,7 @@ export async function playSfx(id: SfxId, options?: { force?: boolean }): Promise
  * Force-load SFX regardless of settings (used for force-play on settings toggle).
  */
 async function loadSfxForce(): Promise<void> {
+  await waitForSettingsHydration();
   if (loaded) return;
   if (!Audio) {
     try {
@@ -124,6 +126,21 @@ async function loadSfxForce(): Promise<void> {
 }
 
 /**
+ * Best-effort instant mute (no unload). Used before backgrounding / emergency mute.
+ */
+export async function muteNow(): Promise<void> {
+  await Promise.all(
+    Object.values(sounds).map(async (s) => {
+      try {
+        await s?.setVolumeAsync(0);
+      } catch {
+        /* best-effort */
+      }
+    }),
+  );
+}
+
+/**
  * Unload all SFX from memory.
  * Sets volume to 0 before unloading to prevent pop, then releases audio session.
  */
@@ -148,8 +165,13 @@ async function _doUnload(): Promise<void> {
       try {
         await s?.setVolumeAsync(0);
       } catch {
-        /* best-effort */
+        /* best-effort — volume first, then unload */
       }
+    }),
+  );
+
+  await Promise.all(
+    entries.map(async (s) => {
       try {
         await s?.unloadAsync();
       } catch {

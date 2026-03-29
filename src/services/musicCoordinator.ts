@@ -1,14 +1,14 @@
-import * as audioService from './audioService';
+import * as audioService from "./audioService";
 import {
   playDemo as trackPlayDemo,
   stopDemo as trackStopDemo,
   type DemoCallbacks,
-} from './trackDemoService';
+} from "./trackDemoService";
 
 const FADE_DURATION_MS = 500;
 const MUSIC_VOLUME = 0.35;
 
-export type GameStatus = 'playing' | 'paused' | 'won' | 'lost';
+export type GameStatus = "playing" | "paused" | "won" | "lost";
 
 export interface MusicInputs {
   musicEnabled: boolean;
@@ -17,29 +17,26 @@ export interface MusicInputs {
   activeTrackId: string;
 }
 
-type AudioMode = 'playing' | 'silent' | 'preview';
+type AudioMode = "playing" | "silent" | "preview";
 
 let transitionId = 0;
 let lastInputs: MusicInputs | null = null;
-let currentMode: AudioMode = 'silent';
+let currentMode: AudioMode = "silent";
 let previewActive = false;
 let disposed = false;
 
 function deriveMode(inputs: MusicInputs): AudioMode {
-  if (previewActive) return 'preview';
-  if (!inputs.musicEnabled) return 'silent';
-  if (!inputs.appActive) return 'silent';
-  if (inputs.gameStatus === 'won' || inputs.gameStatus === 'lost') return 'silent';
-  return 'playing';
+  if (previewActive) return "preview";
+  if (!inputs.musicEnabled) return "silent";
+  if (!inputs.appActive) return "silent";
+  if (inputs.gameStatus === "won" || inputs.gameStatus === "lost") return "silent";
+  return "playing";
 }
 
-async function applyTransition(
-  targetMode: AudioMode,
-  myId: number,
-): Promise<void> {
+async function applyTransition(targetMode: AudioMode, myId: number): Promise<void> {
   if (disposed || myId !== transitionId) return;
 
-  if (targetMode === 'playing') {
+  if (targetMode === "playing") {
     if (!audioService.isLoaded()) return;
     const playing = await audioService.isPlaying();
     if (!playing) {
@@ -47,7 +44,7 @@ async function applyTransition(
     }
     if (myId !== transitionId) return;
     audioService.fade(MUSIC_VOLUME, FADE_DURATION_MS);
-  } else if (targetMode === 'silent' || targetMode === 'preview') {
+  } else if (targetMode === "silent" || targetMode === "preview") {
     if (!audioService.isLoaded()) return;
     if (await audioService.isPlaying()) {
       audioService.fade(0, FADE_DURATION_MS);
@@ -81,11 +78,7 @@ export function sync(inputs: MusicInputs): void {
  * Start track preview. Suspends background music, plays demo, then restores
  * background music on completion or manual stop.
  */
-export function startPreview(
-  asset: number,
-  durationMs: number,
-  callbacks?: DemoCallbacks,
-): void {
+export function startPreview(asset: number, durationMs: number, callbacks?: DemoCallbacks): void {
   if (disposed) return;
 
   trackStopDemo();
@@ -93,7 +86,7 @@ export function startPreview(
   previewActive = true;
   transitionId += 1;
   const myId = transitionId;
-  currentMode = 'preview';
+  currentMode = "preview";
 
   (async () => {
     if (audioService.isLoaded() && (await audioService.isPlaying())) {
@@ -135,28 +128,14 @@ export function init(): void {
 }
 
 /**
- * Dispose coordinator. Call when game screen unmounts.
- * Safely fades out and unloads without races:
- * - Bumps transitionId to cancel in-flight transitions
- * - Checks audioService.isLoaded() before each async step
+ * Prepare for coordinated game teardown (see `cleanupGameAudio`).
+ * Cancels transitions, stops preview demo, and marks coordinator disposed.
  */
-export async function dispose(): Promise<void> {
+export async function prepareForGameCleanup(): Promise<void> {
   disposed = true;
   transitionId += 1;
   previewActive = false;
-  trackStopDemo();
-
-  if (!audioService.isLoaded()) return;
-
-  if (await audioService.isPlaying()) {
-    audioService.fade(0, FADE_DURATION_MS);
-    await new Promise((r) => setTimeout(r, FADE_DURATION_MS));
-  }
-
-  // audioService.unload() already sets volume to 0 before unloading
-  if (audioService.isLoaded()) {
-    await audioService.unload();
-  }
+  await trackStopDemo();
 }
 
 export function isPreviewActive(): boolean {

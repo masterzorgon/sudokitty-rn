@@ -5,18 +5,20 @@
 // Audio session is managed lazily via audioSessionManager:
 // acquired on load, released on unload. No session = no pops.
 
-import * as session from './audioSessionManager';
+import * as session from "./audioSessionManager";
 
-let Audio: typeof import('expo-av').Audio | null = null;
+let Audio: typeof import("expo-av").Audio | null = null;
 
 async function ensureAudioModule(): Promise<boolean> {
   if (!Audio) {
     try {
-      const av = await import('expo-av');
+      const av = await import("expo-av");
       Audio = av.Audio;
       return true;
     } catch {
-      console.warn('[audioService] expo-av native module not available. Rebuild with: npx expo run:ios');
+      console.warn(
+        "[audioService] expo-av native module not available. Rebuild with: npx expo run:ios",
+      );
       return false;
     }
   }
@@ -31,7 +33,7 @@ const FADE_DURATION_MS = 500;
 const FADE_STEPS = 10;
 const CROSSFADE_MS = 300;
 const MUSIC_VOLUME = 0.35;
-const DEFAULT_ASSET = require('../../assets/audio/tracks/mochi-morning.m4a');
+const DEFAULT_ASSET = require("../../assets/audio/tracks/mochi-morning.m4a");
 
 // ============================================
 // Internal State
@@ -58,18 +60,41 @@ export async function loadBackgroundMusic(asset?: number): Promise<void> {
     await session.acquire();
 
     const musicAsset = asset ?? DEFAULT_ASSET;
-    const { sound: loadedSound } = await Audio.Sound.createAsync(
-      musicAsset,
-      { shouldPlay: false, isLooping: true, volume: 0 },
-    );
+    const { sound: loadedSound } = await Audio.Sound.createAsync(musicAsset, {
+      shouldPlay: false,
+      isLooping: true,
+      volume: 0,
+    });
 
     sound = loadedSound;
     loaded = true;
   } catch (error) {
-    console.warn('[audioService] Failed to load background music:', error);
+    console.warn("[audioService] Failed to load background music:", error);
     sound = null;
     loaded = false;
     await session.release();
+  }
+}
+
+/**
+ * Cancel any in-flight fade (e.g. before coordinated teardown).
+ */
+export function cancelFade(): void {
+  if (currentFade) {
+    currentFade.cancel();
+    currentFade = null;
+  }
+}
+
+/**
+ * Best-effort instant mute (no unload). Used before backgrounding / emergency mute.
+ */
+export async function muteNow(): Promise<void> {
+  if (!sound || !loaded) return;
+  try {
+    await sound.setVolumeAsync(0);
+  } catch {
+    /* best-effort */
   }
 }
 
@@ -79,23 +104,19 @@ export async function loadBackgroundMusic(asset?: number): Promise<void> {
  * then releases the audio session.
  */
 export async function unload(): Promise<void> {
-  if (currentFade) {
-    currentFade.cancel();
-    currentFade = null;
-  }
+  cancelFade();
 
   if (sound) {
     try {
-      const status = await sound.getStatusAsync();
-      if (status.isLoaded && (status.volume ?? 0) > 0) {
-        await sound.setVolumeAsync(0);
-      }
-    } catch { /* best-effort silence before unload */ }
+      await sound.setVolumeAsync(0);
+    } catch {
+      /* best-effort silence before unload */
+    }
 
     try {
       await sound.unloadAsync();
     } catch (error) {
-      console.warn('[audioService] Failed to unload sound:', error);
+      console.warn("[audioService] Failed to unload sound:", error);
     }
     sound = null;
     loaded = false;
@@ -125,7 +146,7 @@ export async function play(volume: number = 1.0): Promise<void> {
       await sound.playAsync();
     }
   } catch (error) {
-    console.warn('[audioService] Failed to play sound:', error);
+    console.warn("[audioService] Failed to play sound:", error);
   }
 }
 
@@ -142,7 +163,7 @@ export async function pause(): Promise<void> {
       await sound.pauseAsync();
     }
   } catch (error) {
-    console.warn('[audioService] Failed to pause sound:', error);
+    console.warn("[audioService] Failed to pause sound:", error);
   }
 }
 
@@ -158,9 +179,7 @@ export function fade(
   targetVolume: number,
   durationMs: number = FADE_DURATION_MS,
 ): { cancel: () => void } {
-  if (currentFade) {
-    currentFade.cancel();
-  }
+  cancelFade();
 
   let cancelled = false;
   const stepTime = durationMs / FADE_STEPS;
@@ -183,13 +202,17 @@ export function fade(
         await new Promise((resolve) => setTimeout(resolve, stepTime));
       }
     } catch (error) {
-      console.warn('[audioService] Failed during fade:', error);
+      console.warn("[audioService] Failed during fade:", error);
     }
   };
 
   run();
 
-  const cancelHandle = { cancel: () => { cancelled = true; } };
+  const cancelHandle = {
+    cancel: () => {
+      cancelled = true;
+    },
+  };
   currentFade = cancelHandle;
   return cancelHandle;
 }

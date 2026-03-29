@@ -5,11 +5,11 @@
 // - soundsEnabled: SFX only (game sound effects). Zero effect on background music.
 // - musicEnabled: background music only. Zero effect on SFX.
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { trackSettingChanged } from '../utils/analytics';
-import type { ThemeName } from '../theme/palettes';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { trackSettingChanged } from "../utils/analytics";
+import type { ThemeName } from "../theme/palettes";
 
 interface SettingsState {
   soundsEnabled: boolean;
@@ -39,8 +39,28 @@ const initialState: SettingsState = {
   timerEnabled: true,
   unlimitedMistakes: false,
   unlimitedHints: false,
-  colorTheme: 'pink',
+  colorTheme: "pink",
 };
+
+/** Persist hydration: avoid audio session acquire with default `true` before AsyncStorage applies saved prefs. */
+let settingsHydrated = false;
+const settingsHydrationWaiters: (() => void)[] = [];
+
+function markSettingsHydrated(): void {
+  if (settingsHydrated) return;
+  settingsHydrated = true;
+  settingsHydrationWaiters.forEach((resolve) => resolve());
+  settingsHydrationWaiters.length = 0;
+}
+
+export function hasSettingsHydrated(): boolean {
+  return settingsHydrated;
+}
+
+export function waitForSettingsHydration(): Promise<void> {
+  if (settingsHydrated) return Promise.resolve();
+  return new Promise((resolve) => settingsHydrationWaiters.push(resolve));
+}
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
   persist(
@@ -49,32 +69,32 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 
       setSoundsEnabled: (enabled: boolean) => {
         set({ soundsEnabled: enabled });
-        trackSettingChanged('sounds', enabled);
+        trackSettingChanged("sounds", enabled);
       },
 
       setMusicEnabled: (enabled: boolean) => {
         set({ musicEnabled: enabled });
-        trackSettingChanged('music', enabled);
+        trackSettingChanged("music", enabled);
       },
 
       setHapticsEnabled: (enabled: boolean) => {
         set({ hapticsEnabled: enabled });
-        trackSettingChanged('haptics', enabled);
+        trackSettingChanged("haptics", enabled);
       },
 
       setTimerEnabled: (enabled: boolean) => {
         set({ timerEnabled: enabled });
-        trackSettingChanged('timer', enabled);
+        trackSettingChanged("timer", enabled);
       },
 
       setUnlimitedMistakes: (enabled: boolean) => {
         set({ unlimitedMistakes: enabled });
-        trackSettingChanged('unlimitedMistakes', enabled);
+        trackSettingChanged("unlimitedMistakes", enabled);
       },
 
       setUnlimitedHints: (enabled: boolean) => {
         set({ unlimitedHints: enabled });
-        trackSettingChanged('unlimitedHints', enabled);
+        trackSettingChanged("unlimitedHints", enabled);
       },
 
       setColorTheme: (theme: ThemeName) => {
@@ -87,13 +107,13 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       },
     }),
     {
-      name: '@sudokitty/settings',
+      name: "@sudokitty/settings",
       storage: createJSONStorage(() => AsyncStorage),
       version: 4,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as Record<string, unknown>;
         if (version < 2) {
-          state.colorTheme = 'pink';
+          state.colorTheme = "pink";
         }
         if (version < 3) {
           const oldMistakeLimit = state.mistakeLimitEnabled as boolean | undefined;
@@ -106,8 +126,14 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         }
         return state as unknown as SettingsState & SettingsActions;
       },
-    }
-  )
+      onRehydrateStorage: () => (_state, error) => {
+        if (error) {
+          console.warn("[settingsStore] Rehydration error:", error);
+        }
+        markSettingsHydrated();
+      },
+    },
+  ),
 );
 
 // Selectors for optimized subscriptions

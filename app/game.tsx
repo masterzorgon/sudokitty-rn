@@ -21,7 +21,8 @@ import { startGameAnimations } from "../src/theme/animations";
 import { GAME_LAYOUT } from "../src/constants/layout";
 import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from "../src/engine/types";
 import { playFeedback, playFeedbackForCorrectHintPlacement } from "../src/utils/feedback";
-import { loadSfx, unloadSfx } from "../src/services/sfxService";
+import { loadSfx } from "../src/services/sfxService";
+import { cleanupGameAudio } from "../src/services/gameAudioCleanup";
 import { showRewardedAd } from "../src/services/adService";
 import { useIsPremium } from "../src/stores/premiumStore";
 
@@ -55,9 +56,9 @@ export default function GameScreen() {
   useBackgroundMusic();
 
   useEffect(() => {
-    loadSfx();
+    void loadSfx();
     return () => {
-      unloadSfx();
+      void cleanupGameAudio();
     };
   }, []);
 
