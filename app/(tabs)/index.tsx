@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: "center",
-    marginTop: spacing.xl,
+    marginTop: spacing.xxl + spacing.xl,
   },
   catContainer: {},
   streakContainer: {
