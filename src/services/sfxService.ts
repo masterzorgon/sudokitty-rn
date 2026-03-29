@@ -3,50 +3,52 @@
 // Guarded: only loads when soundsEnabled is true. No load = no audio session = no pops.
 // Uses audioSessionManager for ref-counted session lifecycle.
 
-import { useSettingsStore } from '../stores/settingsStore';
-import * as session from './audioSessionManager';
+import { useSettingsStore } from "../stores/settingsStore";
+import * as session from "./audioSessionManager";
 
-let Audio: typeof import('expo-av').Audio | null = null;
+let Audio: typeof import("expo-av").Audio | null = null;
 
 export type SfxId =
-  | 'correct'
-  | 'unitComplete'
-  | 'mistake'
-  | 'gameWon'
-  | 'gameLost'
-  | 'tap'
-  | 'erase'
-  | 'notesToggle'
-  | 'hint';
+  | "correct"
+  | "unitComplete"
+  | "mistake"
+  | "gameWon"
+  | "gameLost"
+  | "tap"
+  | "erase"
+  | "notesToggle"
+  | "hint";
 
 const SFX_ASSETS: Record<SfxId, number> = {
-  correct: require('../../assets/audio/sfx/correct.m4a'),
-  unitComplete: require('../../assets/audio/sfx/correct.m4a'),
-  mistake: require('../../assets/audio/sfx/mistake.m4a'),
-  gameWon: require('../../assets/audio/sfx/game-won.m4a'),
-  gameLost: require('../../assets/audio/sfx/game-lost.m4a'),
-  tap: require('../../assets/audio/sfx/tap.m4a'),
-  erase: require('../../assets/audio/sfx/erase.m4a'),
-  notesToggle: require('../../assets/audio/sfx/notes-toggle.m4a'),
-  hint: require('../../assets/audio/sfx/hint.m4a'),
+  correct: require("../../assets/audio/sfx/correct.m4a"),
+  unitComplete: require("../../assets/audio/sfx/correct.m4a"),
+  mistake: require("../../assets/audio/sfx/mistake.m4a"),
+  gameWon: require("../../assets/audio/sfx/game-won.m4a"),
+  gameLost: require("../../assets/audio/sfx/game-lost.m4a"),
+  tap: require("../../assets/audio/sfx/tap.m4a"),
+  erase: require("../../assets/audio/sfx/erase.m4a"),
+  notesToggle: require("../../assets/audio/sfx/notes-toggle.m4a"),
+  hint: require("../../assets/audio/sfx/hint.m4a"),
 };
 
 const SFX_VOLUME = 0.7;
 
 const sounds: Partial<Record<SfxId, any>> = {};
 let loaded = false;
+let unloadInFlight: Promise<void> | null = null;
 
 /**
  * Preload all SFX into memory.
  * Skipped when soundsEnabled is false — no audio session activation.
  */
 export async function loadSfx(): Promise<void> {
+  if (unloadInFlight) await unloadInFlight;
   if (loaded) return;
   if (!useSettingsStore.getState().soundsEnabled) return;
 
   if (!Audio) {
     try {
-      const av = await import('expo-av');
+      const av = await import("expo-av");
       Audio = av.Audio;
     } catch {
       return;
@@ -96,7 +98,7 @@ async function loadSfxForce(): Promise<void> {
   if (loaded) return;
   if (!Audio) {
     try {
-      const av = await import('expo-av');
+      const av = await import("expo-av");
       Audio = av.Audio;
     } catch {
       return;
@@ -113,7 +115,9 @@ async function loadSfxForce(): Promise<void> {
           volume: SFX_VOLUME,
         });
         sounds[id] = sound;
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }),
   );
   loaded = true;
@@ -123,7 +127,16 @@ async function loadSfxForce(): Promise<void> {
  * Unload all SFX from memory.
  * Sets volume to 0 before unloading to prevent pop, then releases audio session.
  */
-export async function unloadSfx(): Promise<void> {
+export function unloadSfx(): Promise<void> {
+  const p = _doUnload();
+  unloadInFlight = p;
+  p.finally(() => {
+    if (unloadInFlight === p) unloadInFlight = null;
+  });
+  return p;
+}
+
+async function _doUnload(): Promise<void> {
   const entries = Object.values(sounds);
   if (entries.length === 0) {
     loaded = false;
@@ -134,10 +147,14 @@ export async function unloadSfx(): Promise<void> {
     entries.map(async (s) => {
       try {
         await s?.setVolumeAsync(0);
-      } catch { /* best-effort */ }
+      } catch {
+        /* best-effort */
+      }
       try {
         await s?.unloadAsync();
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }),
   );
   Object.keys(sounds).forEach((k) => delete sounds[k as SfxId]);

@@ -247,10 +247,17 @@ interface GameActions {
   toggleNotesMode: () => void;
 
   // Hints
-  useHint: () => { row: number; col: number; value: number } | null;
+  useHint: () => {
+    row: number;
+    col: number;
+    value: number;
+    /** True when the value was placed immediately (random hint); false when the sheet is shown first. */
+    placedImmediately: boolean;
+  } | null;
   getStrategicHint: () => Hint | null;
   clearHintHighlight: () => void;
-  dismissHintModal: () => void;
+  /** Returns placement outcome when a value was applied; null otherwise. */
+  dismissHintModal: () => { isGameWon: boolean; completedUnitsCount: number } | null;
 
   // Undo
   undo: () => boolean;
@@ -580,7 +587,12 @@ export const useGameStore = create<GameState & GameActions>()(
             draft.hintHighlightCells = strategicHint.highlightCells;
           });
 
-          return { row: targetCell.row, col: targetCell.col, value: targetValue! };
+          return {
+            row: targetCell.row,
+            col: targetCell.col,
+            value: targetValue!,
+            placedImmediately: false,
+          };
         }
 
         // Fallback: random empty cell, no modal
@@ -633,7 +645,12 @@ export const useGameStore = create<GameState & GameActions>()(
           }
         });
 
-        return { row: randomCell.row, col: randomCell.col, value: correctValue };
+        return {
+          row: randomCell.row,
+          col: randomCell.col,
+          value: correctValue,
+          placedImmediately: true,
+        };
       },
 
       // Get a strategic hint using the solver (technique-based)
@@ -683,6 +700,7 @@ export const useGameStore = create<GameState & GameActions>()(
 
       // After reading the hint sheet: place value, award XP, then clear hint UI state
       dismissHintModal: () => {
+        let placementOutcome: { isGameWon: boolean; completedUnitsCount: number } | null = null;
         set((draft) => {
           const hint = draft.lastHint;
           if (!hint) return;
@@ -727,15 +745,22 @@ export const useGameStore = create<GameState & GameActions>()(
               draft.lastCompletedUnits = completedUnits;
             }
 
+            let isGameWon = false;
             if (isBoardComplete(draft.board)) {
               draft.gameStatus = "won";
               draft.isTimerRunning = false;
+              isGameWon = true;
             }
+            placementOutcome = {
+              isGameWon,
+              completedUnitsCount: completedUnits.length,
+            };
           }
 
           draft.lastHint = null;
           draft.hintHighlightCells = [];
         });
+        return placementOutcome;
       },
 
       // Undo last move

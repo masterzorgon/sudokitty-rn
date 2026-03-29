@@ -12,6 +12,7 @@ import { MAX_HINTS } from "../../engine/types";
 import { colors } from "../../theme/colors";
 import { fontFamilies } from "../../theme/typography";
 import { SkeuButton } from "../ui/Skeuomorphic";
+import { playFeedbackForCorrectHintPlacement } from "../../utils/feedback";
 import { BUTTON_HEIGHT, BUTTON_RADIUS, whiteSkeuColorsSecondary } from "./constants";
 
 const whiteColors = whiteSkeuColorsSecondary;
@@ -102,7 +103,14 @@ export const ActionButtons = memo(({ onHintUnavailable }: ActionButtonsProps) =>
 
   const handleHintPress = () => {
     if (canUseHint) {
-      applyHint();
+      const r = applyHint();
+      if (r?.placedImmediately) {
+        const st = useGameStore.getState();
+        playFeedbackForCorrectHintPlacement({
+          isGameWon: st.gameStatus === "won",
+          completedUnitsCount: st.lastCompletedUnits.length,
+        });
+      }
     } else {
       onHintUnavailable?.();
     }

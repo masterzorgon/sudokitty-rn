@@ -20,7 +20,7 @@ import { spacing } from "../src/theme";
 import { startGameAnimations } from "../src/theme/animations";
 import { GAME_LAYOUT } from "../src/constants/layout";
 import { Difficulty, getTodayDateString, DAILY_DIFFICULTY_SCHEDULE } from "../src/engine/types";
-import { playFeedback } from "../src/utils/feedback";
+import { playFeedback, playFeedbackForCorrectHintPlacement } from "../src/utils/feedback";
 import { loadSfx, unloadSfx } from "../src/services/sfxService";
 import { showRewardedAd } from "../src/services/adService";
 import { useIsPremium } from "../src/stores/premiumStore";
@@ -161,7 +161,14 @@ export default function GameScreen() {
     if (!earned) return;
     const { addPaidHints, useHint: applyHint } = useGameStore.getState();
     addPaidHints(1);
-    applyHint();
+    const r = applyHint();
+    if (r?.placedImmediately) {
+      const st = useGameStore.getState();
+      playFeedbackForCorrectHintPlacement({
+        isGameWon: st.gameStatus === "won",
+        completedUnitsCount: st.lastCompletedUnits.length,
+      });
+    }
   }, []);
 
   return (

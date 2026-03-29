@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useCallback } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 import { useColors } from "../../theme/colors";
@@ -10,6 +10,7 @@ import { SkeuButton } from "../ui/Skeuomorphic";
 import { MiniBoard, sliceBox, sliceColumn, sliceRow } from "../board";
 import type { SudokuCellData } from "../board";
 import { positionKey } from "../../engine/types";
+import { playFeedbackForCorrectHintPlacement } from "../../utils/feedback";
 
 export function HintModal() {
   const lastHint = useLastHint();
@@ -42,8 +43,13 @@ export function HintModal() {
     return { box, localRow, localCol, startRow, startCol, columnBands, rowBands, highlightSet };
   }, [lastHint, rawBoard]);
 
+  const dismissWithFeedback = useCallback(() => {
+    const r = dismissHintModal();
+    if (r) playFeedbackForCorrectHintPlacement(r);
+  }, [dismissHintModal]);
+
   const handleApply = () => {
-    sheetRef.current?.close(dismissHintModal);
+    sheetRef.current?.close(dismissWithFeedback);
   };
 
   if (!lastHint) return null;
@@ -53,7 +59,7 @@ export function HintModal() {
       ref={sheetRef}
       embedded
       visible={lastHint !== null}
-      onDismiss={dismissHintModal}
+      onDismiss={dismissWithFeedback}
       blurBackground={false}
     >
       {/* Centered header: badge → technique name → mochi hint */}
