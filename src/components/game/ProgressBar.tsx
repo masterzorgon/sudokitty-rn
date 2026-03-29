@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: GAME_LAYOUT.SCREEN_PADDING,
   },
   backButton: {
-    marginRight: 8,
+    marginRight: 6,
   },
   barContainer: {
     flex: 1,
@@ -272,9 +272,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "flex-end",
-    gap: 2,
+    gap: 1,
     flexShrink: 0,
     minWidth: 36,
+    marginLeft: 6,
   },
   percentSign: {
     ...typography.caption,
@@ -283,6 +284,6 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     padding: 4,
-    marginLeft: 8,
+    marginLeft: 6,
   },
 });
