@@ -45,7 +45,9 @@ export async function loadSfx(): Promise<void> {
   await waitForSettingsHydration();
   if (unloadInFlight) await unloadInFlight;
   if (loaded) return;
-  if (!useSettingsStore.getState().soundsEnabled) return;
+  if (!useSettingsStore.getState().soundsEnabled) {
+    return;
+  }
 
   if (!Audio) {
     try {
@@ -77,9 +79,13 @@ export async function loadSfx(): Promise<void> {
 export async function playSfx(id: SfxId, options?: { force?: boolean }): Promise<void> {
   if (!options?.force && !useSettingsStore.getState().soundsEnabled) return;
 
-  // Lazy-load on first forced play if sounds were disabled at mount time
-  if (!loaded && options?.force) {
-    await loadSfxForce();
+  // Self-heal: if SFX were unloaded by teardown race, reload on demand.
+  if (!loaded) {
+    if (options?.force) {
+      await loadSfxForce();
+    } else {
+      await loadSfx();
+    }
   }
 
   const sound = sounds[id];
