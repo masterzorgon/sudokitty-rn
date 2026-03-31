@@ -34,7 +34,7 @@ function isPremiumDifficulty(difficulty: Difficulty): boolean {
   return difficulty === "hard" || difficulty === "expert";
 }
 
-export function MenuRow({ item, index: _index, onPress, isVisible, isLast }: MenuRowProps) {
+export function MenuRow({ item, onPress, isVisible, isLast }: MenuRowProps) {
   const c = useColors();
   const isPremium = useEffectivePremium();
 

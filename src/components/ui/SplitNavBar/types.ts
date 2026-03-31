@@ -1,12 +1,12 @@
 // Type definitions for Split Navigation Bar
-import { Difficulty } from '@/src/engine/types';
-import { BOTTOM_ACTION_OFFSET } from '@/src/theme';
+import { Difficulty } from "@/src/engine/types";
+import { BOTTOM_ACTION_OFFSET } from "@/src/theme";
 
 // Tab types for left cluster (Home, Profile, Settings)
-export type SecondaryTab = 'index' | 'stats' | 'store' | 'settings';
+export type SecondaryTab = "index" | "stats" | "store" | "settings";
 
 // Primary action button states
-export type PrimaryActionState = 'new_game' | 'resume';
+export type PrimaryActionState = "new_game" | "resume";
 
 // Props for the main SplitNavBar container
 export interface SplitNavBarProps {
@@ -38,7 +38,7 @@ export interface PrimaryActionPillProps {
 }
 
 // Menu action types
-export type MenuAction = 'select_difficulty' | 'continue_game' | 'quit_game';
+export type MenuAction = "select_difficulty" | "continue_game" | "quit_game";
 
 // Generic menu item that can represent any action
 export interface MenuItem {
@@ -60,7 +60,6 @@ export interface SecondaryMenuProps {
 // Props for individual MenuRow (replaces DifficultyRow)
 export interface MenuRowProps {
   item: MenuItem;
-  index: number;
   onPress: () => void;
   isVisible: boolean;
   isLast?: boolean;
@@ -91,13 +90,25 @@ export const LAYOUT = {
 // Menu configurations for each primary action state
 export const MENU_CONFIGS: Record<PrimaryActionState, MenuItem[]> = {
   new_game: [
-    { id: 'expert', label: 'Expert', icon: 'zap', action: 'select_difficulty', difficulty: 'expert' },
-    { id: 'hard', label: 'Hard', icon: 'frown', action: 'select_difficulty', difficulty: 'hard' },
-    { id: 'medium', label: 'Medium', icon: 'meh', action: 'select_difficulty', difficulty: 'medium' },
-    { id: 'easy', label: 'Easy', icon: 'smile', action: 'select_difficulty', difficulty: 'easy' },
+    {
+      id: "expert",
+      label: "Expert",
+      icon: "zap",
+      action: "select_difficulty",
+      difficulty: "expert",
+    },
+    { id: "hard", label: "Hard", icon: "frown", action: "select_difficulty", difficulty: "hard" },
+    {
+      id: "medium",
+      label: "Medium",
+      icon: "meh",
+      action: "select_difficulty",
+      difficulty: "medium",
+    },
+    { id: "easy", label: "Easy", icon: "smile", action: "select_difficulty", difficulty: "easy" },
   ],
   resume: [
-    { id: 'quit', label: 'Quit Game', icon: 'x-circle', action: 'quit_game' },
-    { id: 'continue', label: 'Continue Playing', icon: 'play', action: 'continue_game' },
+    { id: "quit", label: "Quit Game", icon: "x-circle", action: "quit_game" },
+    { id: "continue", label: "Continue Playing", icon: "play", action: "continue_game" },
   ],
 };

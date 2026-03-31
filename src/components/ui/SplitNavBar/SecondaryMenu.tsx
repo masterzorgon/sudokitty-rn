@@ -52,7 +52,7 @@ export function SecondaryMenu({ isOpen, menuType, onSelect, onDismiss }: Seconda
     [isPremium, onSelect],
   );
 
-  // PanResponder for swipe-down to dismiss for swipe-down to dismiss
+  // PanResponder for swipe-down dismiss gesture.
   const panResponder = useMemo(
     () =>
       PanResponder.create({
@@ -113,7 +113,6 @@ export function SecondaryMenu({ isOpen, menuType, onSelect, onDismiss }: Seconda
               <MenuRow
                 key={item.id}
                 item={item}
-                index={index}
                 isVisible={isOpen}
                 isLast={index === menuItems.length - 1}
                 onPress={() => void handleItemPress(item)}
