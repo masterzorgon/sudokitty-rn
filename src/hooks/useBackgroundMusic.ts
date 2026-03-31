@@ -28,6 +28,9 @@ import { useGameStore } from "../stores/gameStore";
 import { useActiveTrackId } from "../stores/ownedTracksStore";
 import { getTrackById } from "../constants/backingTracks";
 
+/** Slightly longer than coordinator fade + step quantization so unload does not clip the tail. */
+const UNLOAD_AFTER_MUSIC_OFF_MS = 700;
+
 export function useBackgroundMusic() {
   const musicEnabled = useMusicEnabled();
   const gameStatus = useGameStore((s) => s.gameStatus);
@@ -53,15 +56,26 @@ export function useBackgroundMusic() {
 
   // Load music when enabled, unload when disabled.
   // Gated on settings hydration to avoid phantom session acquire before AsyncStorage applies.
+  // Delay unload after disabling music so musicCoordinator.sync can fade out first (see FADE_DURATION_MS).
   useEffect(() => {
     if (!settingsHydrated) return;
+    let unloadTimer: ReturnType<typeof setTimeout> | null = null;
+
     if (musicEnabled) {
       const track = getTrackById(activeTrackId);
-      audioService.loadBackgroundMusic(track?.asset);
+      void audioService.loadBackgroundMusic(track?.asset).then(() => {
+        musicCoordinator.resyncAfterAudioReady();
+      });
     } else if (prevMusicEnabled.current && !musicEnabled) {
-      audioService.unload();
+      unloadTimer = setTimeout(() => {
+        void audioService.unload();
+      }, UNLOAD_AFTER_MUSIC_OFF_MS);
     }
     prevMusicEnabled.current = musicEnabled;
+
+    return () => {
+      if (unloadTimer) clearTimeout(unloadTimer);
+    };
   }, [musicEnabled, activeTrackId, settingsHydrated]);
 
   // Sync coordinator on input changes
@@ -103,6 +117,8 @@ export function useBackgroundMusic() {
       return;
     }
 
-    void audioService.switchTrack(track.asset);
+    void audioService.switchTrack(track.asset).then(() => {
+      musicCoordinator.resyncAfterAudioReady();
+    });
   }, [activeTrackId, settingsHydrated]);
 }

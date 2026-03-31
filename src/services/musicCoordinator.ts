@@ -75,6 +75,30 @@ export function sync(inputs: MusicInputs): void {
 }
 
 /**
+ * Call when background audio finishes loading or after switchTrack completes.
+ * sync() can run before loadBackgroundMusic resolves; applyTransition then no-ops while
+ * !isLoaded, but currentMode is already "playing", so later sync calls no-op forever.
+ * If playback never started, reset to silent and sync again.
+ */
+export function resyncAfterAudioReady(): void {
+  if (disposed) return;
+  if (!lastInputs) return;
+  const targetMode = deriveMode(lastInputs);
+  if (targetMode !== "playing") return;
+  if (!audioService.isLoaded()) return;
+
+  void (async () => {
+    const playing = await audioService.isPlaying();
+    if (playing) return;
+
+    if (currentMode === "playing") {
+      currentMode = "silent";
+    }
+    sync(lastInputs!);
+  })();
+}
+
+/**
  * Start track preview. Suspends background music, plays demo, then restores
  * background music on completion or manual stop.
  */

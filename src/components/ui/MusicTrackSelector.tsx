@@ -18,7 +18,6 @@ import Animated, {
 import { BACKING_TRACKS, type BackingTrackDef } from "../../constants/backingTracks";
 import { useOwnedTracksStore } from "../../stores/ownedTracksStore";
 import { useMusicEnabled } from "../../stores/settingsStore";
-import * as musicCoordinator from "../../services/musicCoordinator";
 import { playFeedback } from "../../utils/feedback";
 import { spacing } from "../../theme";
 import { swipeGesture } from "../../theme/animations";
@@ -33,7 +32,7 @@ const {
   frictionPower: FRICTION_POWER,
   frictionScale: FRICTION_SCALE,
 } = swipeGesture;
-const RANK_ANIM_DURATION = 250;
+const RANK_ANIM_DURATION = 200;
 
 function StackedTrackCard({
   track,
@@ -44,9 +43,10 @@ function StackedTrackCard({
   rotationSV,
   currentRotation,
   isActive,
-  demoPlayingTrackId,
   disabled,
-  onToggleDemo,
+  selectionLocked,
+  onRankAnimationStart,
+  onRankAnimationEnd,
   onSelect,
 }: {
   track: BackingTrackDef;
@@ -57,9 +57,10 @@ function StackedTrackCard({
   rotationSV: SharedValue<number>;
   currentRotation: number;
   isActive: boolean;
-  demoPlayingTrackId: string | null;
   disabled?: boolean;
-  onToggleDemo: () => void;
+  selectionLocked: boolean;
+  onRankAnimationStart: () => void;
+  onRankAnimationEnd: () => void;
   onSelect: () => void;
 }) {
   const animRank = useSharedValue(rank);
@@ -68,16 +69,24 @@ function StackedTrackCard({
   useEffect(() => {
     if (prevRankRef.current !== rank) {
       if (rank < prevRankRef.current) {
-        animRank.value = withTiming(rank, {
-          duration: RANK_ANIM_DURATION,
-          easing: Easing.out(Easing.cubic),
-        });
+        onRankAnimationStart();
+        animRank.value = withTiming(
+          rank,
+          {
+            duration: RANK_ANIM_DURATION,
+            easing: Easing.out(Easing.cubic),
+          },
+          () => {
+            "worklet";
+            runOnJS(onRankAnimationEnd)();
+          },
+        );
       } else {
         animRank.value = rank;
       }
       prevRankRef.current = rank;
     }
-  }, [rank, animRank]);
+  }, [rank, animRank, onRankAnimationStart, onRankAnimationEnd]);
 
   const animStyle = useAnimatedStyle(() => {
     const isCurrentFront = isFront && rotationSV.value === currentRotation;
@@ -98,9 +107,8 @@ function StackedTrackCard({
       <MusicTrackCard
         track={track}
         isActive={isActive}
-        isDemoPlaying={demoPlayingTrackId === track.id}
         disabled={disabled}
-        onToggleDemo={onToggleDemo}
+        selectionLocked={selectionLocked}
         onSelect={onSelect}
       />
     </Animated.View>
@@ -123,8 +131,21 @@ export function MusicTrackSelector() {
     return idx >= 0 ? idx : 0;
   }, [ownedTracks, activeTrackId]);
 
+  /** Stable signature when persisted store adds tracks (hydration) or ownership changes. */
+  const ownedSignature = useMemo(() => [...ownedTrackIds].sort().join("|"), [ownedTrackIds]);
+
   const [rotation, setRotation] = useState(initialRotation);
-  const [demoPlayingTrackId, setDemoPlayingTrackId] = useState<string | null>(null);
+
+  const dragX = useSharedValue(0);
+  const rotationSV = useSharedValue(initialRotation);
+
+  // Keep deck order aligned with active track + owned list. Must also reset rotationSV: StackedTrackCard
+  // uses `rotationSV.value === currentRotation` for the front card; if we only setRotation() after a
+  // swipe, rotationSV stays high and the front card gets opacity 0 (looks like cards "disappear").
+  useEffect(() => {
+    setRotation(initialRotation);
+    rotationSV.value = initialRotation;
+  }, [initialRotation, ownedSignature]);
 
   const rotatedTracks = useMemo(() => {
     if (ownedTracks.length === 0) return [];
@@ -133,14 +154,21 @@ export function MusicTrackSelector() {
     return arr;
   }, [ownedTracks, rotation]);
 
-  const dragX = useSharedValue(0);
-  const rotationSV = useSharedValue(0);
   const swiping = useRef(false);
+  const rankAnimLockRef = useRef(0);
+  const [rankAnimating, setRankAnimating] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      musicCoordinator.stopPreview();
-    };
+  const onRankAnimationStart = useCallback(() => {
+    rankAnimLockRef.current += 1;
+    setRankAnimating(true);
+  }, []);
+
+  const onRankAnimationEnd = useCallback(() => {
+    rankAnimLockRef.current -= 1;
+    if (rankAnimLockRef.current <= 0) {
+      rankAnimLockRef.current = 0;
+      setRankAnimating(false);
+    }
   }, []);
 
   const advanceState = useCallback(() => {
@@ -157,36 +185,9 @@ export function MusicTrackSelector() {
     swiping.current = false;
   }, [dragX]);
 
-  const handleToggleDemo = useCallback(
-    (track: BackingTrackDef) => {
-      playFeedback("tap");
-      if (!musicEnabled) {
-        if (demoPlayingTrackId === track.id) {
-          musicCoordinator.stopPreview();
-          setDemoPlayingTrackId(null);
-        }
-        return;
-      }
-      if (demoPlayingTrackId === track.id) {
-        musicCoordinator.stopPreview();
-        setDemoPlayingTrackId(null);
-      } else {
-        musicCoordinator.startPreview(track.asset, track.demoDurationMs, {
-          onComplete: () => {
-            setDemoPlayingTrackId(null);
-          },
-        });
-        setDemoPlayingTrackId(track.id);
-      }
-    },
-    [demoPlayingTrackId, musicEnabled],
-  );
-
   const handleSelectTrack = useCallback(
     (trackId: string) => {
       playFeedback("tap");
-      musicCoordinator.stopPreview();
-      setDemoPlayingTrackId(null);
       setActiveTrack(trackId);
     },
     [setActiveTrack],
@@ -242,9 +243,7 @@ export function MusicTrackSelector() {
         <MusicTrackCard
           track={track}
           isActive={track.id === activeTrackId}
-          isDemoPlaying={demoPlayingTrackId === track.id}
           disabled={!musicEnabled}
-          onToggleDemo={() => handleToggleDemo(track)}
           onSelect={() => handleSelectTrack(track.id)}
         />
       </View>
@@ -268,9 +267,10 @@ export function MusicTrackSelector() {
               rotationSV={rotationSV}
               currentRotation={rotation}
               isActive={track.id === activeTrackId}
-              demoPlayingTrackId={demoPlayingTrackId}
               disabled={!musicEnabled}
-              onToggleDemo={() => handleToggleDemo(track)}
+              selectionLocked={rankAnimating}
+              onRankAnimationStart={onRankAnimationStart}
+              onRankAnimationEnd={onRankAnimationEnd}
               onSelect={() => handleSelectTrack(track.id)}
             />
           ))
