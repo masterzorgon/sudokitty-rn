@@ -1,26 +1,31 @@
 // Secondary menu that unfurls from primary action pill
 // Expands upward from primary action pill
 
-import React, { useRef, useMemo } from 'react';
-import { StyleSheet, View, Pressable, Modal, PanResponder } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { Easing } from 'react-native-reanimated';
-import { SecondaryMenuProps, MENU_CONFIGS, LAYOUT } from './types';
-import { MenuRow } from './MenuRow';
-import { useVisibilityAnimation } from '@/src/hooks/useVisibilityAnimation';
+import React, { useRef, useMemo, useCallback } from "react";
+import { StyleSheet, View, Pressable, Modal, PanResponder } from "react-native";
+import { BlurView } from "expo-blur";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { Easing } from "react-native-reanimated";
+import { SecondaryMenuProps, MENU_CONFIGS, LAYOUT, type MenuItem } from "./types";
+import { MenuRow } from "./MenuRow";
+import { useVisibilityAnimation } from "@/src/hooks/useVisibilityAnimation";
+import { useEffectivePremium, usePremiumStore } from "@/src/stores/premiumStore";
+import { presentPaywallAlways } from "@/src/lib/revenueCat";
+import { TEST_MODE_BYPASS_PAYWALL } from "@/src/constants/testMode";
 
 const SWIPE_THRESHOLD = 50; // Minimum distance to trigger dismiss
 const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity to trigger dismiss
 
-export function SecondaryMenu({
-  isOpen,
-  menuType,
-  onSelect,
-  onDismiss,
-}: SecondaryMenuProps) {
+function isPremiumLockedDifficulty(item: MenuItem, isPremium: boolean): boolean {
+  if (!item.difficulty) return false;
+  if (isPremium) return false;
+  return item.difficulty === "hard" || item.difficulty === "expert";
+}
+
+export function SecondaryMenu({ isOpen, menuType, onSelect, onDismiss }: SecondaryMenuProps) {
   const insets = useSafeAreaInsets();
   const isDismissing = useRef(false);
+  const isPremium = useEffectivePremium();
 
   const animatedMenuStyle = useVisibilityAnimation(isOpen, {
     durationIn: 120,
@@ -30,6 +35,22 @@ export function SecondaryMenu({
   });
 
   const menuItems = MENU_CONFIGS[menuType];
+
+  const handleItemPress = useCallback(
+    async (item: MenuItem) => {
+      if (isPremiumLockedDifficulty(item, isPremium)) {
+        await presentPaywallAlways();
+        await usePremiumStore.getState().syncStatus();
+        const nowPremium = usePremiumStore.getState().isPremium || TEST_MODE_BYPASS_PAYWALL;
+        if (nowPremium) {
+          onSelect(item);
+        }
+        return;
+      }
+      onSelect(item);
+    },
+    [isPremium, onSelect],
+  );
 
   // PanResponder for swipe-down to dismiss for swipe-down to dismiss
   const panResponder = useMemo(
@@ -59,7 +80,7 @@ export function SecondaryMenu({
           isDismissing.current = false;
         },
       }),
-    [onDismiss]
+    [onDismiss],
   );
 
   return (
@@ -87,7 +108,7 @@ export function SecondaryMenu({
       >
         {/* Animated menu - only as large as its content */}
         <Animated.View style={[styles.menuWrapper, animatedMenuStyle]} pointerEvents="box-none">
-          <View style={[styles.menu, menuType === 'resume' && styles.menuWide]}>
+          <View style={[styles.menu, menuType === "resume" && styles.menuWide]}>
             {menuItems.map((item, index) => (
               <MenuRow
                 key={item.id}
@@ -95,7 +116,7 @@ export function SecondaryMenu({
                 index={index}
                 isVisible={isOpen}
                 isLast={index === menuItems.length - 1}
-                onPress={() => onSelect(item)}
+                onPress={() => void handleItemPress(item)}
               />
             ))}
           </View>
@@ -115,16 +136,15 @@ const styles = StyleSheet.create({
   positioningContainer: {
     ...StyleSheet.absoluteFillObject,
     // Flexbox positions content at bottom-right without expanding
-    flexDirection: 'column',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
     paddingRight: LAYOUT.horizontalPadding,
   },
   menuWrapper: {
     // Transform origin: scales from bottom-right corner
   },
   menu: {
-    gap: LAYOUT.rowGap,
     minWidth: 228,
   },
   menuWide: {
