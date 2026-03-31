@@ -37,16 +37,18 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
     const afford = config.currency === "iap" || totalMochis >= (config.price as number);
     return { insufficientFunds: config.currency === "mochis" && !afford };
   }, [config, totalMochis]);
+  const isUnavailable = config?.buttonLabel.trim().toLowerCase() === "unavailable";
 
   const handlePress = useCallback(() => {
     if (!config) return;
+    if (isUnavailable) return;
     if (insufficientFunds && config.onInsufficientFunds) {
       sheetRef.current?.close(() => config.onInsufficientFunds!());
       return;
     }
     if (insufficientFunds) return;
     sheetRef.current?.close(() => config.onConfirm());
-  }, [config, insufficientFunds]);
+  }, [config, insufficientFunds, isUnavailable]);
 
   if (!config) return null;
 
@@ -85,16 +87,18 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
 
       <SkeuButton
         onPress={handlePress}
-        variant="primary"
+        variant={isUnavailable ? "disabled" : "primary"}
         borderRadius={borderRadius.lg}
-        sheen={!loading}
-        disabled={loading}
+        sheen={!loading && !isUnavailable}
+        disabled={loading || isUnavailable}
         style={styles.buyButton}
         contentStyle={styles.buyButtonContent}
         accessibilityLabel={insufficientFunds ? "Get more mochis" : config.buttonLabel}
       >
         {loading ? (
           <ActivityIndicator size="small" color={colors.white} />
+        ) : isUnavailable ? (
+          <Text style={styles.unavailableButtonText}>{config.buttonLabel}</Text>
         ) : insufficientFunds ? (
           <View style={styles.buttonRow}>
             <MochiPointIcon width={20} height={20} />
@@ -165,6 +169,11 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.bold,
     fontSize: 16,
     color: colors.white,
+  },
+  unavailableButtonText: {
+    fontFamily: fontFamilies.bold,
+    fontSize: 16,
+    color: colors.textSecondary,
   },
   noThanks: {
     marginTop: spacing.xl,

@@ -2,13 +2,22 @@
 // All purchase/entitlement logic lives here. Other modules import from
 // this file, never directly from react-native-purchases.
 
-import Purchases, { LOG_LEVEL, CustomerInfo, PurchasesStoreProduct } from 'react-native-purchases';
-import RevenueCatUI from 'react-native-purchases-ui';
-import { MOCHI_PACK_PRODUCT_IDS, MOCHI_PACK_AMOUNTS, type MochiPackProductId } from '../constants/economy';
-import { usePlayerStreakStore } from '../stores/playerStreakStore';
+import Purchases, {
+  LOG_LEVEL,
+  CustomerInfo,
+  PurchasesStoreProduct,
+  PRODUCT_CATEGORY,
+} from "react-native-purchases";
+import RevenueCatUI from "react-native-purchases-ui";
+import {
+  MOCHI_PACK_PRODUCT_IDS,
+  MOCHI_PACK_AMOUNTS,
+  type MochiPackProductId,
+} from "../constants/economy";
+import { usePlayerStreakStore } from "../stores/playerStreakStore";
 
-const API_KEY = process.env.EXPO_PUBLIC_RC_API_KEY ?? '';
-const ENTITLEMENT_ID = 'Sudokitty Premium';
+const API_KEY = process.env.EXPO_PUBLIC_RC_API_KEY ?? "";
+const ENTITLEMENT_ID = "Sudokitty Premium";
 
 // ============================================
 // Initialization
@@ -52,7 +61,7 @@ export async function presentPaywall(): Promise<boolean> {
       requiredEntitlementIdentifier: ENTITLEMENT_ID,
     });
     // PURCHASED, RESTORED, or NOT_PRESENTED (already has entitlement)
-    return result === 'PURCHASED' || result === 'RESTORED' || result === 'NOT_PRESENTED';
+    return result === "PURCHASED" || result === "RESTORED" || result === "NOT_PRESENTED";
   } catch {
     return false;
   }
@@ -65,7 +74,7 @@ export async function presentPaywall(): Promise<boolean> {
 export async function presentPaywallAlways(): Promise<boolean> {
   try {
     const result = await RevenueCatUI.presentPaywall();
-    return result === 'PURCHASED' || result === 'RESTORED';
+    return result === "PURCHASED" || result === "RESTORED";
   } catch {
     return false;
   }
@@ -119,16 +128,27 @@ export async function getCustomerInfo(): Promise<CustomerInfo | null> {
 /** Fetch mochi pack products from RevenueCat. Returns empty array on failure. */
 export async function getMochiPackProducts(): Promise<PurchasesStoreProduct[]> {
   try {
-    const products = await Purchases.getProducts([...MOCHI_PACK_PRODUCT_IDS]);
+    const configured = await Purchases.isConfigured();
+    if (!configured) {
+      if (__DEV__) {
+        console.warn("[RevenueCat] getMochiPackProducts called before Purchases.configure");
+      }
+      return [];
+    }
+
+    const products = await Purchases.getProducts(
+      [...MOCHI_PACK_PRODUCT_IDS],
+      PRODUCT_CATEGORY.NON_SUBSCRIPTION,
+    );
     if (__DEV__ && products.length === 0) {
       console.warn(
-        '[RevenueCat] getMochiPackProducts: no products returned. Check: (1) EXPO_PUBLIC_RC_API_KEY is set, (2) products mochis_500, mochis_1200, mochis_3000 exist in App Store Connect as consumables, (3) RevenueCat dashboard has the app linked to App Store Connect.',
+        "[RevenueCat] getMochiPackProducts: no products returned. Check: (1) EXPO_PUBLIC_RC_API_KEY is set, (2) products mochis_500, mochis_1200, mochis_3000 exist in App Store Connect as consumables, (3) RevenueCat dashboard has the app linked to App Store Connect.",
       );
     }
     return products;
   } catch (e) {
     if (__DEV__) {
-      console.warn('[RevenueCat] getMochiPackProducts failed:', e);
+      console.warn("[RevenueCat] getMochiPackProducts failed:", e);
     }
     return [];
   }
@@ -145,7 +165,7 @@ export async function purchaseMochiPack(
     const amount = MOCHI_PACK_AMOUNTS[productId];
     if (!amount) return { success: false };
 
-    usePlayerStreakStore.getState().addMochiHistoryEntry(amount, 'iap');
+    usePlayerStreakStore.getState().addMochiHistoryEntry(amount, "iap");
 
     return { success: true, amount };
   } catch (error: any) {
@@ -164,9 +184,7 @@ export async function purchaseMochiPack(
  * changes (e.g., renewal, cancellation, cross-device sync).
  * Returns a cleanup function to remove the listener.
  */
-export function addCustomerInfoListener(
-  listener: (info: CustomerInfo) => void,
-): () => void {
+export function addCustomerInfoListener(listener: (info: CustomerInfo) => void): () => void {
   Purchases.addCustomerInfoUpdateListener(listener);
   return () => {
     Purchases.removeCustomerInfoUpdateListener(listener);
