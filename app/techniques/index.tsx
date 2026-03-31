@@ -22,7 +22,7 @@ import {
 import { useTechniqueProgress, useCompletionCount } from "../../src/stores/techniqueProgressStore";
 import { playFeedback } from "../../src/utils/feedback";
 import { trackPaywallOpened } from "../../src/utils/analytics";
-import { useEffectivePremium } from "../../src/stores/premiumStore";
+import { useEffectivePremium, usePremiumStore } from "../../src/stores/premiumStore";
 import { presentPaywall } from "../../src/lib/revenueCat";
 import { CTABannerCarousel } from "../../src/components/ui/CTABannerCarousel";
 
@@ -148,7 +148,11 @@ export default function TechniquesListScreen() {
     if (!isPremium && meta && meta.level >= 2) {
       playFeedback("tap");
       trackPaywallOpened("technique_card");
-      await presentPaywall();
+      const purchased = await presentPaywall();
+      if (purchased) {
+        usePremiumStore.getState().setPremium(true);
+        usePremiumStore.getState().syncStatus();
+      }
       return;
     }
     playFeedback("tap");

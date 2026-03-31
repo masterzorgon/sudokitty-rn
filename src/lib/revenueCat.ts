@@ -44,7 +44,26 @@ export async function checkPremiumStatus(): Promise<boolean> {
 
 /** Synchronously check premium from a CustomerInfo object. */
 export function isPremiumFromInfo(info: CustomerInfo): boolean {
-  return info.entitlements.active[ENTITLEMENT_ID] !== undefined;
+  const result = info.entitlements.active[ENTITLEMENT_ID] !== undefined;
+  // #region agent log
+  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+    body: JSON.stringify({
+      sessionId: "0514f9",
+      location: "revenueCat.ts:isPremiumFromInfo",
+      message: "isPremiumFromInfo check",
+      data: {
+        result,
+        activeEntitlements: Object.keys(info.entitlements.active),
+        expectedId: ENTITLEMENT_ID,
+      },
+      timestamp: Date.now(),
+      hypothesisId: "H2",
+    }),
+  }).catch(() => {});
+  // #endregion
+  return result;
 }
 
 // ============================================
@@ -73,9 +92,51 @@ export async function presentPaywall(): Promise<boolean> {
  */
 export async function presentPaywallAlways(): Promise<boolean> {
   try {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+      body: JSON.stringify({
+        sessionId: "0514f9",
+        location: "revenueCat.ts:presentPaywallAlways",
+        message: "presentPaywallAlways called",
+        data: {},
+        timestamp: Date.now(),
+        hypothesisId: "H1",
+      }),
+    }).catch(() => {});
+    // #endregion
     const result = await RevenueCatUI.presentPaywall();
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+      body: JSON.stringify({
+        sessionId: "0514f9",
+        location: "revenueCat.ts:presentPaywallAlways",
+        message: "presentPaywall returned",
+        data: { result, isPurchasedOrRestored: result === "PURCHASED" || result === "RESTORED" },
+        timestamp: Date.now(),
+        hypothesisId: "H1",
+      }),
+    }).catch(() => {});
+    // #endregion
     return result === "PURCHASED" || result === "RESTORED";
-  } catch {
+  } catch (e: any) {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+      body: JSON.stringify({
+        sessionId: "0514f9",
+        location: "revenueCat.ts:presentPaywallAlways",
+        message: "presentPaywallAlways ERROR",
+        data: { error: String(e) },
+        timestamp: Date.now(),
+        hypothesisId: "H1",
+      }),
+    }).catch(() => {});
+    // #endregion
     return false;
   }
 }
@@ -159,16 +220,58 @@ export async function purchaseMochiPack(
   product: PurchasesStoreProduct,
 ): Promise<{ success: boolean; amount?: number }> {
   try {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+      body: JSON.stringify({
+        sessionId: "0514f9",
+        location: "revenueCat.ts:purchaseMochiPack",
+        message: "purchaseMochiPack called",
+        data: { productId: product.identifier },
+        timestamp: Date.now(),
+        hypothesisId: "H5",
+      }),
+    }).catch(() => {});
+    // #endregion
     await Purchases.purchaseStoreProduct(product);
 
     const productId = product.identifier as MochiPackProductId;
     const amount = MOCHI_PACK_AMOUNTS[productId];
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+      body: JSON.stringify({
+        sessionId: "0514f9",
+        location: "revenueCat.ts:purchaseMochiPack",
+        message: "purchase succeeded, crediting mochis",
+        data: { productId, amount },
+        timestamp: Date.now(),
+        hypothesisId: "H5",
+      }),
+    }).catch(() => {});
+    // #endregion
     if (!amount) return { success: false };
 
     usePlayerStreakStore.getState().addMochiHistoryEntry(amount, "iap");
 
     return { success: true, amount };
   } catch (error: any) {
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+      body: JSON.stringify({
+        sessionId: "0514f9",
+        location: "revenueCat.ts:purchaseMochiPack",
+        message: "purchaseMochiPack ERROR",
+        data: { error: String(error), userCancelled: !!error.userCancelled },
+        timestamp: Date.now(),
+        hypothesisId: "H5",
+      }),
+    }).catch(() => {});
+    // #endregion
     if (error.userCancelled) return { success: false };
     throw error;
   }

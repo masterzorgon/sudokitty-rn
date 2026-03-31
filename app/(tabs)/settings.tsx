@@ -31,7 +31,7 @@ import {
   trackExternalLinkOpened,
   trackPaywallOpened,
 } from "../../src/utils/analytics";
-import { useEffectivePremium } from "../../src/stores/premiumStore";
+import { useEffectivePremium, usePremiumStore } from "../../src/stores/premiumStore";
 import {
   presentPaywall,
   presentPaywallAlways,
@@ -88,6 +88,8 @@ export default function SettingsScreen() {
       }
       const purchased = await presentPaywall();
       if (purchased) {
+        usePremiumStore.getState().setPremium(true);
+        usePremiumStore.getState().syncStatus();
         setter(true);
       }
     },
@@ -96,7 +98,11 @@ export default function SettingsScreen() {
 
   const handleUpgradePremium = useCallback(async () => {
     trackPaywallOpened("settings");
-    await presentPaywallAlways();
+    const purchased = await presentPaywallAlways();
+    if (purchased) {
+      usePremiumStore.getState().setPremium(true);
+      usePremiumStore.getState().syncStatus();
+    }
   }, []);
 
   const handleRestorePurchases = useCallback(async () => {

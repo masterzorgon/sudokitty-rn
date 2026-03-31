@@ -11,7 +11,7 @@ import { spacing, borderRadius } from "../../src/theme";
 import { ScreenBackground, ScreenContent, ScreenHeader } from "../../src/components/ui/Layout";
 import { CTABannerCarousel } from "../../src/components/ui/CTABannerCarousel";
 import { usePlayerStreakStore } from "../../src/stores/playerStreakStore";
-import { useEffectivePremium } from "../../src/stores/premiumStore";
+import { useEffectivePremium, usePremiumStore } from "../../src/stores/premiumStore";
 import { useOwnedTracksStore } from "../../src/stores/ownedTracksStore";
 import { BACKING_TRACKS, type BackingTrackDef } from "../../src/constants/backingTracks";
 import {
@@ -111,25 +111,85 @@ export default function StoreScreen() {
 
   const handlePurchasePack = useCallback(
     async (product: PurchasesStoreProduct) => {
+      // #region agent log
+      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+        body: JSON.stringify({
+          sessionId: "0514f9",
+          location: "store.tsx:handlePurchasePack",
+          message: "handlePurchasePack called",
+          data: {
+            productId: product.identifier,
+            purchaseInProgress,
+            sheetConfigNull: sheetConfig === null,
+          },
+          timestamp: Date.now(),
+          hypothesisId: "H4",
+        }),
+      }).catch(() => {});
+      // #endregion
       if (purchaseInProgress) return;
       setPurchaseInProgress(product.identifier);
       try {
         const result = await purchaseMochiPack(product);
+        // #region agent log
+        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+          body: JSON.stringify({
+            sessionId: "0514f9",
+            location: "store.tsx:handlePurchasePack",
+            message: "purchaseMochiPack returned",
+            data: { result, sheetConfigNull: sheetConfig === null },
+            timestamp: Date.now(),
+            hypothesisId: "H4",
+          }),
+        }).catch(() => {});
+        // #endregion
         if (mountedRef.current && result.success && result.amount) {
           Alert.alert(
             "Purchase Complete!",
             `You received ${result.amount.toLocaleString()} mochis!`,
           );
         }
-      } catch {
+      } catch (e: any) {
+        // #region agent log
+        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+          body: JSON.stringify({
+            sessionId: "0514f9",
+            location: "store.tsx:handlePurchasePack",
+            message: "handlePurchasePack ERROR",
+            data: { error: String(e) },
+            timestamp: Date.now(),
+            hypothesisId: "H5",
+          }),
+        }).catch(() => {});
+        // #endregion
         if (mountedRef.current) {
           Alert.alert("Purchase Failed", "Something went wrong. Please try again.");
         }
       } finally {
+        // #region agent log
+        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+          body: JSON.stringify({
+            sessionId: "0514f9",
+            location: "store.tsx:handlePurchasePack",
+            message: "handlePurchasePack finally",
+            data: { mounted: mountedRef.current, sheetConfigNull: sheetConfig === null },
+            timestamp: Date.now(),
+            hypothesisId: "H4",
+          }),
+        }).catch(() => {});
+        // #endregion
         if (mountedRef.current) setPurchaseInProgress(null);
       }
     },
-    [purchaseInProgress],
+    [purchaseInProgress, sheetConfig],
   );
 
   const handleInsufficientFunds = useCallback(
@@ -266,7 +326,39 @@ export default function StoreScreen() {
               ? undefined
               : async () => {
                   playFeedback("tap");
-                  await presentPaywallAlways();
+                  // #region agent log
+                  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+                    body: JSON.stringify({
+                      sessionId: "0514f9",
+                      location: "store.tsx:removeAdsPress",
+                      message: "Remove Ads pressed, calling presentPaywallAlways",
+                      data: { isPremiumBefore: isPremium },
+                      timestamp: Date.now(),
+                      hypothesisId: "H1",
+                    }),
+                  }).catch(() => {});
+                  // #endregion
+                  const purchased = await presentPaywallAlways();
+                  // #region agent log
+                  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
+                    body: JSON.stringify({
+                      sessionId: "0514f9",
+                      location: "store.tsx:removeAdsPress",
+                      message: "presentPaywallAlways returned",
+                      data: { purchased, isPremiumAfter: isPremium },
+                      timestamp: Date.now(),
+                      hypothesisId: "H1",
+                    }),
+                  }).catch(() => {});
+                  // #endregion
+                  if (purchased) {
+                    usePremiumStore.getState().setPremium(true);
+                    usePremiumStore.getState().syncStatus();
+                  }
                 }
           }
         />

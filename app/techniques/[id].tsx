@@ -14,6 +14,7 @@ import { BoardSlideView } from "../../src/components/ui/StepFlow/BoardSlideView"
 import { ShowcasePage } from "../../src/components/ui/ShowcasePage";
 import { AppButton } from "../../src/components/ui/AppButton";
 import { presentPaywall } from "../../src/lib/revenueCat";
+import { usePremiumStore } from "../../src/stores/premiumStore";
 import { trackPaywallOpened } from "../../src/utils/analytics";
 
 import { Image } from "expo-image";
@@ -146,7 +147,11 @@ export default function TechniquePracticeScreen() {
             label: "Unlock",
             onPress: async () => {
               trackPaywallOpened("technique_detail");
-              await presentPaywall();
+              const purchased = await presentPaywall();
+              if (purchased) {
+                usePremiumStore.getState().setPremium(true);
+                usePremiumStore.getState().syncStatus();
+              }
             },
             icon: "lock",
             iconPosition: "left",

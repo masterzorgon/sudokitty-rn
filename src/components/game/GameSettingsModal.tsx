@@ -8,7 +8,7 @@ import {
   useUnlimitedHints,
 } from "../../stores/settingsStore";
 import { useGameStore } from "../../stores/gameStore";
-import { useEffectivePremium } from "../../stores/premiumStore";
+import { useEffectivePremium, usePremiumStore } from "../../stores/premiumStore";
 import { presentPaywall } from "../../lib/revenueCat";
 import { MAX_MISTAKES, MAX_HINTS } from "../../engine/types";
 import { colors, useColors } from "../../theme/colors";
@@ -72,6 +72,8 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
       }
       const purchased = await presentPaywall();
       if (purchased) {
+        usePremiumStore.getState().setPremium(true);
+        usePremiumStore.getState().syncStatus();
         setter(true);
       }
     },
