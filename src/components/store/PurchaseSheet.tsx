@@ -42,36 +42,8 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
   const handlePress = useCallback(() => {
     if (!config) return;
     if (isUnavailable) return;
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-      body: JSON.stringify({
-        sessionId: "0514f9",
-        location: "PurchaseSheet.tsx:handlePress",
-        message: "handlePress called, closing sheet with callback",
-        data: { insufficientFunds, isUnavailable, currency: config.currency },
-        timestamp: Date.now(),
-        hypothesisId: "H4",
-      }),
-    }).catch(() => {});
-    // #endregion
     if (insufficientFunds && config.onInsufficientFunds) {
       sheetRef.current?.close(() => {
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-          body: JSON.stringify({
-            sessionId: "0514f9",
-            location: "PurchaseSheet.tsx:insufficientFundsCb",
-            message: "close callback fired (insufficient funds), calling onDismiss first",
-            data: {},
-            timestamp: Date.now(),
-            hypothesisId: "H4",
-          }),
-        }).catch(() => {});
-        // #endregion
         onDismiss();
         config.onInsufficientFunds!();
       });
@@ -79,20 +51,6 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
     }
     if (insufficientFunds) return;
     sheetRef.current?.close(() => {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-        body: JSON.stringify({
-          sessionId: "0514f9",
-          location: "PurchaseSheet.tsx:confirmCb",
-          message: "close callback fired (onConfirm), calling onDismiss first",
-          data: {},
-          timestamp: Date.now(),
-          hypothesisId: "H4",
-        }),
-      }).catch(() => {});
-      // #endregion
       onDismiss();
       config.onConfirm();
     });

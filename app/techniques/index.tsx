@@ -151,7 +151,6 @@ export default function TechniquesListScreen() {
       const purchased = await presentPaywall();
       if (purchased) {
         usePremiumStore.getState().setPremium(true);
-        usePremiumStore.getState().syncStatus();
       }
       return;
     }

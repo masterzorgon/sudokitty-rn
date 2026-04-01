@@ -150,7 +150,6 @@ export default function TechniquePracticeScreen() {
               const purchased = await presentPaywall();
               if (purchased) {
                 usePremiumStore.getState().setPremium(true);
-                usePremiumStore.getState().syncStatus();
               }
             },
             icon: "lock",

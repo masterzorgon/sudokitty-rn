@@ -89,7 +89,6 @@ export default function SettingsScreen() {
       const purchased = await presentPaywall();
       if (purchased) {
         usePremiumStore.getState().setPremium(true);
-        usePremiumStore.getState().syncStatus();
         setter(true);
       }
     },
@@ -101,7 +100,6 @@ export default function SettingsScreen() {
     const purchased = await presentPaywallAlways();
     if (purchased) {
       usePremiumStore.getState().setPremium(true);
-      usePremiumStore.getState().syncStatus();
     }
   }, []);
 

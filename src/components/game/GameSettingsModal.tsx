@@ -73,7 +73,6 @@ export function GameSettingsModal({ visible, onClose }: GameSettingsModalProps) 
       const purchased = await presentPaywall();
       if (purchased) {
         usePremiumStore.getState().setPremium(true);
-        usePremiumStore.getState().syncStatus();
         setter(true);
       }
     },

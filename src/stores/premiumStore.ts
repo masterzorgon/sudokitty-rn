@@ -36,55 +36,11 @@ export const usePremiumStore = create<PremiumState & PremiumActions>()(
       isLoaded: false,
 
       syncStatus: async () => {
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-          body: JSON.stringify({
-            sessionId: "0514f9",
-            location: "premiumStore.ts:syncStatus",
-            message: "syncStatus called",
-            data: {},
-            timestamp: Date.now(),
-            hypothesisId: "H1",
-          }),
-        }).catch(() => {});
-        // #endregion
         const isPremium = await checkPremiumStatus();
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-          body: JSON.stringify({
-            sessionId: "0514f9",
-            location: "premiumStore.ts:syncStatus",
-            message: "syncStatus result",
-            data: { isPremium },
-            timestamp: Date.now(),
-            hypothesisId: "H1",
-          }),
-        }).catch(() => {});
-        // #endregion
         set({ isPremium, isLoaded: true });
       },
 
-      setPremium: (value: boolean) => {
-        // #region agent log
-        fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-          body: JSON.stringify({
-            sessionId: "0514f9",
-            location: "premiumStore.ts:setPremium",
-            message: "setPremium called",
-            data: { value },
-            timestamp: Date.now(),
-            hypothesisId: "H3",
-          }),
-        }).catch(() => {});
-        // #endregion
-        set({ isPremium: value });
-      },
+      setPremium: (value: boolean) => set({ isPremium: value }),
     }),
     {
       name: "@sudokitty/premium",
@@ -121,35 +77,7 @@ export function useEffectivePremium(): boolean {
  * Call once after initRevenueCat(). Returns a cleanup function.
  */
 export function startPremiumListener(): () => void {
-  // #region agent log
-  fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-    body: JSON.stringify({
-      sessionId: "0514f9",
-      location: "premiumStore.ts:startPremiumListener",
-      message: "startPremiumListener registered",
-      data: {},
-      timestamp: Date.now(),
-      hypothesisId: "H3",
-    }),
-  }).catch(() => {});
-  // #endregion
   return addCustomerInfoListener((info: CustomerInfo) => {
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-      body: JSON.stringify({
-        sessionId: "0514f9",
-        location: "premiumStore.ts:listener",
-        message: "CustomerInfo listener fired",
-        data: { activeEntitlements: Object.keys(info.entitlements.active) },
-        timestamp: Date.now(),
-        hypothesisId: "H3",
-      }),
-    }).catch(() => {});
-    // #endregion
     usePremiumStore.getState().setPremium(isPremiumFromInfo(info));
   });
 }

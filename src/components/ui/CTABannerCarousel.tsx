@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,10 @@ import {
   type ViewStyle,
   type GestureResponderEvent,
   type PanResponderGestureState,
-} from 'react-native';
-import { Image, type ImageSource } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
+} from "react-native";
+import { Image, type ImageSource } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -23,26 +23,26 @@ import Animated, {
   interpolate,
   Extrapolation,
   type SharedValue,
-} from 'react-native-reanimated';
-import { useColors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import { swipeGesture } from '../../theme/animations';
-import { SkeuCard, SkeuButton } from './Skeuomorphic';
-import { playFeedback } from '../../utils/feedback';
-import { useEffectivePremium } from '../../stores/premiumStore';
-import { useAppRatedStore, useHasRated } from '../../stores/appRatedStore';
-import { presentPaywallAlways } from '../../lib/revenueCat';
+} from "react-native-reanimated";
+import { useColors } from "../../theme/colors";
+import { typography, fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import { swipeGesture } from "../../theme/animations";
+import { SkeuCard, SkeuButton } from "./Skeuomorphic";
+import { playFeedback } from "../../utils/feedback";
+import { useEffectivePremium, usePremiumStore } from "../../stores/premiumStore";
+import { useAppRatedStore, useHasRated } from "../../stores/appRatedStore";
+import { presentPaywallAlways } from "../../lib/revenueCat";
 
-const MochiStarsImg = require('../../../assets/images/mochi/mochi-stars.png');
-const MochiShareImg = require('../../../assets/images/mochi/mochi-share.png');
-const MochiTechniquesImg = require('../../../assets/images/mochi/mochi-techniques.png');
+const MochiStarsImg = require("../../../assets/images/mochi/mochi-stars.png");
+const MochiShareImg = require("../../../assets/images/mochi/mochi-share.png");
+const MochiTechniquesImg = require("../../../assets/images/mochi/mochi-techniques.png");
 
-type PromoKey = 'techniques' | 'invite' | 'rate';
+type PromoKey = "techniques" | "invite" | "rate";
 
-const SHARE_MESSAGE = 'Check out SudoKitty — an app that helps you master sudoku!';
+const SHARE_MESSAGE = "Check out SudoKitty — an app that helps you master sudoku!";
 /** iOS App Store URL — replace idXXXXXXXXX with your app’s Apple ID from App Store Connect */
-const IOS_APP_STORE_URL = 'https://apps.apple.com/app/sudokitty/idXXXXXXXXX';
+const IOS_APP_STORE_URL = "https://apps.apple.com/app/sudokitty/idXXXXXXXXX";
 
 interface PromoCopyEntry {
   badge: string;
@@ -57,49 +57,52 @@ interface PromoCopyEntry {
 
 const PROMO_COPY: Record<PromoKey, PromoCopyEntry> = {
   techniques: {
-    badge: 'SUDOKU TECHNIQUES',
-    title: 'Level up your solving skills',
-    buttonLabel: 'Unlock All Techniques',
-    accessibilityLabel: 'Unlock all sudoku techniques',
+    badge: "SUDOKU TECHNIQUES",
+    title: "Level up your solving skills",
+    buttonLabel: "Unlock All Techniques",
+    accessibilityLabel: "Unlock all sudoku techniques",
     image: MochiTechniquesImg,
     imageStyle: {
       width: 100,
       height: 100,
     },
     imageContainerStyle: {
-      alignItems: 'center',
-      justifyContent: 'flex-end',
+      alignItems: "center",
+      justifyContent: "flex-end",
       marginRight: spacing.sm,
     },
   },
   invite: {
-    badge: 'INVITE FRIENDS',
-    title: 'Give Sudokitty to friends',
-    buttonLabel: 'Share the Love',
-    accessibilityLabel: 'Invite friends and earn 100 mochis',
+    badge: "INVITE FRIENDS",
+    title: "Give Sudokitty to friends",
+    buttonLabel: "Share the Love",
+    accessibilityLabel: "Invite friends and earn 100 mochis",
     image: MochiShareImg,
     imageStyle: {
       width: 105,
       height: 105,
     },
     imageContainerStyle: {
-      alignItems: 'center',
-      justifyContent: 'flex-end',
+      alignItems: "center",
+      justifyContent: "flex-end",
       marginRight: spacing.sm,
     },
   },
   rate: {
-    badge: 'RATE SUDOKITTY',
-    title: 'Help other Sudokitty fans',
-    buttonLabel: 'Rate the App',
-    accessibilityLabel: 'Rate SudoKitty on the App Store',
+    badge: "RATE SUDOKITTY",
+    title: "Help other Sudokitty fans",
+    buttonLabel: "Rate the App",
+    accessibilityLabel: "Rate SudoKitty on the App Store",
     image: MochiStarsImg,
   },
 };
 
 function usePromoActions(): Record<PromoKey, () => void> {
   const handleTechniques = useCallback(async () => {
-    await presentPaywallAlways();
+    const purchased = await presentPaywallAlways();
+    if (purchased) {
+      usePremiumStore.getState().setPremium(true);
+    }
   }, []);
 
   const handleInvite = useCallback(async () => {
@@ -107,35 +110,36 @@ function usePromoActions(): Record<PromoKey, () => void> {
       await Share.share({
         message: `${SHARE_MESSAGE} ${IOS_APP_STORE_URL}`,
         url: IOS_APP_STORE_URL,
-        title: 'Sudokitty',
+        title: "Sudokitty",
       });
-    } catch { /* user cancelled */ }
+    } catch {
+      /* user cancelled */
+    }
   }, []);
 
   const handleRate = useCallback(async () => {
     try {
-      const StoreReview = await import('expo-store-review');
+      const StoreReview = await import("expo-store-review");
       await StoreReview.requestReview();
     } catch {
-      Alert.alert('Thanks!', 'Please rate us on the App Store.');
+      Alert.alert("Thanks!", "Please rate us on the App Store.");
     }
 
-    setTimeout(() => {
-      Alert.alert(
-        'Did you leave a review?',
-        'We would love to hear your feedback!',
-        [
+    setTimeout(
+      () => {
+        Alert.alert("Did you leave a review?", "We would love to hear your feedback!", [
           {
-            text: 'Not yet',
-            style: 'cancel',
+            text: "Not yet",
+            style: "cancel",
           },
           {
-            text: 'Yes, I did!',
+            text: "Yes, I did!",
             onPress: () => useAppRatedStore.getState().setRated(true),
           },
-        ],
-      );
-    }, 2 * 60 * 1000);
+        ]);
+      },
+      2 * 60 * 1000,
+    );
   }, []);
 
   return { techniques: handleTechniques, invite: handleInvite, rate: handleRate };
@@ -178,7 +182,7 @@ function CTABannerCard({
       accessibilityLabel={accessibilityLabel ?? badge}
     >
       <LinearGradient
-        colors={[c.boardBackground, c.accentLight + '10', c.buttonPrimary + '40']}
+        colors={[c.boardBackground, c.accentLight + "10", c.buttonPrimary + "40"]}
         locations={[1, 0.55, 0]}
         style={cardStyles.gradientOverlay}
         pointerEvents="none"
@@ -186,27 +190,39 @@ function CTABannerCard({
 
       <View style={cardStyles.row}>
         <View style={cardStyles.textArea}>
-          <Text style={[cardStyles.badge, { color: c.mochiPillText, backgroundColor: c.mochiPillBorder + '40' }]}>
+          <Text
+            style={[
+              cardStyles.badge,
+              { color: c.mochiPillText, backgroundColor: c.mochiPillBorder + "40" },
+            ]}
+          >
             {badge}
           </Text>
-          <Text style={[cardStyles.title, { color: c.textPrimary }]}>
-            {title}
-          </Text>
+          <Text style={[cardStyles.title, { color: c.textPrimary }]}>{title}</Text>
         </View>
         <View style={[cardStyles.imageArea, imageContainerStyle]}>
-          {imageComponent ?? <Image source={image} style={[cardStyles.mochiImage, imageStyle]} contentFit="contain" />}
+          {imageComponent ?? (
+            <Image
+              source={image}
+              style={[cardStyles.mochiImage, imageStyle]}
+              contentFit="contain"
+            />
+          )}
         </View>
       </View>
       <SkeuButton
-        onPress={() => { playFeedback('tap'); onPress(); }}
+        onPress={() => {
+          playFeedback("tap");
+          onPress();
+        }}
         variant="primary"
         sheen
         borderRadius={borderRadius.md}
         contentStyle={cardStyles.btnContent}
         style={cardStyles.btn}
-        accessibilityLabel={typeof buttonLabel === 'string' ? buttonLabel : undefined}
+        accessibilityLabel={typeof buttonLabel === "string" ? buttonLabel : undefined}
       >
-        {typeof buttonLabel === 'string' ? (
+        {typeof buttonLabel === "string" ? (
           <Text style={cardStyles.btnText}>{buttonLabel}</Text>
         ) : (
           buttonLabel
@@ -218,7 +234,7 @@ function CTABannerCard({
           <BlurView
             intensity={12}
             tint="regular"
-            style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255, 255, 255, 0.23)' }]}
+            style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(255, 255, 255, 0.23)" }]}
           />
         </Animated.View>
       )}
@@ -229,7 +245,7 @@ function CTABannerCard({
 const cardStyles = StyleSheet.create({
   card: {
     padding: spacing.lg,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -237,8 +253,8 @@ const cardStyles = StyleSheet.create({
     margin: -spacing.sm,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   textArea: {
     flex: 1,
@@ -248,11 +264,11 @@ const cardStyles = StyleSheet.create({
     fontFamily: fontFamilies.bold,
     fontSize: 12,
     letterSpacing: 1,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: borderRadius.xs,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: spacing.sm,
   },
   title: {
@@ -262,8 +278,8 @@ const cardStyles = StyleSheet.create({
   imageArea: {
     width: 80,
     height: 80,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   mochiImage: {
     width: 120,
@@ -276,20 +292,26 @@ const cardStyles = StyleSheet.create({
   },
   btnContent: {
     paddingVertical: spacing.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   btnText: {
     fontFamily: fontFamilies.bold,
     fontSize: 13,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     letterSpacing: 0.5,
   },
 });
 
 const PEEK_OFFSET = 8;
 const SCALE_STEP = 0.03;
-const { threshold: SWIPE_THRESHOLD, velocityThreshold: VELOCITY_THRESHOLD, offscreenX: OFFSCREEN_X, frictionPower: FRICTION_POWER, frictionScale: FRICTION_SCALE } = swipeGesture;
+const {
+  threshold: SWIPE_THRESHOLD,
+  velocityThreshold: VELOCITY_THRESHOLD,
+  offscreenX: OFFSCREEN_X,
+  frictionPower: FRICTION_POWER,
+  frictionScale: FRICTION_SCALE,
+} = swipeGesture;
 const RANK_ANIM_DURATION = 250;
 
 interface PromoConfig {
@@ -304,9 +326,9 @@ function usePromos(filter?: PromoKey[]): PromoConfig[] {
 
   return useMemo(() => {
     const keys: PromoKey[] = [];
-    if (!isPremium) keys.push('techniques');
-    keys.push('invite');
-    if (!hasRated) keys.push('rate');
+    if (!isPremium) keys.push("techniques");
+    keys.push("invite");
+    if (!hasRated) keys.push("rate");
 
     const visible = filter ? keys.filter((k) => filter.includes(k)) : keys;
     return visible.map((key) => ({ key, onPress: actions[key] }));
@@ -402,7 +424,7 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
   }, [promos, rotation]);
 
   const advanceState = useCallback(() => {
-    playFeedback('carouselSwipe');
+    playFeedback("carouselSwipe");
     setRotation((prev) => prev + 1);
     swiping.current = false;
   }, []);
@@ -415,12 +437,8 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
     swiping.current = false;
   }, [dragX]);
 
-  const horizontalSwipeActivated = (
-    _e: GestureResponderEvent,
-    gs: PanResponderGestureState,
-  ) =>
-    Math.abs(gs.dx) > 6 &&
-    Math.abs(gs.dx) > Math.abs(gs.dy) * 0.85;
+  const horizontalSwipeActivated = (_e: GestureResponderEvent, gs: PanResponderGestureState) =>
+    Math.abs(gs.dx) > 6 && Math.abs(gs.dx) > Math.abs(gs.dy) * 0.85;
 
   const panResponder = useRef(
     PanResponder.create({
@@ -436,8 +454,7 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
         if (swiping.current) return;
 
         const shouldDismiss =
-          Math.abs(gs.dx) > SWIPE_THRESHOLD ||
-          Math.abs(gs.vx) > VELOCITY_THRESHOLD / 1000;
+          Math.abs(gs.dx) > SWIPE_THRESHOLD || Math.abs(gs.vx) > VELOCITY_THRESHOLD / 1000;
 
         if (shouldDismiss) {
           swiping.current = true;
@@ -446,7 +463,7 @@ export function CTABannerCarousel({ promos: filter }: { promos?: PromoKey[] } = 
             direction * OFFSCREEN_X,
             { duration: 200, easing: Easing.out(Easing.quad) },
             () => {
-              'worklet';
+              "worklet";
               rotationSV.value = rotationSV.value + 1;
               dragX.value = 0;
               runOnJS(advanceState)();
@@ -512,10 +529,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   frontCard: {
-    position: 'relative',
+    position: "relative",
   },
   stackedCard: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     top: 0,

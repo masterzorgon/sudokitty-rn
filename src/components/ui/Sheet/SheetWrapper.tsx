@@ -68,20 +68,6 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(funct
 
   const animateOut = useCallback(
     (cb?: () => void) => {
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "0514f9" },
-        body: JSON.stringify({
-          sessionId: "0514f9",
-          location: "SheetWrapper.tsx:animateOut",
-          message: "animateOut called",
-          data: { hasCallback: !!cb, willCallOnDismiss: !cb },
-          timestamp: Date.now(),
-          hypothesisId: "H4",
-        }),
-      }).catch(() => {});
-      // #endregion
       overlayOpacity.value = withTiming(0, { duration: 250 });
       translateY.value = withTiming(screenHeight, { duration: 250 }, () => {
         if (cb) {

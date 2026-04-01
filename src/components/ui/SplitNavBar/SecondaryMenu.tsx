@@ -11,7 +11,6 @@ import { MenuRow } from "./MenuRow";
 import { useVisibilityAnimation } from "@/src/hooks/useVisibilityAnimation";
 import { useEffectivePremium, usePremiumStore } from "@/src/stores/premiumStore";
 import { presentPaywallAlways } from "@/src/lib/revenueCat";
-import { TEST_MODE_BYPASS_PAYWALL } from "@/src/constants/testMode";
 
 const SWIPE_THRESHOLD = 50; // Minimum distance to trigger dismiss
 const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity to trigger dismiss
@@ -39,10 +38,9 @@ export function SecondaryMenu({ isOpen, menuType, onSelect, onDismiss }: Seconda
   const handleItemPress = useCallback(
     async (item: MenuItem) => {
       if (isPremiumLockedDifficulty(item, isPremium)) {
-        await presentPaywallAlways();
-        await usePremiumStore.getState().syncStatus();
-        const nowPremium = usePremiumStore.getState().isPremium || TEST_MODE_BYPASS_PAYWALL;
-        if (nowPremium) {
+        const purchased = await presentPaywallAlways();
+        if (purchased) {
+          usePremiumStore.getState().setPremium(true);
           onSelect(item);
         }
         return;
