@@ -42,7 +42,7 @@ type PromoKey = "techniques" | "invite" | "rate";
 
 const SHARE_MESSAGE = "Check out SudoKitty — an app that helps you master sudoku!";
 /** iOS App Store URL — replace idXXXXXXXXX with your app’s Apple ID from App Store Connect */
-const IOS_APP_STORE_URL = "https://apps.apple.com/app/sudokitty/idXXXXXXXXX";
+const IOS_APP_STORE_URL = "https://apps.apple.com/app/sudokitty/6761089982";
 
 interface PromoCopyEntry {
   badge: string;
