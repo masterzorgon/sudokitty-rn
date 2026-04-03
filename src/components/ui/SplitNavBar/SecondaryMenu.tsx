@@ -11,6 +11,7 @@ import { MenuRow } from "./MenuRow";
 import { useVisibilityAnimation } from "@/src/hooks/useVisibilityAnimation";
 import { useEffectivePremium, usePremiumStore } from "@/src/stores/premiumStore";
 import { presentPaywallAlways } from "@/src/lib/revenueCat";
+import { playFeedback } from "@/src/utils/feedback";
 
 const SWIPE_THRESHOLD = 50; // Minimum distance to trigger dismiss
 const SWIPE_VELOCITY_THRESHOLD = 0.3; // Minimum velocity to trigger dismiss
@@ -67,6 +68,7 @@ export function SecondaryMenu({ isOpen, menuType, onSelect, onDismiss }: Seconda
             (dy > SWIPE_THRESHOLD || (dy > 20 && vy > SWIPE_VELOCITY_THRESHOLD))
           ) {
             isDismissing.current = true;
+            playFeedback("tap");
             onDismiss();
             // Reset after animation completes
             setTimeout(() => {
@@ -87,12 +89,21 @@ export function SecondaryMenu({ isOpen, menuType, onSelect, onDismiss }: Seconda
       transparent
       animationType="fade"
       statusBarTranslucent
-      onRequestClose={onDismiss}
+      onRequestClose={() => {
+        playFeedback("tap");
+        onDismiss();
+      }}
     >
       {/* Full-screen blur overlay with tap and swipe to dismiss */}
       <BlurView intensity={40} tint="light" style={StyleSheet.absoluteFill}>
         <View style={styles.overlayTouchable} {...panResponder.panHandlers}>
-          <Pressable style={styles.overlayPressable} onPress={onDismiss} />
+          <Pressable
+            style={styles.overlayPressable}
+            onPress={() => {
+              playFeedback("tap");
+              onDismiss();
+            }}
+          />
         </View>
       </BlurView>
 

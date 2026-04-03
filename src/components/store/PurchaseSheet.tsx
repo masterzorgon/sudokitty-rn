@@ -6,6 +6,7 @@ import { typography, fontFamilies } from "../../theme/typography";
 import { spacing, borderRadius } from "../../theme";
 import { SkeuButton } from "../ui/Skeuomorphic";
 import { SheetWrapper, type SheetWrapperRef } from "../ui/Sheet/SheetWrapper";
+import { playFeedback } from "../../utils/feedback";
 import { usePlayerStreakStore } from "../../stores/playerStreakStore";
 import MochiPointIcon from "../../../assets/images/icons/mochi-point.svg";
 
@@ -121,7 +122,13 @@ export function PurchaseSheet({ config, onDismiss, loading }: PurchaseSheetProps
         )}
       </SkeuButton>
 
-      <Pressable onPress={() => sheetRef.current?.close()} style={styles.noThanks}>
+      <Pressable
+        onPress={() => {
+          playFeedback("tap");
+          sheetRef.current?.close();
+        }}
+        style={styles.noThanks}
+      >
         <Text style={[styles.noThanksText, { color: c.textSecondary }]}>No Thanks</Text>
       </Pressable>
     </SheetWrapper>

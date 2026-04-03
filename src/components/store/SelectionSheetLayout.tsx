@@ -6,6 +6,7 @@ import { fontFamilies } from "../../theme/typography";
 import { spacing, borderRadius } from "../../theme";
 import { SkeuButton } from "../ui/Skeuomorphic";
 import { SheetWrapper, type SheetWrapperRef } from "../ui/Sheet/SheetWrapper";
+import { playFeedback } from "../../utils/feedback";
 
 export interface SelectionSheetLayoutRef {
   close: (callback?: () => void) => void;
@@ -111,7 +112,13 @@ export const SelectionSheetLayout = forwardRef<SelectionSheetLayoutRef, Selectio
         </SkeuButton>
 
         {/* No thanks */}
-        <Pressable onPress={() => sheetRef.current?.close(onDismiss)} style={styles.noThanks}>
+        <Pressable
+          onPress={() => {
+            playFeedback("tap");
+            sheetRef.current?.close(onDismiss);
+          }}
+          style={styles.noThanks}
+        >
           <Text style={[styles.noThanksText, { color: c.textSecondary }]}>No Thanks</Text>
         </Pressable>
       </SheetWrapper>

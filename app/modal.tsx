@@ -7,6 +7,7 @@ import { colors, useColors } from "../src/theme/colors";
 import { typography } from "../src/theme/typography";
 import { spacing, borderRadius } from "../src/theme";
 import { Difficulty, DIFFICULTY_CONFIG, getMochisRangeLabel } from "../src/engine/types";
+import { playFeedback } from "../src/utils/feedback";
 
 interface DifficultyButtonProps {
   difficulty: Difficulty;
@@ -36,6 +37,7 @@ export default function ModalScreen() {
   const newGame = useGameStore((s) => s.newGame);
 
   const handleSelectDifficulty = (difficulty: Difficulty) => {
+    playFeedback("tap");
     newGame(difficulty);
     router.back();
   };

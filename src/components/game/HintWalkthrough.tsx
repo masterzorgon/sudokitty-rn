@@ -10,6 +10,7 @@ import { typography, fontFamilies } from "../../theme/typography";
 import { spacing, borderRadius } from "../../theme";
 import { LEVEL_TO_CATEGORY, CATEGORY_COLORS } from "../../data/techniqueMetadata";
 import type { TechniqueCategory } from "../../data/techniqueMetadata";
+import { playFeedback } from "../../utils/feedback";
 
 export const HintWalkthrough = memo(function HintWalkthrough() {
   const c = useColors();
@@ -40,7 +41,10 @@ export const HintWalkthrough = memo(function HintWalkthrough() {
     <View style={[styles.container, { backgroundColor: c.cream }]}>
       <View style={styles.headerRow}>
         <Pressable
-          onPress={cancelActiveHint}
+          onPress={() => {
+            playFeedback("tap");
+            cancelActiveHint();
+          }}
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel="Cancel hint"
@@ -59,7 +63,10 @@ export const HintWalkthrough = memo(function HintWalkthrough() {
 
       <View style={styles.navRow}>
         <Pressable
-          onPress={prevHintStep}
+          onPress={() => {
+            playFeedback("tap");
+            prevHintStep();
+          }}
           disabled={isFirst}
           style={[styles.iconBtn, isFirst && styles.iconBtnDisabled]}
           accessibilityRole="button"
@@ -82,7 +89,10 @@ export const HintWalkthrough = memo(function HintWalkthrough() {
 
         {isLast ? (
           <Pressable
-            onPress={applyActiveHint}
+            onPress={() => {
+              playFeedback("tap");
+              applyActiveHint();
+            }}
             style={styles.doneBtn}
             accessibilityRole="button"
             accessibilityLabel="Apply hint"
@@ -91,7 +101,10 @@ export const HintWalkthrough = memo(function HintWalkthrough() {
           </Pressable>
         ) : (
           <Pressable
-            onPress={nextHintStep}
+            onPress={() => {
+              playFeedback("tap");
+              nextHintStep();
+            }}
             style={styles.iconBtn}
             accessibilityRole="button"
             accessibilityLabel="Next hint step"

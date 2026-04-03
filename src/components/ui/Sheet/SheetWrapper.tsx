@@ -21,6 +21,7 @@ import Animated, {
 
 import { colors, useColors } from "../../../theme/colors";
 import { spacing, borderRadius } from "../../../theme";
+import { playFeedback } from "../../../utils/feedback";
 
 const DISMISS_DISTANCE = 120;
 const DISMISS_VELOCITY = 0.8;
@@ -94,6 +95,7 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(funct
         },
         onPanResponderRelease: (_, gs) => {
           if (gs.dy > DISMISS_DISTANCE || gs.vy > DISMISS_VELOCITY) {
+            playFeedback("tap");
             animateOut();
           } else {
             translateY.value = withTiming(0, { duration: 200 });
@@ -116,7 +118,11 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(funct
     opacity: overlayOpacity.value,
   }));
 
-  const handleTapOutside = dismissOnTapOutside ? () => animateOut() : undefined;
+  const handleTapOutside = useCallback(() => {
+    if (!dismissOnTapOutside) return;
+    playFeedback("tap");
+    animateOut();
+  }, [dismissOnTapOutside, animateOut]);
 
   const sheetContent = (
     <Animated.View
@@ -138,13 +144,19 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(funct
   const overlayInner = blurBackground ? (
     <Animated.View style={[StyleSheet.absoluteFill, overlayAnimatedStyle]}>
       <BlurView intensity={60} tint="dark" style={styles.overlay}>
-        <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+        <Pressable
+          style={styles.dismissArea}
+          onPress={dismissOnTapOutside ? handleTapOutside : undefined}
+        />
         {sheetContent}
       </BlurView>
     </Animated.View>
   ) : (
     <Animated.View style={[styles.overlay, styles.dimOverlay, overlayAnimatedStyle]}>
-      <Pressable style={styles.dismissArea} onPress={handleTapOutside} />
+      <Pressable
+        style={styles.dismissArea}
+        onPress={dismissOnTapOutside ? handleTapOutside : undefined}
+      />
       {sheetContent}
     </Animated.View>
   );
@@ -157,7 +169,15 @@ export const SheetWrapper = forwardRef<SheetWrapperRef, SheetWrapperProps>(funct
   }
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={() => animateOut()}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onRequestClose={() => {
+        playFeedback("tap");
+        animateOut();
+      }}
+    >
       {overlayInner}
     </Modal>
   );

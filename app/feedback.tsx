@@ -151,9 +151,18 @@ function Dropdown({ label, value, options, onSelect, disabled }: DropdownProps) 
         visible={isOpen}
         transparent
         animationType="fade"
-        onRequestClose={() => setIsOpen(false)}
+        onRequestClose={() => {
+          playFeedback("tap");
+          setIsOpen(false);
+        }}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setIsOpen(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {
+            playFeedback("tap");
+            setIsOpen(false);
+          }}
+        >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{label}</Text>
             <FlatList

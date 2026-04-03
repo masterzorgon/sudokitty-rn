@@ -91,6 +91,7 @@ export default function StoreScreen() {
 
   const handleToggleDemo = useCallback(
     async (track: BackingTrackDef) => {
+      playFeedback("tap");
       if (demoPlayingTrackId === track.id) {
         await stopDemo();
         setDemoPlayingTrackId(null);
