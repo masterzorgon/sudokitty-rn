@@ -39,8 +39,9 @@ import {
   restorePurchases,
 } from "../../src/lib/revenueCat";
 
-const RULES_URL = "https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/";
-const PRIVACY_URL = "https://example.com/privacy"; // TODO: Replace with actual privacy URL
+const RULES_URL = "https://sudokitty.com/rules";
+const PRIVACY_URL = "https://sudokitty.com/privacy";
+const TERMS_URL = "https://sudokitty.com/terms";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -264,6 +265,12 @@ export default function SettingsScreen() {
             label="Privacy preferences"
             onPress={() => navigate({ url: PRIVACY_URL, trackKey: "privacy" })}
             icon="shield"
+            isExternal
+          />
+          <SettingsLinkRow
+            label="Terms"
+            onPress={() => navigate({ url: TERMS_URL, trackKey: "terms" })}
+            icon="file-text"
             isExternal
           />
           <SettingsLinkRow
