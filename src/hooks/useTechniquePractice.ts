@@ -176,7 +176,6 @@ export function useTechniquePractice() {
         onSuccess(toPuzzleState(next));
         return;
       }
-      // No curated puzzles: avoid running the generator (it can hang for 5s+ for rare techniques)
       const curatedList = CURATED_PUZZLE_BANK[techniqueId];
       if (!curatedList || curatedList.length === 0) {
         onError();
@@ -221,16 +220,20 @@ export function useTechniquePractice() {
     );
   }, [loadPuzzleAsync, sequence]);
 
+  // Stable ref so the initial-load effect never re-fires due to generatePuzzle identity changes
+  const generatePuzzleRef = useRef(generatePuzzle);
+  generatePuzzleRef.current = generatePuzzle;
+
   // Initial load
   useEffect(() => {
     if (!isPremium && metadata && metadata.level >= 3) {
       setStatusOverride("locked");
     } else if (techniqueId && metadata?.hasSolver) {
-      generatePuzzle();
+      generatePuzzleRef.current();
     } else if (techniqueId && metadata && !metadata.hasSolver) {
       setStatusOverride("coming-soon");
     }
-  }, [techniqueId, isPremium, generatePuzzle, metadata]);
+  }, [techniqueId, isPremium, metadata]);
 
   // Load practice puzzle when entering practice phase
   useEffect(() => {
