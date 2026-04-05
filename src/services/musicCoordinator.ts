@@ -83,17 +83,17 @@ export function sync(inputs: MusicInputs): void {
 export function resyncAfterAudioReady(): void {
   if (disposed) return;
   if (!lastInputs) return;
-  const targetMode = deriveMode(lastInputs);
-  if (targetMode !== "playing") return;
   if (!audioService.isLoaded()) return;
 
   void (async () => {
+    const targetMode = deriveMode(lastInputs!);
+    if (targetMode !== "playing") return;
+
     const playing = await audioService.isPlaying();
     if (playing) return;
 
-    if (currentMode === "playing") {
-      currentMode = "silent";
-    }
+    // Force re-derive: reset so sync() sees a mode change
+    currentMode = "silent";
     sync(lastInputs!);
   })();
 }

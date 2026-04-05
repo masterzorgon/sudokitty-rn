@@ -120,13 +120,7 @@ These are the main theories that matched both **code structure** and **native st
 
 ---
 
-## 5. Instrumentation (debug sessions)
-
-During investigation, **HTTP ingest** logs (debug session id **`337cb5`**) were added to trace burst start/finish and related state. **These have been removed** from production code after stability was confirmed.
-
----
-
-## 5.1 Sprite rendering (stable implementation)
+## 5. Sprite rendering (stable implementation)
 
 The mochi character uses **`assets/images/icons/mochi-point-sprite.png`** as a normal React Native **`Image`** with **`require()`**, positioned each frame from the **same RAF + JS particle state** used for the earlier accent dots. **No** Skia `Picture` / `useImage`, **no** Reanimated `useFrameCallback` for the burst—matching the journal’s conclusion that those stacks were the crash source, not “using a PNG” per se.
 

@@ -94,6 +94,7 @@ export async function playSfx(id: SfxId, options?: { force?: boolean }): Promise
   const sound = sounds[id];
   if (!sound) return;
   try {
+    await sound.setVolumeAsync(SFX_VOLUME);
     await sound.setPositionAsync(0);
     await sound.playAsync();
   } catch {

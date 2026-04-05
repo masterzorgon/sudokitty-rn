@@ -60,6 +60,7 @@ export default function RootLayout() {
       getRandomWelcomeMessage().then((msg) => {
         preloadedWelcomeMessage = msg;
       }),
+      loadSfx(),
     ]).then(() => setDataReady(true));
   }, []);
 
@@ -82,10 +83,7 @@ function RootLayoutNav() {
   const c = useColors();
   const lastPrefetchRef = useRef<number>(0);
 
-  /** Preload SFX app-wide so store / bursts have mochi-arrival without opening game first. */
-  useEffect(() => {
-    void loadSfx();
-  }, []);
+  /** SFX preloaded in RootLayout Promise.all (splash-blocking). */
 
   useEffect(() => {
     useAppRatedStore.getState().setRated(false);
