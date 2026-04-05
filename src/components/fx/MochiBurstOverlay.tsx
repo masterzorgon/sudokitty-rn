@@ -15,15 +15,30 @@ const MOCHI_BURST_SPRITE = require("../../../assets/images/icons/mochi-point-spr
 const MOCHI_SPRITE_ASPECT = 44 / 51;
 
 /** Must exceed max(delay + activeDuration) or the sim ends in a timeout while particles are still mid-flight. */
-const MAX_BURST_MS = 3200;
-const DT_CAP_MS = 33;
-const GRAVITY = 280;
-const SEEK_STRENGTH = 620;
-const DEAD_DIST_PX = 8;
-const FADE_START_DIST = 20;
+const MAX_BURST_MS = 10000;
+const DT_CAP_MS = 100;
+/** Global motion scale (initial velocity multiplier; paired with GRAVITY / SEEK). */
+const SPEED_SCALE = 1;
+const GRAVITY = 599;
+const SEEK_STRENGTH = 800;
+/** Extra delay per particle index so mochis reach the pill in sequence, not one blob. */
+const STAGGER_DELAY_S = 0.08;
+const DEAD_DIST_PX = 20;
+const FADE_START_DIST = 100;
+/** Visible life after delay — fade from 0 → 1 over this many seconds of simulation time. */
+const OPACITY_EASE_IN_S = 0.12;
+/** Spawn cluster width (px) around biased center. */
+const SPAWN_X_JITTER_PX = 110;
+/** Pull spawn cluster horizontally toward pill. */
+const SPAWN_X_PULL_K = 0.093;
+/** Initial horizontal velocity: bias toward target + noise (before SPEED_SCALE). */
+const INITIAL_XVEL_BIAS_K = 0.11;
+/** Random lateral noise on top of bias (before SPEED_SCALE). */
+const INITIAL_X_NOISE_PX = 171;
+const RENDER_EVERY_N_FRAMES = 2;
 /** Base count from pack size, clamped; then −30% (rounded). */
 const PARTICLE_COUNT = (amount: number) =>
-  Math.max(1, Math.round(Math.min(Math.max(Math.floor(amount / 25), 12), 40) * 0.5));
+  Math.max(1, Math.round(Math.min(Math.max(Math.floor(amount / 25), 12), 40) * 0.6));
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -33,8 +48,10 @@ function randomRange(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
-function easeInCubic(t: number): number {
-  return t * t * t;
+/** Smoothstep 0..1 for seek blend (no flat ballistic phase). */
+function smoothstep01(t: number): number {
+  const x = clamp(t, 0, 1);
+  return x * x * (3 - 2 * x);
 }
 
 export interface MochiParticleState {
@@ -50,6 +67,8 @@ export interface MochiParticleState {
   activeDuration: number;
   dead: boolean;
   hasTarget: boolean;
+  /** Final alpha for Image (includes ease-in; physics uses `opacity`). */
+  displayOpacity: number;
 }
 
 function buildInitialMochis(
@@ -64,30 +83,40 @@ function buildInitialMochis(
   const ty = targetCenter?.y ?? 52;
 
   for (let i = 0; i < count; i++) {
-    const spawnX = sw * 0.5 + randomRange(-95, 95);
+    const midX = sw * 0.5;
+    const spawnX =
+      midX + (tx - midX) * SPAWN_X_PULL_K + randomRange(-SPAWN_X_JITTER_PX, SPAWN_X_JITTER_PX);
     const spawnY = sh - randomRange(32, 64);
-    const delay = randomRange(0, 0.2) + (i % 4) * 0.035;
+    const delay = i * STAGGER_DELAY_S + randomRange(0, 0.028);
     const dx = tx - spawnX;
     const dy = ty - spawnY;
     const dist = Math.sqrt(dx * dx + dy * dy);
     // Estimate time-to-target from initial distance. Do not cap too low: long bottom→header paths need >1.2s
     // or particles hit pe > activeDuration and vanish before reaching the pill.
-    const travelTime = hasTarget ? clamp(dist / 380, 0.52, 2.45) : 0.82 + randomRange(0, 0.12);
-    const activeDuration = travelTime + randomRange(0, 0.14);
+    // Half-speed motion needs ~2× lifetime so particles can still reach the pill.
+    const travelTime = hasTarget ? clamp(dist / 315, 0.58, 2.55) * 2 : 0.82 + randomRange(0, 0.12);
+    const activeDuration = travelTime + randomRange(0, 0.16);
+
+    const toTargetX = tx - spawnX;
+    const xVel =
+      (toTargetX * INITIAL_XVEL_BIAS_K + randomRange(-INITIAL_X_NOISE_PX, INITIAL_X_NOISE_PX)) *
+      SPEED_SCALE;
+    const yVel = randomRange(-440, -300) * SPEED_SCALE;
 
     particles.push({
       spawnX,
       spawnY,
       x: spawnX,
       y: spawnY,
-      xVel: randomRange(-150, 150),
-      yVel: randomRange(-540, -340),
+      xVel,
+      yVel,
       scale: 1,
       opacity: 1,
       delay,
       activeDuration,
       dead: false,
       hasTarget,
+      displayOpacity: 0,
     });
   }
   return particles;
@@ -108,23 +137,20 @@ function simulateParticles(
     if (tBurst < p.delay) {
       p.x = p.spawnX;
       p.y = p.spawnY;
+      p.displayOpacity = 0;
       continue;
     }
 
     const pe = tBurst - p.delay;
     if (pe > p.activeDuration) {
       p.dead = true;
+      p.displayOpacity = 0;
       continue;
     }
 
     const tNorm = p.activeDuration > 0.001 ? pe / p.activeDuration : 1;
-    let wBlend = 0;
-    if (tNorm >= 0.3 && tNorm <= 0.7) {
-      const u = (tNorm - 0.3) / 0.4;
-      wBlend = easeInCubic(u);
-    } else if (tNorm > 0.7) {
-      wBlend = 1;
-    }
+    /** Seek ramps a bit later so spread reads wider before coalescing. */
+    const wBlend = smoothstep01(clamp(tNorm / 0.66, 0, 1));
 
     const tx = target?.x ?? sw * 0.88;
     const ty = target?.y ?? 52;
@@ -162,7 +188,12 @@ function simulateParticles(
     if (canSeek && dist < DEAD_DIST_PX) {
       p.dead = true;
       p.opacity = 0;
+      p.displayOpacity = 0;
+      continue;
     }
+
+    const easeIn = clamp(pe / OPACITY_EASE_IN_S, 0, 1);
+    p.displayOpacity = p.opacity * easeIn;
   }
 }
 
@@ -243,6 +274,7 @@ export function MochiBurstOverlay() {
     lastTsRef.current = null;
     simActiveRef.current = true;
 
+    let renderTick = 0;
     const tick = (ts: number) => {
       if (!simActiveRef.current) return;
 
@@ -260,7 +292,10 @@ export function MochiBurstOverlay() {
 
       simulateParticles(particlesRef.current, tBurst, sw, target, dt);
 
-      setRenderParticles(shallowSnapshot(particlesRef.current));
+      renderTick++;
+      if (renderTick === 1 || renderTick % RENDER_EVERY_N_FRAMES === 0) {
+        setRenderParticles(shallowSnapshot(particlesRef.current));
+      }
 
       const tMs = tBurst * 1000;
       const parts = particlesRef.current;
@@ -297,7 +332,7 @@ export function MochiBurstOverlay() {
   return (
     <View style={styles.overlay} pointerEvents="none">
       {renderParticles.map((p, i) => {
-        if (p.opacity <= 0 || (p.dead && p.opacity <= 0)) return null;
+        if (p.dead || p.displayOpacity <= 0) return null;
         const w = BASE_SPRITE_WIDTH_PX * p.scale;
         const h = w * MOCHI_SPRITE_ASPECT;
         return (
@@ -310,7 +345,7 @@ export function MochiBurstOverlay() {
               {
                 width: w,
                 height: h,
-                opacity: p.opacity,
+                opacity: p.displayOpacity,
                 transform: [{ translateX: p.x - w / 2 }, { translateY: p.y - h / 2 }],
               },
             ]}
