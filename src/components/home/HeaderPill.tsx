@@ -18,6 +18,7 @@ import MochiPointIcon from "../../../assets/images/icons/mochi-point.svg";
 import { setOnBurstComplete, setOnMochiArrival, useFXStore } from "../../stores/fxStore";
 import { PARTICLE_COUNT } from "../../constants/mochiBurst";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
+import { RollingNumber } from "../ui/RollingNumber";
 
 const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
@@ -206,9 +207,15 @@ function MochiHeaderPillInner({ value, onPress }: { value: number; onPress: () =
         <View style={[styles.iconCircle, iconCircleStyle]}>
           {config.renderIcon(textColor, ICON_SIZE)}
         </View>
-        <Animated.Text style={[styles.countText, { color: textColor }, countAnimatedStyle]}>
-          {displayedMochis.toLocaleString()}
-        </Animated.Text>
+        <Animated.View style={countAnimatedStyle}>
+          <RollingNumber
+            value={displayedMochis}
+            fontSize={FONT_SIZE}
+            color={textColor}
+            textStyle={{ fontFamily: fontFamilies.bold }}
+            digitsAlign="end"
+          />
+        </Animated.View>
       </SkeuButton>
     </View>
   );
