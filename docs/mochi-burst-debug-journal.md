@@ -122,36 +122,34 @@ These are the main theories that matched both **code structure** and **native st
 
 ## 5. Instrumentation (debug sessions)
 
-During investigation, **HTTP ingest** logs (debug session id **`337cb5`**) were added to trace:
+During investigation, **HTTP ingest** logs (debug session id **`337cb5`**) were added to trace burst start/finish and related state. **These have been removed** from production code after stability was confirmed.
 
-- Burst **start** (amount, particle count, viewport, whether target layout exists).
-- Burst **finish** (elapsed time, reason: particles done vs timeout).
-- **Reduced motion** skip.
-- Marker for **“RAF + plain JS”** path vs earlier Reanimated paths.
+---
 
-These should be **removed** after crashes are **gone in practice** and the team agrees—do not treat them as permanent product telemetry.
+## 5.1 Sprite rendering (stable implementation)
+
+The mochi character uses **`assets/images/icons/mochi-point-sprite.png`** as a normal React Native **`Image`** with **`require()`**, positioned each frame from the **same RAF + JS particle state** used for the earlier accent dots. **No** Skia `Picture` / `useImage`, **no** Reanimated `useFrameCallback` for the burst—matching the journal’s conclusion that those stacks were the crash source, not “using a PNG” per se.
 
 ---
 
 ## 6. Related files (quick reference)
 
-| File                                          | Notes                                                 |
-| --------------------------------------------- | ----------------------------------------------------- |
-| `src/components/fx/MochiBurstOverlay.tsx`     | Burst overlay, simulation, rendering                  |
-| `src/stores/fxStore.ts`                       | Burst trigger + target layout                         |
-| `src/components/home/HeaderPill.tsx`          | `measureInWindow` → store                             |
-| `app/_layout.tsx`                             | Overlay mount point                                   |
-| `app/(tabs)/store.tsx`                        | Trigger on purchase success                           |
-| `src/components/store/MochiPurchaseSheet.tsx` | Trigger on sheet purchase success                     |
-| `assets/images/icons/mochi-point-sprite.png`  | Sprite asset (not required for stable dots-only path) |
+| File                                          | Notes                                             |
+| --------------------------------------------- | ------------------------------------------------- |
+| `src/components/fx/MochiBurstOverlay.tsx`     | Burst overlay, simulation, rendering              |
+| `src/stores/fxStore.ts`                       | Burst trigger + target layout                     |
+| `src/components/home/HeaderPill.tsx`          | `measureInWindow` → store                         |
+| `app/_layout.tsx`                             | Overlay mount point                               |
+| `app/(tabs)/store.tsx`                        | Trigger on purchase success                       |
+| `src/components/store/MochiPurchaseSheet.tsx` | Trigger on sheet purchase success                 |
+| `assets/images/icons/mochi-point-sprite.png`  | Burst particle sprite (`Image` + RAF positioning) |
 
 ---
 
 ## 7. Follow-ups (non-blocking)
 
-1. **Visuals:** Restore **mochi sprite** using an approach that does **not** reintroduce per-frame Reanimated UI work or fragile Skia picture/image patterns—e.g. static `Image` in a `View` positioned by **JS-driven** `left`/`top`/`opacity` from the RAF loop (same state as dots), or a single Skia layer only if proven stable on device.
-2. **Performance:** If `setState` every frame on low-end devices is hot, throttle snapshots (e.g. 30 FPS) or batch particles into fewer parent views—still without `useFrameCallback` unless Reanimated usage is proven safe in isolation.
-3. **Cleanup:** Remove debug `fetch` instrumentation after sign-off.
+1. **Performance:** If `setState` every frame on low-end devices is hot, throttle snapshots (e.g. 30 FPS) or batch particles into fewer parent views—still without `useFrameCallback` unless Reanimated usage is proven safe in isolation.
+2. **Visual polish:** Tint overlays, rotation wobble, or alternate sprites remain optional—keep them on the same RAF + `Image` / `View` pattern above.
 
 ---
 

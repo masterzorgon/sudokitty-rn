@@ -1,10 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { StyleSheet, useWindowDimensions, View } from "react-native";
+import { Image, StyleSheet, useWindowDimensions, View } from "react-native";
 
-import { useColors } from "../../theme/colors";
 import { useFXStore } from "../../stores/fxStore";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { playFeedback } from "../../utils/feedback";
+
+/**
+ * Sprite burst (safe path per mochi-burst-debug-journal.md): RN `Image` + `require()`, positions/opacity from
+ * the same RAF/JS state as before. Do not drive this asset through Skia Picture/useImage or Reanimated
+ * useFrameCallback — those paths crashed in native stacks.
+ */
+const MOCHI_BURST_SPRITE = require("../../../assets/images/icons/mochi-point-sprite.png");
+/** Source art 51×44; keep aspect when scaling. */
+const MOCHI_SPRITE_ASPECT = 44 / 51;
 
 /** Must exceed max(delay + activeDuration) or the sim ends in a timeout while particles are still mid-flight. */
 const MAX_BURST_MS = 3200;
@@ -162,10 +170,10 @@ function shallowSnapshot(parts: MochiParticleState[]): MochiParticleState[] {
   return parts.map((p) => ({ ...p }));
 }
 
-const BASE_DOT_PX = 20;
+/** Base width for sprite; height follows MOCHI_SPRITE_ASPECT. */
+const BASE_SPRITE_WIDTH_PX = 28;
 
 export function MochiBurstOverlay() {
-  const c = useColors();
   const { width, height } = useWindowDimensions();
   const reducedMotion = useReducedMotion();
 
@@ -286,25 +294,24 @@ export function MochiBurstOverlay() {
     return null;
   }
 
-  const accentColor = (c.accent as string) ?? "#c97b63";
-
   return (
     <View style={styles.overlay} pointerEvents="none">
       {renderParticles.map((p, i) => {
         if (p.opacity <= 0 || (p.dead && p.opacity <= 0)) return null;
-        const size = BASE_DOT_PX * p.scale;
+        const w = BASE_SPRITE_WIDTH_PX * p.scale;
+        const h = w * MOCHI_SPRITE_ASPECT;
         return (
-          <View
+          <Image
             key={i}
+            source={MOCHI_BURST_SPRITE}
+            resizeMode="contain"
             style={[
-              styles.dot,
+              styles.particle,
               {
-                width: size,
-                height: size,
-                borderRadius: size / 2,
+                width: w,
+                height: h,
                 opacity: p.opacity,
-                backgroundColor: accentColor,
-                transform: [{ translateX: p.x - size / 2 }, { translateY: p.y - size / 2 }],
+                transform: [{ translateX: p.x - w / 2 }, { translateY: p.y - h / 2 }],
               },
             ]}
           />
@@ -319,7 +326,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     zIndex: 100,
   },
-  dot: {
+  particle: {
     position: "absolute",
     left: 0,
     top: 0,
