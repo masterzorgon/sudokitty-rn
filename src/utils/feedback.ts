@@ -17,7 +17,8 @@ export type FeedbackId =
   | "gameLost"
   | "erase"
   | "notesToggle"
-  | "hint";
+  | "hint"
+  | "mochiArrival";
 
 const HAPTIC_MAP: Record<FeedbackId, HapticPattern | null> = {
   selection: "selection",
@@ -33,6 +34,7 @@ const HAPTIC_MAP: Record<FeedbackId, HapticPattern | null> = {
   erase: "erase",
   notesToggle: "tap",
   hint: "tap",
+  mochiArrival: "tap",
 };
 
 const SFX_MAP: Record<FeedbackId, SfxId | null> = {
@@ -49,6 +51,7 @@ const SFX_MAP: Record<FeedbackId, SfxId | null> = {
   erase: "erase",
   notesToggle: "notesToggle",
   hint: "hint",
+  mochiArrival: "mochiArrival",
 };
 
 export interface PlayFeedbackOptions {

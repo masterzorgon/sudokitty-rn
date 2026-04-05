@@ -1,5 +1,25 @@
 import { create } from "zustand";
 
+/** High-frequency arrival signals — not Zustand state (avoids re-renders per hit). */
+let _onMochiArrival: (() => void) | null = null;
+let _onBurstComplete: (() => void) | null = null;
+
+export function setOnMochiArrival(cb: (() => void) | null): void {
+  _onMochiArrival = cb;
+}
+
+export function fireMochiArrival(): void {
+  _onMochiArrival?.();
+}
+
+export function setOnBurstComplete(cb: (() => void) | null): void {
+  _onBurstComplete = cb;
+}
+
+export function fireBurstComplete(): void {
+  _onBurstComplete?.();
+}
+
 export interface MochiTargetLayout {
   x: number;
   y: number;

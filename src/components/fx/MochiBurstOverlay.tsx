@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Image, StyleSheet, useWindowDimensions, View } from "react-native";
 
-import { useFXStore } from "../../stores/fxStore";
+import { PARTICLE_COUNT } from "../../constants/mochiBurst";
+import { fireBurstComplete, fireMochiArrival, useFXStore } from "../../stores/fxStore";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { playFeedback } from "../../utils/feedback";
 
@@ -36,9 +37,6 @@ const INITIAL_XVEL_BIAS_K = 0.11;
 /** Random lateral noise on top of bias (before SPEED_SCALE). */
 const INITIAL_X_NOISE_PX = 171;
 const RENDER_EVERY_N_FRAMES = 2;
-/** Base count from pack size, clamped; then −30% (rounded). */
-const PARTICLE_COUNT = (amount: number) =>
-  Math.max(1, Math.round(Math.min(Math.max(Math.floor(amount / 25), 12), 40) * 0.6));
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -129,6 +127,7 @@ function simulateParticles(
   sw: number,
   target: { x: number; y: number } | null,
   dt: number,
+  onArrival?: (index: number) => void,
 ): void {
   for (let i = 0; i < parts.length; i++) {
     const p = parts[i];
@@ -142,7 +141,21 @@ function simulateParticles(
     }
 
     const pe = tBurst - p.delay;
+
+    const tx = target?.x ?? sw * 0.88;
+    const ty = target?.y ?? 52;
+    const canSeek = target !== null;
+
+    let dx = tx - p.x;
+    let dy = ty - p.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < 0.001) dist = 0.001;
+
     if (pe > p.activeDuration) {
+      /** Safety net: if particle expired near the target, count it as arrived. */
+      if (canSeek && dist < FADE_START_DIST) {
+        onArrival?.(i);
+      }
       p.dead = true;
       p.displayOpacity = 0;
       continue;
@@ -151,15 +164,6 @@ function simulateParticles(
     const tNorm = p.activeDuration > 0.001 ? pe / p.activeDuration : 1;
     /** Seek ramps a bit later so spread reads wider before coalescing. */
     const wBlend = smoothstep01(clamp(tNorm / 0.66, 0, 1));
-
-    const tx = target?.x ?? sw * 0.88;
-    const ty = target?.y ?? 52;
-    const canSeek = p.hasTarget && target !== null;
-
-    let dx = tx - p.x;
-    let dy = ty - p.y;
-    let dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < 0.001) dist = 0.001;
 
     const bvX = p.xVel;
     const bvY = p.yVel + GRAVITY * dt;
@@ -186,6 +190,7 @@ function simulateParticles(
     }
 
     if (canSeek && dist < DEAD_DIST_PX) {
+      onArrival?.(i);
       p.dead = true;
       p.opacity = 0;
       p.displayOpacity = 0;
@@ -249,14 +254,15 @@ export function MochiBurstOverlay() {
   const finishAndNotify = useCallback(() => {
     cancelSim();
     setRenderParticles([]);
-    playFeedback("unitComplete");
-  }, [cancelSim]);
+    fireBurstComplete();
+  }, [cancelSim, burstId]);
 
   useEffect(() => {
     if (burstId === 0) return;
     if (reducedMotion) {
       cancelSim();
       setRenderParticles([]);
+      playFeedback("unitComplete");
       return;
     }
 
@@ -290,7 +296,19 @@ export function MochiBurstOverlay() {
       const { w: sw } = screenRef.current;
       const target = targetRef.current;
 
-      simulateParticles(particlesRef.current, tBurst, sw, target, dt);
+      /** Particles built before `targetLayout` exists use short `activeDuration`; extend once a real target is known. */
+      if (target) {
+        for (const p of particlesRef.current) {
+          if (!p.hasTarget) {
+            p.activeDuration = Math.max(p.activeDuration, 2.8);
+          }
+        }
+      }
+
+      simulateParticles(particlesRef.current, tBurst, sw, target, dt, () => {
+        playFeedback("mochiArrival");
+        fireMochiArrival();
+      });
 
       renderTick++;
       if (renderTick === 1 || renderTick % RENDER_EVERY_N_FRAMES === 0) {

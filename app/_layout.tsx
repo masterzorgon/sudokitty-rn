@@ -24,6 +24,7 @@ import { useAppRatedStore } from "../src/stores/appRatedStore";
 import { runEconomyV2Migration } from "../src/services/economyMigration";
 import { getRandomWelcomeMessage } from "../src/constants/welcomeMessages";
 import { MochiBurstOverlay } from "../src/components/fx/MochiBurstOverlay";
+import { loadSfx } from "../src/services/sfxService";
 
 export let preloadedWelcomeMessage = "";
 
@@ -80,6 +81,11 @@ const PREFETCH_COOLDOWN_MS = 60_000; // 60-second debounce for foreground prefet
 function RootLayoutNav() {
   const c = useColors();
   const lastPrefetchRef = useRef<number>(0);
+
+  /** Preload SFX app-wide so store / bursts have mochi-arrival without opening game first. */
+  useEffect(() => {
+    void loadSfx();
+  }, []);
 
   useEffect(() => {
     useAppRatedStore.getState().setRated(false);

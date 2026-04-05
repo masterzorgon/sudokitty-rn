@@ -17,7 +17,8 @@ export type SfxId =
   | "tap"
   | "erase"
   | "notesToggle"
-  | "hint";
+  | "hint"
+  | "mochiArrival";
 
 const SFX_ASSETS: Record<SfxId, number> = {
   correct: require("../../assets/audio/sfx/correct.m4a"),
@@ -29,6 +30,8 @@ const SFX_ASSETS: Record<SfxId, number> = {
   erase: require("../../assets/audio/sfx/erase.m4a"),
   notesToggle: require("../../assets/audio/sfx/notes-toggle.m4a"),
   hint: require("../../assets/audio/sfx/hint.m4a"),
+  /** Single Sound instance: rapid arrivals restart playback (staccato / drumroll). Keep clip very short vs STAGGER_DELAY_S or add a pool later. */
+  mochiArrival: require("../../assets/audio/sfx/mochi-arrival.mp3"),
 };
 
 const SFX_VOLUME = 0.7;
