@@ -1,19 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet, type ViewStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useColors, type ColorPalette } from '../../theme/colors';
-import { fontFamilies } from '../../theme/typography';
-import { spacing, borderRadius } from '../../theme';
-import type { CustomSkeuColors } from '../ui/Skeuomorphic';
-import { SkeuButton } from '../ui/Skeuomorphic';
-import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
+import React, { useCallback, useEffect, useRef } from "react";
+import { View, Text, StyleSheet, type ViewStyle } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useColors, type ColorPalette } from "../../theme/colors";
+import { fontFamilies } from "../../theme/typography";
+import { spacing, borderRadius } from "../../theme";
+import type { CustomSkeuColors } from "../ui/Skeuomorphic";
+import { SkeuButton } from "../ui/Skeuomorphic";
+import MochiPointIcon from "../../../assets/images/icons/mochi-point.svg";
+import { useFXStore } from "../../stores/fxStore";
 
 const PILL_HEIGHT = 34;
 const ICON_SIZE = 18;
 const ICON_CIRCLE_SIZE = 26;
 const FONT_SIZE = 14;
 
-export type HeaderPillType = 'mochis' | 'freezes' | 'xp' | 'level';
+export type HeaderPillType = "mochis" | "freezes" | "xp" | "level";
 
 interface PillConfig {
   colorKeys: { border: keyof ColorPalette; text: keyof ColorPalette };
@@ -23,23 +24,23 @@ interface PillConfig {
 
 const PILL_CONFIGS: Record<HeaderPillType, PillConfig> = {
   freezes: {
-    colorKeys: { border: 'freezePillBorder', text: 'freezePillText' },
-    label: 'Streak Freezes',
+    colorKeys: { border: "freezePillBorder", text: "freezePillText" },
+    label: "Streak Freezes",
     renderIcon: (color, size) => <Ionicons name="snow" size={size} color={color} />,
   },
   xp: {
-    colorKeys: { border: 'xpPillBorder', text: 'xpPillText' },
-    label: 'XP',
+    colorKeys: { border: "xpPillBorder", text: "xpPillText" },
+    label: "XP",
     renderIcon: (color, size) => <Ionicons name="flash" size={size} color={color} />,
   },
   level: {
-    colorKeys: { border: 'levelPillBorder', text: 'levelPillText' },
-    label: 'Level',
+    colorKeys: { border: "levelPillBorder", text: "levelPillText" },
+    label: "Level",
     renderIcon: (color, size) => <Ionicons name="trophy" size={size} color={color} />,
   },
   mochis: {
-    colorKeys: { border: 'mochiPillBorder', text: 'mochiPillText' },
-    label: 'Mochis',
+    colorKeys: { border: "mochiPillBorder", text: "mochiPillText" },
+    label: "Mochis",
     renderIcon: (_, size) => <MochiPointIcon width={size} height={size} />,
   },
 };
@@ -52,6 +53,7 @@ export interface HeaderPillProps {
 
 export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
   const c = useColors();
+  const mochiWrapRef = useRef<View>(null);
   const config = PILL_CONFIGS[type];
   const borderColor = c[config.colorKeys.border] as string;
   const textColor = c[config.colorKeys.text] as string;
@@ -60,21 +62,21 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
     width: ICON_CIRCLE_SIZE,
     height: ICON_CIRCLE_SIZE,
     borderRadius: ICON_CIRCLE_SIZE / 2,
-    backgroundColor: borderColor + '50',
+    backgroundColor: borderColor + "50",
   };
 
   const skeuColors: CustomSkeuColors = {
     gradient: [c.cream, c.cream, c.cream] as readonly [string, string, string],
-    edge: borderColor + '99',
-    borderLight: 'rgba(255, 255, 255, 0.4)',
-    borderDark: borderColor + '99',
+    edge: borderColor + "99",
+    borderLight: "rgba(255, 255, 255, 0.4)",
+    borderDark: borderColor + "99",
     textColor,
   };
 
   const faceStyle: ViewStyle = {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: spacing.sm,
     paddingVertical: 4,
     paddingLeft: 4,
@@ -82,7 +84,41 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
     height: PILL_HEIGHT,
   };
 
-  return (
+  useEffect(() => {
+    if (type !== "mochis") return;
+    return () => {
+      useFXStore.getState().setTargetLayout(null);
+    };
+  }, [type]);
+
+  const handleMochiLayout = useCallback(() => {
+    if (type !== "mochis") return;
+    mochiWrapRef.current?.measureInWindow((x, y, w, h) => {
+      useFXStore.getState().setTargetLayout({ x, y, width: w, height: h });
+      // #region agent log
+      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "337cb5" },
+        body: JSON.stringify({
+          sessionId: "337cb5",
+          runId: "mochi-burst-monitor",
+          hypothesisId: "H2_measure",
+          location: "HeaderPill.tsx:measureInWindow",
+          message: "Mochi pill measured in window",
+          data: {
+            x: Math.round(x),
+            y: Math.round(y),
+            w: Math.round(w),
+            h: Math.round(h),
+          },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
+    });
+  }, [type]);
+
+  const buttonEl = (
     <SkeuButton
       onPress={onPress}
       customColors={skeuColors}
@@ -97,16 +133,31 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
       <Text style={[styles.countText, { color: textColor }]}>{value}</Text>
     </SkeuButton>
   );
+
+  if (type === "mochis") {
+    return (
+      <View
+        ref={mochiWrapRef}
+        onLayout={handleMochiLayout}
+        collapsable={false}
+        style={styles.container}
+      >
+        {buttonEl}
+      </View>
+    );
+  }
+
+  return buttonEl;
 }
 
 const styles = StyleSheet.create({
   container: {
-    overflow: 'visible',
+    overflow: "visible",
     borderRadius: borderRadius.full,
   },
   iconCircle: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   countText: {
     fontFamily: fontFamilies.bold,

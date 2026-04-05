@@ -37,6 +37,7 @@ import { StoreItemRow } from "../../src/components/ui/StoreItemRow";
 import { MusicTrackCard } from "../../src/components/ui/MusicTrackCard";
 import { MochiPricePill } from "../../src/components/ui/MochiPricePill";
 import { PurchaseSheet, type PurchaseSheetConfig } from "../../src/components/store/PurchaseSheet";
+import { useFXStore } from "../../src/stores/fxStore";
 const MochiMusicImg = require("../../assets/images/mochi/mochi-music.png");
 const MochiFreezeImg = require("../../assets/images/mochi/mochi-freeze.png");
 
@@ -117,10 +118,8 @@ export default function StoreScreen() {
       try {
         const result = await purchaseMochiPack(product);
         if (mountedRef.current && result.success && result.amount) {
-          Alert.alert(
-            "Purchase Complete!",
-            `You received ${result.amount.toLocaleString()} mochis!`,
-          );
+          playFeedback("tapHeavy");
+          useFXStore.getState().triggerMochiBurst(result.amount);
         }
       } catch {
         if (mountedRef.current) {

@@ -23,6 +23,7 @@ import { preloadInterstitial, preloadRewarded } from "../src/services/adService"
 import { useAppRatedStore } from "../src/stores/appRatedStore";
 import { runEconomyV2Migration } from "../src/services/economyMigration";
 import { getRandomWelcomeMessage } from "../src/constants/welcomeMessages";
+import { MochiBurstOverlay } from "../src/components/fx/MochiBurstOverlay";
 
 export let preloadedWelcomeMessage = "";
 
@@ -185,6 +186,7 @@ function RootLayoutNav() {
             }}
           />
         </Stack>
+        <MochiBurstOverlay />
       </View>
     </SafeAreaProvider>
   );

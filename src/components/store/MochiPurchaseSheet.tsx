@@ -1,25 +1,27 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, ActivityIndicator, Alert, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
-import { Ionicons } from '@expo/vector-icons';
-import type { PurchasesStoreProduct } from 'react-native-purchases';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, Text, ActivityIndicator, Alert, StyleSheet } from "react-native";
+import { Image } from "expo-image";
+import { Ionicons } from "@expo/vector-icons";
+import type { PurchasesStoreProduct } from "react-native-purchases";
 
-import { useColors } from '../../theme/colors';
-import { StoreItemRow } from '../ui/StoreItemRow';
-import { usePlayerStreakStore } from '../../stores/playerStreakStore';
-import { getMochiPackProducts, purchaseMochiPack } from '../../lib/revenueCat';
+import { useColors } from "../../theme/colors";
+import { StoreItemRow } from "../ui/StoreItemRow";
+import { usePlayerStreakStore } from "../../stores/playerStreakStore";
+import { getMochiPackProducts, purchaseMochiPack } from "../../lib/revenueCat";
 import {
   MOCHI_PACK_PRODUCT_IDS,
   MOCHI_PACK_AMOUNTS,
   type MochiPackProductId,
-} from '../../constants/economy';
-import { MOCHI_PACK_IMAGE_SOURCES } from '../../constants/mochiPackImages';
-import MochiPointIcon from '../../../assets/images/icons/mochi-point.svg';
+} from "../../constants/economy";
+import { MOCHI_PACK_IMAGE_SOURCES } from "../../constants/mochiPackImages";
+import MochiPointIcon from "../../../assets/images/icons/mochi-point.svg";
 import {
   SelectionSheetLayout,
   selectionSheetStyles as ss,
   type SelectionSheetLayoutRef,
-} from './SelectionSheetLayout';
+} from "./SelectionSheetLayout";
+import { playFeedback } from "../../utils/feedback";
+import { useFXStore } from "../../stores/fxStore";
 
 export interface MochiPurchaseSheetProps {
   visible: boolean;
@@ -61,27 +63,35 @@ export function MochiPurchaseSheet({ visible, onDismiss }: MochiPurchaseSheetPro
     try {
       const result = await purchaseMochiPack(product);
       if (result.success && result.amount) {
+        playFeedback("tapHeavy");
+        useFXStore.getState().triggerMochiBurst(result.amount);
         layoutRef.current?.close(() => {
-          Alert.alert('Purchase Complete!', `You received ${result.amount!.toLocaleString()} mochis!`);
           handleDismiss();
         });
       }
     } catch {
-      Alert.alert('Purchase Failed', 'Something went wrong. Please try again.');
+      Alert.alert("Purchase Failed", "Something went wrong. Please try again.");
     } finally {
       setPurchasing(false);
     }
   }, [selectedPackId, products, handleDismiss]);
 
   const selectedAmount = selectedPackId ? MOCHI_PACK_AMOUNTS[selectedPackId] : null;
-  const selectedProduct = selectedPackId ? products.find((p) => p.identifier === selectedPackId) : null;
+  const selectedProduct = selectedPackId
+    ? products.find((p) => p.identifier === selectedPackId)
+    : null;
 
   return (
     <SelectionSheetLayout
       ref={layoutRef}
       visible={visible}
       onDismiss={handleDismiss}
-      pills={[{ icon: <MochiPointIcon width={19} height={19} />, label: `${totalMochis.toLocaleString()} mochis` }]}
+      pills={[
+        {
+          icon: <MochiPointIcon width={19} height={19} />,
+          label: `${totalMochis.toLocaleString()} mochis`,
+        },
+      ]}
       title="Purchase more mochis"
       buttonActive={!!selectedPackId}
       buttonLoading={purchasing}
@@ -92,7 +102,10 @@ export function MochiPurchaseSheet({ visible, onDismiss }: MochiPurchaseSheetPro
           <MochiPointIcon width={20} height={20} />
           <Text style={ss.buttonText}>mochis</Text>
           {selectedProduct && (
-            <Text style={ss.buttonSeparator}>{'  ·  '}{selectedProduct.priceString}</Text>
+            <Text style={ss.buttonSeparator}>
+              {"  ·  "}
+              {selectedProduct.priceString}
+            </Text>
           )}
         </View>
       }
@@ -110,7 +123,13 @@ export function MochiPurchaseSheet({ visible, onDismiss }: MochiPurchaseSheetPro
             <StoreItemRow
               key={packId}
               icon={
-                <View style={[ss.iconCircle, ss.mochiPackIconTile, { backgroundColor: c.accentLight + '40' }]}>
+                <View
+                  style={[
+                    ss.iconCircle,
+                    ss.mochiPackIconTile,
+                    { backgroundColor: c.accentLight + "40" },
+                  ]}
+                >
                   <View style={ss.mochiPackIconImageInner}>
                     <Image
                       source={MOCHI_PACK_IMAGE_SOURCES[packId]}
@@ -121,7 +140,7 @@ export function MochiPurchaseSheet({ visible, onDismiss }: MochiPurchaseSheetPro
                 </View>
               }
               title={`${amount.toLocaleString()} Mochis`}
-              subtitle={product?.priceString ?? '—'}
+              subtitle={product?.priceString ?? "—"}
               trailing={
                 isSelected ? (
                   <Ionicons name="checkmark-circle" size={24} color={c.accent} />
