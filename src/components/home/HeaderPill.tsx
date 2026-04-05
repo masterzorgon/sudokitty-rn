@@ -95,26 +95,6 @@ export function HeaderPill({ type, value, onPress }: HeaderPillProps) {
     if (type !== "mochis") return;
     mochiWrapRef.current?.measureInWindow((x, y, w, h) => {
       useFXStore.getState().setTargetLayout({ x, y, width: w, height: h });
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "337cb5" },
-        body: JSON.stringify({
-          sessionId: "337cb5",
-          runId: "mochi-burst-monitor",
-          hypothesisId: "H2_measure",
-          location: "HeaderPill.tsx:measureInWindow",
-          message: "Mochi pill measured in window",
-          data: {
-            x: Math.round(x),
-            y: Math.round(y),
-            w: Math.round(w),
-            h: Math.round(h),
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
     });
   }, [type]);
 

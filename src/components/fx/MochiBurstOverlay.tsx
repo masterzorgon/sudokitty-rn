@@ -6,13 +6,16 @@ import { useFXStore } from "../../stores/fxStore";
 import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { playFeedback } from "../../utils/feedback";
 
-const MAX_BURST_MS = 1200;
+/** Must exceed max(delay + activeDuration) or the sim ends in a timeout while particles are still mid-flight. */
+const MAX_BURST_MS = 3200;
 const DT_CAP_MS = 33;
 const GRAVITY = 280;
 const SEEK_STRENGTH = 620;
 const DEAD_DIST_PX = 8;
 const FADE_START_DIST = 20;
-const PARTICLE_COUNT = (amount: number) => Math.min(Math.max(Math.floor(amount / 25), 12), 40);
+/** Base count from pack size, clamped; then −30% (rounded). */
+const PARTICLE_COUNT = (amount: number) =>
+  Math.max(1, Math.round(Math.min(Math.max(Math.floor(amount / 25), 12), 40) * 0.5));
 
 function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
@@ -59,8 +62,10 @@ function buildInitialMochis(
     const dx = tx - spawnX;
     const dy = ty - spawnY;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const travelTime = hasTarget ? clamp(dist / 420, 0.48, 1.12) : 0.82 + randomRange(0, 0.12);
-    const activeDuration = travelTime + randomRange(0, 0.12);
+    // Estimate time-to-target from initial distance. Do not cap too low: long bottom→header paths need >1.2s
+    // or particles hit pe > activeDuration and vanish before reaching the pill.
+    const travelTime = hasTarget ? clamp(dist / 380, 0.52, 2.45) : 0.82 + randomRange(0, 0.12);
+    const activeDuration = travelTime + randomRange(0, 0.14);
 
     particles.push({
       spawnX,
@@ -202,50 +207,17 @@ export function MochiBurstOverlay() {
     lastTsRef.current = null;
   }, []);
 
-  const finishAndNotify = useCallback(
-    (elapsedMs: number, reason: "particles_done" | "timeout") => {
-      cancelSim();
-      setRenderParticles([]);
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "337cb5" },
-        body: JSON.stringify({
-          sessionId: "337cb5",
-          runId: "mochi-burst-monitor",
-          hypothesisId: "H4_burst_complete",
-          location: "MochiBurstOverlay.tsx:finishAndNotify",
-          message: "Burst physics finished",
-          data: { elapsedMs: Math.round(elapsedMs), reason },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-      playFeedback("unitComplete");
-    },
-    [cancelSim],
-  );
+  const finishAndNotify = useCallback(() => {
+    cancelSim();
+    setRenderParticles([]);
+    playFeedback("unitComplete");
+  }, [cancelSim]);
 
   useEffect(() => {
     if (burstId === 0) return;
     if (reducedMotion) {
       cancelSim();
       setRenderParticles([]);
-      // #region agent log
-      fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "337cb5" },
-        body: JSON.stringify({
-          sessionId: "337cb5",
-          runId: "mochi-burst-monitor",
-          hypothesisId: "H3_overlay",
-          location: "MochiBurstOverlay.tsx:burstEffect",
-          message: "Burst skipped (reduced motion)",
-          data: { burstId, burstAmount },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
       return;
     }
 
@@ -254,29 +226,6 @@ export function MochiBurstOverlay() {
     const targetCenter = layout
       ? { x: layout.x + layout.width / 2, y: layout.y + layout.height / 2 }
       : null;
-
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "337cb5" },
-      body: JSON.stringify({
-        sessionId: "337cb5",
-        runId: "mochi-burst-monitor",
-        hypothesisId: "H3_overlay",
-        location: "MochiBurstOverlay.tsx:burstEffect",
-        message: "Burst started",
-        data: {
-          burstId,
-          burstAmount,
-          particleCount: count,
-          hasTarget: targetCenter !== null,
-          vw: Math.round(width),
-          vh: Math.round(height),
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
 
     cancelSim();
     burstElapsedRef.current = 0;
@@ -319,8 +268,7 @@ export function MochiBurstOverlay() {
       }
 
       if ((allDead && parts.length > 0) || tMs >= MAX_BURST_MS) {
-        const reason = tMs >= MAX_BURST_MS ? "timeout" : "particles_done";
-        finishAndNotify(tMs, reason);
+        finishAndNotify();
         return;
       }
 
@@ -333,25 +281,6 @@ export function MochiBurstOverlay() {
       cancelSim();
     };
   }, [burstId, reducedMotion, burstAmount, width, height, cancelSim, finishAndNotify]);
-
-  useEffect(() => {
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/0ae61ecd-caec-474e-bdeb-3b6e3b859537", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "337cb5" },
-      body: JSON.stringify({
-        sessionId: "337cb5",
-        runId: "mochi-burst-monitor",
-        hypothesisId: "H11_raf_js",
-        location: "MochiBurstOverlay.tsx:mount",
-        message:
-          "Burst sim: requestAnimationFrame + plain JS only (no useFrameCallback / Reanimated UI batch)",
-        data: { renderPath: "raf_plain_js" },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-  }, []);
 
   if (reducedMotion) {
     return null;
