@@ -1,14 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useGameStore, useXPEarnedThisGame } from '../../stores/gameStore';
-import { useTimerEnabled, useUnlimitedMistakes } from '../../stores/settingsStore';
-import { colors, useColors } from '../../theme/colors';
-import { typography, fontFamilies } from '../../theme/typography';
-import { spacing } from '../../theme';
-import { MAX_MISTAKES } from '../../engine/types';
-import { RollingTime, RollingNumber } from '../ui';
-import { CELL_SIZE } from '../board/SudokuCell';
+import React, { memo } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useGameStore, useXPEarnedThisGame } from "../../stores/gameStore";
+import { useTimerEnabled, useUnlimitedMistakes } from "../../stores/settingsStore";
+import { colors, useColors } from "../../theme/colors";
+import { typography, fontFamilies } from "../../theme/typography";
+import { spacing } from "../../theme";
+import { MAX_MISTAKES } from "../../engine/types";
+import { RollingTime, RollingNumber } from "../ui";
+import { CELL_SIZE } from "../board/SudokuCell";
 
 interface IconIndicatorProps {
   used: number;
@@ -19,28 +19,32 @@ interface IconIndicatorProps {
   emptyColor?: string;
 }
 
-const IconIndicator = ({
-  used,
-  total,
-  filledIcon,
-  emptyIcon,
-  filledColor,
-  emptyColor = colors.gridLine,
-}: IconIndicatorProps) => (
-  <View style={styles.iconRow}>
-    {Array.from({ length: total }, (_, i) => {
-      const isRemaining = i < (total - used);
-      return (
-        <Ionicons
-          key={i}
-          name={isRemaining ? filledIcon : emptyIcon}
-          size={16}
-          color={isRemaining ? filledColor : emptyColor}
-        />
-      );
-    })}
-  </View>
+const IconIndicator = memo(
+  ({
+    used,
+    total,
+    filledIcon,
+    emptyIcon,
+    filledColor,
+    emptyColor = colors.gridLine,
+  }: IconIndicatorProps) => (
+    <View style={styles.iconRow}>
+      {Array.from({ length: total }, (_, i) => {
+        const isRemaining = i < total - used;
+        return (
+          <Ionicons
+            key={i}
+            name={isRemaining ? filledIcon : emptyIcon}
+            size={16}
+            color={isRemaining ? filledColor : emptyColor}
+          />
+        );
+      })}
+    </View>
+  ),
 );
+
+IconIndicator.displayName = "IconIndicator";
 
 export const GameHeader = () => {
   const c = useColors();
@@ -99,9 +103,9 @@ export const GameHeader = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    alignSelf: 'center',
+    flexDirection: "row",
+    alignItems: "stretch",
+    alignSelf: "center",
     backgroundColor: colors.white,
     height: 30,
     width: CELL_SIZE * 9,
@@ -110,8 +114,8 @@ const styles = StyleSheet.create({
   },
   section: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: spacing.xs,
   },
   sectionDivider: {
@@ -119,8 +123,8 @@ const styles = StyleSheet.create({
     borderRightColor: colors.gridLineBold,
   },
   iconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   infinityIcon: {
@@ -129,13 +133,13 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   xpRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   xpBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 3,
     paddingHorizontal: 6,
     paddingVertical: 3,

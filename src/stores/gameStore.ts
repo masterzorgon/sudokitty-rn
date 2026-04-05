@@ -4,7 +4,7 @@
 import { useMemo } from "react";
 import { enableMapSet } from "immer";
 import { create } from "zustand";
-import { useShallow } from "zustand/react/shallow";
+
 import { subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import {
@@ -973,26 +973,25 @@ export const useTimeElapsed = () => useGameStore((s) => s.timeElapsed);
 export const useDifficulty = () => useGameStore((s) => s.difficulty);
 export const useCanContinue = () => useGameStore((s) => s.canContinue);
 
-// Progress selector - subscribes to board changes and computes progress
-export const useProgress = () =>
-  useGameStore((s) => {
+// Progress selector — useMemo on board reference so the 81-cell loop only runs
+// when Immer produces a new board (cell mutations), not on timer ticks or selection.
+export const useProgress = () => {
+  const board = useGameStore((s) => s.board);
+  return useMemo(() => {
     let filled = 0;
     let total = 0;
-
     for (let row = 0; row < BOARD_SIZE; row++) {
       for (let col = 0; col < BOARD_SIZE; col++) {
-        const cell = s.board[row][col];
+        const cell = board[row][col];
         if (!cell.isGiven) {
           total++;
-          if (cell.value === cell.correctValue) {
-            filled++;
-          }
+          if (cell.value === cell.correctValue) filled++;
         }
       }
     }
-
     return total === 0 ? 0 : filled / total;
-  });
+  }, [board]);
+};
 
 // Check if there's a resumable game (paused or playing with progress)
 export const useHasResumableGame = () => {
@@ -1038,24 +1037,21 @@ export const useHintHighlightCells = () => useGameStore((s) => s.hintHighlightCe
 // Set of hint highlight cell keys for efficient lookup
 export const useHintHighlightSet = (): Set<string> => {
   const hintCells = useGameStore((s) => s.hintHighlightCells);
-  return new Set(hintCells.map(positionKey));
+  return useMemo(() => new Set(hintCells.map(positionKey)), [hintCells]);
 };
 
 // Remaining count per number (9 - placed count). Index 0 is unused.
-// Uses useShallow to prevent infinite re-renders from new array references.
+// useMemo on board reference avoids the 81-cell loop on non-board state changes.
 export const useRemainingCounts = (): number[] => {
-  return useGameStore(
-    useShallow((s) => {
-      const counts = new Array(10).fill(0);
-      for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-          const val = s.board[row][col].value;
-          if (val !== null && val >= 1 && val <= 9) {
-            counts[val]++;
-          }
-        }
+  const board = useGameStore((s) => s.board);
+  return useMemo(() => {
+    const counts = new Array(10).fill(0);
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const val = board[row][col].value;
+        if (val !== null && val >= 1 && val <= 9) counts[val]++;
       }
-      return counts.map((c) => 9 - c);
-    }),
-  );
+    }
+    return counts.map((c) => 9 - c);
+  }, [board]);
 };

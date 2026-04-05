@@ -1,7 +1,7 @@
 // Individual Sudoku cell component with optional animations
 // Props-driven: works for both the main game (full animations) and technique practice (static)
 
-import React, { useEffect, memo } from "react";
+import React, { useEffect, memo, useMemo } from "react";
 import { Pressable, StyleSheet, Text, View, Dimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -108,19 +108,24 @@ export const SudokuCell = memo(
     // Wave completion animation shared value
     const waveGlow = useSharedValue(0);
 
+    // Value placement "pop" scale and mistake shake
+    const valueScale = useSharedValue(1);
+    const shakeX = useSharedValue(0);
+
     // Single-edge border strategy: each cell only draws right + bottom borders.
     // The board container provides the outer frame (top, left, right, bottom).
-    const isLastCol = col === 8;
-    const isLastRow = row === 8;
-    const isRightBoxBorder = (col + 1) % 3 === 0 && !isLastCol;
-    const isBottomBoxBorder = (row + 1) % 3 === 0 && !isLastRow;
-
-    const borderStyle = {
-      borderRightWidth: isLastCol ? 0 : isRightBoxBorder ? 2 : 1,
-      borderBottomWidth: isLastRow ? 0 : isBottomBoxBorder ? 2 : 1,
-      borderRightColor: isRightBoxBorder ? colors.gridLineBold : colors.gridLine,
-      borderBottomColor: isBottomBoxBorder ? colors.gridLineBold : colors.gridLine,
-    };
+    const borderStyle = useMemo(() => {
+      const isLastCol = col === 8;
+      const isLastRow = row === 8;
+      const isRightBoxBorder = (col + 1) % 3 === 0 && !isLastCol;
+      const isBottomBoxBorder = (row + 1) % 3 === 0 && !isLastRow;
+      return {
+        borderRightWidth: isLastCol ? 0 : isRightBoxBorder ? 2 : 1,
+        borderBottomWidth: isLastRow ? 0 : isBottomBoxBorder ? 2 : 1,
+        borderRightColor: isRightBoxBorder ? colors.gridLineBold : colors.gridLine,
+        borderBottomColor: isBottomBoxBorder ? colors.gridLineBold : colors.gridLine,
+      };
+    }, [row, col]);
 
     // Base background color depends on checkerboard box
     const baseBackground = isInAltBox ? c.cellBackgroundAlt : colors.cellBackground;
@@ -143,16 +148,27 @@ export const SudokuCell = memo(
       backgroundProgress,
     ]);
 
-    // Trigger glow effect on correct input (game mode only)
+    // Trigger glow + pop on correct input, shake on mistake (game mode only)
     useEffect(() => {
-      if (!animateValues) return;
-      if (displayValue && !isGiven && isValid) {
+      if (!animateValues || !displayValue || isGiven) return;
+      if (isValid) {
         glowOpacity.value = withSequence(
           withTiming(1, timingConfigs.glowIn),
           withTiming(0, timingConfigs.glowOut),
         );
+        valueScale.value = withSequence(
+          withTiming(1.15, { duration: 80 }),
+          withSpring(1, springConfigs.quick),
+        );
+      } else {
+        shakeX.value = withSequence(
+          withTiming(-4, { duration: 50 }),
+          withTiming(4, { duration: 50 }),
+          withTiming(-2, { duration: 50 }),
+          withTiming(0, { duration: 50 }),
+        );
       }
-    }, [displayValue, isValid, animateValues, glowOpacity, isGiven]);
+    }, [displayValue, isValid, animateValues, glowOpacity, isGiven, valueScale, shakeX]);
 
     // Trigger completion wave animation entirely on the UI thread via withDelay.
     // When overlapping units complete (e.g. row + column), use the earliest delay.
@@ -186,6 +202,10 @@ export const SudokuCell = memo(
       opacity: waveGlow.value,
     }));
 
+    const animatedValueStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: valueScale.value }, { translateX: shakeX.value }],
+    }));
+
     const handlePress = onPress ? () => onPress(row, col) : undefined;
 
     return (
@@ -205,7 +225,7 @@ export const SudokuCell = memo(
           <Animated.View
             style={[
               staticStyles.waveGlow,
-              { backgroundColor: `${c.accent}4D` },
+              { backgroundColor: `${c.accent}66` },
               animatedWaveGlowStyle,
             ]}
           />
@@ -216,17 +236,19 @@ export const SudokuCell = memo(
 
         {/* Content */}
         {displayValue ? (
-          <Text
-            style={[
-              compact ? staticStyles.compactValue : staticStyles.value,
-              isGiven ? staticStyles.givenValue : staticStyles.userValue,
-              !isValid && staticStyles.errorValue,
-              isHighlighted && !isSecondaryHighlight && { color: c.accent },
-              isSecondaryHighlight && { color: c.coral },
-            ]}
-          >
-            {displayValue}
-          </Text>
+          <Animated.View style={animateValues && !isGiven ? animatedValueStyle : undefined}>
+            <Text
+              style={[
+                compact ? staticStyles.compactValue : staticStyles.value,
+                isGiven ? staticStyles.givenValue : staticStyles.userValue,
+                !isValid && staticStyles.errorValue,
+                isHighlighted && !isSecondaryHighlight && { color: c.accent },
+                isSecondaryHighlight && { color: c.coral },
+              ]}
+            >
+              {displayValue}
+            </Text>
+          </Animated.View>
         ) : notes.size > 0 ? (
           <NotesGrid notes={notes} cellSize={cellSize} />
         ) : null}
