@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import { Image } from "expo-image";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, Feather } from "@expo/vector-icons";
 import type { PurchasesStoreProduct } from "react-native-purchases";
 
@@ -43,6 +43,7 @@ const MochiFreezeImg = require("../../assets/images/mochi/mochi-freeze.png");
 
 export default function StoreScreen() {
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const isPremium = useEffectivePremium();
   const totalMochis = usePlayerStreakStore((s) => s.totalMochiPoints);
   const streakFreezesCount = usePlayerStreakStore((s) => s.streakFreezesCount);
@@ -238,7 +239,7 @@ export default function StoreScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
+    <View style={[styles.container, { backgroundColor: c.cream, paddingTop: insets.top }]}>
       <ScreenBackground />
 
       <ScreenContent contentStyle={contentStyle} style={{ marginTop: 20 }}>
@@ -368,7 +369,7 @@ export default function StoreScreen() {
         onDismiss={() => setSheetConfig(null)}
         loading={purchaseInProgress !== null}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

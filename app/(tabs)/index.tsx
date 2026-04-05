@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Image, StyleSheet } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { playFeedback } from "../../src/utils/feedback";
@@ -92,7 +92,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
+    <View style={[styles.container, { backgroundColor: c.cream, paddingTop: insets.top }]}>
       <ScreenBackground />
 
       <View style={[styles.content, { paddingTop: headerHeight }]}>
@@ -141,7 +141,7 @@ export default function HomeScreen() {
           clearStreakLostInfo();
         }}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

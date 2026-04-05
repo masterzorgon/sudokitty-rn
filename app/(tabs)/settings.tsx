@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { StyleSheet, View, Linking, Alert, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "../../src/theme/colors";
@@ -46,6 +46,7 @@ const TERMS_URL = "https://sudokitty.com/terms";
 export default function SettingsScreen() {
   const router = useRouter();
   const c = useColors();
+  const insets = useSafeAreaInsets();
 
   const unlimitedMistakes = useUnlimitedMistakes();
   const unlimitedHints = useUnlimitedHints();
@@ -149,7 +150,7 @@ export default function SettingsScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: c.cream }]} edges={["top"]}>
+    <View style={[styles.container, { backgroundColor: c.cream, paddingTop: insets.top }]}>
       <ScreenBackground />
       <ScreenContent contentStyle={contentStyle} style={{ marginTop: 20 }}>
         <CTABannerCarousel promos={["rate"]} />
@@ -294,7 +295,7 @@ export default function SettingsScreen() {
         </SkeuCard>
       </ScreenContent>
       <ScreenHeader onHeightChange={setHeaderHeight} />
-    </SafeAreaView>
+    </View>
   );
 }
 
