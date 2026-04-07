@@ -41,7 +41,7 @@ import {
 
 const RULES_URL = "https://sudokitty.com/rules";
 const PRIVACY_URL = "https://sudokitty.com/privacy";
-const TERMS_URL = "https://sudokitty.com/terms";
+const TERMS_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -263,7 +263,7 @@ export default function SettingsScreen() {
             accessibilityHint="Send feedback to the developers"
           />
           <SettingsLinkRow
-            label="Privacy preferences"
+            label="Privacy policy"
             onPress={() => navigate({ url: PRIVACY_URL, trackKey: "privacy" })}
             icon="shield"
             isExternal
