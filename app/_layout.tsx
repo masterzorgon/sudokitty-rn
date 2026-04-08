@@ -61,6 +61,7 @@ export default function RootLayout() {
         preloadedWelcomeMessage = msg;
       }),
       loadSfx(),
+      initRevenueCat(),
     ]).then(() => setDataReady(true));
   }, []);
 
@@ -93,10 +94,8 @@ function RootLayoutNav() {
     prefetchGamePuzzles(["easy", "medium", "hard", "expert"]);
     prefetchPuzzles(Object.keys(TECHNIQUE_IDS));
     usePlayerStreakStore.getState().syncFromRemote();
-    initRevenueCat().then(() => {
-      usePremiumStore.getState().syncStatus();
-      startPremiumListener();
-    });
+    usePremiumStore.getState().syncStatus();
+    startPremiumListener();
     preloadInterstitial();
     preloadRewarded();
   }, []);
