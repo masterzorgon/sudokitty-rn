@@ -13,7 +13,6 @@ import { useColors } from "../../theme/colors";
 import { borderRadius as br } from "../../theme";
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect);
-const AnimatedSvg = Animated.createAnimatedComponent(Svg);
 
 const STROKE_WIDTH = 3;
 const CORNER_RADIUS = br.md;
@@ -116,27 +115,27 @@ export function DemoPlayButton({
         ]}
       />
 
-      <AnimatedSvg
-        width={size}
-        height={size}
-        style={[styles.ring, animatedSvgStyle]}
-        overflow="visible"
+      <Animated.View
+        style={[styles.ring, { width: size, height: size }, animatedSvgStyle]}
+        pointerEvents="none"
       >
-        <AnimatedRect
-          x={inset}
-          y={inset}
-          width={rectSize}
-          height={rectSize}
-          rx={CORNER_RADIUS}
-          ry={CORNER_RADIUS}
-          stroke={color}
-          strokeWidth={STROKE_WIDTH}
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={`${perimeter}`}
-          animatedProps={animatedRectProps}
-        />
-      </AnimatedSvg>
+        <Svg width={size} height={size} style={{ overflow: "visible" }}>
+          <AnimatedRect
+            x={inset}
+            y={inset}
+            width={rectSize}
+            height={rectSize}
+            rx={CORNER_RADIUS}
+            ry={CORNER_RADIUS}
+            stroke={color}
+            strokeWidth={STROKE_WIDTH}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={`${perimeter}`}
+            animatedProps={animatedRectProps}
+          />
+        </Svg>
+      </Animated.View>
 
       <Ionicons
         name={isPlaying ? "pause" : "play"}
